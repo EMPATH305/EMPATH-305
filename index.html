@@ -778,30 +778,57 @@ const canvas = document.getElementById('star-canvas');
 const ctx = canvas.getContext('2d');
 const tooltip = document.getElementById('star-tooltip');
 
+// 星星顏色配置：冷暖色交錯，更有層次
+const STAR_COLORS = [
+  {r:200,g:215,b:245}, // 冷藍白
+  {r:245,g:235,b:210}, // 暖金白
+  {r:180,g:210,b:235}, // 淡藍
+  {r:235,g:210,b:190}, // 暖橙白
+  {r:210,g:225,b:255}, // 藍紫
+  {r:255,g:240,b:220}, // 淡金
+];
+
 function resizeCanvas(){
   const room = document.getElementById('room-m');
   canvas.width = room.offsetWidth;
   canvas.height = room.offsetHeight;
+  // resize 後重新初始化背景星
+  initBgStars();
 }
-window.addEventListener('resize', resizeCanvas);
-setTimeout(resizeCanvas, 100);
+window.addEventListener('resize', ()=>{ resizeCanvas(); });
 
 const starMessages = [
-  {text:'思念媽媽的味道，她做的滷肉飯。',x:null,y:null,brightness:3,clicks:3},
-  {text:'那年夏天的他，現在不知道在哪裡。',x:null,y:null,brightness:2,clicks:2},
-  {text:'我在異鄉的每個夜晚，都想起家。',x:null,y:null,brightness:4,clicks:4},
-  {text:'思念一段沒有開口的感情。',x:null,y:null,brightness:1,clicks:1},
-  {text:'那隻貓，已經離開三年了。',x:null,y:null,brightness:2,clicks:2},
-  {text:'懷念那段大家都還在一起的時光。',x:null,y:null,brightness:3,clicks:3},
+  {text:'思念媽媽的味道，她做的滷肉飯。',x:null,y:null,brightness:3,clicks:3,colorIdx:1},
+  {text:'那年夏天的他，現在不知道在哪裡。',x:null,y:null,brightness:2,clicks:2,colorIdx:0},
+  {text:'我在異鄉的每個夜晚，都想起家。',x:null,y:null,brightness:4,clicks:4,colorIdx:4},
+  {text:'思念一段沒有開口的感情。',x:null,y:null,brightness:1,clicks:1,colorIdx:2},
+  {text:'那隻貓，已經離開三年了。',x:null,y:null,brightness:2,clicks:2,colorIdx:3},
+  {text:'懷念那段大家都還在一起的時光。',x:null,y:null,brightness:3,clicks:3,colorIdx:5},
 ];
 
-function initStarPositions(){
+// 保證星星位置分散，不重疊
+function placeStarPosition(existing){
   const w=canvas.width||800, h=canvas.height||600;
-  const margin=80;
+  const margin=100;
+  let attempts=0, x, y, ok;
+  do {
+    x = margin + Math.random()*(w-2*margin);
+    y = margin + Math.random()*(h-2*margin);
+    ok = existing.every(s=>{
+      if(!s.x) return true;
+      const dx=s.x-x, dy=s.y-y;
+      return Math.sqrt(dx*dx+dy*dy)>60;
+    });
+    attempts++;
+  } while(!ok && attempts<30);
+  return {x,y};
+}
+
+function initStarPositions(){
   starMessages.forEach((s,i)=>{
     if(!s.x){
-      s.x = margin + Math.random()*(w-2*margin);
-      s.y = margin + Math.random()*(h-2*margin);
+      const pos = placeStarPosition(starMessages.slice(0,i));
+      s.x = pos.x; s.y = pos.y;
     }
   });
 }
@@ -809,56 +836,101 @@ function initStarPositions(){
 let bgStars=[];
 function initBgStars(){
   bgStars=[];
-  const w=canvas.width||800,h=canvas.height||600;
-  for(let i=0;i<120;i++){
-    bgStars.push({
-      x:Math.random()*w, y:Math.random()*h,
-      r:Math.random()*0.8+0.2,
-      a:Math.random(),
-      da:(Math.random()-.5)*0.003
-    });
+  const w=canvas.width||800, h=canvas.height||600;
+  // 三層背景星：遠、中、近
+  for(let i=0;i<60;i++){   // 遠景：極小極暗
+    const c=STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)];
+    bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.4+0.1,
+      a:Math.random()*0.3+0.05, da:(Math.random()-.5)*0.002, c});
   }
+  for(let i=0;i<50;i++){   // 中景：小
+    const c=STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)];
+    bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.6+0.3,
+      a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c});
+  }
+  for(let i=0;i<30;i++){   // 近景：稍大，閃爍快
+    const c=STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)];
+    bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.5,
+      a:Math.random()*0.5+0.2, da:(Math.random()-.5)*0.005, c});
+  }
+}
+
+// 畫六芒星光芒
+function drawSparkle(cx,cy,r,alpha,color){
+  ctx.save();
+  const arms=[0,60,120,180,240,300];
+  arms.forEach(deg=>{
+    const rad=deg*Math.PI/180;
+    ctx.strokeStyle=`rgba(${color.r},${color.g},${color.b},${alpha})`;
+    ctx.lineWidth=0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(rad)*r, cy+Math.sin(rad)*r);
+    ctx.stroke();
+  });
+  ctx.restore();
 }
 
 let animFrame;
 function drawStars(){
   if(!canvas.width) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // bg stars twinkle
+
+  // 背景星（閃爍）
   bgStars.forEach(s=>{
     s.a += s.da;
-    if(s.a>1||s.a<0.1) s.da*=-1;
+    if(s.a>0.7||s.a<0.03) s.da*=-1;
     ctx.beginPath();
     ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(168,184,200,${s.a*0.5})`;
+    ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`;
     ctx.fill();
   });
-  // content stars
+
+  // 內容星（思念）
   initStarPositions();
-  starMessages.forEach((s,i)=>{
+  starMessages.forEach(s=>{
     const b = s.brightness;
-    const r = 2+b*1.5;
-    // glow
-    const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,r*5);
-    g.addColorStop(0,`rgba(200,210,230,${0.12+b*0.06})`);
-    g.addColorStop(1,'rgba(200,210,230,0)');
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,r*5,0,Math.PI*2);
-    ctx.fillStyle=g;
-    ctx.fill();
-    // star
+    const c = STAR_COLORS[s.colorIdx||0];
+    const r = 1.5 + b*1.2;
+    const glowR = r*(4+b*0.8);
+
+    // 外暈（多層）
+    [glowR*1.5, glowR, glowR*0.5].forEach((gr,li)=>{
+      const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,gr);
+      const alpha = (0.04+b*0.02)*(1-li*0.3);
+      g.addColorStop(0,`rgba(${c.r},${c.g},${c.b},${alpha})`);
+      g.addColorStop(1,`rgba(${c.r},${c.g},${c.b},0)`);
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,gr,0,Math.PI*2);
+      ctx.fillStyle=g;
+      ctx.fill();
+    });
+
+    // 光芒（亮度>=2才出現）
+    if(b>=2){
+      drawSparkle(s.x,s.y,r*(2+b*0.6),0.08+b*0.02,c);
+    }
+
+    // 星核
+    const core = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,r);
+    core.addColorStop(0,`rgba(${c.r},${c.g},${c.b},1)`);
+    core.addColorStop(0.5,`rgba(${c.r},${c.g},${c.b},0.8)`);
+    core.addColorStop(1,`rgba(${c.r},${c.g},${c.b},0.2)`);
     ctx.beginPath();
     ctx.arc(s.x,s.y,r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(220,230,245,${0.6+b*0.08})`;
+    ctx.fillStyle=core;
     ctx.fill();
-    // sparkle cross
-    if(b>=3){
-      ctx.strokeStyle=`rgba(220,230,245,${0.15+b*0.04})`;
-      ctx.lineWidth=0.5;
-      ctx.beginPath();ctx.moveTo(s.x-r*3,s.y);ctx.lineTo(s.x+r*3,s.y);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(s.x,s.y-r*3);ctx.lineTo(s.x,s.y+r*3);ctx.stroke();
+
+    // 最亮星加十字光
+    if(b>=4){
+      ctx.strokeStyle=`rgba(${c.r},${c.g},${c.b},0.25)`;
+      ctx.lineWidth=0.8;
+      const arm=r*5;
+      ctx.beginPath();ctx.moveTo(s.x-arm,s.y);ctx.lineTo(s.x+arm,s.y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(s.x,s.y-arm);ctx.lineTo(s.x,s.y+arm);ctx.stroke();
     }
   });
+
   animFrame = requestAnimationFrame(drawStars);
 }
 
@@ -869,26 +941,43 @@ window.addEventListener('load',()=>{
     initStarPositions();
     drawStars();
     updateMStats();
-  },300);
+  },200);
 });
 
+// 精確取得 canvas 內座標（修正 position:absolute 偏移問題）
+function getCanvasPos(e){
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
+
 function getStarAt(x,y){
+  // 越亮的星點擊範圍越大
   return starMessages.find(s=>{
-    if(!s.x)return false;
-    const dx=s.x-x,dy=s.y-y;
-    return Math.sqrt(dx*dx+dy*dy)<22;
+    if(!s.x) return false;
+    const dx=s.x-x, dy=s.y-y;
+    const hitR = 16 + s.brightness*4;
+    return Math.sqrt(dx*dx+dy*dy) < hitR;
   });
 }
 
 canvas.addEventListener('mousemove', e=>{
-  const rect=canvas.getBoundingClientRect();
-  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const {x,y} = getCanvasPos(e);
   const star = getStarAt(x,y);
   if(star){
     tooltip.style.display='block';
-    tooltip.style.left=(e.clientX+16)+'px';
-    tooltip.style.top=(e.clientY-10)+'px';
-    tooltip.innerHTML=`${star.text}<br><span style="font-size:9px;color:rgba(168,184,200,.4);letter-spacing:2px;">✦ ${star.clicks} 次共鳴</span>`;
+    tooltip.style.left=(e.clientX+18)+'px';
+    tooltip.style.top=(e.clientY-12)+'px';
+    const c=STAR_COLORS[star.colorIdx||0];
+    tooltip.innerHTML=`
+      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.6);letter-spacing:2px;">思念</span><br>
+      ${star.text}<br>
+      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.4);letter-spacing:1px;margin-top:4px;display:block;">✦ ${star.clicks} 次共鳴 · 點擊讓它更亮</span>
+    `;
     canvas.style.cursor='pointer';
   } else {
     tooltip.style.display='none';
@@ -896,47 +985,53 @@ canvas.addEventListener('mousemove', e=>{
   }
 });
 
-canvas.addEventListener('mouseleave',()=>{tooltip.style.display='none';});
+canvas.addEventListener('mouseleave',()=>{
+  tooltip.style.display='none';
+  canvas.style.cursor='default';
+});
 
 canvas.addEventListener('click', e=>{
-  const rect=canvas.getBoundingClientRect();
-  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const {x,y} = getCanvasPos(e);
   const star = getStarAt(x,y);
   if(star){
-    star.brightness = Math.min(star.brightness+0.5, 8);
+    star.brightness = Math.min(star.brightness+1, 10);
     star.clicks++;
     updateMStats();
-    showToast('這顆星更亮了一些 ✦');
+    showToast('這顆思念更亮了 ✦');
   }
 });
 
 function updateMStats(){
   document.getElementById('m-count').textContent = starMessages.length;
+  if(starMessages.length===0) return;
   const brightest = starMessages.reduce((a,b)=>b.brightness>a.brightness?b:a);
-  document.getElementById('m-brightest').textContent = 
-    brightest.text.length>12?brightest.text.slice(0,12)+'…':brightest.text;
+  document.getElementById('m-brightest').textContent =
+    brightest.text.length>14?brightest.text.slice(0,14)+'…':brightest.text;
 }
 
 function submitM(){
   const input = document.getElementById('m-input');
   const text = input.value.trim();
   if(!text){showToast('請先寫下你的思念');return;}
-  const room = document.getElementById('room-m');
-  const margin=80;
-  const w=canvas.width||room.offsetWidth||800;
-  const h=canvas.height||room.offsetHeight||600;
-  const newStar={
-    text,
-    x: margin + Math.random()*(w-2*margin),
-    y: margin*2 + Math.random()*(h-margin*3),
-    brightness:1,
-    clicks:0
+
+  // 先確保 canvas 尺寸正確
+  if(!canvas.width || canvas.width<10) resizeCanvas();
+
+  const colorIdx = Math.floor(Math.random()*STAR_COLORS.length);
+  const newStar = {
+    text, brightness:1, clicks:0,
+    colorIdx, x:null, y:null
   };
+  // 計算不重疊位置
+  const pos = placeStarPosition(starMessages);
+  newStar.x = pos.x;
+  newStar.y = pos.y;
+
   starMessages.push(newStar);
   input.value='';
   updateMStats();
   logJourney('m', text);
-  showToast('你的思念成為了一顆星 ✦');
+  showToast('你的思念成為了一顆星，滑鼠移過去看看 ✦');
 }
 
 // ===== P: KINTSUGI =====
