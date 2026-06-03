@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
 
-<!-- 社群分享標籤 (Open Graph) -->
 <meta property="og:title" content="EMPATH — Every Moment As Truth Heals" />
 <meta property="og:description" content="數位時代的情緒安放平台。承認、安放、修補、釋放、交換、回家。以文學敘事對抗視覺霸權的設計實踐。" />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop" /> 
 <meta name="twitter:card" content="summary_large_image" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
@@ -26,16 +27,12 @@ html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease;}
 a{text-decoration:none;color:inherit;}
 
-/* 🌟 通用設計：高敏感視覺降噪模式 (Sensory Shield) */
+/* 通用設計：高敏感視覺降噪模式 */
 body.hsp-mode {
-  --white: rgba(247, 244, 239, 0.65);
-  --fog: rgba(201, 197, 188, 0.55);
-  --gold: rgba(201, 168, 76, 0.6);
-  --amber: rgba(232, 168, 124, 0.6);
-  --muted: rgba(123, 143, 161, 0.4);
-  background: #080d14; /* 稍微變暗、變暖的背景 */
+  --white: rgba(247, 244, 239, 0.65); --fog: rgba(201, 197, 188, 0.55);
+  --gold: rgba(201, 168, 76, 0.6); --amber: rgba(232, 168, 124, 0.6);
+  --muted: rgba(123, 143, 161, 0.4); background: #080d14; 
 }
-/* 降噪模式下強制停止所有動畫，降低視覺刺激 */
 body.hsp-mode * { animation-play-state: paused !important; }
 body.hsp-mode .room-desc { color: rgba(255,255,255,0.3); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
@@ -60,7 +57,6 @@ nav{
 .nav-letter[data-l="T"]{color:var(--t);} .nav-letter[data-l="T"]:hover{border-color:var(--t);background:rgba(232,168,124,.1);}
 .nav-letter[data-l="H"]{color:var(--h);} .nav-letter[data-l="H"]:hover{border-color:var(--h);background:rgba(242,232,217,.1);}
 
-/* 視覺降噪按鈕 */
 .hsp-toggle-btn {
   font-family: 'Noto Sans TC', sans-serif; font-size: 11px; letter-spacing: 2px;
   background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--fog);
@@ -70,29 +66,16 @@ nav{
 .hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
 
 /* ===== HERO ===== */
-#hero{
-  min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
-  padding:100px 40px 80px;position:relative;overflow:hidden;
-}
-.hero-bg-text{
-  position:absolute;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;
-  color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;
-  top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;
-}
+#hero{ min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:100px 40px 80px;position:relative;overflow:hidden; }
+.hero-bg-text{ position:absolute;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap; }
 .hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;position:relative; }
 .hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,2.2vw,20px);color:var(--gold);letter-spacing:3px;margin-bottom:14px;position:relative; }
 .hero-desc{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:56px;position:relative;}
 .hero-quotes{ display:flex;gap:40px;margin-bottom:56px;position:relative;flex-wrap:wrap;justify-content:center; }
-.hero-quote{
-  max-width:280px;padding:20px 24px;border-left:1px solid rgba(255,255,255,.1);
-  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);line-height:1.9;text-align:left;
-}
+.hero-quote{ max-width:280px;padding:20px 24px;border-left:1px solid rgba(255,255,255,.1);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);line-height:1.9;text-align:left; }
 .hero-quote cite{ display:block;margin-top:8px;font-style:normal;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.25); }
 .doors-nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
-.door-btn{
-  display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px;border:1px solid rgba(255,255,255,.08);
-  cursor:pointer;transition:all .35s;min-width:82px;
-}
+.door-btn{ display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px;border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .35s;min-width:82px; }
 .door-btn:hover{transform:translateY(-5px);}
 .door-btn .dl{ font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1; }
 .door-btn .dz{font-size:10px;letter-spacing:2px;color:var(--fog);}
@@ -114,7 +97,6 @@ nav{
 .room-desc{ font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px; cursor:pointer; transition: color 0.3s; padding: 4px; border-radius: 4px; }
 .room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.03); }
 .room-desc::after { content: ' 🔊'; font-size: 10px; opacity: 0.5; }
-
 .input-area{ width:100%;max-width:600px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--white);font-family:'Noto Serif TC',serif;font-size:14px;padding:18px;line-height:2;resize:none;outline:none;transition:border-color .3s; }
 .input-area:focus{border-color:rgba(255,255,255,.2);} .input-area::placeholder{color:rgba(255,255,255,.2);}
 .send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:11px 28px;border:1px solid;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:2px;cursor:pointer;transition:all .3s;background:transparent; color:inherit;}
@@ -164,7 +146,7 @@ nav{
 .sand-timer-bar{flex:1;height:1px;background:rgba(122,158,159,.15);}
 .sand-timer-fill{height:100%;background:var(--a);transition:width 1s linear;}
 .sand-time-left{font-size:9px;color:rgba(122,158,159,.5);letter-spacing:1px;white-space:nowrap;}
-.sand-dissolve-overlay{ position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);opacity:0;pointer-events:none;transition:opacity 2s; }
+.sand-dissolve-overlay{ position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);opacity:0;pointer-events:none;transition:opacity 2s; }
 .sand-msg.dissolving{opacity:.15;transform:translateY(4px);} .sand-msg.dissolving .sand-dissolve-overlay{opacity:1;}
 .a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px; }
 
@@ -184,10 +166,9 @@ nav{
 .echo-btn .heart{transition:transform .2s;} .echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
 .echo-count{ font-family:'Cormorant Garamond',serif;font-size:14px;color:rgba(232,168,124,.3);margin-top:16px; }
 .t-send-panel{background:rgba(255,255,255,.03);padding:26px;border:1px solid rgba(232,168,124,.08);} .t-send-panel .t-panel-title{margin-bottom:16px;}
-
 .echo-pulse-ring{ width:80px;height:80px;border-radius:50%;border:1px solid rgba(232,168,124,.3);display:flex;align-items:center;justify-content:center;margin:24px auto 8px;position:relative; }
-.echo-pulse-ring::before{ content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(232,168,124,.1); }
-.echo-pulse-ring::after{ content:'';position:absolute;inset:-16px;border-radius:50%;border:1px solid rgba(232,168,124,.05); }
+.echo-pulse-ring::before{ content:'';position:absolute;top:-8px;left:-8px;right:-8px;bottom:-8px;border-radius:50%;border:1px solid rgba(232,168,124,.1); }
+.echo-pulse-ring::after{ content:'';position:absolute;top:-16px;left:-16px;right:-16px;bottom:-16px;border-radius:50%;border:1px solid rgba(232,168,124,.05); }
 .echo-heart{ font-size:28px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
 .echo-label{ text-align:center;font-size:10px;letter-spacing:2px;color:rgba(232,168,124,.4);margin-bottom:16px; }
@@ -196,14 +177,12 @@ nav{
 #room-h{background:linear-gradient(180deg,#0D1B2A 0%,#0f0f1a 100%);}
 #room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.5);}
 .h-journey{max-width:700px;}
-
 .journey-summary, .global-summary{ display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:32px; }
 .j-card, .g-card{ background:rgba(255,255,255,.03);padding:22px 14px;text-align:center;border-top:1px solid;transition:background .3s;cursor:default; }
 .j-card:hover, .g-card:hover{background:rgba(255,255,255,.05);}
 .j-card:nth-child(1){border-top-color:var(--e);} .j-card:nth-child(2){border-top-color:var(--m);}
 .j-card:nth-child(3){border-top-color:var(--p);} .j-card:nth-child(4){border-top-color:var(--a);}
 .j-card:nth-child(5){border-top-color:var(--t);}
-
 .g-card{ background:rgba(201,168,76,0.02);border:1px solid rgba(201,168,76,0.08);border-top:2px solid var(--gold); }
 .g-card:hover{background:rgba(201,168,76,0.05);border-color:rgba(201,168,76,0.25);}
 .g-card.visitor-card { border-top-color: var(--white); background: rgba(255,255,255,0.02); }
@@ -245,7 +224,7 @@ nav{
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
 .lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dawn);line-height:2.2; }
 
-/* 🌟 社群分享按鈕 */
+/* 🌟 分享按鈕與下載功能區塊 */
 .share-action-box { display:flex; flex-wrap:wrap; gap:16px; margin-top: 40px; }
 .action-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px;
@@ -255,27 +234,30 @@ nav{
 }
 .action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
 
-/* 🌟 Spotify Wrapped 風格：靈魂足跡分享卡 Modal */
+/* 🌟 真實圖片生成：分享卡 Modal CSS 修復 (完全相容版) */
 .share-modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000;
-  display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px);
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; /* 修正 Safari 隱形 bug */
+  background: rgba(0,0,0,0.85); z-index: 99999;
+  display: none; flex-direction: column; justify-content: center; align-items: center;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
-.share-modal.show { display: flex; animation: fadeSlideIn 0.4s ease; }
+.share-modal.show { display: flex !important; animation: fadeSlideIn 0.4s ease; }
 .wrapped-card {
   background: linear-gradient(135deg, #16243b, #0a111a); border: 1px solid rgba(201,168,76,0.3);
   padding: 40px 30px; border-radius: 4px; text-align: center; max-width: 320px; width: 90%;
   box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative;
 }
+.share-modal-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; align-items: center; width: 100%; }
 .wrapped-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); letter-spacing: 6px; margin-bottom: 8px; font-weight: 600;}
 .wrapped-sub { font-size: 10px; color: var(--fog); letter-spacing: 4px; margin-bottom: 30px; }
 .wrapped-item { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding: 14px 0; color: var(--white); letter-spacing: 2px;}
 .wrapped-item span { font-family: 'Noto Serif TC', serif; font-weight: 700; color: var(--gold); }
 .wrapped-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 32px; letter-spacing: 1px;}
-.close-modal-btn { background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 8px 24px; margin-top: 24px; font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; }
+.close-modal-btn { background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 10px 24px; font-size: 12px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 4px; }
 .close-modal-btn:hover { color: var(--white); border-color: var(--white); }
 
 /* ===== TOAST ===== */
-.toast{ position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px); background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.1); padding:12px 24px;font-size:12px;color:var(--fog);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999;pointer-events:none;backdrop-filter:blur(10px); }
+.toast{ position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px); background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.1); padding:12px 24px;font-size:12px;color:var(--fog);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(10px); }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ===== FOOTER ===== */
@@ -294,28 +276,28 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
 </head>
 <body>
 
-<!-- 🌟 留存儀式感：分享卡 Modal (Spotify Wrapped 風格) -->
 <div id="share-modal" class="share-modal">
-  <div class="wrapped-card">
+  
+  <div class="wrapped-card" id="wrapped-card-content">
     <div class="wrapped-title">EMPATH</div>
     <div class="wrapped-sub">我的靈魂足跡</div>
-    
     <div class="wrapped-item">放下情緒 <span id="sc-e">0</span></div>
     <div class="wrapped-item">點亮星空 <span id="sc-m">0</span></div>
     <div class="wrapped-item">修補遺憾 <span id="sc-p">0</span></div>
     <div class="wrapped-item">流放秘密 <span id="sc-a">0</span></div>
     <div class="wrapped-item">傳遞溫暖 <span id="sc-t">0</span></div>
-    
     <div class="wrapped-footer">我們雖然孤獨地存在<br>但我們可以溫暖地交會</div>
-    <button class="close-modal-btn" onclick="window.closeShareModal()">關閉 / 螢幕截圖分享</button>
+  </div>
+
+  <div class="share-modal-actions">
+    <button class="close-modal-btn" id="download-card-btn" onclick="window.downloadShareCard()" style="background:var(--gold); color:#000; border:none; font-weight:bold;">⬇️ 下載為專屬圖片檔案</button>
+    <button class="close-modal-btn" onclick="window.closeShareModal()">關閉視窗</button>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
-<!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -325,12 +307,10 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
     <a class="nav-letter" data-l="A" href="#room-a">A</a>
     <a class="nav-letter" data-l="T" href="#room-t">T</a>
     <a class="nav-letter" data-l="H" href="#room-h">H</a>
-    <!-- 🌟 通用設計：視覺降噪按鈕 -->
     <button class="nav-letter hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️ 降噪</button>
   </div>
 </nav>
 
-<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-text">EMPATH</div>
   <h1 class="hero-title">EMPATH</h1>
@@ -358,7 +338,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <span class="scroll-hint">↓ &nbsp; SCROLL</span>
 </section>
 
-<!-- E: 情緒出口 -->
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
@@ -375,7 +354,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <div class="e-feed" id="e-feed"></div>
 </section>
 
-<!-- M: 星空思念 -->
 <section id="room-m" class="room">
   <canvas id="star-canvas"></canvas>
   <div class="room-letter">M</div>
@@ -393,13 +371,11 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
     </div>
     <div class="m-stats">
       <div class="m-stat"><span id="m-count">0</span> 顆星</div>
-      <!-- 🌟 已修復：最亮星星將會在此顯示 -->
       <div class="m-stat">最亮：<span id="m-brightest">—</span></div>
     </div>
   </div>
 </section>
 
-<!-- P: 碎片修補 -->
 <section id="room-p" class="room">
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
@@ -419,7 +395,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <p class="p-healed-count" id="p-healed-count"></p>
 </section>
 
-<!-- A: 神聖避難所 -->
 <section id="room-a" class="room">
   <div class="room-letter">A</div>
   <p class="room-tag">A — Asylum / Ache</p>
@@ -435,7 +410,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <div class="a-feed" id="a-feed"></div>
 </section>
 
-<!-- T: 能量共振 -->
 <section id="room-t" class="room">
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
@@ -471,7 +445,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </section>
 
-<!-- H: 靈魂歸宿 -->
 <section id="room-h" class="room">
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
@@ -481,7 +454,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </p>
   <div class="h-journey">
     
-    <!-- 全網公共數據大區域 -->
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <div class="global-summary" id="g-summary">
       <div class="g-card visitor-card"><span class="g-letter">✦</span><div class="g-num" id="g-v-count">0</div><div class="g-label">總造訪靈魂</div></div>
@@ -491,7 +463,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       <div class="g-card"><span class="g-letter">T</span><div class="g-num" id="g-t-count">0</div><div class="g-label">世間漂浮溫暖</div></div>
     </div>
 
-    <!-- 個人歷史足跡看板 -->
     <p class="h-timeline-title" style="letter-spacing:4px;">YOUR FOOTPRINTS — 你的專屬足跡</p>
     <div class="journey-summary" id="h-summary">
       <div class="j-card"><span class="j-letter">E</span><div class="j-num" id="h-e-count">0</div><div class="j-label">情緒放下</div></div>
@@ -501,7 +472,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       <div class="j-card"><span class="j-letter">T</span><div class="j-num" id="h-t-count">0</div><div class="j-label">溫暖傳出</div></div>
     </div>
 
-    <!-- 靈魂鑰匙跨裝置同步保險箱區塊 -->
     <div class="sync-box">
       <div class="sync-title">靈魂共振同步 — SOUL SYNC</div>
       <p style="font-size:11px; color:var(--muted); line-height:1.7;">
@@ -534,13 +504,10 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       <p>Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。</p>
     </div>
 
-    <!-- 🌟 分享行動呼籲按鈕區塊 -->
     <div class="share-action-box">
-      <!-- 生成專屬分享卡 (Spotify Wrapped 風格) -->
       <button class="action-btn" onclick="window.openShareCard()" style="border-color: var(--gold); color: var(--gold);">
         <span>✦</span> 生成我的靈魂足跡卡 <span>✦</span>
       </button>
-      <!-- 原生連結分享 -->
       <button class="action-btn" onclick="window.shareSite()">
         分享這座避難所連結
       </button>
@@ -549,7 +516,6 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-left">Every Moment As Truth Heals</div>
   <div class="footer-letters">
@@ -595,7 +561,7 @@ function loadLocalJourney() {
 }
 loadLocalJourney();
 
-// 🌟 通用設計：視覺降噪模式 Toggle (Sensory Shield)
+// 🌟 通用設計：視覺降噪模式 Toggle
 window.toggleHSP = function() {
   const body = document.body;
   const btn = document.getElementById('hsp-btn');
@@ -610,7 +576,6 @@ window.toggleHSP = function() {
     window.showToast('已關閉降噪模式');
   }
 }
-// 載入時檢查是否曾開啟降噪模式
 if(localStorage.getItem('empath_hsp_mode') === 'true') {
   document.body.classList.add('hsp-mode');
   setTimeout(()=> document.getElementById('hsp-btn').classList.add('active'), 100);
@@ -631,12 +596,10 @@ window.speakText = function(text) {
 };
 if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
 
-// 🌟 通用設計：觸覺心跳震動
 window.triggerHeartbeat = function() {
   if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); }
 };
 
-// 🌟 社群連結分享
 window.shareSite = function() {
   if (navigator.share) {
     navigator.share({ title: 'EMPATH', text: '我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', url: window.location.href }).catch(console.error);
@@ -645,7 +608,7 @@ window.shareSite = function() {
   }
 }
 
-// 🌟 生成專屬靈魂足跡分享卡 (Spotify Wrapped 風格)
+// 🌟 真實圖片生成：開啟卡片與執行下載轉換
 window.openShareCard = function() {
   document.getElementById('sc-e').textContent = state.eCount;
   document.getElementById('sc-m').textContent = state.mCount;
@@ -653,9 +616,36 @@ window.openShareCard = function() {
   document.getElementById('sc-a').textContent = state.aCount;
   document.getElementById('sc-t').textContent = state.tCount;
   document.getElementById('share-modal').classList.add('show');
-  window.showToast('已生成您的專屬足跡，歡迎螢幕截圖分享至限動 ✦');
+  window.showToast('足跡卡已生成 ✦ 您可直接截圖或點擊下方下載');
 }
 window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); }
+
+window.downloadShareCard = function() {
+  if(typeof html2canvas === 'undefined') {
+    window.showToast('圖片生成引擎載入中，請稍後再試或使用螢幕截圖 ✦');
+    return;
+  }
+  const card = document.getElementById('wrapped-card-content');
+  const btn = document.getElementById('download-card-btn');
+  const originalText = btn.textContent;
+  btn.textContent = '生成圖片中...';
+
+  html2canvas(card, {
+    backgroundColor: '#0a111a',
+    scale: 2 // 高解析度
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'EMPATH_Soul_Journey.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click(); // 觸發下載
+    btn.textContent = originalText;
+    window.showToast('圖片已成功下載！快去分享到限時動態吧 ✦');
+  }).catch(err => {
+    console.error(err);
+    btn.textContent = originalText;
+    window.showToast('生成失敗，請直接使用螢幕截圖 ✦');
+  });
+}
 
 window.showToast = function(msg, dur=2400){
   const t = document.getElementById('toast'); t.textContent = msg;
@@ -745,7 +735,6 @@ function initBgStars(){
   for(let i=0; i<100; i++){ bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.2, a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c:STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]}); }
 }
 
-// 🌟 已修復：抓取星星時，即時更新「最亮星星」文字
 function updateMStats(){
   if(!document.getElementById('m-count') || !document.getElementById('m-brightest')) return;
   document.getElementById('m-count').textContent = starMessages.length;
@@ -757,7 +746,7 @@ function updateMStats(){
 onSnapshot(collection(db, "stars"), (snapshot) => {
   globalCounts.m = snapshot.size; starMessages = [];
   snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, text: data.text, brightness: data.brightness||1, clicks: data.clicks||0, colorIdx: data.colorIdx||0, relX: data.relX, relY: data.relY }); });
-  updateMStats(); // 🌟 修復核心：呼叫更新最亮星星面板
+  updateMStats(); 
 });
 
 function drawStars(){
@@ -774,7 +763,7 @@ function drawStars(){
     if(b >= 5){ 
       ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.5; const arm = coreR * 5;
       ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x, s.y+arm); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
     }
   });
   requestAnimationFrame(drawStars);
@@ -806,7 +795,9 @@ roomM.addEventListener('click', async e => {
 window.submitM = async function(){
   const input = document.getElementById('m-input'); const text = input.value.trim(); if(!text){ window.showToast('請先寫下你的思念'); return; }
   try {
-    await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() });
+    await addDoc(collection(db, "stars"), {
+      text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp()
+    });
     input.value=''; logJourney('m', text); window.showToast('你的思念成為了一顆星 ✦');
   } catch(err){}
 }
