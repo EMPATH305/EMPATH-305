@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
 
+<!-- 社群分享標籤 (Open Graph) -->
 <meta property="og:title" content="EMPATH — Every Moment As Truth Heals" />
 <meta property="og:description" content="數位時代的情緒安放平台。承認、安放、修補、釋放、交換、回家。以文學敘事對抗視覺霸權的設計實踐。" />
 <meta property="og:type" content="website" />
@@ -22,32 +23,34 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden;}
+body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease;}
 a{text-decoration:none;color:inherit;}
 
-/* 通用設計：高敏感族群減速保護 (若系統開啟減少動態，網頁自動靜止) */
-@media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+/* 🌟 通用設計：高敏感視覺降噪模式 (Sensory Shield) */
+body.hsp-mode {
+  --white: rgba(247, 244, 239, 0.65);
+  --fog: rgba(201, 197, 188, 0.55);
+  --gold: rgba(201, 168, 76, 0.6);
+  --amber: rgba(232, 168, 124, 0.6);
+  --muted: rgba(123, 143, 161, 0.4);
+  background: #080d14; /* 稍微變暗、變暖的背景 */
 }
+/* 降噪模式下強制停止所有動畫，降低視覺刺激 */
+body.hsp-mode * { animation-play-state: paused !important; }
+body.hsp-mode .room-desc { color: rgba(255,255,255,0.3); }
+body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
 
 /* ===== NAV ===== */
 nav{
-  position:fixed;top:0;left:0;right:0;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px 40px;
-  background:rgba(13,27,42,.94);backdrop-filter:blur(16px);
+  position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
+  padding:16px 40px;background:rgba(13,27,42,.94);backdrop-filter:blur(16px);
   border-bottom:1px solid rgba(255,255,255,.06);z-index:500;
 }
-.nav-logo{
-  font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;
-  color:var(--white);letter-spacing:6px;
-}
+.nav-logo{ font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--white);letter-spacing:6px; }
 .nav-letters{display:flex;gap:6px;}
 .nav-letter{
-  width:36px;height:36px;border:1px solid rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;
-  cursor:pointer;transition:all .3s;color:var(--fog);
+  width:36px;height:36px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;color:var(--fog);
 }
 .nav-letter:hover{transform:translateY(-2px);}
 .nav-letter[data-l="E"]{color:var(--e);} .nav-letter[data-l="E"]:hover{border-color:var(--e);background:rgba(123,143,161,.1);}
@@ -57,10 +60,18 @@ nav{
 .nav-letter[data-l="T"]{color:var(--t);} .nav-letter[data-l="T"]:hover{border-color:var(--t);background:rgba(232,168,124,.1);}
 .nav-letter[data-l="H"]{color:var(--h);} .nav-letter[data-l="H"]:hover{border-color:var(--h);background:rgba(242,232,217,.1);}
 
+/* 視覺降噪按鈕 */
+.hsp-toggle-btn {
+  font-family: 'Noto Sans TC', sans-serif; font-size: 11px; letter-spacing: 2px;
+  background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--fog);
+  padding: 0 12px; border-radius: 20px; margin-left: 12px; font-weight: normal; opacity: 0.7;
+}
+.hsp-toggle-btn:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+.hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
+
 /* ===== HERO ===== */
 #hero{
-  min-height:100vh;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;text-align:center;
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
   padding:100px 40px 80px;position:relative;overflow:hidden;
 }
 .hero-bg-text{
@@ -68,14 +79,8 @@ nav{
   color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;
   top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;
 }
-.hero-title{
-  font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;
-  color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;position:relative;
-}
-.hero-sub{
-  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,2.2vw,20px);color:var(--gold);
-  letter-spacing:3px;margin-bottom:14px;position:relative;
-}
+.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;position:relative; }
+.hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,2.2vw,20px);color:var(--gold);letter-spacing:3px;margin-bottom:14px;position:relative; }
 .hero-desc{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:56px;position:relative;}
 .hero-quotes{ display:flex;gap:40px;margin-bottom:56px;position:relative;flex-wrap:wrap;justify-content:center; }
 .hero-quote{
@@ -106,18 +111,13 @@ nav{
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
 .room-tag{font-size:10px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;}
 .room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(20px,3vw,30px);color:var(--white);margin-bottom:10px; }
-
-/* 🌟 通用設計：語音導航點擊樣式 */
-.room-desc{
-  font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px;
-  cursor:pointer; transition: color 0.3s; padding: 4px; border-radius: 4px;
-}
+.room-desc{ font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px; cursor:pointer; transition: color 0.3s; padding: 4px; border-radius: 4px; }
 .room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.03); }
 .room-desc::after { content: ' 🔊'; font-size: 10px; opacity: 0.5; }
 
 .input-area{ width:100%;max-width:600px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--white);font-family:'Noto Serif TC',serif;font-size:14px;padding:18px;line-height:2;resize:none;outline:none;transition:border-color .3s; }
 .input-area:focus{border-color:rgba(255,255,255,.2);} .input-area::placeholder{color:rgba(255,255,255,.2);}
-.send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:11px 28px;border:1px solid;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:2px;cursor:pointer;transition:all .3s;background:transparent; }
+.send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:11px 28px;border:1px solid;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:2px;cursor:pointer;transition:all .3s;background:transparent; color:inherit;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
 /* ===== E ROOM ===== */
@@ -136,7 +136,7 @@ nav{
 .m-input-wrap{max-width:480px;}
 .star-tooltip{ position:fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.15); padding:16px; font-size:12px; color:var(--fog); z-index:600; max-width:240px; line-height:1.9; display:none; border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); pointer-events: none; }
 .m-stats{ display:flex;gap:24px;margin-top:20px; }
-.m-stat{font-size:10px;letter-spacing:2px;color:rgba(168,184,200,.4);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;}
+.m-stat{font-size:10px;letter-spacing:2px;color:rgba(168,184,200,.4);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;}
 
 /* ===== P ROOM ===== */
 #room-p{background:linear-gradient(180deg,#0D1B2A 0%,#100e08 100%);}
@@ -245,15 +245,34 @@ nav{
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
 .lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dawn);line-height:2.2; }
 
-/* 🌟 社群分享按鈕專屬樣式 */
-.share-action-box { text-align: center; margin-top: 40px; }
-.share-btn {
-  display: inline-flex; align-items: center; gap: 10px; padding: 14px 36px;
+/* 🌟 社群分享按鈕 */
+.share-action-box { display:flex; flex-wrap:wrap; gap:16px; margin-top: 40px; }
+.action-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px;
   background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
   color: var(--white); font-family: 'Noto Serif TC', serif; font-size: 13px;
-  letter-spacing: 3px; cursor: pointer; transition: all 0.3s; border-radius: 4px;
+  letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 4px; flex: 1; min-width: 240px;
 }
-.share-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--white); transform: translateY(-2px); }
+.action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
+
+/* 🌟 Spotify Wrapped 風格：靈魂足跡分享卡 Modal */
+.share-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000;
+  display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px);
+}
+.share-modal.show { display: flex; animation: fadeSlideIn 0.4s ease; }
+.wrapped-card {
+  background: linear-gradient(135deg, #16243b, #0a111a); border: 1px solid rgba(201,168,76,0.3);
+  padding: 40px 30px; border-radius: 4px; text-align: center; max-width: 320px; width: 90%;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative;
+}
+.wrapped-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); letter-spacing: 6px; margin-bottom: 8px; font-weight: 600;}
+.wrapped-sub { font-size: 10px; color: var(--fog); letter-spacing: 4px; margin-bottom: 30px; }
+.wrapped-item { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding: 14px 0; color: var(--white); letter-spacing: 2px;}
+.wrapped-item span { font-family: 'Noto Serif TC', serif; font-weight: 700; color: var(--gold); }
+.wrapped-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 32px; letter-spacing: 1px;}
+.close-modal-btn { background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 8px 24px; margin-top: 24px; font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; }
+.close-modal-btn:hover { color: var(--white); border-color: var(--white); }
 
 /* ===== TOAST ===== */
 .toast{ position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px); background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.1); padding:12px 24px;font-size:12px;color:var(--fog);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999;pointer-events:none;backdrop-filter:blur(10px); }
@@ -275,9 +294,28 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
 </head>
 <body>
 
+<!-- 🌟 留存儀式感：分享卡 Modal (Spotify Wrapped 風格) -->
+<div id="share-modal" class="share-modal">
+  <div class="wrapped-card">
+    <div class="wrapped-title">EMPATH</div>
+    <div class="wrapped-sub">我的靈魂足跡</div>
+    
+    <div class="wrapped-item">放下情緒 <span id="sc-e">0</span></div>
+    <div class="wrapped-item">點亮星空 <span id="sc-m">0</span></div>
+    <div class="wrapped-item">修補遺憾 <span id="sc-p">0</span></div>
+    <div class="wrapped-item">流放秘密 <span id="sc-a">0</span></div>
+    <div class="wrapped-item">傳遞溫暖 <span id="sc-t">0</span></div>
+    
+    <div class="wrapped-footer">我們雖然孤獨地存在<br>但我們可以溫暖地交會</div>
+    <button class="close-modal-btn" onclick="window.closeShareModal()">關閉 / 螢幕截圖分享</button>
+  </div>
+</div>
+
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
+<!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -287,9 +325,12 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
     <a class="nav-letter" data-l="A" href="#room-a">A</a>
     <a class="nav-letter" data-l="T" href="#room-t">T</a>
     <a class="nav-letter" data-l="H" href="#room-h">H</a>
+    <!-- 🌟 通用設計：視覺降噪按鈕 -->
+    <button class="nav-letter hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️ 降噪</button>
   </div>
 </nav>
 
+<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-text">EMPATH</div>
   <h1 class="hero-title">EMPATH</h1>
@@ -317,6 +358,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <span class="scroll-hint">↓ &nbsp; SCROLL</span>
 </section>
 
+<!-- E: 情緒出口 -->
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
@@ -333,6 +375,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <div class="e-feed" id="e-feed"></div>
 </section>
 
+<!-- M: 星空思念 -->
 <section id="room-m" class="room">
   <canvas id="star-canvas"></canvas>
   <div class="room-letter">M</div>
@@ -350,11 +393,13 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
     </div>
     <div class="m-stats">
       <div class="m-stat"><span id="m-count">0</span> 顆星</div>
+      <!-- 🌟 已修復：最亮星星將會在此顯示 -->
       <div class="m-stat">最亮：<span id="m-brightest">—</span></div>
     </div>
   </div>
 </section>
 
+<!-- P: 碎片修補 -->
 <section id="room-p" class="room">
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
@@ -374,6 +419,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <p class="p-healed-count" id="p-healed-count"></p>
 </section>
 
+<!-- A: 神聖避難所 -->
 <section id="room-a" class="room">
   <div class="room-letter">A</div>
   <p class="room-tag">A — Asylum / Ache</p>
@@ -389,6 +435,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <div class="a-feed" id="a-feed"></div>
 </section>
 
+<!-- T: 能量共振 -->
 <section id="room-t" class="room">
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
@@ -424,6 +471,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </section>
 
+<!-- H: 靈魂歸宿 -->
 <section id="room-h" class="room">
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
@@ -433,6 +481,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </p>
   <div class="h-journey">
     
+    <!-- 全網公共數據大區域 -->
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <div class="global-summary" id="g-summary">
       <div class="g-card visitor-card"><span class="g-letter">✦</span><div class="g-num" id="g-v-count">0</div><div class="g-label">總造訪靈魂</div></div>
@@ -442,6 +491,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       <div class="g-card"><span class="g-letter">T</span><div class="g-num" id="g-t-count">0</div><div class="g-label">世間漂浮溫暖</div></div>
     </div>
 
+    <!-- 個人歷史足跡看板 -->
     <p class="h-timeline-title" style="letter-spacing:4px;">YOUR FOOTPRINTS — 你的專屬足跡</p>
     <div class="journey-summary" id="h-summary">
       <div class="j-card"><span class="j-letter">E</span><div class="j-num" id="h-e-count">0</div><div class="j-label">情緒放下</div></div>
@@ -451,6 +501,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       <div class="j-card"><span class="j-letter">T</span><div class="j-num" id="h-t-count">0</div><div class="j-label">溫暖傳出</div></div>
     </div>
 
+    <!-- 靈魂鑰匙跨裝置同步保險箱區塊 -->
     <div class="sync-box">
       <div class="sync-title">靈魂共振同步 — SOUL SYNC</div>
       <p style="font-size:11px; color:var(--muted); line-height:1.7;">
@@ -483,16 +534,22 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       <p>Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。</p>
     </div>
 
+    <!-- 🌟 分享行動呼籲按鈕區塊 -->
     <div class="share-action-box">
-      <button class="share-btn" onclick="window.shareSite()">
-        <span>✦</span> 分享這座避難所 <span>✦</span>
+      <!-- 生成專屬分享卡 (Spotify Wrapped 風格) -->
+      <button class="action-btn" onclick="window.openShareCard()" style="border-color: var(--gold); color: var(--gold);">
+        <span>✦</span> 生成我的靈魂足跡卡 <span>✦</span>
       </button>
-      <p style="font-size: 10px; color: var(--muted); margin-top: 12px; letter-spacing: 1px;">分享給那個需要安放情緒的人</p>
+      <!-- 原生連結分享 -->
+      <button class="action-btn" onclick="window.shareSite()">
+        分享這座避難所連結
+      </button>
     </div>
 
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
   <div class="footer-left">Every Moment As Truth Heals</div>
   <div class="footer-letters">
@@ -531,59 +588,74 @@ function loadLocalJourney() {
   if(savedJourney){
     try {
       journeyData = JSON.parse(savedJourney);
-      state.eCount = journeyData.counters.e || 0;
-      state.mCount = journeyData.counters.m || 0;
-      state.pCount = journeyData.counters.p || 0;
-      state.aCount = journeyData.counters.a || 0;
-      state.tCount = journeyData.counters.t || 0;
+      state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0;
+      state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0;
     } catch(err) { console.error(err); }
   }
 }
 loadLocalJourney();
 
-// 🌟 語音導航優化 (盡量尋找自然的中文女聲)
+// 🌟 通用設計：視覺降噪模式 Toggle (Sensory Shield)
+window.toggleHSP = function() {
+  const body = document.body;
+  const btn = document.getElementById('hsp-btn');
+  body.classList.toggle('hsp-mode');
+  if(body.classList.contains('hsp-mode')) {
+    btn.classList.add('active');
+    localStorage.setItem('empath_hsp_mode', 'true');
+    window.showToast('👁️ 已開啟降噪模式：降低對比與暫停閃爍');
+  } else {
+    btn.classList.remove('active');
+    localStorage.setItem('empath_hsp_mode', 'false');
+    window.showToast('已關閉降噪模式');
+  }
+}
+// 載入時檢查是否曾開啟降噪模式
+if(localStorage.getItem('empath_hsp_mode') === 'true') {
+  document.body.classList.add('hsp-mode');
+  setTimeout(()=> document.getElementById('hsp-btn').classList.add('active'), 100);
+}
+
+// 🌟 通用設計：語音導航
 window.speakText = function(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW'; 
-    utterance.rate = 0.9; // 放慢語速
-    utterance.pitch = 1.0;
-    
-    // 嘗試篩選品質較好的系統內建語音
+    utterance.lang = 'zh-TW'; utterance.rate = 0.9; utterance.pitch = 1.0;
     const voices = window.speechSynthesis.getVoices();
     const goodVoice = voices.find(v => v.name.includes('Mei-Jia') || v.name.includes('Google 國語') || (v.lang.includes('zh-TW') && v.name.includes('Female')));
     if(goodVoice) { utterance.voice = goodVoice; }
-    
     window.speechSynthesis.speak(utterance);
     window.showToast('🔉 語音導航朗讀中...');
-  } else {
-    window.showToast('您的瀏覽器不支援語音朗讀');
   }
 };
-// 確保語音庫載入
 if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
 
-// 🌟 觸覺震動 API
+// 🌟 通用設計：觸覺心跳震動
 window.triggerHeartbeat = function() {
-  if ('vibrate' in navigator) {
-    navigator.vibrate([40, 120, 40]); 
-  }
+  if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); }
 };
 
-// 🌟 原生社群分享 API (Native Share)
+// 🌟 社群連結分享
 window.shareSite = function() {
   if (navigator.share) {
-    navigator.share({
-      title: 'EMPATH — Every Moment As Truth Heals',
-      text: '我發現了一個很溫暖的地方，可以在數位時代安放情緒。承認、安放、修補、釋放、交換、回家。來這裡看看吧：',
-      url: window.location.href
-    }).catch(console.error);
+    navigator.share({ title: 'EMPATH', text: '我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', url: window.location.href }).catch(console.error);
   } else {
-    navigator.clipboard.writeText(window.location.href);
-    window.showToast('網址已複製！快去貼給朋友吧 ✦');
+    navigator.clipboard.writeText(window.location.href); window.showToast('網址已複製！快去貼給朋友吧 ✦');
   }
 }
+
+// 🌟 生成專屬靈魂足跡分享卡 (Spotify Wrapped 風格)
+window.openShareCard = function() {
+  document.getElementById('sc-e').textContent = state.eCount;
+  document.getElementById('sc-m').textContent = state.mCount;
+  document.getElementById('sc-p').textContent = state.pCount;
+  document.getElementById('sc-a').textContent = state.aCount;
+  document.getElementById('sc-t').textContent = state.tCount;
+  document.getElementById('share-modal').classList.add('show');
+  window.showToast('已生成您的專屬足跡，歡迎螢幕截圖分享至限動 ✦');
+}
+window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); }
 
 window.showToast = function(msg, dur=2400){
   const t = document.getElementById('toast'); t.textContent = msg;
@@ -673,10 +745,19 @@ function initBgStars(){
   for(let i=0; i<100; i++){ bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.2, a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c:STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]}); }
 }
 
+// 🌟 已修復：抓取星星時，即時更新「最亮星星」文字
+function updateMStats(){
+  if(!document.getElementById('m-count') || !document.getElementById('m-brightest')) return;
+  document.getElementById('m-count').textContent = starMessages.length;
+  if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; }
+  const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a);
+  document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
+}
+
 onSnapshot(collection(db, "stars"), (snapshot) => {
   globalCounts.m = snapshot.size; starMessages = [];
   snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, text: data.text, brightness: data.brightness||1, clicks: data.clicks||0, colorIdx: data.colorIdx||0, relX: data.relX, relY: data.relY }); });
-  if(document.getElementById('m-count')) document.getElementById('m-count').textContent = starMessages.length;
+  updateMStats(); // 🌟 修復核心：呼叫更新最亮星星面板
 });
 
 function drawStars(){
@@ -688,11 +769,8 @@ function drawStars(){
     const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; 
     const coreR = 1 + (b * 0.3); const glowR = coreR + (b * 3);
     const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
-    grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 1)`);
-    grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`);
-    grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+    grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 1)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
     ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill();
-
     if(b >= 5){ 
       ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.5; const arm = coreR * 5;
       ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
@@ -708,8 +786,7 @@ function getStarAt(x, y){
 
 roomM.addEventListener('click', async e => {
   if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return;
-  const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top;
-  const star = getStarAt(x, y);
+  const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; const star = getStarAt(x, y);
   
   if(star){
     if(activeStarId !== star.id) {
@@ -720,14 +797,10 @@ roomM.addEventListener('click', async e => {
     } else {
       try {
         await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 });
-        window.showToast('這顆思念更亮了 ✦');
-        window.triggerHeartbeat(); 
-        tooltip.style.display = 'none'; activeStarId = null; 
+        window.showToast('這顆思念更亮了 ✦'); window.triggerHeartbeat(); tooltip.style.display = 'none'; activeStarId = null; 
       } catch (err) {}
     }
-  } else {
-    tooltip.style.display = 'none'; activeStarId = null;
-  }
+  } else { tooltip.style.display = 'none'; activeStarId = null; }
 });
 
 window.submitM = async function(){
@@ -769,14 +842,12 @@ window.submitP = async function(){
   await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); window.showToast('碎片已放入');
 }
 
-// ===== 🌟 1. 修復 A 房沙畫倒數計時消失問題 =====
+// ===== A 房 =====
 onSnapshot(collection(db, "sand"), (snapshot) => {
   globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); feed.innerHTML = ''; const nowMs = Date.now();
   snapshot.forEach(docSnap => {
     const data = docSnap.data(); if(!data.createdAt) return; const leftSecs = (24*60*60) - ((nowMs - data.createdAt.seconds*1000)/1000); if(leftSecs <= 0) return;
     const div = document.createElement('div'); div.className = 'sand-msg'; const pct = (leftSecs / 86400) * 100;
-    
-    // 修復這裡：將缺失的 .sand-time-left 標籤加回來了！
     div.innerHTML = `
       <div class="sand-dissolve-overlay"></div>
       <div class="sand-msg-text">${data.text}</div>
@@ -786,11 +857,9 @@ onSnapshot(collection(db, "sand"), (snapshot) => {
         <div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div>
       </div>`;
     feed.appendChild(div);
-    
     let simSecs = leftSecs; const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
     const interval = setInterval(() => {
-      simSecs -= 1; 
-      if(simSecs <= 0){ clearInterval(interval); div.remove(); return; }
+      simSecs -= 1; if(simSecs <= 0){ clearInterval(interval); div.remove(); return; }
       if(fill) fill.style.width = (simSecs / (24 * 60 * 60)) * 100 + '%';
       if(label) label.textContent = formatTimeLeft(simSecs);
     }, 1000);
@@ -820,9 +889,7 @@ window.submitT = async function(){
 }
 
 function formatTimeLeft(secs){
-  if(secs<=0) return '即將消散';
-  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
-  return h>0 ? `${h}h ${m}m 後消散` : `${m}m 後消散`;
+  if(secs<=0) return '即將消散'; const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60); return h>0 ? `${h}h ${m}m 後消散` : `${m}m 後消散`;
 }
 
 // ===== 3. 初始化 =====
