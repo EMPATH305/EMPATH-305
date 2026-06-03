@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EMPATH — Every Moment As Truth Heals</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
+  --white:#F7F4EF;--fog:#C9C5BC;--muted:#7B8FA1;
+  --gold:#C9A84C;--amber:#E8A87C;--dawn:#F2E8D9;
+  --e:#7B8FA1;--m:#A8B8C8;--p:#C9A84C;
+  --a:#7A9E9F;--t:#E8A87C;--h:#F2E8D9;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* ===== NAV ===== */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 40px;
+  background:rgba(13,27,42,.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,.06);z-index:500;
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;
+  color:var(--white);letter-spacing:6px;
+}
+.nav-letters{display:flex;gap:6px;}
+.nav-letter{
+  width:36px;height:36px;border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;
+  cursor:pointer;transition:all .3s;color:var(--fog);
+}
+.nav-letter:hover{transform:translateY(-2px);}
+.nav-letter[data-l="E"]{color:var(--e);}
+.nav-letter[data-l="E"]:hover{border-color:var(--e);background:rgba(123,143,161,.1);}
+.nav-letter[data-l="M"]{color:var(--m);}
+.nav-letter[data-l="M"]:hover{border-color:var(--m);background:rgba(168,184,200,.1);}
+.nav-letter[data-l="P"]{color:var(--p);}
+.nav-letter[data-l="P"]:hover{border-color:var(--p);background:rgba(201,168,76,.1);}
+.nav-letter[data-l="A"]{color:var(--a);}
+.nav-letter[data-l="A"]:hover{border-color:var(--a);background:rgba(122,158,159,.1);}
+.nav-letter[data-l="T"]{color:var(--t);}
+.nav-letter[data-l="T"]:hover{border-color:var(--t);background:rgba(232,168,124,.1);}
+.nav-letter[data-l="H"]{color:var(--h);}
+.nav-letter[data-l="H"]:hover{border-color:var(--h);background:rgba(242,232,217,.1);}
+
+/* ===== HERO ===== */
+#hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  padding:100px 40px 80px;position:relative;overflow:hidden;
+}
+.hero-bg-text{
+  position:absolute;
+  font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;
+  color:rgba(255,255,255,.025);letter-spacing:-0.02em;
+  pointer-events:none;user-select:none;line-height:1;
+  top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;
+}
+.hero-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(60px,12vw,120px);font-weight:600;
+  color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;
+  position:relative;
+}
+.hero-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(14px,2.2vw,20px);color:var(--gold);
+  letter-spacing:3px;margin-bottom:14px;position:relative;
+}
+.hero-desc{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:56px;position:relative;}
+.hero-quotes{
+  display:flex;gap:40px;margin-bottom:56px;position:relative;
+  flex-wrap:wrap;justify-content:center;
+}
+.hero-quote{
+  max-width:280px;padding:20px 24px;
+  border-left:1px solid rgba(255,255,255,.1);
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:13px;color:var(--muted);line-height:1.9;text-align:left;
+}
+.hero-quote cite{
+  display:block;margin-top:8px;
+  font-style:normal;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.25);
+}
+.doors-nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
+.door-btn{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:20px 16px;border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;transition:all .35s;min-width:82px;
+}
+.door-btn:hover{transform:translateY(-5px);}
+.door-btn .dl{
+  font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1;
+}
+.door-btn .dz{font-size:10px;letter-spacing:2px;color:var(--fog);}
+.door-btn[data-d="E"]{border-color:rgba(123,143,161,.3);}
+.door-btn[data-d="E"]:hover{border-color:var(--e);background:rgba(123,143,161,.05);}
+.door-btn[data-d="E"] .dl{color:var(--e);}
+.door-btn[data-d="M"]{border-color:rgba(168,184,200,.3);}
+.door-btn[data-d="M"]:hover{border-color:var(--m);background:rgba(168,184,200,.05);}
+.door-btn[data-d="M"] .dl{color:var(--m);}
+.door-btn[data-d="P"]{border-color:rgba(201,168,76,.3);}
+.door-btn[data-d="P"]:hover{border-color:var(--p);background:rgba(201,168,76,.05);}
+.door-btn[data-d="P"] .dl{color:var(--p);}
+.door-btn[data-d="A"]{border-color:rgba(122,158,159,.3);}
+.door-btn[data-d="A"]:hover{border-color:var(--a);background:rgba(122,158,159,.05);}
+.door-btn[data-d="A"] .dl{color:var(--a);}
+.door-btn[data-d="T"]{border-color:rgba(232,168,124,.3);}
+.door-btn[data-d="T"]:hover{border-color:var(--t);background:rgba(232,168,124,.05);}
+.door-btn[data-d="T"] .dl{color:var(--t);}
+.door-btn[data-d="H"]{border-color:rgba(242,232,217,.3);}
+.door-btn[data-d="H"]:hover{border-color:var(--h);background:rgba(242,232,217,.05);}
+.door-btn[data-d="H"] .dl{color:var(--h);}
+.flow-line{
+  font-family:'Noto Serif TC',serif;font-size:10px;letter-spacing:3px;
+  color:var(--muted);position:relative;margin-bottom:8px;
+}
+.scroll-hint{font-size:10px;color:var(--muted);letter-spacing:3px;animation:pulse 2.5s infinite;position:relative;}
+@keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+/* ===== COMMON ROOM STYLES ===== */
+.room{min-height:100vh;padding:100px 40px 80px;position:relative;overflow:hidden;}
+.room-letter{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(80px,15vw,160px);font-weight:600;
+  line-height:1;opacity:.07;
+  position:absolute;top:80px;right:40px;pointer-events:none;
+}
+.room-tag{font-size:10px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;}
+.room-title{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(20px,3vw,30px);color:var(--white);margin-bottom:10px;
+}
+.room-desc{font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px;}
+.input-area{
+  width:100%;max-width:600px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  color:var(--white);font-family:'Noto Serif TC',serif;font-size:14px;
+  padding:18px;line-height:2;resize:none;outline:none;
+  transition:border-color .3s;
+}
+.input-area:focus{border-color:rgba(255,255,255,.2);}
+.input-area::placeholder{color:rgba(255,255,255,.2);}
+.send-btn{
+  display:inline-flex;align-items:center;gap:8px;margin-top:12px;
+  padding:11px 28px;border:1px solid;
+  font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:2px;
+  cursor:pointer;transition:all .3s;background:transparent;
+}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== E ROOM ===== */
+#room-e{background:linear-gradient(180deg,#0D1B2A 0%,#0c1824 100%);}
+#room-e .room-letter{color:var(--e);}
+#room-e .room-tag{color:var(--e);}
+#room-e .send-btn{border-color:var(--e);color:var(--e);}
+#room-e .send-btn:hover{background:rgba(123,143,161,.12);}
+.e-anon-label{
+  font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.5);
+  margin-bottom:6px;
+}
+.e-char-count{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
+.e-feed{margin-top:36px;display:flex;flex-direction:column;gap:10px;max-width:600px;}
+.e-msg{
+  background:rgba(255,255,255,.03);padding:18px 20px;
+  border-left:2px solid rgba(123,143,161,.25);
+  font-size:13px;line-height:2;color:var(--fog);
+  animation:fadeSlideIn .5s ease;
+}
+.e-msg-anon{font-size:9px;color:rgba(123,143,161,.4);letter-spacing:3px;margin-bottom:6px;}
+.e-msg-time{font-size:9px;color:rgba(255,255,255,.15);margin-top:8px;letter-spacing:1px;}
+
+/* ===== M ROOM ===== */
+#room-m{background:#060d1a;overflow:hidden;}
+#room-m .room-letter{color:var(--m);}
+#room-m .room-tag{color:var(--m);}
+#room-m .send-btn{border-color:var(--m);color:var(--m);}
+#room-m .send-btn:hover{background:rgba(168,184,200,.08);}
+#star-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;}
+#room-m .room-content{position:relative;z-index:1;}
+.m-input-wrap{max-width:480px;}
+.star-tooltip{
+  position:fixed;
+  background:rgba(8,16,28,.97);
+  border:1px solid rgba(168,184,200,.15);
+  padding:12px 16px;font-size:12px;color:var(--fog);
+  z-index:600;max-width:220px;
+  line-height:1.9;display:none;pointer-events:none;
+}
+.m-stats{
+  display:flex;gap:24px;margin-top:20px;
+}
+.m-stat{font-size:10px;letter-spacing:2px;color:rgba(168,184,200,.4);}
+.m-stat span{color:var(--m);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;}
+
+/* ===== P ROOM ===== */
+#room-p{background:linear-gradient(180deg,#0D1B2A 0%,#100e08 100%);}
+#room-p .room-letter{color:var(--p);}
+#room-p .room-tag{color:var(--p);}
+#room-p .send-btn{border-color:var(--p);color:var(--p);}
+#room-p .send-btn:hover{background:rgba(201,168,76,.08);}
+.p-vessel{
+  max-width:540px;margin-bottom:32px;
+  position:relative;
+}
+#p-canvas{
+  width:100%;height:300px;display:block;cursor:crosshair;
+  background:rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.1);
+}
+.p-canvas-hint{
+  font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.3);
+  text-align:center;margin-top:8px;
+}
+.kintsugi-board{
+  max-width:600px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:8px;
+}
+.shard{
+  background:rgba(255,255,255,.03);padding:18px;
+  border:1px solid rgba(201,168,76,.1);
+  cursor:pointer;transition:all .4s;
+  position:relative;overflow:hidden;
+}
+.shard:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04);}
+.shard.healed{border-color:rgba(201,168,76,.5);}
+.shard-text{font-size:12px;line-height:2;color:var(--fog);}
+.shard-glow{
+  position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity .4s;
+}
+.shard:hover .shard-glow{opacity:1;}
+.shard.healed .shard-glow{opacity:.8;}
+.shard-healed-tag{
+  font-size:8px;color:var(--gold);letter-spacing:2px;
+  margin-top:10px;display:none;
+}
+.shard.healed .shard-healed-tag{display:block;}
+.p-healed-count{
+  font-family:'Cormorant Garamond',serif;font-size:13px;
+  color:rgba(201,168,76,.4);letter-spacing:2px;margin-top:20px;
+}
+
+/* ===== A ROOM ===== */
+#room-a{background:linear-gradient(180deg,#0D1B2A 0%,#071014 100%);}
+#room-a .room-letter{color:var(--a);}
+#room-a .room-tag{color:var(--a);}
+#room-a .send-btn{border-color:var(--a);color:var(--a);}
+#room-a .send-btn:hover{background:rgba(122,158,159,.08);}
+.a-feed{margin-top:32px;display:flex;flex-direction:column;gap:14px;max-width:600px;}
+.sand-msg{
+  background:rgba(122,158,159,.05);padding:20px 22px;
+  border-left:2px solid rgba(122,158,159,.3);
+  position:relative;overflow:hidden;
+  animation:fadeSlideIn .5s ease;
+  transition:opacity 3s ease,transform 3s ease;
+}
+.sand-msg-text{font-size:13px;line-height:2;color:var(--fog);}
+.sand-timer-wrap{
+  display:flex;align-items:center;gap:8px;
+  margin-top:10px;
+}
+.sand-timer-label{font-size:9px;color:var(--a);letter-spacing:2px;}
+.sand-timer-bar{flex:1;height:1px;background:rgba(122,158,159,.15);}
+.sand-timer-fill{height:100%;background:var(--a);transition:width 1s linear;}
+.sand-time-left{font-size:9px;color:rgba(122,158,159,.5);letter-spacing:1px;white-space:nowrap;}
+.sand-dissolve-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);
+  opacity:0;pointer-events:none;transition:opacity 2s;
+}
+.sand-msg.dissolving{opacity:.15;transform:translateY(4px);}
+.sand-msg.dissolving .sand-dissolve-overlay{opacity:1;}
+.a-note{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px;
+}
+
+/* ===== T ROOM ===== */
+#room-t{background:linear-gradient(180deg,#0D1B2A 0%,#140f08 100%);}
+#room-t .room-letter{color:var(--t);}
+#room-t .room-tag{color:var(--t);}
+#room-t .send-btn{border-color:var(--t);color:var(--t);}
+#room-t .send-btn:hover{background:rgba(232,168,124,.08);}
+.t-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  max-width:840px;margin-top:32px;
+}
+.t-panel{background:rgba(255,255,255,.03);padding:26px;border:1px solid rgba(232,168,124,.08);}
+.t-panel-title{
+  font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;
+  color:var(--white);margin-bottom:20px;letter-spacing:2px;
+}
+.t-feed{display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;}
+.t-feed::-webkit-scrollbar{width:2px;}
+.t-feed::-webkit-scrollbar-thumb{background:rgba(232,168,124,.2);}
+.warmth-item{
+  padding:14px 16px;background:rgba(232,168,124,.04);
+  border-left:2px solid rgba(232,168,124,.2);
+  font-size:12px;line-height:1.9;color:var(--fog);
+  position:relative;animation:fadeSlideIn .5s ease;
+}
+.warmth-pulse{
+  position:absolute;top:10px;right:10px;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--amber);animation:heartbeat 2.5s ease-in-out infinite;
+}
+@keyframes heartbeat{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:.9;transform:scale(1.4);}}
+.echo-btn{
+  display:flex;align-items:center;gap:6px;
+  margin-top:8px;padding:5px 0;
+  background:transparent;border:none;cursor:pointer;
+  font-size:10px;color:var(--muted);letter-spacing:1px;
+  transition:color .3s;font-family:'Noto Sans TC',sans-serif;
+}
+.echo-btn:hover{color:var(--amber);}
+.echo-btn.pulsed{color:var(--amber);}
+.echo-btn .heart{transition:transform .2s;}
+.echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
+.echo-count{
+  font-family:'Cormorant Garamond',serif;font-size:14px;
+  color:rgba(232,168,124,.3);margin-top:16px;
+}
+.t-send-panel{background:rgba(255,255,255,.03);padding:26px;border:1px solid rgba(232,168,124,.08);}
+.t-send-panel .t-panel-title{margin-bottom:16px;}
+
+/* Echo Pulse Viz */
+.echo-pulse-ring{
+  width:80px;height:80px;border-radius:50%;
+  border:1px solid rgba(232,168,124,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:24px auto 8px;position:relative;
+}
+.echo-pulse-ring::before{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  border:1px solid rgba(232,168,124,.1);
+}
+.echo-pulse-ring::after{
+  content:'';position:absolute;inset:-16px;border-radius:50%;
+  border:1px solid rgba(232,168,124,.05);
+}
+.echo-heart{
+  font-size:28px;line-height:1;
+  animation:echopulse 2s ease-in-out infinite;
+}
+@keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+.echo-label{
+  text-align:center;font-size:10px;letter-spacing:2px;
+  color:rgba(232,168,124,.4);margin-bottom:16px;
+}
+
+/* ===== H ROOM ===== */
+#room-h{background:linear-gradient(180deg,#0D1B2A 0%,#0f0f1a 100%);}
+#room-h .room-letter{color:var(--h);}
+#room-h .room-tag{color:rgba(242,232,217,.5);}
+.h-journey{max-width:700px;}
+.journey-summary{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:36px;
+}
+.j-card{
+  background:rgba(255,255,255,.03);padding:22px 18px;text-align:center;
+  border-top:1px solid;transition:background .3s;cursor:default;
+}
+.j-card:hover{background:rgba(255,255,255,.05);}
+.j-card:nth-child(1){border-top-color:var(--e);}
+.j-card:nth-child(2){border-top-color:var(--m);}
+.j-card:nth-child(3){border-top-color:var(--p);}
+.j-card:nth-child(4){border-top-color:var(--a);}
+.j-card:nth-child(5){border-top-color:var(--t);}
+.j-num{
+  font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;
+  color:var(--white);line-height:1;margin-bottom:6px;
+}
+.j-label{font-size:9px;color:var(--muted);letter-spacing:2px;}
+.j-letter{
+  display:block;font-family:'Cormorant Garamond',serif;font-size:11px;
+  font-weight:600;margin-bottom:4px;letter-spacing:1px;
+}
+.j-card:nth-child(1) .j-letter{color:var(--e);}
+.j-card:nth-child(2) .j-letter{color:var(--m);}
+.j-card:nth-child(3) .j-letter{color:var(--p);}
+.j-card:nth-child(4) .j-letter{color:var(--a);}
+.j-card:nth-child(5) .j-letter{color:var(--t);}
+
+.home-quote{
+  background:rgba(255,255,255,.02);padding:32px 36px;
+  border-left:2px solid rgba(242,232,217,.15);margin-bottom:28px;
+}
+.home-quote p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:17px;color:var(--dawn);line-height:2.2;
+}
+.h-timeline{max-width:600px;margin-bottom:36px;}
+.h-timeline-title{
+  font-size:10px;letter-spacing:3px;color:var(--muted);
+  margin-bottom:20px;
+}
+.h-events{display:flex;flex-direction:column;gap:0;}
+.h-event{
+  display:flex;gap:20px;padding:14px 0;
+  border-left:1px solid rgba(255,255,255,.07);
+  padding-left:20px;position:relative;
+  font-size:12px;line-height:1.9;color:var(--fog);
+  animation:fadeSlideIn .5s ease;
+}
+.h-event::before{
+  content:'';position:absolute;left:-4px;top:20px;
+  width:7px;height:7px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);background:var(--bg);
+}
+.h-event.e-event::before{border-color:var(--e);background:rgba(123,143,161,.2);}
+.h-event.m-event::before{border-color:var(--m);background:rgba(168,184,200,.2);}
+.h-event.p-event::before{border-color:var(--p);background:rgba(201,168,76,.2);}
+.h-event.a-event::before{border-color:var(--a);background:rgba(122,158,159,.2);}
+.h-event.t-event::before{border-color:var(--t);background:rgba(232,168,124,.2);}
+.h-event-label{
+  font-size:9px;letter-spacing:2px;margin-bottom:2px;
+}
+.h-event.e-event .h-event-label{color:var(--e);}
+.h-event.m-event .h-event-label{color:var(--m);}
+.h-event.p-event .h-event-label{color:var(--p);}
+.h-event.a-event .h-event-label{color:var(--a);}
+.h-event.t-event .h-event-label{color:var(--t);}
+.h-event-text{font-size:12px;color:var(--fog);line-height:1.9;}
+.h-event-time{font-size:9px;color:rgba(255,255,255,.15);margin-top:4px;}
+
+.lighthouse{
+  text-align:center;padding:40px 20px;
+  border:1px solid rgba(242,232,217,.08);max-width:500px;
+}
+.lighthouse-flame{
+  font-size:44px;margin-bottom:14px;
+  animation:flicker 3s ease-in-out infinite;display:block;
+}
+@keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
+.lighthouse p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:15px;color:var(--dawn);line-height:2.2;
+}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.1);
+  padding:12px 24px;font-size:12px;color:var(--fog);letter-spacing:1px;
+  opacity:0;transition:all .4s;z-index:999;pointer-events:none;
+  backdrop-filter:blur(10px);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== FOOTER ===== */
+footer{
+  padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-left{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:15px;color:rgba(255,255,255,.3);letter-spacing:2px;
+}
+.footer-right{font-size:9px;color:rgba(255,255,255,.15);letter-spacing:3px;}
+.footer-letters{
+  display:flex;gap:8px;
+}
+.footer-l{
+  font-family:'Cormorant Garamond',serif;font-size:13px;
+  opacity:.25;letter-spacing:2px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  nav{padding:14px 20px;}
+  .room{padding:90px 20px 60px;}
+  .room-letter{font-size:80px;top:70px;right:20px;}
+  .t-layout{grid-template-columns:1fr;}
+  .journey-summary{grid-template-columns:repeat(2,1fr);}
+  .kintsugi-board{grid-template-columns:1fr;}
+  .hero-quotes{flex-direction:column;gap:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<div class="star-tooltip" id="star-tooltip"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">EMPATH</a>
+  <div class="nav-letters">
+    <a class="nav-letter" data-l="E" href="#room-e">E</a>
+    <a class="nav-letter" data-l="M" href="#room-m">M</a>
+    <a class="nav-letter" data-l="P" href="#room-p">P</a>
+    <a class="nav-letter" data-l="A" href="#room-a">A</a>
+    <a class="nav-letter" data-l="T" href="#room-t">T</a>
+    <a class="nav-letter" data-l="H" href="#room-h">H</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-text">EMPATH</div>
+  <h1 class="hero-title">EMPATH</h1>
+  <p class="hero-sub">Every Moment As Truth Heals</p>
+  <p class="hero-desc">數位時代的情緒安放平台　以文學敘事對抗視覺霸權的設計實踐</p>
+  <div class="hero-quotes">
+    <div class="hero-quote">
+      廣告以「迷人(Glamour)」製造幻覺，讓人相信擁有某種形象就能被渴望。
+      <cite>—— JOHN BERGER《觀看的方式》</cite>
+    </div>
+    <div class="hero-quote">
+      所看的從來不是所說的，影像以各種方式不斷處決文字。
+      <cite>—— 楊凱麟，論馬格利特</cite>
+    </div>
+  </div>
+  <p class="flow-line">承認 → 安放 → 修補 → 釋放 → 交換 → 回家</p>
+  <div class="doors-nav">
+    <a class="door-btn" data-d="E" href="#room-e"><span class="dl">E</span><span class="dz">情緒出口</span></a>
+    <a class="door-btn" data-d="M" href="#room-m"><span class="dl">M</span><span class="dz">思念映射</span></a>
+    <a class="door-btn" data-d="P" href="#room-p"><span class="dl">P</span><span class="dz">碎片修補</span></a>
+    <a class="door-btn" data-d="A" href="#room-a"><span class="dl">A</span><span class="dz">神聖避難所</span></a>
+    <a class="door-btn" data-d="T" href="#room-t"><span class="dl">T</span><span class="dz">能量共振</span></a>
+    <a class="door-btn" data-d="H" href="#room-h"><span class="dl">H</span><span class="dz">靈魂歸宿</span></a>
+  </div>
+  <span class="scroll-hint">↓ &nbsp; SCROLL</span>
+</section>
+
+<!-- E: 情緒出口 -->
+<section id="room-e" class="room">
+  <div class="room-letter">E</div>
+  <p class="room-tag">E — Emptiness / Exit</p>
+  <h2 class="room-title">情緒出口</h2>
+  <p class="room-desc">說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。</p>
+  <p class="e-anon-label">ANONYMOUS — 完全匿名</p>
+  <textarea class="input-area" id="e-input" rows="5"
+    placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
+  <div class="e-char-count" id="e-char">0 / 300</div>
+  <br>
+  <button class="send-btn" onclick="submitE()">投入黑暗 →</button>
+  <div class="e-feed" id="e-feed"></div>
+</section>
+
+<!-- M: 星空思念 -->
+<section id="room-m" class="room">
+  <canvas id="star-canvas"></canvas>
+  <div class="room-letter">M</div>
+  <div class="room-content">
+    <p class="room-tag">M — Missing / Memory</p>
+    <h2 class="room-title">思念映射</h2>
+    <p class="room-desc">每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。</p>
+    <div class="m-input-wrap">
+      <textarea class="input-area" id="m-input" rows="4"
+        placeholder="寫下你的思念，它會成為夜空中的一顆星……&#10;思念一個人、一個地方、或一段時光。"></textarea>
+      <br>
+      <button class="send-btn" onclick="submitM()">放上星空 →</button>
+    </div>
+    <div class="m-stats">
+      <div class="m-stat"><span id="m-count">0</span> 顆星</div>
+      <div class="m-stat">最亮：<span id="m-brightest">—</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- P: 碎片修補 -->
+<section id="room-p" class="room">
+  <div class="room-letter">P</div>
+  <p class="room-tag">P — Piece / Pain</p>
+  <h2 class="room-title">碎片修補</h2>
+  <p class="room-desc">金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。</p>
+  <div class="p-vessel">
+    <canvas id="p-canvas" width="540" height="300"></canvas>
+    <p class="p-canvas-hint">點擊碎片，以金縫補裂痕</p>
+  </div>
+  <textarea class="input-area" id="p-input" rows="3"
+    placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
+  <br>
+  <button class="send-btn" onclick="submitP()">放入瓷器 →</button>
+  <div class="kintsugi-board" id="p-board"></div>
+  <p class="p-healed-count" id="p-healed-count"></p>
+</section>
+
+<!-- A: 神聖避難所 -->
+<section id="room-a" class="room">
+  <div class="room-letter">A</div>
+  <p class="room-tag">A — Asylum / Ache</p>
+  <h2 class="room-title">神聖避難所</h2>
+  <p class="room-desc">痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。</p>
+  <textarea class="input-area" id="a-input" rows="4"
+    placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
+  <br>
+  <button class="send-btn" onclick="submitA()">放入沙畫 →</button>
+  <p class="a-note">∗ 所有留言將在 24 小時後自動消散，如沙畫般不留痕跡</p>
+  <div class="a-feed" id="a-feed"></div>
+</section>
+
+<!-- T: 能量共振 -->
+<section id="room-t" class="room">
+  <div class="room-letter">T</div>
+  <p class="room-tag">T — Temperature / Truth</p>
+  <h2 class="room-title">能量共振</h2>
+  <p class="room-desc">照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。</p>
+  <div class="t-layout">
+    <div>
+      <div class="t-panel">
+        <p class="t-panel-title">溫暖訊息流</p>
+        <div class="t-feed" id="t-feed"></div>
+        <p class="echo-count" id="t-echo-count"></p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;">
+      <div class="t-send-panel">
+        <p class="t-panel-title">傳送你的溫暖</p>
+        <textarea class="input-area" id="t-input" rows="4"
+          placeholder="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"></textarea>
+        <br>
+        <button class="send-btn" onclick="submitT()">傳出去 →</button>
+      </div>
+      <div class="t-panel" style="text-align:center;">
+        <p class="t-panel-title" style="text-align:center;">Echo Pulse</p>
+        <div class="echo-pulse-ring"><span class="echo-heart">🕯️</span></div>
+        <p class="echo-label">共鳴之震 — 情感不被量化</p>
+        <p style="font-size:11px;color:var(--muted);line-height:1.9;">
+          當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- H: 靈魂歸宿 -->
+<section id="room-h" class="room">
+  <div class="room-letter">H</div>
+  <p class="room-tag">H — Home / Heal</p>
+  <h2 class="room-title">靈魂歸宿</h2>
+  <p class="room-desc">回家，回到不需偽裝的地方。你走過的每個房間，都是你的。</p>
+  <div class="h-journey">
+    <div class="journey-summary" id="h-summary">
+      <div class="j-card"><span class="j-letter">E</span><div class="j-num" id="h-e-count">0</div><div class="j-label">情緒放下</div></div>
+      <div class="j-card"><span class="j-letter">M</span><div class="j-num" id="h-m-count">0</div><div class="j-label">星星放上</div></div>
+      <div class="j-card"><span class="j-letter">P</span><div class="j-num" id="h-p-count">0</div><div class="j-label">碎片修補</div></div>
+      <div class="j-card"><span class="j-letter">A</span><div class="j-num" id="h-a-count">0</div><div class="j-label">秘密放下</div></div>
+      <div class="j-card"><span class="j-letter">T</span><div class="j-num" id="h-t-count">0</div><div class="j-label">溫暖傳出</div></div>
+    </div>
+    <div class="home-quote">
+      <p>我們雖然孤獨地存在，但我們可以溫暖地交會。</p>
+    </div>
+    <div class="h-timeline">
+      <p class="h-timeline-title">YOUR JOURNEY — 你的旅程</p>
+      <div class="h-events" id="h-events">
+        <div class="h-event" style="color:var(--muted);font-size:12px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);">
+          <div>
+            <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);margin-bottom:4px;">開始</div>
+            <div>你來到了這裡。這已經是一種勇氣。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lighthouse">
+      <span class="lighthouse-flame">🕯️</span>
+      <p>Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">Every Moment As Truth Heals</div>
+  <div class="footer-letters">
+    <span class="footer-l">E</span><span class="footer-l">M</span>
+    <span class="footer-l">P</span><span class="footer-l">A</span>
+    <span class="footer-l">T</span><span class="footer-l">H</span>
+  </div>
+  <div class="footer-right">數位時代的情緒安放平台</div>
+</footer>
+
+<script>
+// ===== GLOBAL STATE =====
+const state = {
+  eCount:0, mCount:0, pCount:0, aCount:0, tCount:0,
+  stars:[],
+  healedCount:0,
+  echoTotal:0,
+  aMessages:[],
+};
+
+// ===== TOAST =====
+function showToast(msg, dur=2400){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+// ===== TIME HELPER =====
+function nowStr(){
+  const d=new Date();
+  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+
+// ===== JOURNEY LOG =====
+function logJourney(type, text){
+  const container = document.getElementById('h-events');
+  const cls = type+'-event';
+  const labels = {e:'情緒出口',m:'思念映射',p:'碎片修補',a:'避難所',t:'能量共振'};
+  const div = document.createElement('div');
+  div.className = 'h-event '+cls;
+  div.innerHTML = `<div>
+    <div class="h-event-label">${labels[type]||type.toUpperCase()}</div>
+    <div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div>
+    <div class="h-event-time">${nowStr()}</div>
+  </div>`;
+  container.appendChild(div);
+  // update counter
+  state[type+'Count']++;
+  const el = document.getElementById('h-'+type+'-count');
+  if(el) el.textContent = state[type+'Count'];
+}
+
+// ===== E: EMOTION TRASH =====
+const eInput = document.getElementById('e-input');
+if(eInput){
+  eInput.addEventListener('input',()=>{
+    const l = eInput.value.length;
+    document.getElementById('e-char').textContent = Math.min(l,300)+' / 300';
+    if(l>300) eInput.value = eInput.value.slice(0,300);
+  });
+}
+
+const ePreset = [
+  '我真的好累了，但又不知道能告訴誰。',
+  '我一直在等一個道歉，但可能永遠不會來。',
+  '我害怕自己根本不值得被愛。',
+  '有時候我希望一切都暫停一下。',
+  '我失去了一個以為會一直在的人。',
+];
+
+function submitE(){
+  const input = document.getElementById('e-input');
+  const text = input.value.trim();
+  if(!text){showToast('請先寫下你想說的話');return;}
+  const feed = document.getElementById('e-feed');
+  const div = document.createElement('div');
+  div.className = 'e-msg';
+  div.innerHTML = `
+    <div class="e-msg-anon">匿名 · ANONYMOUS</div>
+    <div>${text}</div>
+    <div class="e-msg-time">${nowStr()}</div>
+  `;
+  feed.insertBefore(div, feed.firstChild);
+  input.value='';
+  document.getElementById('e-char').textContent='0 / 300';
+  logJourney('e', text);
+  showToast('已投入黑暗。你說出來了。');
+}
+
+// seed E with presets
+window.addEventListener('load',()=>{
+  const feed = document.getElementById('e-feed');
+  ePreset.slice(0,3).forEach(t=>{
+    const d = document.createElement('div');
+    d.className='e-msg';
+    d.innerHTML=`<div class="e-msg-anon">匿名 · ANONYMOUS</div><div>${t}</div><div class="e-msg-time">稍早</div>`;
+    feed.appendChild(d);
+  });
+});
+
+// ===== M: STAR MAP =====
+const canvas = document.getElementById('star-canvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('star-tooltip');
+
+function resizeCanvas(){
+  const room = document.getElementById('room-m');
+  canvas.width = room.offsetWidth;
+  canvas.height = room.offsetHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+setTimeout(resizeCanvas, 100);
+
+const starMessages = [
+  {text:'思念媽媽的味道，她做的滷肉飯。',x:null,y:null,brightness:3,clicks:3},
+  {text:'那年夏天的他，現在不知道在哪裡。',x:null,y:null,brightness:2,clicks:2},
+  {text:'我在異鄉的每個夜晚，都想起家。',x:null,y:null,brightness:4,clicks:4},
+  {text:'思念一段沒有開口的感情。',x:null,y:null,brightness:1,clicks:1},
+  {text:'那隻貓，已經離開三年了。',x:null,y:null,brightness:2,clicks:2},
+  {text:'懷念那段大家都還在一起的時光。',x:null,y:null,brightness:3,clicks:3},
+];
+
+function initStarPositions(){
+  const w=canvas.width||800, h=canvas.height||600;
+  const margin=80;
+  starMessages.forEach((s,i)=>{
+    if(!s.x){
+      s.x = margin + Math.random()*(w-2*margin);
+      s.y = margin + Math.random()*(h-2*margin);
+    }
+  });
+}
+
+let bgStars=[];
+function initBgStars(){
+  bgStars=[];
+  const w=canvas.width||800,h=canvas.height||600;
+  for(let i=0;i<120;i++){
+    bgStars.push({
+      x:Math.random()*w, y:Math.random()*h,
+      r:Math.random()*0.8+0.2,
+      a:Math.random(),
+      da:(Math.random()-.5)*0.003
+    });
+  }
+}
+
+let animFrame;
+function drawStars(){
+  if(!canvas.width) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // bg stars twinkle
+  bgStars.forEach(s=>{
+    s.a += s.da;
+    if(s.a>1||s.a<0.1) s.da*=-1;
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(168,184,200,${s.a*0.5})`;
+    ctx.fill();
+  });
+  // content stars
+  initStarPositions();
+  starMessages.forEach((s,i)=>{
+    const b = s.brightness;
+    const r = 2+b*1.5;
+    // glow
+    const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,r*5);
+    g.addColorStop(0,`rgba(200,210,230,${0.12+b*0.06})`);
+    g.addColorStop(1,'rgba(200,210,230,0)');
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,r*5,0,Math.PI*2);
+    ctx.fillStyle=g;
+    ctx.fill();
+    // star
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(220,230,245,${0.6+b*0.08})`;
+    ctx.fill();
+    // sparkle cross
+    if(b>=3){
+      ctx.strokeStyle=`rgba(220,230,245,${0.15+b*0.04})`;
+      ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(s.x-r*3,s.y);ctx.lineTo(s.x+r*3,s.y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(s.x,s.y-r*3);ctx.lineTo(s.x,s.y+r*3);ctx.stroke();
+    }
+  });
+  animFrame = requestAnimationFrame(drawStars);
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    resizeCanvas();
+    initBgStars();
+    initStarPositions();
+    drawStars();
+    updateMStats();
+  },300);
+});
+
+function getStarAt(x,y){
+  return starMessages.find(s=>{
+    if(!s.x)return false;
+    const dx=s.x-x,dy=s.y-y;
+    return Math.sqrt(dx*dx+dy*dy)<22;
+  });
+}
+
+canvas.addEventListener('mousemove', e=>{
+  const rect=canvas.getBoundingClientRect();
+  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const star = getStarAt(x,y);
+  if(star){
+    tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+16)+'px';
+    tooltip.style.top=(e.clientY-10)+'px';
+    tooltip.innerHTML=`${star.text}<br><span style="font-size:9px;color:rgba(168,184,200,.4);letter-spacing:2px;">✦ ${star.clicks} 次共鳴</span>`;
+    canvas.style.cursor='pointer';
+  } else {
+    tooltip.style.display='none';
+    canvas.style.cursor='default';
+  }
+});
+
+canvas.addEventListener('mouseleave',()=>{tooltip.style.display='none';});
+
+canvas.addEventListener('click', e=>{
+  const rect=canvas.getBoundingClientRect();
+  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const star = getStarAt(x,y);
+  if(star){
+    star.brightness = Math.min(star.brightness+0.5, 8);
+    star.clicks++;
+    updateMStats();
+    showToast('這顆星更亮了一些 ✦');
+  }
+});
+
+function updateMStats(){
+  document.getElementById('m-count').textContent = starMessages.length;
+  const brightest = starMessages.reduce((a,b)=>b.brightness>a.brightness?b:a);
+  document.getElementById('m-brightest').textContent = 
+    brightest.text.length>12?brightest.text.slice(0,12)+'…':brightest.text;
+}
+
+function submitM(){
+  const input = document.getElementById('m-input');
+  const text = input.value.trim();
+  if(!text){showToast('請先寫下你的思念');return;}
+  const room = document.getElementById('room-m');
+  const margin=80;
+  const w=canvas.width||room.offsetWidth||800;
+  const h=canvas.height||room.offsetHeight||600;
+  const newStar={
+    text,
+    x: margin + Math.random()*(w-2*margin),
+    y: margin*2 + Math.random()*(h-margin*3),
+    brightness:1,
+    clicks:0
+  };
+  starMessages.push(newStar);
+  input.value='';
+  updateMStats();
+  logJourney('m', text);
+  showToast('你的思念成為了一顆星 ✦');
+}
+
+// ===== P: KINTSUGI =====
+let pCanvas, pCtx;
+let pShards=[];
+let pHealedTotal=0;
+
+const pPreset=[
+  '那段關係，我還沒有說再見。',
+  '我對自己太嚴苛，卻從不原諒自己。',
+  '那次失敗，我一直放不下。',
+  '我錯過了一個重要的告別。',
+];
+
+window.addEventListener('load',()=>{
+  pCanvas = document.getElementById('p-canvas');
+  pCtx = pCanvas.getContext('2d');
+  pCanvas.width = pCanvas.offsetWidth || 540;
+  initPCanvas();
+  pPreset.forEach(t=>addShard(t));
+});
+
+function initPCanvas(){
+  drawKintsugiVessel();
+}
+
+function drawKintsugiVessel(){
+  const c=pCtx, w=pCanvas.width, h=pCanvas.height;
+  c.clearRect(0,0,w,h);
+  // vessel outline
+  c.strokeStyle='rgba(201,168,76,0.2)';
+  c.lineWidth=1;
+  // draw a simple vase/bowl shape
+  c.beginPath();
+  const cx=w/2, cy=h/2;
+  const rx=w*0.3, ry=h*0.38;
+  c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2);
+  c.stroke();
+  // cracks
+  const cracks=[
+    [[cx-80,cy-60],[cx-50,cy],[cx-20,cy+80]],
+    [[cx+60,cy-80],[cx+30,cy-20],[cx+50,cy+60]],
+    [[cx-30,cy-40],[cx+20,cy-10],[cx+60,cy+20]],
+    [[cx-60,cy+20],[cx-10,cy+60],[cx+30,cy+100]],
+  ];
+  cracks.forEach(crack=>{
+    c.beginPath();
+    c.moveTo(crack[0][0],crack[0][1]);
+    crack.slice(1).forEach(p=>c.lineTo(p[0],p[1]));
+    c.strokeStyle='rgba(201,168,76,0.15)';
+    c.lineWidth=0.5;
+    c.stroke();
+  });
+  // count label
+  if(pHealedTotal>0){
+    c.font='11px Noto Sans TC';
+    c.fillStyle='rgba(201,168,76,0.4)';
+    c.textAlign='center';
+    c.fillText(`已修補 ${pHealedTotal} 道裂紋`, cx, cy+ry+24);
+  }
+}
+
+function addShard(text){
+  const board = document.getElementById('p-board');
+  const div = document.createElement('div');
+  div.className='shard';
+  div.innerHTML=`<div class="shard-text">${text}</div>
+    <div class="shard-healed-tag">✦ 已修補</div>
+    <div class="shard-glow"></div>`;
+  div.addEventListener('click',()=>healShard(div));
+  board.appendChild(div);
+  pShards.push({el:div,healed:false,text});
+}
+
+function healShard(el){
+  if(el.classList.contains('healed')) return;
+  el.classList.add('healed');
+  pHealedTotal++;
+  drawKintsugiVessel();
+  drawGoldCrack();
+  document.getElementById('p-healed-count').textContent=`已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
+  showToast('以金修補，裂縫成為了光 ✦');
+}
+
+function drawGoldCrack(){
+  const c=pCtx, w=pCanvas.width, h=pCanvas.height;
+  const cx=w/2, cy=h/2;
+  const startX = cx + (Math.random()-0.5)*w*0.4;
+  const startY = cy + (Math.random()-0.5)*h*0.5;
+  const endX = startX + (Math.random()-0.5)*80;
+  const endY = startY + (Math.random()-0.5)*80;
+  const midX = (startX+endX)/2+(Math.random()-0.5)*30;
+  const midY = (startY+endY)/2+(Math.random()-0.5)*30;
+  c.beginPath();
+  c.moveTo(startX,startY);
+  c.quadraticCurveTo(midX,midY,endX,endY);
+  c.strokeStyle='rgba(201,168,76,0.7)';
+  c.lineWidth=1.5;
+  c.stroke();
+  // gold glow
+  c.strokeStyle='rgba(201,168,76,0.2)';
+  c.lineWidth=4;
+  c.beginPath();
+  c.moveTo(startX,startY);
+  c.quadraticCurveTo(midX,midY,endX,endY);
+  c.stroke();
+}
+
+function submitP(){
+  const input = document.getElementById('p-input');
+  const text = input.value.trim();
+  if(!text){showToast('請先寫下你心中的碎片');return;}
+  addShard(text);
+  input.value='';
+  logJourney('p', text);
+  showToast('碎片放入了。點擊它，讓它被修補。');
+}
+
+// ===== A: SAND MESSAGES (24h auto-dissolve) =====
+const aPreset=[
+  {text:'今天哭了，不知道為什麼。就是很想哭。',dur:24*60*60},
+  {text:'我知道我應該放下，但就是做不到。',dur:22*60*60},
+  {text:'我最近不想說話，但又怕被遺忘。',dur:18*60*60},
+];
+
+window.addEventListener('load',()=>{
+  const remaining = [
+    {text:aPreset[0].text, left:23*60*60+42*60+11, total:24*60*60},
+    {text:aPreset[1].text, left:21*60*60+8*60, total:22*60*60},
+    {text:aPreset[2].text, left:14*60*60+30*60, total:18*60*60},
+  ];
+  remaining.forEach(m=>renderAMessage(m.text, m.left, m.total));
+});
+
+function formatTimeLeft(secs){
+  if(secs<=0) return '即將消散';
+  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
+  if(h>0) return `${h}h ${m}m 後消散`;
+  return `${m}m 後消散`;
+}
+
+function renderAMessage(text, secsLeft, totalSecs){
+  const feed = document.getElementById('a-feed');
+  const div = document.createElement('div');
+  div.className='sand-msg';
+  const pct = (secsLeft/totalSecs)*100;
+  div.innerHTML=`
+    <div class="sand-dissolve-overlay"></div>
+    <div class="sand-msg-text">${text}</div>
+    <div class="sand-timer-wrap">
+      <div class="sand-timer-label">DISSOLVING</div>
+      <div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div>
+      <div class="sand-time-left" id="tl-${Date.now()}">${formatTimeLeft(secsLeft)}</div>
+    </div>
+  `;
+  feed.insertBefore(div, feed.firstChild);
+  // simulate countdown (accelerated for demo: 1 real second = 60 sim seconds)
+  let simSecs = secsLeft;
+  const fill = div.querySelector('.sand-timer-fill');
+  const label = div.querySelector('.sand-time-left');
+  const interval = setInterval(()=>{
+    simSecs -= 60;
+    if(simSecs<=0){
+      clearInterval(interval);
+      div.classList.add('dissolving');
+      setTimeout(()=>div.remove(), 3500);
+      return;
+    }
+    const p = (simSecs/totalSecs)*100;
+    fill.style.width=p+'%';
+    label.textContent = formatTimeLeft(simSecs);
+    if(p<15) div.style.opacity=(0.3+(p/15)*0.7)+'';
+  },1000);
+}
+
+function submitA(){
+  const input = document.getElementById('a-input');
+  const text = input.value.trim();
+  if(!text){showToast('請先寫下你想放下的話');return;}
+  renderAMessage(text, 24*60*60, 24*60*60);
+  input.value='';
+  logJourney('a', text);
+  showToast('已放入沙畫。24 小時後，它會消散。');
+}
+
+// ===== T: WARMTH EXCHANGE =====
+const tPreset=[
+  '你今天撐過來了，這就夠了。',
+  '不知道有沒有人需要聽到這句話：你很好，真的很好。',
+  '給所有在深夜還沒睡的人，你不孤單。',
+  '有時候沉默也是一種療癒。謝謝你陪著自己。',
+  '你不需要解釋你的傷，傷就是傷，它是真實的。',
+];
+
+window.addEventListener('load',()=>{
+  const feed = document.getElementById('t-feed');
+  tPreset.forEach(t=>{
+    const div=createWarmthItem(t);
+    feed.appendChild(div);
+  });
+  document.getElementById('t-echo-count').textContent=
+    `本週共 ${tPreset.length} 道溫暖漂浮`;
+});
+
+function createWarmthItem(text){
+  const div=document.createElement('div');
+  div.className='warmth-item';
+  let echos=Math.floor(Math.random()*12)+1;
+  div.innerHTML=`
+    <div class="warmth-pulse"></div>
+    <div>${text}</div>
+    <button class="echo-btn" onclick="sendEcho(this,${echos})">
+      <span class="heart">🕯️</span> Echo Pulse
+      <span class="echo-num" style="color:rgba(232,168,124,.4);margin-left:4px;">(${echos})</span>
+    </button>
+  `;
+  return div;
+}
+
+function sendEcho(btn, count){
+  if(btn.classList.contains('pulsed')) return;
+  btn.classList.add('pulsed');
+  const num=btn.querySelector('.echo-num');
+  num.textContent=`(${count+1})`;
+  state.echoTotal++;
+  showToast('✦ Echo Pulse 傳出——不顯示數字，只有心跳。');
+  if('vibrate' in navigator) navigator.vibrate([40,20,40]);
+}
+
+function submitT(){
+  const input = document.getElementById('t-input');
+  const text = input.value.trim();
+  if(!text){showToast('請先寫下你想送出的溫暖');return;}
+  const feed = document.getElementById('t-feed');
+  const div = createWarmthItem(text);
+  div.style.borderLeftColor='rgba(232,168,124,.6)';
+  feed.insertBefore(div, feed.firstChild);
+  input.value='';
+  state.tCount++;
+  logJourney('t', text);
+  const total = feed.querySelectorAll('.warmth-item').length;
+  document.getElementById('t-echo-count').textContent=`本週共 ${total} 道溫暖漂浮`;
+  showToast('溫暖已送出，它正在漂浮向某個人 🕯️');
+}
+
+// Keep H room updated
+function updateHRoom(){
+  document.getElementById('h-e-count').textContent=state.eCount;
+  document.getElementById('h-m-count').textContent=
+    document.getElementById('m-count')?document.getElementById('m-count').textContent:'0';
+  document.getElementById('h-p-count').textContent=pHealedTotal;
+  document.getElementById('h-a-count').textContent=state.aCount;
+  document.getElementById('h-t-count').textContent=state.tCount;
+}
+setInterval(updateHRoom, 2000);
+
+</script>
+</body>
+</html>
