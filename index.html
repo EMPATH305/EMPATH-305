@@ -4,6 +4,13 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
+
+<meta property="og:title" content="EMPATH — Every Moment As Truth Heals" />
+<meta property="og:description" content="數位時代的情緒安放平台。承認、安放、修補、釋放、交換、回家。以文學敘事對抗視覺霸權的設計實踐。" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop" /> 
+<meta name="twitter:card" content="summary_large_image" />
+
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -17,6 +24,11 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden;}
 a{text-decoration:none;color:inherit;}
+
+/* 🌟 1. 通用設計：高敏感族群減速保護 */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
 
 /* ===== NAV ===== */
 nav{
@@ -139,7 +151,14 @@ nav{
   font-family:'Noto Serif TC',serif;font-weight:700;
   font-size:clamp(20px,3vw,30px);color:var(--white);margin-bottom:10px;
 }
-.room-desc{font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px;}
+/* 加入語音導航點擊樣式 */
+.room-desc{
+  font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px;
+  cursor:pointer; transition: color 0.3s;
+}
+.room-desc:hover{ color: var(--dawn); }
+.room-desc::after { content: ' 🔊'; font-size: 10px; opacity: 0.3; }
+
 .input-area{
   width:100%;max-width:600px;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
@@ -163,10 +182,7 @@ nav{
 #room-e .room-tag{color:var(--e);}
 #room-e .send-btn{border-color:var(--e);color:var(--e);}
 #room-e .send-btn:hover{background:rgba(123,143,161,.12);}
-.e-anon-label{
-  font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.5);
-  margin-bottom:6px;
-}
+.e-anon-label{ font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.5);margin-bottom:6px; }
 .e-char-count{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
 .e-feed{margin-top:36px;display:flex;flex-direction:column;gap:10px;max-width:600px;}
 .e-msg{
@@ -188,16 +204,12 @@ nav{
 #room-m .room-content{position:relative;z-index:1;}
 .m-input-wrap{max-width:480px;}
 .star-tooltip{
-  position:fixed;
-  background:rgba(8,16,28,.97);
-  border:1px solid rgba(168,184,200,.15);
-  padding:12px 16px;font-size:12px;color:var(--fog);
-  z-index:600;max-width:220px;
-  line-height:1.9;display:none;pointer-events:none;
+  position:fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.15);
+  padding:16px; font-size:12px; color:var(--fog); z-index:600; max-width:240px;
+  line-height:1.9; display:none; border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  pointer-events: none; /* Tooltip 本身不阻擋點擊 */
 }
-.m-stats{
-  display:flex;gap:24px;margin-top:20px;
-}
+.m-stats{ display:flex;gap:24px;margin-top:20px; }
 .m-stat{font-size:10px;letter-spacing:2px;color:rgba(168,184,200,.4);}
 .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;}
 
@@ -207,47 +219,25 @@ nav{
 #room-p .room-tag{color:var(--p);}
 #room-p .send-btn{border-color:var(--p);color:var(--p);}
 #room-p .send-btn:hover{background:rgba(201,168,76,.08);}
-.p-vessel{
-  max-width:540px;margin-bottom:32px;
-  position:relative;
-}
-#p-canvas{
-  width:100%;height:300px;display:block;
-  background:rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.1);
-}
-.p-canvas-hint{
-  font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.3);
-  text-align:center;margin-top:8px;
-}
-.kintsugi-board{
-  max-width:600px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:8px;
-}
+.p-vessel{ max-width:540px;margin-bottom:32px;position:relative; }
+#p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.1); }
+.p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.3);text-align:center;margin-top:8px; }
+.kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:8px; }
 .shard{
-  background:rgba(255,255,255,.03);padding:18px;
-  border:1px solid rgba(201,168,76,.1);
-  cursor:pointer;transition:all .4s;
-  position:relative;overflow:hidden;
+  background:rgba(255,255,255,.03);padding:18px;border:1px solid rgba(201,168,76,.1);
+  cursor:pointer;transition:all .4s;position:relative;overflow:hidden;
 }
 .shard:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04);}
 .shard.healed{border-color:rgba(201,168,76,.5);}
 .shard-text{font-size:12px;line-height:2;color:var(--fog);}
 .shard-glow{
   position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  opacity:0;transition:opacity .4s;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0;transition:opacity .4s;
 }
-.shard:hover .shard-glow{opacity:1;}
-.shard.healed .shard-glow{opacity:.8;}
-.shard-healed-tag{
-  font-size:8px;color:var(--gold);letter-spacing:2px;
-  margin-top:10px;display:none;
-}
+.shard:hover .shard-glow{opacity:1;} .shard.healed .shard-glow{opacity:.8;}
+.shard-healed-tag{ font-size:8px;color:var(--gold);letter-spacing:2px;margin-top:10px;display:none; }
 .shard.healed .shard-healed-tag{display:block;}
-.p-healed-count{
-  font-family:'Cormorant Garamond',serif;font-size:13px;
-  color:rgba(201,168,76,.4);letter-spacing:2px;margin-top:20px;
-}
+.p-healed-count{ font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(201,168,76,.4);letter-spacing:2px;margin-top:20px; }
 
 /* ===== A ROOM ===== */
 #room-a{background:linear-gradient(180deg,#0D1B2A 0%,#071014 100%);}
@@ -257,32 +247,22 @@ nav{
 #room-a .send-btn:hover{background:rgba(122,158,159,.08);}
 .a-feed{margin-top:32px;display:flex;flex-direction:column;gap:14px;max-width:600px;}
 .sand-msg{
-  background:rgba(122,158,159,.05);padding:20px 22px;
-  border-left:2px solid rgba(122,158,159,.3);
-  position:relative;overflow:hidden;
-  animation:fadeSlideIn .5s ease;
-  transition:opacity 3s ease,transform 3s ease;
+  background:rgba(122,158,159,.05);padding:20px 22px;border-left:2px solid rgba(122,158,159,.3);
+  position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:opacity 3s ease,transform 3s ease;
 }
 .sand-msg-text{font-size:13px;line-height:2;color:var(--fog);}
-.sand-timer-wrap{
-  display:flex;align-items:center;gap:8px;
-  margin-top:10px;
-}
+.sand-timer-wrap{ display:flex;align-items:center;gap:8px;margin-top:10px; }
 .sand-timer-label{font-size:9px;color:var(--a);letter-spacing:2px;}
 .sand-timer-bar{flex:1;height:1px;background:rgba(122,158,159,.15);}
 .sand-timer-fill{height:100%;background:var(--a);transition:width 1s linear;}
 .sand-time-left{font-size:9px;color:rgba(122,158,159,.5);letter-spacing:1px;white-space:nowrap;}
 .sand-dissolve-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);
+  position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);
   opacity:0;pointer-events:none;transition:opacity 2s;
 }
 .sand-msg.dissolving{opacity:.15;transform:translateY(4px);}
 .sand-msg.dissolving .sand-dissolve-overlay{opacity:1;}
-.a-note{
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px;
-}
+.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px; }
 
 /* ===== T ROOM ===== */
 #room-t{background:linear-gradient(180deg,#0D1B2A 0%,#140f08 100%);}
@@ -290,72 +270,40 @@ nav{
 #room-t .room-tag{color:var(--t);}
 #room-t .send-btn{border-color:var(--t);color:var(--t);}
 #room-t .send-btn:hover{background:rgba(232,168,124,.08);}
-.t-layout{
-  display:grid;grid-template-columns:1fr 1fr;gap:24px;
-  max-width:840px;margin-top:32px;
-}
+.t-layout{ display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:840px;margin-top:32px; }
 .t-panel{background:rgba(255,255,255,.03);padding:26px;border:1px solid rgba(232,168,124,.08);}
-.t-panel-title{
-  font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;
-  color:var(--white);margin-bottom:20px;letter-spacing:2px;
-}
+.t-panel-title{ font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;color:var(--white);margin-bottom:20px;letter-spacing:2px; }
 .t-feed{display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;}
-.t-feed::-webkit-scrollbar{width:2px;}
-.t-feed::-webkit-scrollbar-thumb{background:rgba(232,168,124,.2);}
+.t-feed::-webkit-scrollbar{width:2px;} .t-feed::-webkit-scrollbar-thumb{background:rgba(232,168,124,.2);}
 .warmth-item{
-  padding:14px 16px;background:rgba(232,168,124,.04);
-  border-left:2px solid rgba(232,168,124,.2);
-  font-size:12px;line-height:1.9;color:var(--fog);
-  position:relative;animation:fadeSlideIn .5s ease;
+  padding:14px 16px;background:rgba(232,168,124,.04);border-left:2px solid rgba(232,168,124,.2);
+  font-size:12px;line-height:1.9;color:var(--fog);position:relative;animation:fadeSlideIn .5s ease;
 }
 .warmth-pulse{
-  position:absolute;top:10px;right:10px;
-  width:6px;height:6px;border-radius:50%;
+  position:absolute;top:10px;right:10px;width:6px;height:6px;border-radius:50%;
   background:var(--amber);animation:heartbeat 2.5s ease-in-out infinite;
 }
 @keyframes heartbeat{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:.9;transform:scale(1.4);}}
 .echo-btn{
-  display:flex;align-items:center;gap:6px;
-  margin-top:8px;padding:5px 0;
-  background:transparent;border:none;cursor:pointer;
-  font-size:10px;color:var(--muted);letter-spacing:1px;
-  transition:color .3s;font-family:'Noto Sans TC',sans-serif;
+  display:flex;align-items:center;gap:6px;margin-top:8px;padding:5px 0;
+  background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--muted);
+  letter-spacing:1px;transition:color .3s;font-family:'Noto Sans TC',sans-serif;
 }
-.echo-btn:hover{color:var(--amber);}
-.echo-btn.pulsed{color:var(--amber);}
-.echo-btn .heart{transition:transform .2s;}
-.echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
-.echo-count{
-  font-family:'Cormorant Garamond',serif;font-size:14px;
-  color:rgba(232,168,124,.3);margin-top:16px;
-}
+.echo-btn:hover{color:var(--amber);} .echo-btn.pulsed{color:var(--amber);}
+.echo-btn .heart{transition:transform .2s;} .echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
+.echo-count{ font-family:'Cormorant Garamond',serif;font-size:14px;color:rgba(232,168,124,.3);margin-top:16px; }
 .t-send-panel{background:rgba(255,255,255,.03);padding:26px;border:1px solid rgba(232,168,124,.08);}
 .t-send-panel .t-panel-title{margin-bottom:16px;}
 
-/* Echo Pulse Viz */
 .echo-pulse-ring{
-  width:80px;height:80px;border-radius:50%;
-  border:1px solid rgba(232,168,124,.3);
-  display:flex;align-items:center;justify-content:center;
-  margin:24px auto 8px;position:relative;
+  width:80px;height:80px;border-radius:50%;border:1px solid rgba(232,168,124,.3);
+  display:flex;align-items:center;justify-content:center;margin:24px auto 8px;position:relative;
 }
-.echo-pulse-ring::before{
-  content:'';position:absolute;inset:-8px;border-radius:50%;
-  border:1px solid rgba(232,168,124,.1);
-}
-.echo-pulse-ring::after{
-  content:'';position:absolute;inset:-16px;border-radius:50%;
-  border:1px solid rgba(232,168,124,.05);
-}
-.echo-heart{
-  font-size:28px;line-height:1;
-  animation:echopulse 2s ease-in-out infinite;
-}
+.echo-pulse-ring::before{ content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(232,168,124,.1); }
+.echo-pulse-ring::after{ content:'';position:absolute;inset:-16px;border-radius:50%;border:1px solid rgba(232,168,124,.05); }
+.echo-heart{ font-size:28px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
-.echo-label{
-  text-align:center;font-size:10px;letter-spacing:2px;
-  color:rgba(232,168,124,.4);margin-bottom:16px;
-}
+.echo-label{ text-align:center;font-size:10px;letter-spacing:2px;color:rgba(232,168,124,.4);margin-bottom:16px; }
 
 /* ===== H ROOM ===== */
 #room-h{background:linear-gradient(180deg,#0D1B2A 0%,#0f0f1a 100%);}
@@ -363,42 +311,29 @@ nav{
 #room-h .room-tag{color:rgba(242,232,217,.5);}
 .h-journey{max-width:700px;}
 
-.journey-summary, .global-summary{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:32px;
-}
-.j-card, .g-card{
-  background:rgba(255,255,255,.03);padding:22px 14px;text-align:center;
-  border-top:1px solid;transition:background .3s;cursor:default;
-}
+.journey-summary, .global-summary{ display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:32px; }
+.j-card, .g-card{ background:rgba(255,255,255,.03);padding:22px 14px;text-align:center;border-top:1px solid;transition:background .3s;cursor:default; }
 .j-card:hover, .g-card:hover{background:rgba(255,255,255,.05);}
-.j-card:nth-child(1){border-top-color:var(--e);}
-.j-card:nth-child(2){border-top-color:var(--m);}
-.j-card:nth-child(3){border-top-color:var(--p);}
-.j-card:nth-child(4){border-top-color:var(--a);}
+.j-card:nth-child(1){border-top-color:var(--e);} .j-card:nth-child(2){border-top-color:var(--m);}
+.j-card:nth-child(3){border-top-color:var(--p);} .j-card:nth-child(4){border-top-color:var(--a);}
 .j-card:nth-child(5){border-top-color:var(--t);}
 
-.g-card{
-  background:rgba(201,168,76,0.02);border:1px solid rgba(201,168,76,0.08);border-top:2px solid var(--gold);
-}
+.g-card{ background:rgba(201,168,76,0.02);border:1px solid rgba(201,168,76,0.08);border-top:2px solid var(--gold); }
 .g-card:hover{background:rgba(201,168,76,0.05);border-color:rgba(201,168,76,0.25);}
+/* 🌟 特殊增加的總人數統計卡片 */
+.g-card.visitor-card { border-top-color: var(--white); background: rgba(255,255,255,0.02); }
 
-.j-num, .g-num{
-  font-family:'Noto Serif TC',serif;font-size:36px;font-weight:700;
-  color:var(--white);line-height:1;margin-bottom:6px;
-}
+.j-num, .g-num{ font-family:'Noto Serif TC',serif;font-size:36px;font-weight:700;color:var(--white);line-height:1;margin-bottom:6px; }
 .g-num{color:var(--gold);}
+.g-card.visitor-card .g-num { color: var(--white); }
 
 .j-label, .g-label{font-size:9px;color:var(--muted);letter-spacing:2px;}
-.j-letter, .g-letter{
-  display:block;font-family:'Cormorant Garamond',serif;font-size:11px;
-  font-weight:600;margin-bottom:4px;letter-spacing:1px;
-}
-.j-card:nth-child(1) .j-letter{color:var(--e);}
-.j-card:nth-child(2) .j-letter{color:var(--m);}
-.j-card:nth-child(3) .j-letter{color:var(--p);}
-.j-card:nth-child(4) .j-letter{color:var(--a);}
+.j-letter, .g-letter{ display:block;font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:600;margin-bottom:4px;letter-spacing:1px; }
+.j-card:nth-child(1) .j-letter{color:var(--e);} .j-card:nth-child(2) .j-letter{color:var(--m);}
+.j-card:nth-child(3) .j-letter{color:var(--p);} .j-card:nth-child(4) .j-letter{color:var(--a);}
 .j-card:nth-child(5) .j-letter{color:var(--t);}
 .g-letter{color:var(--gold);}
+.g-card.visitor-card .g-letter { color: var(--white); }
 
 .sync-box {
   background: rgba(255,255,255,.01); border: 1px solid rgba(255,255,255,.06);
@@ -418,30 +353,17 @@ nav{
 .sync-btn-small:hover { border-color: var(--white); color: var(--white); background: rgba(255,255,255,0.02); }
 .key-display { font-family: monospace; font-size: 13px; color: var(--white); letter-spacing: 2px; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); padding: 6px 12px; margin-right: 8px; font-weight: bold; }
 
-.home-quote{
-  background:rgba(255,255,255,.02);padding:32px 36px;
-  border-left:2px solid rgba(242,232,217,.15);margin:36px 0 28px;
-}
-.home-quote p{
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:17px;color:var(--dawn);line-height:2.2;
-}
+.home-quote{ background:rgba(255,255,255,.02);padding:32px 36px;border-left:2px solid rgba(242,232,217,.15);margin:36px 0 28px; }
+.home-quote p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--dawn);line-height:2.2; }
 .h-timeline{max-width:600px;margin-bottom:36px;}
-.h-timeline-title{
-  font-size:10px;letter-spacing:3px;color:var(--muted);
-  margin-bottom:20px;
-}
+.h-timeline-title{ font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:20px; }
 .h-events{display:flex;flex-direction:column;gap:0;}
 .h-event{
-  display:flex;gap:20px;padding:14px 0;
-  border-left:1px solid rgba(255,255,255,.07);
-  padding-left:20px;position:relative;
-  font-size:12px;line-height:1.9;color:var(--fog);
-  animation:fadeSlideIn .5s ease;
+  display:flex;gap:20px;padding:14px 0;border-left:1px solid rgba(255,255,255,.07);
+  padding-left:20px;position:relative;font-size:12px;line-height:1.9;color:var(--fog);animation:fadeSlideIn .5s ease;
 }
 .h-event::before{
-  content:'';position:absolute;left:-4px;top:20px;
-  width:7px;height:7px;border-radius:50%;
+  content:'';position:absolute;left:-4px;top:20px;width:7px;height:7px;border-radius:50%;
   border:1px solid rgba(255,255,255,.2);background:var(--bg);
 }
 .h-event.e-event::before{border-color:var(--e);background:rgba(123,143,161,.2);}
@@ -449,59 +371,35 @@ nav{
 .h-event.p-event::before{border-color:var(--p);background:rgba(201,168,76,.2);}
 .h-event.a-event::before{border-color:var(--a);background:rgba(122,158,159,.2);}
 .h-event.t-event::before{border-color:var(--t);background:rgba(232,168,124,.2);}
-.h-event-label{
-  font-size:9px;letter-spacing:2px;margin-bottom:2px;
-}
-.h-event.e-event .h-event-label{color:var(--e);}
-.h-event.m-event .h-event-label{color:var(--m);}
-.h-event.p-event .h-event-label{color:var(--p);}
-.h-event.a-event .h-event-label{color:var(--a);}
+.h-event-label{ font-size:9px;letter-spacing:2px;margin-bottom:2px; }
+.h-event.e-event .h-event-label{color:var(--e);} .h-event.m-event .h-event-label{color:var(--m);}
+.h-event.p-event .h-event-label{color:var(--p);} .h-event.a-event .h-event-label{color:var(--a);}
 .h-event.t-event .h-event-label{color:var(--t);}
 .h-event-text{font-size:12px;color:var(--fog);line-height:1.9;}
 .h-event-time{font-size:9px;color:rgba(255,255,255,.15);margin-top:4px;}
 
-.lighthouse{
-  text-align:center;padding:40px 20px;
-  border:1px solid rgba(242,232,217,.08);max-width:500px;
-}
-.lighthouse-flame{
-  font-size:44px;margin-bottom:14px;
-  animation:flicker 3s ease-in-out infinite;display:block;
-}
+.lighthouse{ text-align:center;padding:40px 20px;border:1px solid rgba(242,232,217,.08);max-width:500px; }
+.lighthouse-flame{ font-size:44px;margin-bottom:14px;animation:flicker 3s ease-in-out infinite;display:block; }
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
-.lighthouse p{
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:15px;color:var(--dawn);line-height:2.2;
-}
+.lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dawn);line-height:2.2; }
 
 /* ===== TOAST ===== */
 .toast{
   position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px);
   background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.1);
   padding:12px 24px;font-size:12px;color:var(--fog);letter-spacing:1px;
-  opacity:0;transition:all .4s;z-index:999;pointer-events:none;
-  backdrop-filter:blur(10px);
+  opacity:0;transition:all .4s;z-index:999;pointer-events:none;backdrop-filter:blur(10px);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ===== FOOTER ===== */
 footer{
-  padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);
-  display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:16px;
+  padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
 }
-.footer-left{
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:15px;color:rgba(255,255,255,.3);letter-spacing:2px;
-}
+.footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.3);letter-spacing:2px; }
 .footer-right{font-size:9px;color:rgba(255,255,255,.15);letter-spacing:3px;}
-.footer-letters{
-  display:flex;gap:8px;
-}
-.footer-l{
-  font-family:'Cormorant Garamond',serif;font-size:13px;
-  opacity:.25;letter-spacing:2px;
-}
+.footer-letters{ display:flex;gap:8px; }
+.footer-l{ font-family:'Cormorant Garamond',serif;font-size:13px;opacity:.25;letter-spacing:2px; }
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
@@ -562,7 +460,9 @@ footer{
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
   <h2 class="room-title">情緒出口</h2>
-  <p class="room-desc">說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。</p>
+  <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
+    說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。
+  </p>
   <p class="e-anon-label">ANONYMOUS — 完全匿名</p>
   <textarea class="input-area" id="e-input" rows="5"
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
@@ -578,7 +478,9 @@ footer{
   <div class="room-content">
     <p class="room-tag">M — Missing / Memory</p>
     <h2 class="room-title">思念映射</h2>
-    <p class="room-desc">每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。</p>
+    <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
+      每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。
+    </p>
     <div class="m-input-wrap">
       <textarea class="input-area" id="m-input" rows="4"
         placeholder="寫下你的思念，它會成為夜空中的一顆星……&#10;思念一個人、一個地方、或一段時光。"></textarea>
@@ -596,7 +498,9 @@ footer{
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
   <h2 class="room-title">碎片修補</h2>
-  <p class="room-desc">金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。</p>
+  <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
+    金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。
+  </p>
   <div class="p-vessel">
     <canvas id="p-canvas" width="540" height="300"></canvas>
     <p class="p-canvas-hint">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕</p>
@@ -613,7 +517,9 @@ footer{
   <div class="room-letter">A</div>
   <p class="room-tag">A — Asylum / Ache</p>
   <h2 class="room-title">神聖避難所</h2>
-  <p class="room-desc">痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。</p>
+  <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
+    痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。
+  </p>
   <textarea class="input-area" id="a-input" rows="4"
     placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
   <br>
@@ -626,7 +532,9 @@ footer{
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
   <h2 class="room-title">能量共振</h2>
-  <p class="room-desc">照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。</p>
+  <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
+    照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。
+  </p>
   <div class="t-layout">
     <div>
       <div class="t-panel">
@@ -659,15 +567,17 @@ footer{
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
   <h2 class="room-title">靈魂歸宿</h2>
-  <p class="room-desc">回家，回到不需偽裝的地方。你走過的每個房間，都是你的。</p>
+  <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
+    回家，回到不需偽裝的地方。你走過的每個房間，都是你的。
+  </p>
   <div class="h-journey">
     
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <div class="global-summary" id="g-summary">
+      <div class="g-card visitor-card"><span class="g-letter">✦</span><div class="g-num" id="g-v-count">0</div><div class="g-label">總造訪靈魂</div></div>
       <div class="g-card"><span class="g-letter">E</span><div class="g-num" id="g-e-count">0</div><div class="g-label">全網釋放情緒</div></div>
       <div class="g-card"><span class="g-letter">M</span><div class="g-num" id="g-m-count">0</div><div class="g-label">夜空匯聚星芒</div></div>
       <div class="g-card"><span class="g-letter">P</span><div class="g-num" id="g-p-count">0</div><div class="g-label">共同修補遺憾</div></div>
-      <div class="g-card"><span class="g-letter">A</span><div class="g-num" id="g-a-count">0</div><div class="g-label">避難所留秘密</div></div>
       <div class="g-card"><span class="g-letter">T</span><div class="g-num" id="g-t-count">0</div><div class="g-label">世間漂浮溫暖</div></div>
     </div>
 
@@ -685,14 +595,12 @@ footer{
       <p style="font-size:11px; color:var(--muted); line-height:1.7;">
         無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。
       </p>
-      
       <div class="sync-actions" id="sync-initial-actions">
         <button class="sync-btn-small" onclick="window.createSoulKey()">生成我的靈魂鑰匙</button>
         <span style="font-size:11px; color:rgba(255,255,255,0.15);">或</span>
         <input type="text" class="sync-input" id="sync-key-input" placeholder="輸入既有鑰匙..." style="width:140px; text-transform:uppercase;">
         <button class="sync-btn-small" onclick="window.loadExistingSoulKey()" style="border-color:var(--gold); color:var(--gold);">共振同步足跡</button>
       </div>
-      
       <div class="sync-actions" id="sync-active-actions" style="display:none;">
         <span style="font-size:11px; color:var(--fog);">已開啟即時雲端同步。你的靈魂鑰匙：</span>
         <span class="key-display" id="active-key-display">-</span>
@@ -701,13 +609,12 @@ footer{
     </div>
 
     <div class="home-quote">
-      <p>我們雖然孤獨地存在，但我們可以溫慢地交會。</p>
+      <p>我們雖然孤獨地存在，但我們可以溫暖地交會。</p>
     </div>
     
     <div class="h-timeline">
       <p class="h-timeline-title">YOUR JOURNEY — 你的旅程</p>
-      <div class="h-events" id="h-events">
-        </div>
+      <div class="h-events" id="h-events"></div>
     </div>
     
     <div class="lighthouse">
@@ -730,7 +637,7 @@ footer{
 <script type="module">
 // ===== 1. 引入 Firebase SDK =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90",
@@ -745,15 +652,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===== 2. GLOBAL & PERMANENT STATE (本地記憶與全網同步變數) =====
-const state = {
-  eCount:0, mCount:0, pCount:0, aCount:0, tCount:0
-};
-const globalCounts = { e: 0, m: 0, p: 0, a: 0, t: 0 };
-
+// ===== 2. GLOBAL & PERMANENT STATE =====
+const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
+const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
 let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 
-// 封裝初始化與讀取本地資料邏輯
 function loadLocalJourney() {
   const savedJourney = localStorage.getItem('empath_user_journey');
   if(savedJourney){
@@ -764,528 +667,299 @@ function loadLocalJourney() {
       state.pCount = journeyData.counters.p || 0;
       state.aCount = journeyData.counters.a || 0;
       state.tCount = journeyData.counters.t || 0;
-    } catch(err) {
-      console.error("記憶讀取失敗", err);
-    }
+    } catch(err) { console.error(err); }
   }
 }
 loadLocalJourney();
 
-// ===== 3. 共用函式 ＝＝＝＝＝
+// 🌟 1. 通用設計：語音朗讀與觸覺震動 API 封裝
+window.speakText = function(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-TW'; utterance.rate = 0.85; // 放慢語速展現文學感
+    window.speechSynthesis.speak(utterance);
+    window.showToast('🔉 語音朗讀中...');
+  } else {
+    window.showToast('您的瀏覽器不支援語音朗讀');
+  }
+};
+
+window.triggerHeartbeat = function() {
+  if ('vibrate' in navigator) {
+    navigator.vibrate([40, 120, 40]); // 模擬噗通心跳
+  }
+};
+
 window.showToast = function(msg, dur=2400){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), dur);
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), dur);
 }
+function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 
-function nowStr(){
-  const d = new Date();
-  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-}
-
-// 記憶足跡並觸發靈魂鑰匙背景自動雲端備份
 function logJourney(type, text){
   const time = nowStr();
   journeyData.counters[type] = (journeyData.counters[type] || 0) + 1;
   journeyData.events.push({ type, text, time });
   localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
-
-  state[type+'Count']++;
-  renderTimelineHTML(type, text, time);
-
-  // 如果目前裝置有綁定靈魂鑰匙，自動即時同步上傳備份
+  state[type+'Count']++; renderTimelineHTML(type, text, time);
   autoBackupToCloud();
 }
 
 function renderTimelineHTML(type, text, time){
   const container = document.getElementById('h-events');
-  const cls = type + '-event';
+  const div = document.createElement('div'); div.className = 'h-event ' + type + '-event';
   const labels = {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'};
-  const div = document.createElement('div');
-  div.className = 'h-event ' + cls;
-  div.innerHTML = `<div>
-    <div class="h-event-label">${labels[type] || type.toUpperCase()}</div>
-    <div class="h-event-text">${text.length > 40 ? text.slice(0,40) + '…' : text}</div>
-    <div class="h-event-time">${time}</div>
-  </div>`;
+  div.innerHTML = `<div><div class="h-event-label">${labels[type]||''}</div><div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div><div class="h-event-time">${time}</div></div>`;
   container.appendChild(div);
 }
 
 function initTimeline(){
   const container = document.getElementById('h-events');
-  container.innerHTML = `
-    <div class="h-event" style="color:var(--muted);font-size:12px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);">
-      <div>
-        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);margin-bottom:4px;">開始</div>
-        <div>你來到了這裡。這已經是一種勇氣。</div>
-      </div>
-    </div>
-  `;
-  journeyData.events.forEach(ev => {
-    renderTimelineHTML(ev.type, ev.text, ev.time);
-  });
+  container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:12px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);margin-bottom:4px;">開始</div><div>你來到了這裡。這已經是一種勇氣。</div></div></div>`;
+  journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time));
 }
 
-// ===== 🔒 靈魂鑰匙核心同步功能鏈 (Soul Key Sync System) =====
+// ===== 🔒 靈魂鑰匙同步系統 =====
 window.createSoulKey = async function() {
-  const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
-  const part2 = Math.random().toString(36).substring(2, 6).toUpperCase();
-  const soulKey = `EMP-${part1}-${part2}`;
-  
-  localStorage.setItem('empath_soul_key', soulKey);
-  await autoBackupToCloud();
-  updateSyncUI();
-  window.showToast(`靈魂鑰匙生成成功：${soulKey} ✦ 已開啟自動雲端備份`);
+  const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+  localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(`靈魂鑰匙生成成功 ✦`);
 }
-
 window.loadExistingSoulKey = async function() {
-  const input = document.getElementById('sync-key-input');
-  const key = input.value.trim().toUpperCase();
+  const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase();
   if(!key) { window.showToast('請先輸入靈魂鑰匙'); return; }
-  
   try {
-    const docRef = doc(db, "user_journeys", key);
-    const docSnap = await getDoc(docRef);
-    
+    const docSnap = await getDoc(doc(db, "user_journeys", key));
     if(docSnap.exists()) {
-      const cloudData = docSnap.data();
-      journeyData = {
-        counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0},
-        events: cloudData.events || []
-      };
-      
-      localStorage.setItem('empath_soul_key', key);
-      localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
-      
-      state.eCount = journeyData.counters.e || 0;
-      state.mCount = journeyData.counters.m || 0;
-      state.pCount = journeyData.counters.p || 0;
-      state.aCount = journeyData.counters.a || 0;
-      state.tCount = journeyData.counters.t || 0;
-      
-      initTimeline();
-      updateSyncUI();
-      window.showToast('靈魂共振成功！歷史足跡已完整喚回 ✦');
-      input.value = '';
-    } else {
-      window.showToast('未找到此靈魂鑰匙，請確認輸入是否正確');
-    }
-  } catch(err) {
-    console.error(err);
-    window.showToast('同步失敗，請檢查資料庫連線');
-  }
+      const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] };
+      localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
+      state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0;
+      initTimeline(); updateSyncUI(); window.showToast('靈魂共振成功！足跡已喚回 ✦'); input.value='';
+    } else { window.showToast('未找到此鑰匙'); }
+  } catch(err) { window.showToast('同步失敗'); }
 }
-
 window.unlinkSoulKey = function() {
-  if(confirm('確定要解除此裝置與此靈魂鑰匙的綁定嗎？解綁不會刪除雲端紀錄，但本機往後的足跡將停止同步備份。')) {
-    localStorage.removeItem('empath_soul_key');
-    updateSyncUI();
-    window.showToast('已解除同步綁定。');
-  }
+  if(confirm('確定要解除綁定嗎？本機往後的足跡將停止同步備份。')) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); window.showToast('已解除綁定'); }
 }
-
 async function autoBackupToCloud() {
-  const key = localStorage.getItem('empath_soul_key');
-  if(!key) return;
-  try {
-    await setDoc(doc(db, "user_journeys", key), {
-      counters: journeyData.counters,
-      events: journeyData.events,
-      updatedAt: serverTimestamp()
-    });
-  } catch(err) {
-    console.error("雲端自動備份失敗:", err);
-  }
+  const key = localStorage.getItem('empath_soul_key'); if(!key) return;
+  try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }); } catch(err){}
 }
-
 function updateSyncUI() {
   const key = localStorage.getItem('empath_soul_key');
-  const initialBox = document.getElementById('sync-initial-actions');
-  const activeBox = document.getElementById('sync-active-actions');
-  const keyDisplay = document.getElementById('active-key-display');
-  
-  if(key) {
-    initialBox.style.display = 'none';
-    activeBox.style.display = 'flex';
-    keyDisplay.textContent = key;
-  } else {
-    initialBox.style.display = 'flex';
-    activeBox.style.display = 'none';
-  }
+  if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex'; document.getElementById('active-key-display').textContent=key; }
+  else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; }
 }
 
-// ===== 4. E 房：情緒出口 (全網即時同步) =====
+// ===== E 房 =====
 onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => {
-  globalCounts.e = snapshot.size; 
-  const feed = document.getElementById('e-feed');
-  feed.innerHTML = '';
+  globalCounts.e = snapshot.size; const feed = document.getElementById('e-feed'); feed.innerHTML = '';
   snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr();
-    const div = document.createElement('div');
-    div.className = 'e-msg';
-    div.innerHTML = `
-      <div class="e-msg-anon">匿名 · ANONYMOUS</div>
-      <div>${data.text}</div>
-      <div class="e-msg-time">${timeStr}</div>
-    `;
-    feed.appendChild(div);
+    const data = docSnap.data(); const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr();
+    const div = document.createElement('div'); div.className = 'e-msg'; div.innerHTML = `<div class="e-msg-anon">匿名 · ANONYMOUS</div><div>${data.text}</div><div class="e-msg-time">${timeStr}</div>`; feed.appendChild(div);
   });
 });
-
 window.submitE = async function(){
-  const input = document.getElementById('e-input');
-  const text = input.value.trim();
-  if(!text){ window.showToast('請先寫下你想說的話'); return; }
-  try {
-    await addDoc(collection(db, "emotions"), { text: text, createdAt: serverTimestamp() });
-    input.value = ''; document.getElementById('e-char').textContent = '0 / 300';
-    logJourney('e', text); window.showToast('已投入黑暗。你說出來了。');
-  } catch(e) { console.error(e); }
+  const input = document.getElementById('e-input'); const text = input.value.trim(); if(!text){ window.showToast('請先寫下你想說的話'); return; }
+  try { await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); input.value=''; logJourney('e', text); window.showToast('已投入黑暗'); } catch(e){}
 }
 
-// ===== 5. M 房：星空思念 (全網即時同步) =====
-const canvas = document.getElementById('star-canvas');
-const ctx = canvas.getContext('2d');
-const tooltip = document.getElementById('star-tooltip');
-const roomM = document.getElementById('room-m');
-let starMessages = [];
+// 🌟 2. M 房：視覺重構與手機 UX 修復
+const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m');
+let starMessages = [], bgStars=[]; let activeStarId = null; // 追蹤目前預覽中的星星
 
-const STAR_COLORS = [
-  {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213},
-  {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200},
-  {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231}
-];
+const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 
-function resizeCanvas(){
-  canvas.width = roomM.offsetWidth; canvas.height = roomM.offsetHeight;
-  initBgStars();
-}
+function resizeCanvas(){ canvas.width = roomM.offsetWidth; canvas.height = roomM.offsetHeight; initBgStars(); }
 window.addEventListener('resize', resizeCanvas);
 
-let bgStars=[];
 function initBgStars(){
-  bgStars=[];
-  const w = canvas.width || 800, h = canvas.height || 600;
-  for(let i=0; i<100; i++){ 
-    const c = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
-    bgStars.push({x: Math.random()*w, y: Math.random()*h, r: Math.random()*0.8+0.2, a: Math.random()*0.4+0.1, da: (Math.random()-.5)*0.003, c});
-  }
+  bgStars=[]; const w=canvas.width||800, h=canvas.height||600;
+  for(let i=0; i<100; i++){ bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.2, a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c:STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]}); }
 }
 
 onSnapshot(collection(db, "stars"), (snapshot) => {
-  globalCounts.m = snapshot.size; 
-  starMessages = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    starMessages.push({
-      id: docSnap.id, text: data.text, brightness: data.brightness || 1, clicks: data.clicks || 0, colorIdx: data.colorIdx || 0, relX: data.relX, relY: data.relY
-    });
-  });
-  updateMStats();
+  globalCounts.m = snapshot.size; starMessages = [];
+  snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, text: data.text, brightness: data.brightness||1, clicks: data.clicks||0, colorIdx: data.colorIdx||0, relX: data.relX, relY: data.relY }); });
+  if(document.getElementById('m-count')) document.getElementById('m-count').textContent = starMessages.length;
 });
 
 function drawStars(){
-  if(!canvas.width) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  bgStars.forEach(s => {
-    s.a += s.da; if(s.a > 0.7 || s.a < 0.03) s.da *= -1;
-    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; ctx.fill();
-  });
+  if(!canvas.width) return; ctx.clearRect(0,0,canvas.width,canvas.height);
+  bgStars.forEach(s => { s.a+=s.da; if(s.a>0.7||s.a<0.03) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; ctx.fill(); });
+  
   starMessages.forEach(s => {
-    s.x = s.relX * canvas.width; s.y = s.relY * canvas.height;
-    const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const r = 1.5 + b * 0.8;
-    ctx.save();
-    ctx.shadowBlur = 10 + (b * 3); ctx.shadowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${0.5 + (b * 0.05)})`;
-    ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`; ctx.fill();
-    ctx.restore();
-    if(b >= 4){
-      ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.8; const arm = r * 4;
+    s.x = s.relX*canvas.width; s.y = s.relY*canvas.height;
+    const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; 
+    
+    // 🌟 視覺重構：改用徑向漸層，光暈更柔和逼真
+    const coreR = 1 + (b * 0.3); 
+    const glowR = coreR + (b * 3);
+    const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
+    grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 1)`);
+    grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`);
+    grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+    
+    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill();
+
+    if(b >= 5){ // 發送十字星芒
+      ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.5; const arm = coreR * 5;
       ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x, s.y+arm); ctx.stroke();
     }
   });
   requestAnimationFrame(drawStars);
 }
 
-function getCanvasPos(e){
-  const rect = canvas.getBoundingClientRect();
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-}
-
 function getStarAt(x, y){
-  return starMessages.find(s => {
-    if(!s.x) return false;
-    const dx = s.x - x, dy = s.y - y; return Math.sqrt(dx*dx + dy*dy) < (14 + s.brightness * 3);
-  });
+  return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (16 + s.brightness*2); });
 }
 
-roomM.addEventListener('mousemove', e => {
-  if (e.target.closest('.m-input-wrap') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') {
-    tooltip.style.display = 'none'; roomM.style.cursor = 'default'; return;
-  }
-  const {x, y} = getCanvasPos(e); const star = getStarAt(x, y);
-  if(star){
-    tooltip.style.display = 'block'; tooltip.style.left = (e.clientX + 18) + 'px'; tooltip.style.top = (e.clientY - 12) + 'px';
-    const c = STAR_COLORS[star.colorIdx];
-    tooltip.innerHTML = `思念<br>${star.text}<br><span style="font-size:9px;opacity:0.5;">✦ ${star.clicks} 共鳴 · 點擊發光</span>`;
-    roomM.style.cursor = 'pointer';
-  } else {
-    tooltip.style.display = 'none'; roomM.style.cursor = 'default';
-  }
-});
-
+// 🌟 手機 UX 重構：統一用 Click 判斷。第一下預覽，第二下點亮。
 roomM.addEventListener('click', async e => {
-  if (e.target.closest('.m-input-wrap') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
-  const {x, y} = getCanvasPos(e); const star = getStarAt(x, y);
-  if(star && star.id){
-    try {
-      await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 10), clicks: star.clicks + 1 });
-      window.showToast('這顆思念更亮了 ✦');
-    } catch (err) { console.error(err); }
+  if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return;
+  const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top;
+  const star = getStarAt(x, y);
+  
+  if(star){
+    if(activeStarId !== star.id) {
+      // 第一下點擊：選取星星，顯示文字預覽
+      activeStarId = star.id;
+      tooltip.style.display = 'block'; tooltip.style.left = (e.clientX + 16) + 'px'; tooltip.style.top = (e.clientY - 16) + 'px';
+      const c = STAR_COLORS[star.colorIdx];
+      tooltip.innerHTML = `思念<br>${star.text}<br><span style="font-size:9px;color:var(--gold);margin-top:4px;display:block;">✦ 再次點擊以共鳴點亮 (${star.clicks})</span>`;
+    } else {
+      // 第二下點擊：觸發點亮與震動！
+      try {
+        await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 });
+        window.showToast('這顆思念更亮了 ✦');
+        window.triggerHeartbeat(); // 通用設計觸覺震動
+        tooltip.style.display = 'none'; activeStarId = null; // 點亮後收起泡泡
+      } catch (err) {}
+    }
+  } else {
+    // 點擊空白處收起泡泡
+    tooltip.style.display = 'none'; activeStarId = null;
   }
 });
-
-function updateMStats(){
-  document.getElementById('m-count').textContent = starMessages.length;
-  if(starMessages.length === 0) return;
-  const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a);
-  document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
-}
 
 window.submitM = async function(){
-  const input = document.getElementById('m-input'); const text = input.value.trim();
-  if(!text){ window.showToast('請先寫下你的思念'); return; }
+  const input = document.getElementById('m-input'); const text = input.value.trim(); if(!text){ window.showToast('請先寫下你的思念'); return; }
   try {
-    await addDoc(collection(db, "stars"), {
-      text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random() * STAR_COLORS.length), relX: 0.05 + Math.random() * 0.9, relY: 0.05 + Math.random() * 0.9, createdAt: serverTimestamp()
-    });
-    input.value = ''; logJourney('m', text); window.showToast('你的思念成為了一顆星 ✦');
-  } catch(err) { console.error(err); }
+    await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() });
+    input.value=''; logJourney('m', text); window.showToast('你的思念成為了一顆星 ✦');
+  } catch(err){}
 }
 
-// ===== 6. P 房：碎片修補 (共享數據鏈) =====
+// ===== P 房 =====
 let pCanvas, pCtx, pHealedTotal = 0;
-
-window.addEventListener('load', () => {
-  pCanvas = document.getElementById('p-canvas');
-  pCtx = pCanvas.getContext('2d');
-  pCanvas.width = pCanvas.offsetWidth || 540;
-  drawKintsugiVessel();
-});
+window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); pCanvas.width = pCanvas.offsetWidth||540; drawKintsugiVessel(); });
 
 onSnapshot(collection(db, "shards"), (snapshot) => {
-  const board = document.getElementById('p-board');
-  board.innerHTML = ''; pHealedTotal = 0;
+  const board = document.getElementById('p-board'); board.innerHTML = ''; pHealedTotal = 0;
   snapshot.forEach(docSnap => {
-    const data = docSnap.data(); const id = docSnap.id;
-    if(data.healed) pHealedTotal++;
-    
-    const div = document.createElement('div');
-    div.className = 'shard' + (data.healed ? ' healed' : '');
+    const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++;
+    const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : '');
     div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ 已修補</div><div class="shard-glow"></div>`;
-    
-    div.addEventListener('click', async () => {
-      if(data.healed) return;
-      await updateDoc(doc(db, "shards", id), { healed: true });
-      logJourney('p', data.text);
-      window.showToast('以金修補，裂縫成為了光 ✦');
-    });
+    div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); logJourney('p', data.text); window.showToast('以金修補，裂縫成為了光 ✦'); });
     board.appendChild(div);
   });
-  globalCounts.p = pHealedTotal;
-  drawKintsugiVessel();
-  document.getElementById('p-healed-count').textContent = `已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
+  globalCounts.p = pHealedTotal; drawKintsugiVessel();
+  if(document.getElementById('p-healed-count')) document.getElementById('p-healed-count').textContent = `已有 ${pHealedTotal} 道裂紋，以金修補。`;
 });
 
 function drawKintsugiVessel(){
-  if(!pCtx) return;
-  const c=pCtx, w=pCanvas.width, h=pCanvas.height; c.clearRect(0,0,w,h);
-  c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=1; c.beginPath();
-  const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke();
-  
-  const predefinedCracks = [
-    {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80},
-    {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60},
-    {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20},
-    {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100},
-    {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60},
-    {sx: cx+20, sy: cy+80, mx: cx-20, my: cy+40, ex: cx-60, ey: cy+20},
-    {sx: cx+40, sy: cy-30, mx: cx+70, my: cy, ex: cx+60, ey: cy+60},
-    {sx: cx-50, sy: cy, mx: cx-10, my: cy-20, ex: cx+30, ey: cy-20},
-    {sx: cx-10, sy: cy+60, mx: cx+20, my: cy+30, ex: cx+50, ey: cy+60},
-    {sx: cx-40, sy: cy-60, mx: cx, my: cy-40, ex: cx+30, ey: cy-20}
-  ];
-
-  predefinedCracks.forEach(crack => {
-    c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey);
-    c.strokeStyle='rgba(201,168,76,0.08)'; c.lineWidth=0.5; c.stroke();
-  });
-
-  const goldLinesToDraw = Math.min(pHealedTotal, predefinedCracks.length);
-  for(let i=0; i<goldLinesToDraw; i++){
-    const crack = predefinedCracks[i];
-    c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey);
-    c.strokeStyle='rgba(201,168,76,0.85)'; c.lineWidth=1.8; c.stroke();
-    c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=5; c.stroke();
-  }
-
-  if(pHealedTotal > predefinedCracks.length){
-    for(let i = predefinedCracks.length; i < Math.min(pHealedTotal, 40); i++){
-      const seedX = Math.sin(i) * w * 0.16; const seedY = Math.cos(i) * h * 0.2;
-      c.beginPath(); c.moveTo(cx + seedX, cy + seedY); c.quadraticCurveTo(cx + seedY, cy - seedX, cx - seedX, cy + seedY);
-      c.strokeStyle='rgba(201,168,76,0.85)'; c.lineWidth=1.5; c.stroke();
-    }
-  }
-
-  if(pHealedTotal>0){
-    c.font='11px Noto Sans TC'; c.fillStyle='rgba(201,168,76,0.4)'; c.textAlign='center';
-    c.fillText(`全網共同修補進度：${pHealedTotal} 道裂紋`, cx, cy+ry+24);
-  }
+  if(!pCtx) return; const c=pCtx, w=pCanvas.width, h=pCanvas.height; c.clearRect(0,0,w,h);
+  c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=1; c.beginPath(); const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke();
+  const predefinedCracks = [ {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80}, {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60}, {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20}, {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100}, {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60} ];
+  predefinedCracks.forEach(crack => { c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); c.strokeStyle='rgba(201,168,76,0.08)'; c.lineWidth=0.5; c.stroke(); });
+  const goldLines = Math.min(pHealedTotal, predefinedCracks.length);
+  for(let i=0; i<goldLines; i++){ const crack = predefinedCracks[i]; c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); c.strokeStyle='rgba(201,168,76,0.85)'; c.lineWidth=1.8; c.stroke(); }
 }
 
 window.submitP = async function(){
-  const input = document.getElementById('p-input'); const text = input.value.trim();
-  if(!text){ window.showToast('請先寫下你心中的碎片'); return; }
-  try {
-    await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() });
-    input.value = ''; logJourney('p', text); window.showToast('碎片已放入器皿中。');
-  } catch(e) { console.error(e); }
+  const input = document.getElementById('p-input'); const text = input.value.trim(); if(!text) return;
+  await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); window.showToast('碎片已放入');
 }
 
-// ===== 7. A 房：神戰避難所 (真實流速) =====
-function formatTimeLeft(secs){
-  if(secs<=0) return '即將消散';
-  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
-  return h>0 ? `${h}h ${m}m 後消散` : `${m}m 後消散`;
-}
-
+// ===== A 房 =====
 onSnapshot(collection(db, "sand"), (snapshot) => {
-  globalCounts.a = snapshot.size; 
-  const feed = document.getElementById('a-feed'); feed.innerHTML = '';
-  const nowMs = Date.now();
+  globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); feed.innerHTML = ''; const nowMs = Date.now();
   snapshot.forEach(docSnap => {
-    const data = docSnap.data(); if(!data.createdAt) return;
-    const ageSecs = (nowMs - (data.createdAt.seconds * 1000)) / 1000;
-    const leftSecs = (24 * 60 * 60) - ageSecs;
-    
-    if(leftSecs <= 0) return;
-    
-    const div = document.createElement('div'); div.className = 'sand-msg';
-    const pct = (leftSecs / (24 * 60 * 60)) * 100;
-    div.innerHTML = `
-      <div class="sand-dissolve-overlay"></div> <div class="sand-msg-text">${data.text}</div>
-      <div class="sand-timer-wrap">
-        <div class="sand-timer-label">DISSOLVING</div>
-        <div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div>
-        <div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div>
-      </div>`;
+    const data = docSnap.data(); if(!data.createdAt) return; const leftSecs = (24*60*60) - ((nowMs - data.createdAt.seconds*1000)/1000); if(leftSecs <= 0) return;
+    const div = document.createElement('div'); div.className = 'sand-msg'; const pct = (leftSecs / 86400) * 100;
+    div.innerHTML = `<div class="sand-dissolve-overlay"></div> <div class="sand-msg-text">${data.text}</div> <div class="sand-timer-wrap"> <div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div> </div>`;
     feed.appendChild(div);
-    
-    let simSecs = leftSecs; const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
-    const interval = setInterval(() => {
-      simSecs -= 1; 
-      if(simSecs <= 0){ clearInterval(interval); div.remove(); return; }
-      if(fill) fill.style.width = (simSecs / (24 * 60 * 60)) * 100 + '%';
-      if(label) label.textContent = formatTimeLeft(simSecs);
-    }, 1000);
   });
 });
-
 window.submitA = async function(){
-  const input = document.getElementById('a-input'); const text = input.value.trim();
-  if(!text){ window.showToast('請先寫下你想放下的話'); return; }
-  try {
-    await addDoc(collection(db, "sand"), { text, createdAt: serverTimestamp() });
-    input.value = ''; logJourney('a', text); window.showToast('已放入共享沙畫中。');
-  } catch(e) { console.error(e); }
+  const input = document.getElementById('a-input'); const text = input.value.trim(); if(!text) return;
+  await addDoc(collection(db, "sand"), { text, createdAt: serverTimestamp() }); input.value=''; logJourney('a', text); window.showToast('放入沙畫');
 }
 
-// ===== 8. T 房：能量共振 =====
+// ===== T 房 =====
 onSnapshot(collection(db, "warmth"), (snapshot) => {
-  globalCounts.t = snapshot.size; 
-  const feed = document.getElementById('t-feed'); feed.innerHTML = '';
-  let count = 0;
+  globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); feed.innerHTML = '';
   snapshot.forEach(docSnap => {
-    count++; const data = docSnap.data(); const id = docSnap.id;
-    const div = document.createElement('div'); div.className = 'warmth-item';
-    div.innerHTML = `
-      <div class="warmth-pulse"></div> <div>${data.text}</div>
-      <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}">
-        <span class="heart">🕯️</span> Echo Pulse <span class="echo-num">(${data.echos || 0})</span>
-      </button>`;
-    
+    const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item';
+    div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse <span class="echo-num">(${data.echos||0})</span></button>`;
     div.querySelector('.echo-btn').addEventListener('click', async function(){
-      if(this.classList.contains('pulsed')) return;
-      this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
-      await updateDoc(doc(db, "warmth", id), { echos: (data.echos || 0) + 1 });
-      window.showToast('✦ Echo Pulse 傳出——不顯示數字，只有心跳。');
+      if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
+      await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse 傳出'); window.triggerHeartbeat(); // 通用設計觸覺震動
     });
     feed.appendChild(div);
   });
-  document.getElementById('t-echo-count').textContent = `本週共 ${count} 道溫暖漂浮`;
 });
-
 window.submitT = async function(){
-  const input = document.getElementById('t-input'); const text = input.value.trim();
-  if(!text){ window.showToast('請先寫下你想送出的溫暖'); return; }
-  try {
-    await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() });
-    input.value = ''; logJourney('t', text); window.showToast('溫慢已送出，正在向所有人漂浮 🕯️');
-  } catch(err) { console.error(err); }
+  const input = document.getElementById('t-input'); const text = input.value.trim(); if(!text) return;
+  await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); window.showToast('溫暖已漂浮');
 }
 
-// ===== 9. 初始化與雲端自動同步載入 =====
+// 🌟 3. 初始化、雲端載入與「總造訪人數」邏輯
 window.addEventListener('load', async () => {
-  initTimeline(); 
-  updateSyncUI(); 
   
-  // 🌟 核心同步升級：一開網頁若有綁定鑰匙，自動、秒速去雲端保險箱召喚歷史紀錄！
+  // 計算總造訪人數 (Site Visitor Counter)
+  const metaRef = doc(db, "metadata", "site_stats");
+  const hasVisited = localStorage.getItem('empath_visited');
+  if (!hasVisited) {
+    try {
+      await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true });
+      localStorage.setItem('empath_visited', 'true');
+    } catch(e){}
+  }
+  onSnapshot(metaRef, (docSnap) => {
+    if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; }
+  });
+
+  initTimeline(); updateSyncUI(); 
+  
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey) {
     try {
-      const docRef = doc(db, "user_journeys", existingKey);
-      const docSnap = await getDoc(docRef);
+      const docSnap = await getDoc(doc(db, "user_journeys", existingKey));
       if(docSnap.exists()) {
-        const cloudData = docSnap.data();
-        journeyData = {
-          counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0},
-          events: cloudData.events || []
-        };
-        // 寫入本地，同步校正
+        const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] };
         localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
-        state.eCount = journeyData.counters.e || 0;
-        state.mCount = journeyData.counters.m || 0;
-        state.pCount = journeyData.counters.p || 0;
-        state.aCount = journeyData.counters.a || 0;
-        state.tCount = journeyData.counters.t || 0;
-        initTimeline(); // 重新召喚渲染時間軸
+        state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0;
+        initTimeline(); 
       }
-    } catch(err) {
-      console.error("開網頁雲端同步失敗，將沿用本地快取數據:", err);
-    }
+    } catch(err) {}
   }
 
   setTimeout(() => { resizeCanvas(); drawStars(); }, 200);
   
   setInterval(() => {
-    if(document.getElementById('g-e-count')){
-      document.getElementById('g-e-count').textContent = globalCounts.e;
-      document.getElementById('g-m-count').textContent = globalCounts.m;
-      document.getElementById('g-p-count').textContent = globalCounts.p;
-      document.getElementById('g-a-count').textContent = globalCounts.a;
-      document.getElementById('g-t-count').textContent = globalCounts.t;
-    }
-    if(document.getElementById('h-e-count')){
-      document.getElementById('h-e-count').textContent = state.eCount;
-      document.getElementById('h-m-count').textContent = state.mCount;
-      document.getElementById('h-p-count').textContent = state.pCount;
-      document.getElementById('h-a-count').textContent = state.aCount;
-      document.getElementById('h-t-count').textContent = state.tCount;
-    }
+    if(document.getElementById('g-v-count')) document.getElementById('g-v-count').textContent = globalCounts.v;
+    if(document.getElementById('g-e-count')) document.getElementById('g-e-count').textContent = globalCounts.e;
+    if(document.getElementById('g-m-count')) document.getElementById('g-m-count').textContent = globalCounts.m;
+    if(document.getElementById('g-p-count')) document.getElementById('g-p-count').textContent = globalCounts.p;
+    if(document.getElementById('g-t-count')) document.getElementById('g-t-count').textContent = globalCounts.t;
+    if(document.getElementById('h-e-count')) document.getElementById('h-e-count').textContent = state.eCount;
+    if(document.getElementById('h-m-count')) document.getElementById('h-m-count').textContent = state.mCount;
+    if(document.getElementById('h-p-count')) document.getElementById('h-p-count').textContent = state.pCount;
+    if(document.getElementById('h-a-count')) document.getElementById('h-a-count').textContent = state.aCount;
+    if(document.getElementById('h-t-count')) document.getElementById('h-t-count').textContent = state.tCount;
   }, 1000);
 });
 </script>
