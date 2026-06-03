@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght=300;400;700&family=Noto+Sans+TC:wght=300;400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
@@ -62,7 +62,7 @@ nav{
   font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;
   color:rgba(255,255,255,.025);letter-spacing:-0.02em;
   pointer-events:none;user-select:none;line-height:1;
-  top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;
+  top:50%;left:50%;transform:translate(-50%,-50%);white-white-space:nowrap;
 }
 .hero-title{
   font-family:'Cormorant Garamond',serif;
@@ -535,7 +535,7 @@ footer{
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
   <h2 class="room-title">情緒出口</h2>
-  <p class="room-desc">說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。</p>
+  <p class="room-desc">說出 those 說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。</p>
   <p class="e-anon-label">ANONYMOUS — 完全匿名</p>
   <textarea class="input-area" id="e-input" rows="5"
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
@@ -572,7 +572,7 @@ footer{
   <p class="room-desc">金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。</p>
   <div class="p-vessel">
     <canvas id="p-canvas" width="540" height="300"></canvas>
-    <p class="p-canvas-hint">點擊碎片，以金縫補裂痕</p>
+    <p class="p-canvas-hint">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕</p>
   </div>
   <textarea class="input-area" id="p-input" rows="3"
     placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
@@ -639,10 +639,10 @@ footer{
       <div class="j-card"><span class="j-letter">M</span><div class="j-num" id="h-m-count">0</div><div class="j-label">星星放上</div></div>
       <div class="j-card"><span class="j-letter">P</span><div class="j-num" id="h-p-count">0</div><div class="j-label">碎片修補</div></div>
       <div class="j-card"><span class="j-letter">A</span><div class="j-num" id="h-a-count">0</div><div class="j-label">秘密放下</div></div>
-      <div class="j-card"><span class="j-letter">T</span><div class="j-num" id="h-t-count">0</div><div class="j-label">溫暖傳出</div></div>
+      <div class="j-card"><span class="j-letter">T</span><div class="j-num" id="h-t-count">0</div><div class="j-label">溫慢傳出</div></div>
     </div>
     <div class="home-quote">
-      <p>我們雖然孤獨地存在，但我們可以溫暖地交會。</p>
+      <p>我們雖然孤獨地存在，但我們可以溫慢地交會。</p>
     </div>
     <div class="h-timeline">
       <p class="h-timeline-title">YOUR JOURNEY — 你的旅程</p>
@@ -684,12 +684,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===== 2. GLOBAL & PERMANENT STATE (LocalStorage 永久記憶整合) =====
+// ===== 2. GLOBAL & PERMANENT STATE (LocalStorage 持久記憶體) =====
 const state = {
   eCount:0, mCount:0, pCount:0, aCount:0, tCount:0
 };
 
-// 初始化讀取 LocalStorage
 let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 const savedJourney = localStorage.getItem('empath_user_journey');
 if(savedJourney){
@@ -701,11 +700,11 @@ if(savedJourney){
     state.aCount = journeyData.counters.a || 0;
     state.tCount = journeyData.counters.t || 0;
   } catch(err) {
-    console.error("記憶讀取失敗，初始化新足跡", err);
+    console.error("記憶快取讀取失敗", err);
   }
 }
 
-// ===== 3. 共用函式 =====
+// ===== 3. 共用工具 ＝＝＝＝＝
 window.showToast = function(msg, dur=2400){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -718,16 +717,12 @@ function nowStr(){
   return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
-// 記憶並寫入時間軸（寫入本地永久快取）
 function logJourney(type, text){
   const time = nowStr();
-  
-  // 更新資料結構
   journeyData.counters[type] = (journeyData.counters[type] || 0) + 1;
   journeyData.events.push({ type, text, time });
   localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
 
-  // 動態更新介面
   state[type+'Count']++;
   renderTimelineHTML(type, text, time);
 }
@@ -743,11 +738,9 @@ function renderTimelineHTML(type, text, time){
     <div class="h-event-text">${text.length > 40 ? text.slice(0,40) + '…' : text}</div>
     <div class="h-event-time">${time}</div>
   </div>`;
-  // 新的事件疊在最前面（或加到後面，這裡選擇加到後面配合原設計）
   container.appendChild(div);
 }
 
-// 重建歷史時間軸
 function initTimeline(){
   const container = document.getElementById('h-events');
   container.innerHTML = `
@@ -763,7 +756,7 @@ function initTimeline(){
   });
 }
 
-// ===== 4. E 房：情緒出口 (共享數據鏈) =====
+// ===== 4. E 房：情緒出口 (共享機制) =====
 onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => {
   const feed = document.getElementById('e-feed');
   feed.innerHTML = '';
@@ -795,18 +788,13 @@ window.submitE = async function(){
   const text = input.value.trim();
   if(!text){ window.showToast('請先寫下你想說的話'); return; }
   try {
-    await addDoc(collection(db, "emotions"), {
-      text: text,
-      createdAt: serverTimestamp()
-    });
-    input.value = '';
-    document.getElementById('e-char').textContent = '0 / 300';
-    logJourney('e', text);
-    window.showToast('已投入黑暗。你說出來了。');
+    await addDoc(collection(db, "emotions"), { text: text, createdAt: serverTimestamp() });
+    input.value = ''; document.getElementById('e-char').textContent = '0 / 300';
+    logJourney('e', text); window.showToast('已投入黑暗。你說出來了。');
   } catch(e) { console.error(e); }
 }
 
-// ===== 5. M 房：星空思念 (共享數據鏈) =====
+// ===== 5. M 房：思念映射 (共享星空) =====
 const canvas = document.getElementById('star-canvas');
 const ctx = canvas.getContext('2d');
 const tooltip = document.getElementById('star-tooltip');
@@ -820,8 +808,7 @@ const STAR_COLORS = [
 ];
 
 function resizeCanvas(){
-  canvas.width = roomM.offsetWidth;
-  canvas.height = roomM.offsetHeight;
+  canvas.width = roomM.offsetWidth; canvas.height = roomM.offsetHeight;
   initBgStars();
 }
 window.addEventListener('resize', resizeCanvas);
@@ -832,8 +819,7 @@ function initBgStars(){
   const w = canvas.width || 800, h = canvas.height || 600;
   for(let i=0; i<100; i++){ 
     const c = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
-    bgStars.push({x: Math.random()*w, y: Math.random()*h, r: Math.random()*0.8+0.2,
-      a: Math.random()*0.4+0.1, da: (Math.random()-.5)*0.003, c});
+    bgStars.push({x: Math.random()*w, y: Math.random()*h, r: Math.random()*0.8+0.2, a: Math.random()*0.4+0.1, da: (Math.random()-.5)*0.003, c});
   }
 }
 
@@ -842,9 +828,7 @@ onSnapshot(collection(db, "stars"), (snapshot) => {
   snapshot.forEach((docSnap) => {
     const data = docSnap.data();
     starMessages.push({
-      id: docSnap.id, text: data.text, brightness: data.brightness || 1,
-      clicks: data.clicks || 0, colorIdx: data.colorIdx || 0,
-      relX: data.relX, relY: data.relY
+      id: docSnap.id, text: data.text, brightness: data.brightness || 1, clicks: data.clicks || 0, colorIdx: data.colorIdx || 0, relX: data.relX, relY: data.relY
     });
   });
   updateMStats();
@@ -883,8 +867,7 @@ function getCanvasPos(e){
 function getStarAt(x, y){
   return starMessages.find(s => {
     if(!s.x) return false;
-    const dx = s.x - x, dy = s.y - y;
-    return Math.sqrt(dx*dx + dy*dy) < (14 + s.brightness * 3);
+    const dx = s.x - x, dy = s.y - y; return Math.sqrt(dx*dx + dy*dy) < (14 + s.brightness * 3);
   });
 }
 
@@ -926,15 +909,13 @@ window.submitM = async function(){
   if(!text){ window.showToast('請先寫下你的思念'); return; }
   try {
     await addDoc(collection(db, "stars"), {
-      text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random() * STAR_COLORS.length),
-      relX: 0.05 + Math.random() * 0.9, relY: 0.05 + Math.random() * 0.9, createdAt: serverTimestamp()
+      text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random() * STAR_COLORS.length), relX: 0.05 + Math.random() * 0.9, relY: 0.05 + Math.random() * 0.9, createdAt: serverTimestamp()
     });
-    input.value = ''; logJourney('m', text);
-    window.showToast('你的思念成為了一顆星 ✦');
+    input.value = ''; logJourney('m', text); window.showToast('你的思念成為了一顆星 ✦');
   } catch(err) { console.error(err); }
 }
 
-// ===== 6. P 房：碎片修補 (共享數據鏈) =====
+// ===== 6. P 房：碎片修補 (共享命運瓷器，經絡永續留存) =====
 let pCanvas, pCtx, pHealedTotal = 0;
 
 window.addEventListener('load', () => {
@@ -958,12 +939,12 @@ onSnapshot(collection(db, "shards"), (snapshot) => {
     div.addEventListener('click', async () => {
       if(data.healed) return;
       await updateDoc(doc(db, "shards", id), { healed: true });
-      drawGoldCrack();
       logJourney('p', data.text);
       window.showToast('以金修補，裂縫成為了光 ✦');
     });
     board.appendChild(div);
   });
+  // 資料庫更新時重繪公共瓷器，金線多寡完全由全網累積修補總量控制！
   drawKintsugiVessel();
   document.getElementById('p-healed-count').textContent = `已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
 });
@@ -973,18 +954,50 @@ function drawKintsugiVessel(){
   const c=pCtx, w=pCanvas.width, h=pCanvas.height; c.clearRect(0,0,w,h);
   c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=1; c.beginPath();
   const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke();
+  
+  // 共享經絡系統：預先埋藏的 10 條優雅主幹
+  const predefinedCracks = [
+    {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80},
+    {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60},
+    {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20},
+    {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100},
+    {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60},
+    {sx: cx+20, sy: cy+80, mx: cx-20, my: cy+40, ex: cx-60, ey: cy+20},
+    {sx: cx+40, sy: cy-30, mx: cx+70, my: cy, ex: cx+60, ey: cy+60},
+    {sx: cx-50, sy: cy, mx: cx-10, my: cy-20, ex: cx+30, ey: cy-20},
+    {sx: cx-10, sy: cy+60, mx: cx+20, my: cy+30, ex: cx+50, ey: cy+60},
+    {sx: cx-40, sy: cy-60, mx: cx, my: cy-40, ex: cx+30, ey: cy-20}
+  ];
+
+  // 先繪製暗色裂痕背景
+  predefinedCracks.forEach(crack => {
+    c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey);
+    c.strokeStyle='rgba(201,168,76,0.1)'; c.lineWidth=0.5; c.stroke();
+  });
+
+  // 根據全網共同累積的 healed 總數，依序點亮黃金裂縫！所有人同步可見
+  const goldLinesToDraw = Math.min(pHealedTotal, predefinedCracks.length);
+  for(let i=0; i<goldLinesToDraw; i++){
+    const crack = predefinedCracks[i];
+    c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey);
+    c.strokeStyle='rgba(201,168,76,0.85)'; c.lineWidth=1.8; c.stroke(); // 金線主幹
+    c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=5; c.stroke();    // 金光發散
+  }
+
+  // 超過主幹數量時，運用固定亂數公式增生金線，絕不因為重新整理而消失
+  if(pHealedTotal > predefinedCracks.length){
+    for(let i = predefinedCracks.length; i < Math.min(pHealedTotal, 40); i++){
+      const seedX = Math.sin(i) * w * 0.16; const seedY = Math.cos(i) * h * 0.2;
+      c.beginPath(); c.moveTo(cx + seedX, cy + seedY); c.quadraticCurveTo(cx + seedY, cy - seedX, cx - seedX, cy + seedY);
+      c.strokeStyle='rgba(201,168,76,0.85)'; c.lineWidth=1.5; c.stroke();
+      c.strokeStyle='rgba(201,168,76,0.15)'; c.lineWidth=4; c.stroke();
+    }
+  }
+
   if(pHealedTotal>0){
     c.font='11px Noto Sans TC'; c.fillStyle='rgba(201,168,76,0.4)'; c.textAlign='center';
-    c.fillText(`全網已共同修補 ${pHealedTotal} 道裂紋`, cx, cy+ry+24);
+    c.fillText(`全網共同修補進度：${pHealedTotal} 道裂紋`, cx, cy+ry+24);
   }
-}
-
-function drawGoldCrack(){
-  const c=pCtx, w=pCanvas.width, h=pCanvas.height, cx=w/2, cy=h/2;
-  const sx = cx + (Math.random()-0.5)*w*0.4, sy = cy + (Math.random()-0.5)*h*0.5;
-  const ex = sx + (Math.random()-0.5)*80, ey = sy + (Math.random()-0.5)*80;
-  c.beginPath(); c.moveTo(sx,sy); c.quadraticCurveTo((sx+ex)/2+(Math.random()-0.5)*30, (sy+ey)/2+(Math.random()-0.5)*30, ex,ey);
-  c.strokeStyle='rgba(201,168,76,0.7)'; c.lineWidth=1.5; c.stroke();
 }
 
 window.submitP = async function(){
@@ -992,12 +1005,11 @@ window.submitP = async function(){
   if(!text){ window.showToast('請先寫下你心中的碎片'); return; }
   try {
     await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() });
-    input.value = ''; logJourney('p', text);
-    window.showToast('碎片已放入器皿中。');
+    input.value = ''; logJourney('p', text); window.showToast('碎片已放入器皿中。');
   } catch(e) { console.error(e); }
 }
 
-// ===== 7. A 房：神聖避難所 (共享沙畫數據鏈) =====
+// ===== 7. A 房：神聖避難所 (共享沙畫，回歸真實流速) =====
 function formatTimeLeft(secs){
   if(secs<=0) return '即將消散';
   const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
@@ -1012,7 +1024,7 @@ onSnapshot(collection(db, "sand"), (snapshot) => {
     const ageSecs = (nowMs - (data.createdAt.seconds * 1000)) / 1000;
     const leftSecs = (24 * 60 * 60) - ageSecs;
     
-    if(leftSecs <= 0) return; // 已超時，自動不再渲染
+    if(leftSecs <= 0) return;
     
     const div = document.createElement('div'); div.className = 'sand-msg';
     const pct = (leftSecs / (24 * 60 * 60)) * 100;
@@ -1027,7 +1039,7 @@ onSnapshot(collection(db, "sand"), (snapshot) => {
     
     let simSecs = leftSecs; const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
     const interval = setInterval(() => {
-      simSecs -= 60; // 模擬沙畫消退速度
+      simSecs -= 1; // 修正完成：回歸真實世界，每過 1 秒減少 1 秒
       if(simSecs <= 0){ clearInterval(interval); div.remove(); return; }
       if(fill) fill.style.width = (simSecs / (24 * 60 * 60)) * 100 + '%';
       if(label) label.textContent = formatTimeLeft(simSecs);
@@ -1040,12 +1052,11 @@ window.submitA = async function(){
   if(!text){ window.showToast('請先寫下你想放下的話'); return; }
   try {
     await addDoc(collection(db, "sand"), { text, createdAt: serverTimestamp() });
-    input.value = ''; logJourney('a', text);
-    window.showToast('已放入共享沙畫中。');
+    input.value = ''; logJourney('a', text); window.showToast('已放入共享沙畫中。');
   } catch(e) { console.error(e); }
 }
 
-// ===== 8. T 房：能量共振 (共享漂浮溫暖鏈) =====
+// ===== 8. T 房：能量共振 (共享漂浮機制) =====
 onSnapshot(collection(db, "warmth"), (snapshot) => {
   const feed = document.getElementById('t-feed'); feed.innerHTML = '';
   let count = 0;
@@ -1074,17 +1085,15 @@ window.submitT = async function(){
   if(!text){ window.showToast('請先寫下你想送出的溫暖'); return; }
   try {
     await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() });
-    input.value = ''; logJourney('t', text);
-    window.showToast('溫暖已送出，正在向所有人漂浮 🕯️');
+    input.value = ''; logJourney('t', text); window.showToast('溫暖已送出，正在向所有人漂浮 🕯️');
   } catch(e) { console.error(e); }
 }
 
-// ===== 9. 初始化與介面刷新 (載入記憶) =====
+// ===== 9. 初始化與快取介面載入 =====
 window.addEventListener('load', () => {
-  initTimeline(); // 讀取並渲染持久化歷史足跡
+  initTimeline(); 
   setTimeout(() => { resizeCanvas(); drawStars(); }, 200);
   
-  // 定時刷新 H 房個人累計看板數據
   setInterval(() => {
     if(document.getElementById('h-e-count')){
       document.getElementById('h-e-count').textContent = state.eCount;
