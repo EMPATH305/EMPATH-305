@@ -400,7 +400,6 @@ nav{
 .j-card:nth-child(5) .j-letter{color:var(--t);}
 .g-letter{color:var(--gold);}
 
-/* 🔐 靈魂鑰匙同步區域專屬 CSS 藝術風格 */
 .sync-box {
   background: rgba(255,255,255,.01); border: 1px solid rgba(255,255,255,.06);
   padding: 24px; max-width: 600px; margin: 36px 0; border-radius: 2px;
@@ -517,11 +516,9 @@ footer{
 </head>
 <body>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
-<!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -534,7 +531,6 @@ footer{
   </div>
 </nav>
 
-<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-text">EMPATH</div>
   <h1 class="hero-title">EMPATH</h1>
@@ -562,7 +558,6 @@ footer{
   <span class="scroll-hint">↓ &nbsp; SCROLL</span>
 </section>
 
-<!-- E: 情緒出口 -->
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
@@ -577,7 +572,6 @@ footer{
   <div class="e-feed" id="e-feed"></div>
 </section>
 
-<!-- M: 星空思念 -->
 <section id="room-m" class="room">
   <canvas id="star-canvas"></canvas>
   <div class="room-letter">M</div>
@@ -598,7 +592,6 @@ footer{
   </div>
 </section>
 
-<!-- P: 碎片修補 -->
 <section id="room-p" class="room">
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
@@ -616,7 +609,6 @@ footer{
   <p class="p-healed-count" id="p-healed-count"></p>
 </section>
 
-<!-- A: 神聖避難所 -->
 <section id="room-a" class="room">
   <div class="room-letter">A</div>
   <p class="room-tag">A — Asylum / Ache</p>
@@ -630,7 +622,6 @@ footer{
   <div class="a-feed" id="a-feed"></div>
 </section>
 
-<!-- T: 能量共振 -->
 <section id="room-t" class="room">
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
@@ -664,7 +655,6 @@ footer{
   </div>
 </section>
 
-<!-- H: 靈魂歸宿 -->
 <section id="room-h" class="room">
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
@@ -672,7 +662,6 @@ footer{
   <p class="room-desc">回家，回到不需偽裝的地方。你走過的每個房間，都是你的。</p>
   <div class="h-journey">
     
-    <!-- 全網公共數據大區域 -->
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <div class="global-summary" id="g-summary">
       <div class="g-card"><span class="g-letter">E</span><div class="g-num" id="g-e-count">0</div><div class="g-label">全網釋放情緒</div></div>
@@ -682,7 +671,6 @@ footer{
       <div class="g-card"><span class="g-letter">T</span><div class="g-num" id="g-t-count">0</div><div class="g-label">世間漂浮溫暖</div></div>
     </div>
 
-    <!-- 個人歷史足跡看板 -->
     <p class="h-timeline-title" style="letter-spacing:4px;">YOUR FOOTPRINTS — 你的專屬足跡</p>
     <div class="journey-summary" id="h-summary">
       <div class="j-card"><span class="j-letter">E</span><div class="j-num" id="h-e-count">0</div><div class="j-label">情緒放下</div></div>
@@ -692,14 +680,12 @@ footer{
       <div class="j-card"><span class="j-letter">T</span><div class="j-num" id="h-t-count">0</div><div class="j-label">溫暖傳出</div></div>
     </div>
 
-    <!-- 🔐 靈魂鑰匙跨裝置同步保險箱區塊 -->
     <div class="sync-box">
       <div class="sync-title">靈魂共振同步 — SOUL SYNC</div>
       <p style="font-size:11px; color:var(--muted); line-height:1.7;">
         無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。
       </p>
       
-      <!-- 未開啟同步狀態 -->
       <div class="sync-actions" id="sync-initial-actions">
         <button class="sync-btn-small" onclick="window.createSoulKey()">生成我的靈魂鑰匙</button>
         <span style="font-size:11px; color:rgba(255,255,255,0.15);">或</span>
@@ -707,7 +693,6 @@ footer{
         <button class="sync-btn-small" onclick="window.loadExistingSoulKey()" style="border-color:var(--gold); color:var(--gold);">共振同步足跡</button>
       </div>
       
-      <!-- 已同步狀態 -->
       <div class="sync-actions" id="sync-active-actions" style="display:none;">
         <span style="font-size:11px; color:var(--fog);">已開啟即時雲端同步。你的靈魂鑰匙：</span>
         <span class="key-display" id="active-key-display">-</span>
@@ -722,8 +707,7 @@ footer{
     <div class="h-timeline">
       <p class="h-timeline-title">YOUR JOURNEY — 你的旅程</p>
       <div class="h-events" id="h-events">
-        <!-- 初始足跡由本地快取或靈魂鑰匙讀取渲染 -->
-      </div>
+        </div>
     </div>
     
     <div class="lighthouse">
@@ -733,7 +717,6 @@ footer{
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-left">Every Moment As Truth Heals</div>
   <div class="footer-letters">
@@ -801,7 +784,7 @@ function nowStr(){
   return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
-// 記憶足跡並觸發靈魂鑰匙背景自動雲端備份[cite: 1]
+// 記憶足跡並觸發靈魂鑰匙背景自動雲端備份
 function logJourney(type, text){
   const time = nowStr();
   journeyData.counters[type] = (journeyData.counters[type] || 0) + 1;
@@ -846,7 +829,6 @@ function initTimeline(){
 
 // ===== 🔒 靈魂鑰匙核心同步功能鏈 (Soul Key Sync System) =====
 window.createSoulKey = async function() {
-  // 隨機生成如 EMP-A1B2-C3D4 高質感格式暗號
   const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
   const part2 = Math.random().toString(36).substring(2, 6).toUpperCase();
   const soulKey = `EMP-${part1}-${part2}`;
@@ -873,11 +855,9 @@ window.loadExistingSoulKey = async function() {
         events: cloudData.events || []
       };
       
-      // 覆寫寫入本地永久快取
       localStorage.setItem('empath_soul_key', key);
       localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
       
-      // 更新全域本地變數狀態與介面
       state.eCount = journeyData.counters.e || 0;
       state.mCount = journeyData.counters.m || 0;
       state.pCount = journeyData.counters.p || 0;
@@ -966,6 +946,12 @@ window.submitE = async function(){
 }
 
 // ===== 5. M 房：星空思念 (全網即時同步) =====
+const canvas = document.getElementById('star-canvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('star-tooltip');
+const roomM = document.getElementById('room-m');
+let starMessages = [];
+
 const STAR_COLORS = [
   {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213},
   {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200},
@@ -1019,7 +1005,7 @@ function drawStars(){
     if(b >= 4){
       ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.8; const arm = r * 4;
       ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x, s.y+arm); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
     }
   });
   requestAnimationFrame(drawStars);
@@ -1170,7 +1156,7 @@ window.submitP = async function(){
   } catch(e) { console.error(e); }
 }
 
-// ===== 7. A 房：神聖避難所 (真實流速) =====
+// ===== 7. A 房：神戰避難所 (真實流速) =====
 function formatTimeLeft(secs){
   if(secs<=0) return '即將消散';
   const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
@@ -1249,13 +1235,40 @@ window.submitT = async function(){
   try {
     await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() });
     input.value = ''; logJourney('t', text); window.showToast('溫慢已送出，正在向所有人漂浮 🕯️');
-  } catch(e) { console.error(e); }
+  } catch(err) { console.error(err); }
 }
 
-// ===== 9. 初始化與介面更新 =====
-window.addEventListener('load', () => {
+// ===== 9. 初始化與雲端自動同步載入 =====
+window.addEventListener('load', async () => {
   initTimeline(); 
-  updateSyncUI(); // 啟動時檢查並校正靈魂鑰匙介面
+  updateSyncUI(); 
+  
+  // 🌟 核心同步升級：一開網頁若有綁定鑰匙，自動、秒速去雲端保險箱召喚歷史紀錄！
+  const existingKey = localStorage.getItem('empath_soul_key');
+  if(existingKey) {
+    try {
+      const docRef = doc(db, "user_journeys", existingKey);
+      const docSnap = await getDoc(docRef);
+      if(docSnap.exists()) {
+        const cloudData = docSnap.data();
+        journeyData = {
+          counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0},
+          events: cloudData.events || []
+        };
+        // 寫入本地，同步校正
+        localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
+        state.eCount = journeyData.counters.e || 0;
+        state.mCount = journeyData.counters.m || 0;
+        state.pCount = journeyData.counters.p || 0;
+        state.aCount = journeyData.counters.a || 0;
+        state.tCount = journeyData.counters.t || 0;
+        initTimeline(); // 重新召喚渲染時間軸
+      }
+    } catch(err) {
+      console.error("開網頁雲端同步失敗，將沿用本地快取數據:", err);
+    }
+  }
+
   setTimeout(() => { resizeCanvas(); drawStars(); }, 200);
   
   setInterval(() => {
