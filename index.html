@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght=300;400;700&family=Noto+Sans+TC:wght=300;400&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
@@ -363,7 +363,7 @@ nav{
 #room-h .room-tag{color:rgba(242,232,217,.5);}
 .h-journey{max-width:700px;}
 .journey-summary{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:36px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:36px;
 }
 .j-card{
   background:rgba(255,255,255,.03);padding:22px 18px;text-align:center;
@@ -647,13 +647,7 @@ footer{
     <div class="h-timeline">
       <p class="h-timeline-title">YOUR JOURNEY — 你的旅程</p>
       <div class="h-events" id="h-events">
-        <div class="h-event" style="color:var(--muted);font-size:12px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);">
-          <div>
-            <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);margin-bottom:4px;">開始</div>
-            <div>你來到了這裡。這已經是一種勇氣。</div>
-          </div>
         </div>
-      </div>
     </div>
     <div class="lighthouse">
       <span class="lighthouse-flame">🕯️</span>
@@ -675,11 +669,8 @@ footer{
 <script type="module">
 // ===== 1. 引入 Firebase SDK =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ==========================================
-// 專屬 Firebase 設定 (已完成串接)
-// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90",
   authDomain: "empath-62582.firebaseapp.com",
@@ -689,20 +680,32 @@ const firebaseConfig = {
   appId: "1:945974527649:web:552e236eff7809dfea52e0",
   measurementId: "G-9Z9X6E7WBZ"
 };
-// ==========================================
 
-// 初始化 Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===== 2. GLOBAL STATE =====
+// ===== 2. GLOBAL & PERMANENT STATE (LocalStorage 永久記憶整合) =====
 const state = {
-  eCount:0, mCount:0, pCount:0, aCount:0, tCount:0,
-  healedCount:0, echoTotal:0, aMessages:[]
+  eCount:0, mCount:0, pCount:0, aCount:0, tCount:0
 };
-let starMessages = []; 
 
-// ===== 3. 共用函式 (掛載到 window 供 HTML 呼叫) =====
+// 初始化讀取 LocalStorage
+let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
+const savedJourney = localStorage.getItem('empath_user_journey');
+if(savedJourney){
+  try {
+    journeyData = JSON.parse(savedJourney);
+    state.eCount = journeyData.counters.e || 0;
+    state.mCount = journeyData.counters.m || 0;
+    state.pCount = journeyData.counters.p || 0;
+    state.aCount = journeyData.counters.a || 0;
+    state.tCount = journeyData.counters.t || 0;
+  } catch(err) {
+    console.error("記憶讀取失敗，初始化新足跡", err);
+  }
+}
+
+// ===== 3. 共用函式 =====
 window.showToast = function(msg, dur=2400){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -715,7 +718,21 @@ function nowStr(){
   return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
+// 記憶並寫入時間軸（寫入本地永久快取）
 function logJourney(type, text){
+  const time = nowStr();
+  
+  // 更新資料結構
+  journeyData.counters[type] = (journeyData.counters[type] || 0) + 1;
+  journeyData.events.push({ type, text, time });
+  localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
+
+  // 動態更新介面
+  state[type+'Count']++;
+  renderTimelineHTML(type, text, time);
+}
+
+function renderTimelineHTML(type, text, time){
   const container = document.getElementById('h-events');
   const cls = type + '-event';
   const labels = {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'};
@@ -724,33 +741,87 @@ function logJourney(type, text){
   div.innerHTML = `<div>
     <div class="h-event-label">${labels[type] || type.toUpperCase()}</div>
     <div class="h-event-text">${text.length > 40 ? text.slice(0,40) + '…' : text}</div>
-    <div class="h-event-time">${nowStr()}</div>
+    <div class="h-event-time">${time}</div>
   </div>`;
+  // 新的事件疊在最前面（或加到後面，這裡選擇加到後面配合原設計）
   container.appendChild(div);
-  state[type+'Count']++;
-  const el = document.getElementById('h-'+type+'-count');
-  if(el) el.textContent = state[type+'Count'];
 }
 
-// ===== 4. M 房：星空思念 (突破遮擋結界版) =====
+// 重建歷史時間軸
+function initTimeline(){
+  const container = document.getElementById('h-events');
+  container.innerHTML = `
+    <div class="h-event" style="color:var(--muted);font-size:12px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);">
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);margin-bottom:4px;">開始</div>
+        <div>你來到了這裡。這已經是一種勇氣。</div>
+      </div>
+    </div>
+  `;
+  journeyData.events.forEach(ev => {
+    renderTimelineHTML(ev.type, ev.text, ev.time);
+  });
+}
+
+// ===== 4. E 房：情緒出口 (共享數據鏈) =====
+onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => {
+  const feed = document.getElementById('e-feed');
+  feed.innerHTML = '';
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr();
+    const div = document.createElement('div');
+    div.className = 'e-msg';
+    div.innerHTML = `
+      <div class="e-msg-anon">匿名 · ANONYMOUS</div>
+      <div>${data.text}</div>
+      <div class="e-msg-time">${timeStr}</div>
+    `;
+    feed.appendChild(div);
+  });
+});
+
+const eInput = document.getElementById('e-input');
+if(eInput){
+  eInput.addEventListener('input', () => {
+    const l = eInput.value.length;
+    document.getElementById('e-char').textContent = Math.min(l, 300) + ' / 300';
+    if(l > 300) eInput.value = eInput.value.slice(0, 300);
+  });
+}
+
+window.submitE = async function(){
+  const input = document.getElementById('e-input');
+  const text = input.value.trim();
+  if(!text){ window.showToast('請先寫下你想說的話'); return; }
+  try {
+    await addDoc(collection(db, "emotions"), {
+      text: text,
+      createdAt: serverTimestamp()
+    });
+    input.value = '';
+    document.getElementById('e-char').textContent = '0 / 300';
+    logJourney('e', text);
+    window.showToast('已投入黑暗。你說出來了。');
+  } catch(e) { console.error(e); }
+}
+
+// ===== 5. M 房：星空思念 (共享數據鏈) =====
 const canvas = document.getElementById('star-canvas');
 const ctx = canvas.getContext('2d');
 const tooltip = document.getElementById('star-tooltip');
-const roomM = document.getElementById('room-m'); // 取得 M 房容器
+const roomM = document.getElementById('room-m');
+let starMessages = [];
 
 const STAR_COLORS = [
-  {r: 212, g: 228, b: 255}, // 破曉藍
-  {r: 255, g: 239, b: 213}, // 溫慢星芒
-  {r: 198, g: 216, b: 231}, // 靜謐灰藍
-  {r: 247, g: 220, b: 200}, // 餘暉橙
-  {r: 230, g: 230, b: 250}, // 霧淡紫
-  {r: 255, g: 248, b: 231}, // 柔和香草
+  {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213},
+  {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200},
+  {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231}
 ];
 
 function resizeCanvas(){
-  const room = document.getElementById('room-m');
-  canvas.width = room.offsetWidth;
-  canvas.height = room.offsetHeight;
+  canvas.width = roomM.offsetWidth;
+  canvas.height = roomM.offsetHeight;
   initBgStars();
 }
 window.addEventListener('resize', resizeCanvas);
@@ -766,68 +837,42 @@ function initBgStars(){
   }
 }
 
-// 監聽 Firebase 資料庫
 onSnapshot(collection(db, "stars"), (snapshot) => {
   starMessages = [];
   snapshot.forEach((docSnap) => {
     const data = docSnap.data();
     starMessages.push({
-      id: docSnap.id,
-      text: data.text,
-      brightness: data.brightness || 1,
-      clicks: data.clicks || 0,
-      colorIdx: data.colorIdx || 0,
-      relX: data.relX, 
-      relY: data.relY
+      id: docSnap.id, text: data.text, brightness: data.brightness || 1,
+      clicks: data.clicks || 0, colorIdx: data.colorIdx || 0,
+      relX: data.relX, relY: data.relY
     });
   });
   updateMStats();
 });
 
-let animFrame;
 function drawStars(){
   if(!canvas.width) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 背景背景星
   bgStars.forEach(s => {
-    s.a += s.da;
-    if(s.a > 0.7 || s.a < 0.03) s.da *= -1;
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`;
-    ctx.fill();
+    s.a += s.da; if(s.a > 0.7 || s.a < 0.03) s.da *= -1;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; ctx.fill();
   });
-
-  // 渲染雲端思念星
   starMessages.forEach(s => {
-    s.x = s.relX * canvas.width;
-    s.y = s.relY * canvas.height;
-
-    const b = s.brightness;
-    const c = STAR_COLORS[s.colorIdx];
-    const r = 1.5 + b * 0.8;
-
+    s.x = s.relX * canvas.width; s.y = s.relY * canvas.height;
+    const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const r = 1.5 + b * 0.8;
     ctx.save();
-    ctx.shadowBlur = 10 + (b * 3);
-    ctx.shadowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${0.5 + (b * 0.05)})`;
-    
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`;
-    ctx.fill();
+    ctx.shadowBlur = 10 + (b * 3); ctx.shadowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${0.5 + (b * 0.05)})`;
+    ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`; ctx.fill();
     ctx.restore();
-
     if(b >= 4){
-      ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`;
-      ctx.lineWidth = 0.8;
-      const arm = r * 4;
+      ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.8; const arm = r * 4;
       ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x, s.y+arm); ctx.stroke();
     }
   });
-
-  animFrame = requestAnimationFrame(drawStars);
+  requestAnimationFrame(drawStars);
 }
 
 function getCanvasPos(e){
@@ -839,62 +884,33 @@ function getStarAt(x, y){
   return starMessages.find(s => {
     if(!s.x) return false;
     const dx = s.x - x, dy = s.y - y;
-    const hitR = 14 + s.brightness * 3; // 稍微擴大碰撞偵測半徑，更好點選
-    return Math.sqrt(dx*dx + dy*dy) < hitR;
+    return Math.sqrt(dx*dx + dy*dy) < (14 + s.brightness * 3);
   });
 }
 
-// 修正：改用整體 M 房監聽滑鼠移動事件，避開 z-index 與 pointer-events 結界
 roomM.addEventListener('mousemove', e => {
   if (e.target.closest('.m-input-wrap') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') {
-    tooltip.style.display = 'none';
-    roomM.style.cursor = 'default';
-    return;
+    tooltip.style.display = 'none'; roomM.style.cursor = 'default'; return;
   }
-  
-  const {x, y} = getCanvasPos(e);
-  const star = getStarAt(x, y);
-  
+  const {x, y} = getCanvasPos(e); const star = getStarAt(x, y);
   if(star){
-    tooltip.style.display = 'block';
-    tooltip.style.left = (e.clientX + 18) + 'px';
-    tooltip.style.top = (e.clientY - 12) + 'px';
+    tooltip.style.display = 'block'; tooltip.style.left = (e.clientX + 18) + 'px'; tooltip.style.top = (e.clientY - 12) + 'px';
     const c = STAR_COLORS[star.colorIdx];
-    tooltip.innerHTML = `
-      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.6);letter-spacing:2px;">思念</span><br>
-      ${star.text}<br>
-      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.4);letter-spacing:1px;margin-top:4px;display:block;">✦ ${star.clicks} 次共鳴 · 點擊讓它更亮</span>
-    `;
+    tooltip.innerHTML = `思念<br>${star.text}<br><span style="font-size:9px;opacity:0.5;">✦ ${star.clicks} 共鳴 · 點擊發光</span>`;
     roomM.style.cursor = 'pointer';
   } else {
-    tooltip.style.display = 'none';
-    roomM.style.cursor = 'default';
+    tooltip.style.display = 'none'; roomM.style.cursor = 'default';
   }
 });
 
-roomM.addEventListener('mouseleave', () => {
-  tooltip.style.display = 'none';
-  roomM.style.cursor = 'default';
-});
-
-// 修正：改用整體 M 房監聽點擊，點亮星星
 roomM.addEventListener('click', async e => {
   if (e.target.closest('.m-input-wrap') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
-
-  const {x, y} = getCanvasPos(e);
-  const star = getStarAt(x, y);
-  
+  const {x, y} = getCanvasPos(e); const star = getStarAt(x, y);
   if(star && star.id){
-    const starRef = doc(db, "stars", star.id);
     try {
-      await updateDoc(starRef, {
-        brightness: Math.min(star.brightness + 1, 10),
-        clicks: star.clicks + 1
-      });
+      await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 10), clicks: star.clicks + 1 });
       window.showToast('這顆思念更亮了 ✦');
-    } catch (err) {
-      console.error("更新失敗", err);
-    }
+    } catch (err) { console.error(err); }
   }
 });
 
@@ -902,145 +918,182 @@ function updateMStats(){
   document.getElementById('m-count').textContent = starMessages.length;
   if(starMessages.length === 0) return;
   const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a);
-  document.getElementById('m-brightest').textContent =
-    brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
+  document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
 }
 
 window.submitM = async function(){
-  const input = document.getElementById('m-input');
-  const text = input.value.trim();
+  const input = document.getElementById('m-input'); const text = input.value.trim();
   if(!text){ window.showToast('請先寫下你的思念'); return; }
-
-  const colorIdx = Math.floor(Math.random() * STAR_COLORS.length);
-  const relX = 0.05 + Math.random() * 0.9;
-  const relY = 0.05 + Math.random() * 0.9;
-
   try {
     await addDoc(collection(db, "stars"), {
-      text: text,
-      brightness: 1,
-      clicks: 0,
-      colorIdx: colorIdx,
-      relX: relX,
-      relY: relY,
-      createdAt: serverTimestamp()
+      text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random() * STAR_COLORS.length),
+      relX: 0.05 + Math.random() * 0.9, relY: 0.05 + Math.random() * 0.9, createdAt: serverTimestamp()
     });
+    input.value = ''; logJourney('m', text);
+    window.showToast('你的思念成為了一顆星 ✦');
+  } catch(err) { console.error(err); }
+}
+
+// ===== 6. P 房：碎片修補 (共享數據鏈) =====
+let pCanvas, pCtx, pHealedTotal = 0;
+
+window.addEventListener('load', () => {
+  pCanvas = document.getElementById('p-canvas');
+  pCtx = pCanvas.getContext('2d');
+  pCanvas.width = pCanvas.offsetWidth || 540;
+  drawKintsugiVessel();
+});
+
+onSnapshot(collection(db, "shards"), (snapshot) => {
+  const board = document.getElementById('p-board');
+  board.innerHTML = ''; pHealedTotal = 0;
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data(); const id = docSnap.id;
+    if(data.healed) pHealedTotal++;
     
-    input.value = '';
-    logJourney('m', text);
-    window.showToast('你的思念成為了一顆星，滑鼠移過去看看 ✦');
-  } catch(err) {
-    window.showToast('星空連接失敗，請稍後再試。');
-    console.error(err);
+    const div = document.createElement('div');
+    div.className = 'shard' + (data.healed ? ' healed' : '');
+    div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ 已修補</div><div class="shard-glow"></div>`;
+    
+    div.addEventListener('click', async () => {
+      if(data.healed) return;
+      await updateDoc(doc(db, "shards", id), { healed: true });
+      drawGoldCrack();
+      logJourney('p', data.text);
+      window.showToast('以金修補，裂縫成為了光 ✦');
+    });
+    board.appendChild(div);
+  });
+  drawKintsugiVessel();
+  document.getElementById('p-healed-count').textContent = `已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
+});
+
+function drawKintsugiVessel(){
+  if(!pCtx) return;
+  const c=pCtx, w=pCanvas.width, h=pCanvas.height; c.clearRect(0,0,w,h);
+  c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=1; c.beginPath();
+  const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke();
+  if(pHealedTotal>0){
+    c.font='11px Noto Sans TC'; c.fillStyle='rgba(201,168,76,0.4)'; c.textAlign='center';
+    c.fillText(`全網已共同修補 ${pHealedTotal} 道裂紋`, cx, cy+ry+24);
   }
 }
 
-// ===== 5. E 房：情緒出口 =====
-const eInput = document.getElementById('e-input');
-if(eInput){
-  eInput.addEventListener('input', () => {
-    const l = eInput.value.length;
-    document.getElementById('e-char').textContent = Math.min(l, 300) + ' / 300';
-    if(l > 300) eInput.value = eInput.value.slice(0, 300);
-  });
+function drawGoldCrack(){
+  const c=pCtx, w=pCanvas.width, h=pCanvas.height, cx=w/2, cy=h/2;
+  const sx = cx + (Math.random()-0.5)*w*0.4, sy = cy + (Math.random()-0.5)*h*0.5;
+  const ex = sx + (Math.random()-0.5)*80, ey = sy + (Math.random()-0.5)*80;
+  c.beginPath(); c.moveTo(sx,sy); c.quadraticCurveTo((sx+ex)/2+(Math.random()-0.5)*30, (sy+ey)/2+(Math.random()-0.5)*30, ex,ey);
+  c.strokeStyle='rgba(201,168,76,0.7)'; c.lineWidth=1.5; c.stroke();
 }
 
-window.submitE = function(){
-  const input = document.getElementById('e-input');
-  const text = input.value.trim();
-  if(!text){ window.showToast('請先寫下你想說的話'); return; }
-  const feed = document.getElementById('e-feed');
-  const div = document.createElement('div');
-  div.className = 'e-msg';
-  div.innerHTML = `
-    <div class="e-msg-anon">匿名 · ANONYMOUS</div>
-    <div>${text}</div>
-    <div class="e-msg-time">${nowStr()}</div>
-  `;
-  feed.insertBefore(div, feed.firstChild);
-  input.value = '';
-  document.getElementById('e-char').textContent = '0 / 300';
-  logJourney('e', text);
-  window.showToast('已投入黑暗。你說出來了。');
-}
-
-// ===== 6. P 房：碎片修補 =====
-let pCanvas, pCtx, pShards=[], pHealedTotal=0;
-window.submitP = function(){
-  const input = document.getElementById('p-input');
-  const text = input.value.trim();
+window.submitP = async function(){
+  const input = document.getElementById('p-input'); const text = input.value.trim();
   if(!text){ window.showToast('請先寫下你心中的碎片'); return; }
-  const board = document.getElementById('p-board');
-  const div = document.createElement('div');
-  div.className = 'shard';
-  div.innerHTML = `<div class="shard-text">${text}</div><div class="shard-healed-tag">✦ 已修補</div><div class="shard-glow"></div>`;
-  div.addEventListener('click', function(){
-    if(div.classList.contains('healed')) return;
-    div.classList.add('healed');
-    pHealedTotal++;
-    document.getElementById('p-healed-count').textContent = `已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
-    window.showToast('以金修補，裂縫成為了光 ✦');
+  try {
+    await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() });
+    input.value = ''; logJourney('p', text);
+    window.showToast('碎片已放入器皿中。');
+  } catch(e) { console.error(e); }
+}
+
+// ===== 7. A 房：神聖避難所 (共享沙畫數據鏈) =====
+function formatTimeLeft(secs){
+  if(secs<=0) return '即將消散';
+  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
+  return h>0 ? `${h}h ${m}m 後消散` : `${m}m 後消散`;
+}
+
+onSnapshot(collection(db, "sand"), (snapshot) => {
+  const feed = document.getElementById('a-feed'); feed.innerHTML = '';
+  const nowMs = Date.now();
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data(); if(!data.createdAt) return;
+    const ageSecs = (nowMs - (data.createdAt.seconds * 1000)) / 1000;
+    const leftSecs = (24 * 60 * 60) - ageSecs;
+    
+    if(leftSecs <= 0) return; // 已超時，自動不再渲染
+    
+    const div = document.createElement('div'); div.className = 'sand-msg';
+    const pct = (leftSecs / (24 * 60 * 60)) * 100;
+    div.innerHTML = `
+      <div class="sand-dissolve-overlay"></div> <div class="sand-msg-text">${data.text}</div>
+      <div class="sand-timer-wrap">
+        <div class="sand-timer-label">DISSOLVING</div>
+        <div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div>
+        <div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div>
+      </div>`;
+    feed.appendChild(div);
+    
+    let simSecs = leftSecs; const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
+    const interval = setInterval(() => {
+      simSecs -= 60; // 模擬沙畫消退速度
+      if(simSecs <= 0){ clearInterval(interval); div.remove(); return; }
+      if(fill) fill.style.width = (simSecs / (24 * 60 * 60)) * 100 + '%';
+      if(label) label.textContent = formatTimeLeft(simSecs);
+    }, 1000);
   });
-  board.appendChild(div);
-  input.value = '';
-  logJourney('p', text);
-  window.showToast('碎片放入了。點擊它，讓它被修補。');
-}
+});
 
-// ===== 7. A 房：神聖避難所 =====
-window.submitA = function(){
-  const input = document.getElementById('a-input');
-  const text = input.value.trim();
+window.submitA = async function(){
+  const input = document.getElementById('a-input'); const text = input.value.trim();
   if(!text){ window.showToast('請先寫下你想放下的話'); return; }
-  const feed = document.getElementById('a-feed');
-  const div = document.createElement('div');
-  div.className = 'sand-msg';
-  div.innerHTML = `<div class="sand-msg-text">${text}</div><div class="sand-timer-wrap"><div class="sand-time-left">24h 後消散</div></div>`;
-  feed.insertBefore(div, feed.firstChild);
-  input.value = '';
-  logJourney('a', text);
-  window.showToast('已放入沙畫。24 小時後，它會消散。');
+  try {
+    await addDoc(collection(db, "sand"), { text, createdAt: serverTimestamp() });
+    input.value = ''; logJourney('a', text);
+    window.showToast('已放入共享沙畫中。');
+  } catch(e) { console.error(e); }
 }
 
-// ===== 8. T 房：能量共振 =====
-window.submitT = function(){
-  const input = document.getElementById('t-input');
-  const text = input.value.trim();
+// ===== 8. T 房：能量共振 (共享漂浮溫暖鏈) =====
+onSnapshot(collection(db, "warmth"), (snapshot) => {
+  const feed = document.getElementById('t-feed'); feed.innerHTML = '';
+  let count = 0;
+  snapshot.forEach(docSnap => {
+    count++; const data = docSnap.data(); const id = docSnap.id;
+    const div = document.createElement('div'); div.className = 'warmth-item';
+    div.innerHTML = `
+      <div class="warmth-pulse"></div> <div>${data.text}</div>
+      <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}">
+        <span class="heart">🕯️</span> Echo Pulse <span class="echo-num">(${data.echos || 0})</span>
+      </button>`;
+    
+    div.querySelector('.echo-btn').addEventListener('click', async function(){
+      if(this.classList.contains('pulsed')) return;
+      this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
+      await updateDoc(doc(db, "warmth", id), { echos: (data.echos || 0) + 1 });
+      window.showToast('✦ Echo Pulse 傳出——不顯示數字，只有心跳。');
+    });
+    feed.appendChild(div);
+  });
+  document.getElementById('t-echo-count').textContent = `本週共 ${count} 道溫暖漂浮`;
+});
+
+window.submitT = async function(){
+  const input = document.getElementById('t-input'); const text = input.value.trim();
   if(!text){ window.showToast('請先寫下你想送出的溫暖'); return; }
-  const feed = document.getElementById('t-feed');
-  const div = document.createElement('div');
-  div.className = 'warmth-item';
-  div.innerHTML = `<div class="warmth-pulse"></div><div>${text}</div><button class="echo-btn" onclick="window.sendEcho(this)"><span class="heart">🕯️</span> Echo Pulse</button>`;
-  feed.insertBefore(div, feed.firstChild);
-  input.value = '';
-  logJourney('t', text);
-  window.showToast('溫暖已送出，它正在漂浮向某個人 🕯️');
+  try {
+    await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() });
+    input.value = ''; logJourney('t', text);
+    window.showToast('溫暖已送出，正在向所有人漂浮 🕯️');
+  } catch(e) { console.error(e); }
 }
 
-window.sendEcho = function(btn){
-  if(btn.classList.contains('pulsed')) return;
-  btn.classList.add('pulsed');
-  window.showToast('✦ Echo Pulse 傳出——不顯示數字，只有心跳。');
-}
-
-// ===== 9. 初始化與介面更新 =====
+// ===== 9. 初始化與介面刷新 (載入記憶) =====
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    resizeCanvas();
-    drawStars();
-  }, 200);
+  initTimeline(); // 讀取並渲染持久化歷史足跡
+  setTimeout(() => { resizeCanvas(); drawStars(); }, 200);
   
-  // 更新 H 房數字
+  // 定時刷新 H 房個人累計看板數據
   setInterval(() => {
-    const eCountEl = document.getElementById('h-e-count');
-    if (eCountEl) {
-      eCountEl.textContent = state.eCount;
-      document.getElementById('h-m-count').textContent = document.getElementById('m-count') ? document.getElementById('m-count').textContent : '0';
-      document.getElementById('h-p-count').textContent = pHealedTotal;
+    if(document.getElementById('h-e-count')){
+      document.getElementById('h-e-count').textContent = state.eCount;
+      document.getElementById('h-m-count').textContent = state.mCount;
+      document.getElementById('h-p-count').textContent = state.pCount;
       document.getElementById('h-a-count').textContent = state.aCount;
       document.getElementById('h-t-count').textContent = state.tCount;
     }
-  }, 2000);
+  }, 1000);
 });
 </script>
 </body>
