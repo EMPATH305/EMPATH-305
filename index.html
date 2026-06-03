@@ -212,7 +212,7 @@ nav{
   position:relative;
 }
 #p-canvas{
-  width:100%;height:300px;display:block;cursor:crosshair;
+  width:100%;height:300px;display:block;
   background:rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.1);
 }
 .p-canvas-hint{
@@ -489,11 +489,9 @@ footer{
 </head>
 <body>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
-<!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -506,7 +504,6 @@ footer{
   </div>
 </nav>
 
-<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-text">EMPATH</div>
   <h1 class="hero-title">EMPATH</h1>
@@ -534,7 +531,6 @@ footer{
   <span class="scroll-hint">↓ &nbsp; SCROLL</span>
 </section>
 
-<!-- E: 情緒出口 -->
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
@@ -545,11 +541,10 @@ footer{
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 300</div>
   <br>
-  <button class="send-btn" onclick="submitE()">投入黑暗 →</button>
+  <button class="send-btn" onclick="window.submitE()">投入黑暗 →</button>
   <div class="e-feed" id="e-feed"></div>
 </section>
 
-<!-- M: 星空思念 -->
 <section id="room-m" class="room">
   <canvas id="star-canvas"></canvas>
   <div class="room-letter">M</div>
@@ -561,7 +556,7 @@ footer{
       <textarea class="input-area" id="m-input" rows="4"
         placeholder="寫下你的思念，它會成為夜空中的一顆星……&#10;思念一個人、一個地方、或一段時光。"></textarea>
       <br>
-      <button class="send-btn" onclick="submitM()">放上星空 →</button>
+      <button class="send-btn" onclick="window.submitM()">放上星空 →</button>
     </div>
     <div class="m-stats">
       <div class="m-stat"><span id="m-count">0</span> 顆星</div>
@@ -570,7 +565,6 @@ footer{
   </div>
 </section>
 
-<!-- P: 碎片修補 -->
 <section id="room-p" class="room">
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
@@ -583,12 +577,11 @@ footer{
   <textarea class="input-area" id="p-input" rows="3"
     placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
   <br>
-  <button class="send-btn" onclick="submitP()">放入瓷器 →</button>
+  <button class="send-btn" onclick="window.submitP()">放入瓷器 →</button>
   <div class="kintsugi-board" id="p-board"></div>
   <p class="p-healed-count" id="p-healed-count"></p>
 </section>
 
-<!-- A: 神聖避難所 -->
 <section id="room-a" class="room">
   <div class="room-letter">A</div>
   <p class="room-tag">A — Asylum / Ache</p>
@@ -597,12 +590,11 @@ footer{
   <textarea class="input-area" id="a-input" rows="4"
     placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
   <br>
-  <button class="send-btn" onclick="submitA()">放入沙畫 →</button>
+  <button class="send-btn" onclick="window.submitA()">放入沙畫 →</button>
   <p class="a-note">∗ 所有留言將在 24 小時後自動消散，如沙畫般不留痕跡</p>
   <div class="a-feed" id="a-feed"></div>
 </section>
 
-<!-- T: 能量共振 -->
 <section id="room-t" class="room">
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
@@ -622,7 +614,7 @@ footer{
         <textarea class="input-area" id="t-input" rows="4"
           placeholder="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"></textarea>
         <br>
-        <button class="send-btn" onclick="submitT()">傳出去 →</button>
+        <button class="send-btn" onclick="window.submitT()">傳出去 →</button>
       </div>
       <div class="t-panel" style="text-align:center;">
         <p class="t-panel-title" style="text-align:center;">Echo Pulse</p>
@@ -636,7 +628,6 @@ footer{
   </div>
 </section>
 
-<!-- H: 靈魂歸宿 -->
 <section id="room-h" class="room">
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
@@ -671,7 +662,6 @@ footer{
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-left">Every Moment As Truth Heals</div>
   <div class="footer-letters">
@@ -682,71 +672,283 @@ footer{
   <div class="footer-right">數位時代的情緒安放平台</div>
 </footer>
 
-<script>
-// ===== GLOBAL STATE =====
+<script type="module">
+// ===== 1. 引入 Firebase SDK =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// ==========================================
+// 專屬 Firebase 設定 (已完成串接)
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90",
+  authDomain: "empath-62582.firebaseapp.com",
+  projectId: "empath-62582",
+  storageBucket: "empath-62582.firebasestorage.app",
+  messagingSenderId: "945974527649",
+  appId: "1:945974527649:web:552e236eff7809dfea52e0",
+  measurementId: "G-9Z9X6E7WBZ"
+};
+// ==========================================
+
+// 初始化 Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== 2. GLOBAL STATE =====
 const state = {
   eCount:0, mCount:0, pCount:0, aCount:0, tCount:0,
-  stars:[],
-  healedCount:0,
-  echoTotal:0,
-  aMessages:[],
+  healedCount:0, echoTotal:0, aMessages:[]
 };
+let starMessages = []; 
 
-// ===== TOAST =====
-function showToast(msg, dur=2400){
+// ===== 3. 共用函式 (掛載到 window 供 HTML 呼叫) =====
+window.showToast = function(msg, dur=2400){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), dur);
 }
 
-// ===== TIME HELPER =====
 function nowStr(){
-  const d=new Date();
-  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+  const d = new Date();
+  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
-// ===== JOURNEY LOG =====
 function logJourney(type, text){
   const container = document.getElementById('h-events');
-  const cls = type+'-event';
-  const labels = {e:'情緒出口',m:'思念映射',p:'碎片修補',a:'避難所',t:'能量共振'};
+  const cls = type + '-event';
+  const labels = {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'};
   const div = document.createElement('div');
-  div.className = 'h-event '+cls;
+  div.className = 'h-event ' + cls;
   div.innerHTML = `<div>
-    <div class="h-event-label">${labels[type]||type.toUpperCase()}</div>
-    <div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div>
+    <div class="h-event-label">${labels[type] || type.toUpperCase()}</div>
+    <div class="h-event-text">${text.length > 40 ? text.slice(0,40) + '…' : text}</div>
     <div class="h-event-time">${nowStr()}</div>
   </div>`;
   container.appendChild(div);
-  // update counter
   state[type+'Count']++;
   const el = document.getElementById('h-'+type+'-count');
   if(el) el.textContent = state[type+'Count'];
 }
 
-// ===== E: EMOTION TRASH =====
-const eInput = document.getElementById('e-input');
-if(eInput){
-  eInput.addEventListener('input',()=>{
-    const l = eInput.value.length;
-    document.getElementById('e-char').textContent = Math.min(l,300)+' / 300';
-    if(l>300) eInput.value = eInput.value.slice(0,300);
+// ===== 4. M 房：星空思念 (突破遮擋結界版) =====
+const canvas = document.getElementById('star-canvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('star-tooltip');
+const roomM = document.getElementById('room-m'); // 取得 M 房容器
+
+const STAR_COLORS = [
+  {r: 212, g: 228, b: 255}, // 破曉藍
+  {r: 255, g: 239, b: 213}, // 溫慢星芒
+  {r: 198, g: 216, b: 231}, // 靜謐灰藍
+  {r: 247, g: 220, b: 200}, // 餘暉橙
+  {r: 230, g: 230, b: 250}, // 霧淡紫
+  {r: 255, g: 248, b: 231}, // 柔和香草
+];
+
+function resizeCanvas(){
+  const room = document.getElementById('room-m');
+  canvas.width = room.offsetWidth;
+  canvas.height = room.offsetHeight;
+  initBgStars();
+}
+window.addEventListener('resize', resizeCanvas);
+
+let bgStars=[];
+function initBgStars(){
+  bgStars=[];
+  const w = canvas.width || 800, h = canvas.height || 600;
+  for(let i=0; i<100; i++){ 
+    const c = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+    bgStars.push({x: Math.random()*w, y: Math.random()*h, r: Math.random()*0.8+0.2,
+      a: Math.random()*0.4+0.1, da: (Math.random()-.5)*0.003, c});
+  }
+}
+
+// 監聽 Firebase 資料庫
+onSnapshot(collection(db, "stars"), (snapshot) => {
+  starMessages = [];
+  snapshot.forEach((docSnap) => {
+    const data = docSnap.data();
+    starMessages.push({
+      id: docSnap.id,
+      text: data.text,
+      brightness: data.brightness || 1,
+      clicks: data.clicks || 0,
+      colorIdx: data.colorIdx || 0,
+      relX: data.relX, 
+      relY: data.relY
+    });
+  });
+  updateMStats();
+});
+
+let animFrame;
+function drawStars(){
+  if(!canvas.width) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 背景背景星
+  bgStars.forEach(s => {
+    s.a += s.da;
+    if(s.a > 0.7 || s.a < 0.03) s.da *= -1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`;
+    ctx.fill();
+  });
+
+  // 渲染雲端思念星
+  starMessages.forEach(s => {
+    s.x = s.relX * canvas.width;
+    s.y = s.relY * canvas.height;
+
+    const b = s.brightness;
+    const c = STAR_COLORS[s.colorIdx];
+    const r = 1.5 + b * 0.8;
+
+    ctx.save();
+    ctx.shadowBlur = 10 + (b * 3);
+    ctx.shadowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${0.5 + (b * 0.05)})`;
+    
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`;
+    ctx.fill();
+    ctx.restore();
+
+    if(b >= 4){
+      ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`;
+      ctx.lineWidth = 0.8;
+      const arm = r * 4;
+      ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x, s.y+arm); ctx.stroke();
+    }
+  });
+
+  animFrame = requestAnimationFrame(drawStars);
+}
+
+function getCanvasPos(e){
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function getStarAt(x, y){
+  return starMessages.find(s => {
+    if(!s.x) return false;
+    const dx = s.x - x, dy = s.y - y;
+    const hitR = 14 + s.brightness * 3; // 稍微擴大碰撞偵測半徑，更好點選
+    return Math.sqrt(dx*dx + dy*dy) < hitR;
   });
 }
 
-const ePreset = [
-  '我真的好累了，但又不知道能告訴誰。',
-  '我一直在等一個道歉，但可能永遠不會來。',
-  '我害怕自己根本不值得被愛。',
-  '有時候我希望一切都暫停一下。',
-  '我失去了一個以為會一直在的人。',
-];
+// 修正：改用整體 M 房監聽滑鼠移動事件，避開 z-index 與 pointer-events 結界
+roomM.addEventListener('mousemove', e => {
+  if (e.target.closest('.m-input-wrap') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') {
+    tooltip.style.display = 'none';
+    roomM.style.cursor = 'default';
+    return;
+  }
+  
+  const {x, y} = getCanvasPos(e);
+  const star = getStarAt(x, y);
+  
+  if(star){
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 18) + 'px';
+    tooltip.style.top = (e.clientY - 12) + 'px';
+    const c = STAR_COLORS[star.colorIdx];
+    tooltip.innerHTML = `
+      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.6);letter-spacing:2px;">思念</span><br>
+      ${star.text}<br>
+      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.4);letter-spacing:1px;margin-top:4px;display:block;">✦ ${star.clicks} 次共鳴 · 點擊讓它更亮</span>
+    `;
+    roomM.style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    roomM.style.cursor = 'default';
+  }
+});
 
-function submitE(){
+roomM.addEventListener('mouseleave', () => {
+  tooltip.style.display = 'none';
+  roomM.style.cursor = 'default';
+});
+
+// 修正：改用整體 M 房監聽點擊，點亮星星
+roomM.addEventListener('click', async e => {
+  if (e.target.closest('.m-input-wrap') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
+
+  const {x, y} = getCanvasPos(e);
+  const star = getStarAt(x, y);
+  
+  if(star && star.id){
+    const starRef = doc(db, "stars", star.id);
+    try {
+      await updateDoc(starRef, {
+        brightness: Math.min(star.brightness + 1, 10),
+        clicks: star.clicks + 1
+      });
+      window.showToast('這顆思念更亮了 ✦');
+    } catch (err) {
+      console.error("更新失敗", err);
+    }
+  }
+});
+
+function updateMStats(){
+  document.getElementById('m-count').textContent = starMessages.length;
+  if(starMessages.length === 0) return;
+  const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a);
+  document.getElementById('m-brightest').textContent =
+    brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
+}
+
+window.submitM = async function(){
+  const input = document.getElementById('m-input');
+  const text = input.value.trim();
+  if(!text){ window.showToast('請先寫下你的思念'); return; }
+
+  const colorIdx = Math.floor(Math.random() * STAR_COLORS.length);
+  const relX = 0.05 + Math.random() * 0.9;
+  const relY = 0.05 + Math.random() * 0.9;
+
+  try {
+    await addDoc(collection(db, "stars"), {
+      text: text,
+      brightness: 1,
+      clicks: 0,
+      colorIdx: colorIdx,
+      relX: relX,
+      relY: relY,
+      createdAt: serverTimestamp()
+    });
+    
+    input.value = '';
+    logJourney('m', text);
+    window.showToast('你的思念成為了一顆星，滑鼠移過去看看 ✦');
+  } catch(err) {
+    window.showToast('星空連接失敗，請稍後再試。');
+    console.error(err);
+  }
+}
+
+// ===== 5. E 房：情緒出口 =====
+const eInput = document.getElementById('e-input');
+if(eInput){
+  eInput.addEventListener('input', () => {
+    const l = eInput.value.length;
+    document.getElementById('e-char').textContent = Math.min(l, 300) + ' / 300';
+    if(l > 300) eInput.value = eInput.value.slice(0, 300);
+  });
+}
+
+window.submitE = function(){
   const input = document.getElementById('e-input');
   const text = input.value.trim();
-  if(!text){showToast('請先寫下你想說的話');return;}
+  if(!text){ window.showToast('請先寫下你想說的話'); return; }
   const feed = document.getElementById('e-feed');
   const div = document.createElement('div');
   div.className = 'e-msg';
@@ -756,538 +958,90 @@ function submitE(){
     <div class="e-msg-time">${nowStr()}</div>
   `;
   feed.insertBefore(div, feed.firstChild);
-  input.value='';
-  document.getElementById('e-char').textContent='0 / 300';
+  input.value = '';
+  document.getElementById('e-char').textContent = '0 / 300';
   logJourney('e', text);
-  showToast('已投入黑暗。你說出來了。');
+  window.showToast('已投入黑暗。你說出來了。');
 }
 
-// seed E with presets
-window.addEventListener('load',()=>{
-  const feed = document.getElementById('e-feed');
-  ePreset.slice(0,3).forEach(t=>{
-    const d = document.createElement('div');
-    d.className='e-msg';
-    d.innerHTML=`<div class="e-msg-anon">匿名 · ANONYMOUS</div><div>${t}</div><div class="e-msg-time">稍早</div>`;
-    feed.appendChild(d);
-  });
-});
-
-// ===== M: STAR MAP =====
-const canvas = document.getElementById('star-canvas');
-const ctx = canvas.getContext('2d');
-const tooltip = document.getElementById('star-tooltip');
-
-// 星星顏色配置：冷暖色交錯，更有層次
-const STAR_COLORS = [
-  {r:200,g:215,b:245}, // 冷藍白
-  {r:245,g:235,b:210}, // 暖金白
-  {r:180,g:210,b:235}, // 淡藍
-  {r:235,g:210,b:190}, // 暖橙白
-  {r:210,g:225,b:255}, // 藍紫
-  {r:255,g:240,b:220}, // 淡金
-];
-
-function resizeCanvas(){
-  const room = document.getElementById('room-m');
-  canvas.width = room.offsetWidth;
-  canvas.height = room.offsetHeight;
-  // resize 後重新初始化背景星
-  initBgStars();
-}
-window.addEventListener('resize', ()=>{ resizeCanvas(); });
-
-const starMessages = [
-  {text:'思念媽媽的味道，她做的滷肉飯。',x:null,y:null,brightness:3,clicks:3,colorIdx:1},
-  {text:'那年夏天的他，現在不知道在哪裡。',x:null,y:null,brightness:2,clicks:2,colorIdx:0},
-  {text:'我在異鄉的每個夜晚，都想起家。',x:null,y:null,brightness:4,clicks:4,colorIdx:4},
-  {text:'思念一段沒有開口的感情。',x:null,y:null,brightness:1,clicks:1,colorIdx:2},
-  {text:'那隻貓，已經離開三年了。',x:null,y:null,brightness:2,clicks:2,colorIdx:3},
-  {text:'懷念那段大家都還在一起的時光。',x:null,y:null,brightness:3,clicks:3,colorIdx:5},
-];
-
-// 保證星星位置分散，不重疊
-function placeStarPosition(existing){
-  const w=canvas.width||800, h=canvas.height||600;
-  const margin=100;
-  let attempts=0, x, y, ok;
-  do {
-    x = margin + Math.random()*(w-2*margin);
-    y = margin + Math.random()*(h-2*margin);
-    ok = existing.every(s=>{
-      if(!s.x) return true;
-      const dx=s.x-x, dy=s.y-y;
-      return Math.sqrt(dx*dx+dy*dy)>60;
-    });
-    attempts++;
-  } while(!ok && attempts<30);
-  return {x,y};
-}
-
-function initStarPositions(){
-  starMessages.forEach((s,i)=>{
-    if(!s.x){
-      const pos = placeStarPosition(starMessages.slice(0,i));
-      s.x = pos.x; s.y = pos.y;
-    }
-  });
-}
-
-let bgStars=[];
-function initBgStars(){
-  bgStars=[];
-  const w=canvas.width||800, h=canvas.height||600;
-  // 三層背景星：遠、中、近
-  for(let i=0;i<60;i++){   // 遠景：極小極暗
-    const c=STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)];
-    bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.4+0.1,
-      a:Math.random()*0.3+0.05, da:(Math.random()-.5)*0.002, c});
-  }
-  for(let i=0;i<50;i++){   // 中景：小
-    const c=STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)];
-    bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.6+0.3,
-      a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c});
-  }
-  for(let i=0;i<30;i++){   // 近景：稍大，閃爍快
-    const c=STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)];
-    bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.5,
-      a:Math.random()*0.5+0.2, da:(Math.random()-.5)*0.005, c});
-  }
-}
-
-// 畫六芒星光芒
-function drawSparkle(cx,cy,r,alpha,color){
-  ctx.save();
-  const arms=[0,60,120,180,240,300];
-  arms.forEach(deg=>{
-    const rad=deg*Math.PI/180;
-    ctx.strokeStyle=`rgba(${color.r},${color.g},${color.b},${alpha})`;
-    ctx.lineWidth=0.5;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.lineTo(cx+Math.cos(rad)*r, cy+Math.sin(rad)*r);
-    ctx.stroke();
-  });
-  ctx.restore();
-}
-
-let animFrame;
-function drawStars(){
-  if(!canvas.width) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // 背景星（閃爍）
-  bgStars.forEach(s=>{
-    s.a += s.da;
-    if(s.a>0.7||s.a<0.03) s.da*=-1;
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`;
-    ctx.fill();
-  });
-
-  // 內容星（思念）
-  initStarPositions();
-  starMessages.forEach(s=>{
-    const b = s.brightness;
-    const c = STAR_COLORS[s.colorIdx||0];
-    const r = 1.5 + b*1.2;
-    const glowR = r*(4+b*0.8);
-
-    // 外暈（多層）
-    [glowR*1.5, glowR, glowR*0.5].forEach((gr,li)=>{
-      const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,gr);
-      const alpha = (0.04+b*0.02)*(1-li*0.3);
-      g.addColorStop(0,`rgba(${c.r},${c.g},${c.b},${alpha})`);
-      g.addColorStop(1,`rgba(${c.r},${c.g},${c.b},0)`);
-      ctx.beginPath();
-      ctx.arc(s.x,s.y,gr,0,Math.PI*2);
-      ctx.fillStyle=g;
-      ctx.fill();
-    });
-
-    // 光芒（亮度>=2才出現）
-    if(b>=2){
-      drawSparkle(s.x,s.y,r*(2+b*0.6),0.08+b*0.02,c);
-    }
-
-    // 星核
-    const core = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,r);
-    core.addColorStop(0,`rgba(${c.r},${c.g},${c.b},1)`);
-    core.addColorStop(0.5,`rgba(${c.r},${c.g},${c.b},0.8)`);
-    core.addColorStop(1,`rgba(${c.r},${c.g},${c.b},0.2)`);
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,r,0,Math.PI*2);
-    ctx.fillStyle=core;
-    ctx.fill();
-
-    // 最亮星加十字光
-    if(b>=4){
-      ctx.strokeStyle=`rgba(${c.r},${c.g},${c.b},0.25)`;
-      ctx.lineWidth=0.8;
-      const arm=r*5;
-      ctx.beginPath();ctx.moveTo(s.x-arm,s.y);ctx.lineTo(s.x+arm,s.y);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(s.x,s.y-arm);ctx.lineTo(s.x,s.y+arm);ctx.stroke();
-    }
-  });
-
-  animFrame = requestAnimationFrame(drawStars);
-}
-
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    resizeCanvas();
-    initBgStars();
-    initStarPositions();
-    drawStars();
-    updateMStats();
-  },200);
-});
-
-// 精確取得 canvas 內座標（修正 position:absolute 偏移問題）
-function getCanvasPos(e){
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  return {
-    x: (e.clientX - rect.left) * scaleX,
-    y: (e.clientY - rect.top) * scaleY
-  };
-}
-
-function getStarAt(x,y){
-  // 越亮的星點擊範圍越大
-  return starMessages.find(s=>{
-    if(!s.x) return false;
-    const dx=s.x-x, dy=s.y-y;
-    const hitR = 16 + s.brightness*4;
-    return Math.sqrt(dx*dx+dy*dy) < hitR;
-  });
-}
-
-canvas.addEventListener('mousemove', e=>{
-  const {x,y} = getCanvasPos(e);
-  const star = getStarAt(x,y);
-  if(star){
-    tooltip.style.display='block';
-    tooltip.style.left=(e.clientX+18)+'px';
-    tooltip.style.top=(e.clientY-12)+'px';
-    const c=STAR_COLORS[star.colorIdx||0];
-    tooltip.innerHTML=`
-      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.6);letter-spacing:2px;">思念</span><br>
-      ${star.text}<br>
-      <span style="font-size:9px;color:rgba(${c.r},${c.g},${c.b},.4);letter-spacing:1px;margin-top:4px;display:block;">✦ ${star.clicks} 次共鳴 · 點擊讓它更亮</span>
-    `;
-    canvas.style.cursor='pointer';
-  } else {
-    tooltip.style.display='none';
-    canvas.style.cursor='default';
-  }
-});
-
-canvas.addEventListener('mouseleave',()=>{
-  tooltip.style.display='none';
-  canvas.style.cursor='default';
-});
-
-canvas.addEventListener('click', e=>{
-  const {x,y} = getCanvasPos(e);
-  const star = getStarAt(x,y);
-  if(star){
-    star.brightness = Math.min(star.brightness+1, 10);
-    star.clicks++;
-    updateMStats();
-    showToast('這顆思念更亮了 ✦');
-  }
-});
-
-function updateMStats(){
-  document.getElementById('m-count').textContent = starMessages.length;
-  if(starMessages.length===0) return;
-  const brightest = starMessages.reduce((a,b)=>b.brightness>a.brightness?b:a);
-  document.getElementById('m-brightest').textContent =
-    brightest.text.length>14?brightest.text.slice(0,14)+'…':brightest.text;
-}
-
-function submitM(){
-  const input = document.getElementById('m-input');
-  const text = input.value.trim();
-  if(!text){showToast('請先寫下你的思念');return;}
-
-  // 先確保 canvas 尺寸正確
-  if(!canvas.width || canvas.width<10) resizeCanvas();
-
-  const colorIdx = Math.floor(Math.random()*STAR_COLORS.length);
-  const newStar = {
-    text, brightness:1, clicks:0,
-    colorIdx, x:null, y:null
-  };
-  // 計算不重疊位置
-  const pos = placeStarPosition(starMessages);
-  newStar.x = pos.x;
-  newStar.y = pos.y;
-
-  starMessages.push(newStar);
-  input.value='';
-  updateMStats();
-  logJourney('m', text);
-  showToast('你的思念成為了一顆星，滑鼠移過去看看 ✦');
-}
-
-// ===== P: KINTSUGI =====
-let pCanvas, pCtx;
-let pShards=[];
-let pHealedTotal=0;
-
-const pPreset=[
-  '那段關係，我還沒有說再見。',
-  '我對自己太嚴苛，卻從不原諒自己。',
-  '那次失敗，我一直放不下。',
-  '我錯過了一個重要的告別。',
-];
-
-window.addEventListener('load',()=>{
-  pCanvas = document.getElementById('p-canvas');
-  pCtx = pCanvas.getContext('2d');
-  pCanvas.width = pCanvas.offsetWidth || 540;
-  initPCanvas();
-  pPreset.forEach(t=>addShard(t));
-});
-
-function initPCanvas(){
-  drawKintsugiVessel();
-}
-
-function drawKintsugiVessel(){
-  const c=pCtx, w=pCanvas.width, h=pCanvas.height;
-  c.clearRect(0,0,w,h);
-  // vessel outline
-  c.strokeStyle='rgba(201,168,76,0.2)';
-  c.lineWidth=1;
-  // draw a simple vase/bowl shape
-  c.beginPath();
-  const cx=w/2, cy=h/2;
-  const rx=w*0.3, ry=h*0.38;
-  c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2);
-  c.stroke();
-  // cracks
-  const cracks=[
-    [[cx-80,cy-60],[cx-50,cy],[cx-20,cy+80]],
-    [[cx+60,cy-80],[cx+30,cy-20],[cx+50,cy+60]],
-    [[cx-30,cy-40],[cx+20,cy-10],[cx+60,cy+20]],
-    [[cx-60,cy+20],[cx-10,cy+60],[cx+30,cy+100]],
-  ];
-  cracks.forEach(crack=>{
-    c.beginPath();
-    c.moveTo(crack[0][0],crack[0][1]);
-    crack.slice(1).forEach(p=>c.lineTo(p[0],p[1]));
-    c.strokeStyle='rgba(201,168,76,0.15)';
-    c.lineWidth=0.5;
-    c.stroke();
-  });
-  // count label
-  if(pHealedTotal>0){
-    c.font='11px Noto Sans TC';
-    c.fillStyle='rgba(201,168,76,0.4)';
-    c.textAlign='center';
-    c.fillText(`已修補 ${pHealedTotal} 道裂紋`, cx, cy+ry+24);
-  }
-}
-
-function addShard(text){
-  const board = document.getElementById('p-board');
-  const div = document.createElement('div');
-  div.className='shard';
-  div.innerHTML=`<div class="shard-text">${text}</div>
-    <div class="shard-healed-tag">✦ 已修補</div>
-    <div class="shard-glow"></div>`;
-  div.addEventListener('click',()=>healShard(div));
-  board.appendChild(div);
-  pShards.push({el:div,healed:false,text});
-}
-
-function healShard(el){
-  if(el.classList.contains('healed')) return;
-  el.classList.add('healed');
-  pHealedTotal++;
-  drawKintsugiVessel();
-  drawGoldCrack();
-  document.getElementById('p-healed-count').textContent=`已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
-  showToast('以金修補，裂縫成為了光 ✦');
-}
-
-function drawGoldCrack(){
-  const c=pCtx, w=pCanvas.width, h=pCanvas.height;
-  const cx=w/2, cy=h/2;
-  const startX = cx + (Math.random()-0.5)*w*0.4;
-  const startY = cy + (Math.random()-0.5)*h*0.5;
-  const endX = startX + (Math.random()-0.5)*80;
-  const endY = startY + (Math.random()-0.5)*80;
-  const midX = (startX+endX)/2+(Math.random()-0.5)*30;
-  const midY = (startY+endY)/2+(Math.random()-0.5)*30;
-  c.beginPath();
-  c.moveTo(startX,startY);
-  c.quadraticCurveTo(midX,midY,endX,endY);
-  c.strokeStyle='rgba(201,168,76,0.7)';
-  c.lineWidth=1.5;
-  c.stroke();
-  // gold glow
-  c.strokeStyle='rgba(201,168,76,0.2)';
-  c.lineWidth=4;
-  c.beginPath();
-  c.moveTo(startX,startY);
-  c.quadraticCurveTo(midX,midY,endX,endY);
-  c.stroke();
-}
-
-function submitP(){
+// ===== 6. P 房：碎片修補 =====
+let pCanvas, pCtx, pShards=[], pHealedTotal=0;
+window.submitP = function(){
   const input = document.getElementById('p-input');
   const text = input.value.trim();
-  if(!text){showToast('請先寫下你心中的碎片');return;}
-  addShard(text);
-  input.value='';
-  logJourney('p', text);
-  showToast('碎片放入了。點擊它，讓它被修補。');
-}
-
-// ===== A: SAND MESSAGES (24h auto-dissolve) =====
-const aPreset=[
-  {text:'今天哭了，不知道為什麼。就是很想哭。',dur:24*60*60},
-  {text:'我知道我應該放下，但就是做不到。',dur:22*60*60},
-  {text:'我最近不想說話，但又怕被遺忘。',dur:18*60*60},
-];
-
-window.addEventListener('load',()=>{
-  const remaining = [
-    {text:aPreset[0].text, left:23*60*60+42*60+11, total:24*60*60},
-    {text:aPreset[1].text, left:21*60*60+8*60, total:22*60*60},
-    {text:aPreset[2].text, left:14*60*60+30*60, total:18*60*60},
-  ];
-  remaining.forEach(m=>renderAMessage(m.text, m.left, m.total));
-});
-
-function formatTimeLeft(secs){
-  if(secs<=0) return '即將消散';
-  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60);
-  if(h>0) return `${h}h ${m}m 後消散`;
-  return `${m}m 後消散`;
-}
-
-function renderAMessage(text, secsLeft, totalSecs){
-  const feed = document.getElementById('a-feed');
+  if(!text){ window.showToast('請先寫下你心中的碎片'); return; }
+  const board = document.getElementById('p-board');
   const div = document.createElement('div');
-  div.className='sand-msg';
-  const pct = (secsLeft/totalSecs)*100;
-  div.innerHTML=`
-    <div class="sand-dissolve-overlay"></div>
-    <div class="sand-msg-text">${text}</div>
-    <div class="sand-timer-wrap">
-      <div class="sand-timer-label">DISSOLVING</div>
-      <div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div>
-      <div class="sand-time-left" id="tl-${Date.now()}">${formatTimeLeft(secsLeft)}</div>
-    </div>
-  `;
-  feed.insertBefore(div, feed.firstChild);
-  // simulate countdown (accelerated for demo: 1 real second = 60 sim seconds)
-  let simSecs = secsLeft;
-  const fill = div.querySelector('.sand-timer-fill');
-  const label = div.querySelector('.sand-time-left');
-  const interval = setInterval(()=>{
-    simSecs -= 60;
-    if(simSecs<=0){
-      clearInterval(interval);
-      div.classList.add('dissolving');
-      setTimeout(()=>div.remove(), 3500);
-      return;
-    }
-    const p = (simSecs/totalSecs)*100;
-    fill.style.width=p+'%';
-    label.textContent = formatTimeLeft(simSecs);
-    if(p<15) div.style.opacity=(0.3+(p/15)*0.7)+'';
-  },1000);
+  div.className = 'shard';
+  div.innerHTML = `<div class="shard-text">${text}</div><div class="shard-healed-tag">✦ 已修補</div><div class="shard-glow"></div>`;
+  div.addEventListener('click', function(){
+    if(div.classList.contains('healed')) return;
+    div.classList.add('healed');
+    pHealedTotal++;
+    document.getElementById('p-healed-count').textContent = `已有 ${pHealedTotal} 道裂紋，以金修補。破碎本身，即是美。`;
+    window.showToast('以金修補，裂縫成為了光 ✦');
+  });
+  board.appendChild(div);
+  input.value = '';
+  logJourney('p', text);
+  window.showToast('碎片放入了。點擊它，讓它被修補。');
 }
 
-function submitA(){
+// ===== 7. A 房：神聖避難所 =====
+window.submitA = function(){
   const input = document.getElementById('a-input');
   const text = input.value.trim();
-  if(!text){showToast('請先寫下你想放下的話');return;}
-  renderAMessage(text, 24*60*60, 24*60*60);
-  input.value='';
+  if(!text){ window.showToast('請先寫下你想放下的話'); return; }
+  const feed = document.getElementById('a-feed');
+  const div = document.createElement('div');
+  div.className = 'sand-msg';
+  div.innerHTML = `<div class="sand-msg-text">${text}</div><div class="sand-timer-wrap"><div class="sand-time-left">24h 後消散</div></div>`;
+  feed.insertBefore(div, feed.firstChild);
+  input.value = '';
   logJourney('a', text);
-  showToast('已放入沙畫。24 小時後，它會消散。');
+  window.showToast('已放入沙畫。24 小時後，它會消散。');
 }
 
-// ===== T: WARMTH EXCHANGE =====
-const tPreset=[
-  '你今天撐過來了，這就夠了。',
-  '不知道有沒有人需要聽到這句話：你很好，真的很好。',
-  '給所有在深夜還沒睡的人，你不孤單。',
-  '有時候沉默也是一種療癒。謝謝你陪著自己。',
-  '你不需要解釋你的傷，傷就是傷，它是真實的。',
-];
-
-window.addEventListener('load',()=>{
-  const feed = document.getElementById('t-feed');
-  tPreset.forEach(t=>{
-    const div=createWarmthItem(t);
-    feed.appendChild(div);
-  });
-  document.getElementById('t-echo-count').textContent=
-    `本週共 ${tPreset.length} 道溫暖漂浮`;
-});
-
-function createWarmthItem(text){
-  const div=document.createElement('div');
-  div.className='warmth-item';
-  let echos=Math.floor(Math.random()*12)+1;
-  div.innerHTML=`
-    <div class="warmth-pulse"></div>
-    <div>${text}</div>
-    <button class="echo-btn" onclick="sendEcho(this,${echos})">
-      <span class="heart">🕯️</span> Echo Pulse
-      <span class="echo-num" style="color:rgba(232,168,124,.4);margin-left:4px;">(${echos})</span>
-    </button>
-  `;
-  return div;
-}
-
-function sendEcho(btn, count){
-  if(btn.classList.contains('pulsed')) return;
-  btn.classList.add('pulsed');
-  const num=btn.querySelector('.echo-num');
-  num.textContent=`(${count+1})`;
-  state.echoTotal++;
-  showToast('✦ Echo Pulse 傳出——不顯示數字，只有心跳。');
-  if('vibrate' in navigator) navigator.vibrate([40,20,40]);
-}
-
-function submitT(){
+// ===== 8. T 房：能量共振 =====
+window.submitT = function(){
   const input = document.getElementById('t-input');
   const text = input.value.trim();
-  if(!text){showToast('請先寫下你想送出的溫暖');return;}
+  if(!text){ window.showToast('請先寫下你想送出的溫暖'); return; }
   const feed = document.getElementById('t-feed');
-  const div = createWarmthItem(text);
-  div.style.borderLeftColor='rgba(232,168,124,.6)';
+  const div = document.createElement('div');
+  div.className = 'warmth-item';
+  div.innerHTML = `<div class="warmth-pulse"></div><div>${text}</div><button class="echo-btn" onclick="window.sendEcho(this)"><span class="heart">🕯️</span> Echo Pulse</button>`;
   feed.insertBefore(div, feed.firstChild);
-  input.value='';
-  state.tCount++;
+  input.value = '';
   logJourney('t', text);
-  const total = feed.querySelectorAll('.warmth-item').length;
-  document.getElementById('t-echo-count').textContent=`本週共 ${total} 道溫暖漂浮`;
-  showToast('溫暖已送出，它正在漂浮向某個人 🕯️');
+  window.showToast('溫暖已送出，它正在漂浮向某個人 🕯️');
 }
 
-// Keep H room updated
-function updateHRoom(){
-  document.getElementById('h-e-count').textContent=state.eCount;
-  document.getElementById('h-m-count').textContent=
-    document.getElementById('m-count')?document.getElementById('m-count').textContent:'0';
-  document.getElementById('h-p-count').textContent=pHealedTotal;
-  document.getElementById('h-a-count').textContent=state.aCount;
-  document.getElementById('h-t-count').textContent=state.tCount;
+window.sendEcho = function(btn){
+  if(btn.classList.contains('pulsed')) return;
+  btn.classList.add('pulsed');
+  window.showToast('✦ Echo Pulse 傳出——不顯示數字，只有心跳。');
 }
-setInterval(updateHRoom, 2000);
 
+// ===== 9. 初始化與介面更新 =====
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    resizeCanvas();
+    drawStars();
+  }, 200);
+  
+  // 更新 H 房數字
+  setInterval(() => {
+    const eCountEl = document.getElementById('h-e-count');
+    if (eCountEl) {
+      eCountEl.textContent = state.eCount;
+      document.getElementById('h-m-count').textContent = document.getElementById('m-count') ? document.getElementById('m-count').textContent : '0';
+      document.getElementById('h-p-count').textContent = pHealedTotal;
+      document.getElementById('h-a-count').textContent = state.aCount;
+      document.getElementById('h-t-count').textContent = state.tCount;
+    }
+  }, 2000);
+});
 </script>
 </body>
 </html>
