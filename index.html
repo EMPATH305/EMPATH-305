@@ -279,6 +279,51 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   nav{padding:14px 20px;} .room{padding:90px 20px 60px;} .room-letter{font-size:80px;top:70px;right:20px;}
   .t-layout{grid-template-columns:1fr;} .kintsugi-board{grid-template-columns:1fr;} .hero-quotes{flex-direction:column;gap:16px;}
 }
+
+/* ==========================================
+   🌟 原作者深夜緊急維修 (UX & UI 微調)
+   ========================================== */
+
+/* 1. 提升整體文字對比度 (解決長輩閱讀痛點) */
+body, p, h1, h2, h3, .room-desc, .hero-desc, .input-area, .e-msg, .sand-msg-text, .warmth-item, .shard-text {
+    color: #F5F5F5 !important;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* (降噪模式下的文字保持原本設定以防過亮) */
+body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
+    color: rgba(201, 197, 188, 0.7) !important;
+    text-shadow: none !important;
+}
+
+/* 3. 碎片卡片的高級金繼發光質感 */
+.shard.healed {
+    border: 1px solid #BF953F !important;
+    background: rgba(201,168,76,0.08) !important;
+    box-shadow: 0 0 12px rgba(191, 149, 63, 0.4) !important;
+}
+.shard.healed .shard-glow {
+    background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important;
+    height: 2px !important;
+    opacity: 1 !important;
+    box-shadow: 0 0 8px rgba(252, 246, 186, 0.8) !important;
+}
+
+/* 4. 手機版降噪按鈕緊急修復 */
+@media screen and (max-width: 768px) {
+    #hsp-btn {
+        position: fixed !important;
+        bottom: 25px !important;
+        right: 20px !important;
+        z-index: 9999 !important;
+        transform: scale(0.9);
+        background: rgba(13, 27, 42, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        padding: 6px 16px !important;
+        border-radius: 20px !important;
+        backdrop-filter: blur(8px);
+    }
+}
 </style>
 </head>
 <body>
@@ -821,7 +866,19 @@ onSnapshot(collection(db, "stars"), (snapshot) => {
 
 function drawStars(){
   if(!canvas.width) return; ctx.clearRect(0,0,canvas.width,canvas.height);
-  bgStars.forEach(s => { s.a+=s.da; if(s.a>0.7||s.a<0.03) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; ctx.fill(); });
+  
+  /* 🌟 原作者修復：星空背景加上閃爍變化與自然發光 */
+  bgStars.forEach(s => { 
+    s.a+=s.da; 
+    if(s.a>0.8||s.a<0.1) s.da*=-1; // 增加閃爍落差 
+    ctx.beginPath(); 
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
+    ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; 
+    ctx.shadowBlur = 6; 
+    ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`;
+    ctx.fill(); 
+    ctx.shadowBlur = 0; // 重置
+  });
   
   starMessages.forEach(s => {
     s.x = s.relX*canvas.width; s.y = s.relY*canvas.height;
@@ -894,8 +951,27 @@ function drawKintsugiVessel(){
   c.strokeStyle='rgba(201,168,76,0.2)'; c.lineWidth=1; c.beginPath(); const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke();
   const predefinedCracks = [ {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80}, {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60}, {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20}, {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100}, {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60} ];
   predefinedCracks.forEach(crack => { c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); c.strokeStyle='rgba(201,168,76,0.08)'; c.lineWidth=0.5; c.stroke(); });
+  
   const goldLines = Math.min(pHealedTotal, predefinedCracks.length);
-  for(let i=0; i<goldLines; i++){ const crack = predefinedCracks[i]; c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); c.strokeStyle='rgba(201,168,76,0.85)'; c.lineWidth=1.8; c.stroke(); }
+  for(let i=0; i<goldLines; i++){ 
+    const crack = predefinedCracks[i]; 
+    c.beginPath(); 
+    c.moveTo(crack.sx, crack.sy); 
+    c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); 
+    
+    /* 🌟 原作者修復： Canvas 繪製的金屬漸層與光暈升級 */
+    const gradient = c.createLinearGradient(crack.sx, crack.sy, crack.ex, crack.ey);
+    gradient.addColorStop(0, '#BF953F');
+    gradient.addColorStop(0.5, '#FCF6BA');
+    gradient.addColorStop(1, '#B38728');
+    
+    c.strokeStyle = gradient; 
+    c.lineWidth = 2.5;
+    c.shadowBlur = 10;
+    c.shadowColor = 'rgba(252, 246, 186, 0.8)';
+    c.stroke(); 
+    c.shadowBlur = 0; // 重置
+  }
 }
 
 window.submitP = async function(){
