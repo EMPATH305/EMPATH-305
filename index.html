@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
 
+<!-- 社群分享標籤 (Open Graph) -->
 <meta property="og:title" content="EMPATH — Every Moment As Truth Heals" />
 <meta property="og:description" content="數位時代的情緒安放平台。承認、安放、修補、釋放、交換、回家。以文學敘事對抗視覺霸權的設計實踐。" />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop" /> 
 <meta name="twitter:card" content="summary_large_image" />
 
+<!-- 圖片生成引擎 html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
@@ -105,6 +107,7 @@ nav{
 /* ===== E ROOM ===== */
 #room-e{background:linear-gradient(180deg,#0D1B2A 0%,#0c1824 100%);}
 #room-e .room-letter{color:var(--e);} #room-e .room-tag{color:var(--e);} #room-e .send-btn{border-color:var(--e);color:var(--e);} #room-e .send-btn:hover{background:rgba(123,143,161,.12);}
+.e-warning{ font-size:10px; color:var(--amber); margin-bottom:12px; letter-spacing:1px; line-height:1.6; opacity: 0.8; }
 .e-anon-label{ font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.5);margin-bottom:6px; }
 .e-char-count{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
 .e-feed{margin-top:36px;display:flex;flex-direction:column;gap:10px;max-width:600px;}
@@ -125,7 +128,7 @@ nav{
 #room-p .room-letter{color:var(--p);} #room-p .room-tag{color:var(--p);} #room-p .send-btn{border-color:var(--p);color:var(--p);} #room-p .send-btn:hover{background:rgba(201,168,76,.08);}
 .p-vessel{ max-width:540px;margin-bottom:32px;position:relative; }
 #p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.1); }
-.p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.3);text-align:center;margin-top:8px; }
+.p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.3);text-align:center;margin-top:8px; line-height: 1.8; }
 .kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:8px; }
 .shard{ background:rgba(255,255,255,.03);padding:18px;border:1px solid rgba(201,168,76,.1);cursor:pointer;transition:all .4s;position:relative;overflow:hidden; }
 .shard:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04);} .shard.healed{border-color:rgba(201,168,76,.5);}
@@ -148,7 +151,7 @@ nav{
 .sand-time-left{font-size:9px;color:rgba(122,158,159,.5);letter-spacing:1px;white-space:nowrap;}
 .sand-dissolve-overlay{ position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);opacity:0;pointer-events:none;transition:opacity 2s; }
 .sand-msg.dissolving{opacity:.15;transform:translateY(4px);} .sand-msg.dissolving .sand-dissolve-overlay{opacity:1;}
-.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px; }
+.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px; line-height:1.6; }
 
 /* ===== T ROOM ===== */
 #room-t{background:linear-gradient(180deg,#0D1B2A 0%,#140f08 100%);}
@@ -234,9 +237,9 @@ nav{
 }
 .action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
 
-/* 🌟 真實圖片生成：分享卡 Modal CSS 修復 (完全相容版) */
+/* 🌟 真實圖片生成：分享卡 Modal CSS 修復 */
 .share-modal {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; /* 修正 Safari 隱形 bug */
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.85); z-index: 99999;
   display: none; flex-direction: column; justify-content: center; align-items: center;
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -276,8 +279,9 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
 </head>
 <body>
 
+<!-- 🌟 留存儀式感：分享卡 Modal -->
 <div id="share-modal" class="share-modal">
-  
+  <!-- 要被拍照轉成圖片的區域 -->
   <div class="wrapped-card" id="wrapped-card-content">
     <div class="wrapped-title">EMPATH</div>
     <div class="wrapped-sub">我的靈魂足跡</div>
@@ -295,9 +299,11 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </div>
 
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
+<!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -307,10 +313,12 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
     <a class="nav-letter" data-l="A" href="#room-a">A</a>
     <a class="nav-letter" data-l="T" href="#room-t">T</a>
     <a class="nav-letter" data-l="H" href="#room-h">H</a>
+    <!-- 👁️ 視覺降噪按鈕 -->
     <button class="nav-letter hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️ 降噪</button>
   </div>
 </nav>
 
+<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-text">EMPATH</div>
   <h1 class="hero-title">EMPATH</h1>
@@ -338,6 +346,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <span class="scroll-hint">↓ &nbsp; SCROLL</span>
 </section>
 
+<!-- E: 情緒出口 -->
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
@@ -345,8 +354,11 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字">
     說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。
   </p>
+  <!-- 🌟 反仇恨提示 -->
+  <p class="e-warning">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦</p>
   <p class="e-anon-label">ANONYMOUS — 完全匿名</p>
-  <textarea class="input-area" id="e-input" rows="5"
+  <!-- 🌟 修復字數即時計算 -->
+  <textarea class="input-area" id="e-input" rows="5" maxlength="300" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 300'"
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 300</div>
   <br>
@@ -354,6 +366,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <div class="e-feed" id="e-feed"></div>
 </section>
 
+<!-- M: 星空思念 -->
 <section id="room-m" class="room">
   <canvas id="star-canvas"></canvas>
   <div class="room-letter">M</div>
@@ -364,8 +377,9 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
       每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。
     </p>
     <div class="m-input-wrap">
+      <!-- 🌟 M 房全新引導 Placeholder -->
       <textarea class="input-area" id="m-input" rows="4"
-        placeholder="寫下你的思念，它會成為夜空中的一顆星……&#10;思念一個人、一個地方、或一段時光。"></textarea>
+        placeholder="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"></textarea>
       <br>
       <button class="send-btn" onclick="window.submitM()">放上星空 →</button>
     </div>
@@ -376,6 +390,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </section>
 
+<!-- P: 碎片修補 -->
 <section id="room-p" class="room">
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
@@ -385,7 +400,8 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </p>
   <div class="p-vessel">
     <canvas id="p-canvas" width="540" height="300"></canvas>
-    <p class="p-canvas-hint">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕</p>
+    <!-- 🌟 P 房低門檻修補提示 -->
+    <p class="p-canvas-hint">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦</p>
   </div>
   <textarea class="input-area" id="p-input" rows="3"
     placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
@@ -395,6 +411,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   <p class="p-healed-count" id="p-healed-count"></p>
 </section>
 
+<!-- A: 神聖避難所 -->
 <section id="room-a" class="room">
   <div class="room-letter">A</div>
   <p class="room-tag">A — Asylum / Ache</p>
@@ -406,10 +423,13 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
     placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
   <br>
   <button class="send-btn" onclick="window.submitA()">放入沙畫 →</button>
-  <p class="a-note">∗ 所有留言將在 24 小時後自動消散，如沙畫般不留痕跡</p>
+  <!-- 🌟 反仇恨提示 -->
+  <p class="a-note" style="margin-top:12px; color:rgba(232,168,124,.6);">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
+  <p class="a-note" style="margin-top:8px;">∗ 所有留言將在 24 小時後自動消散，如沙畫般不留痕跡</p>
   <div class="a-feed" id="a-feed"></div>
 </section>
 
+<!-- T: 能量共振 -->
 <section id="room-t" class="room">
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
@@ -445,6 +465,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </section>
 
+<!-- H: 靈魂歸宿 -->
 <section id="room-h" class="room">
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
@@ -516,6 +537,7 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
   <div class="footer-left">Every Moment As Truth Heals</div>
   <div class="footer-letters">
@@ -608,7 +630,7 @@ window.shareSite = function() {
   }
 }
 
-// 🌟 真實圖片生成：開啟卡片與執行下載轉換
+// 🌟 真實圖片生成
 window.openShareCard = function() {
   document.getElementById('sc-e').textContent = state.eCount;
   document.getElementById('sc-m').textContent = state.mCount;
@@ -632,12 +654,12 @@ window.downloadShareCard = function() {
 
   html2canvas(card, {
     backgroundColor: '#0a111a',
-    scale: 2 // 高解析度
+    scale: 2 
   }).then(canvas => {
     const link = document.createElement('a');
     link.download = 'EMPATH_Soul_Journey.png';
     link.href = canvas.toDataURL('image/png');
-    link.click(); // 觸發下載
+    link.click(); 
     btn.textContent = originalText;
     window.showToast('圖片已成功下載！快去分享到限時動態吧 ✦');
   }).catch(err => {
@@ -717,7 +739,7 @@ onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (sna
 });
 window.submitE = async function(){
   const input = document.getElementById('e-input'); const text = input.value.trim(); if(!text){ window.showToast('請先寫下你想說的話'); return; }
-  try { await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); input.value=''; logJourney('e', text); window.showToast('已投入黑暗'); } catch(e){}
+  try { await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); input.value=''; document.getElementById('e-char').textContent = '0 / 300'; logJourney('e', text); window.showToast('已投入黑暗'); } catch(e){}
 }
 
 // ===== M 房 =====
@@ -782,7 +804,7 @@ roomM.addEventListener('click', async e => {
       activeStarId = star.id;
       tooltip.style.display = 'block'; tooltip.style.left = (e.clientX + 16) + 'px'; tooltip.style.top = (e.clientY - 16) + 'px';
       const c = STAR_COLORS[star.colorIdx];
-      tooltip.innerHTML = `思念<br>${star.text}<br><span style="font-size:9px;color:var(--gold);margin-top:4px;display:block;">✦ 再次點擊以共鳴點亮 (${star.clicks})</span>`;
+      tooltip.innerHTML = `思念<br>${star.text}<br><span style="font-size:9px;color:var(--gold);margin-top:4px;display:block;">✦ 再次點擊以共鳴點亮</span>`;
     } else {
       try {
         await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 });
@@ -866,7 +888,8 @@ onSnapshot(collection(db, "warmth"), (snapshot) => {
   globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); feed.innerHTML = '';
   snapshot.forEach(docSnap => {
     const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item';
-    div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse <span class="echo-num">(${data.echos||0})</span></button>`;
+    // 🌟 已移除數字量化，保護純淨無比較的初衷
+    div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`;
     div.querySelector('.echo-btn').addEventListener('click', async function(){
       if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
       await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse 傳出'); window.triggerHeartbeat(); 
