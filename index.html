@@ -131,14 +131,18 @@ nav{
 .p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.3);text-align:center;margin-top:8px; line-height: 1.8; }
 .kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:8px; }
 .shard{ background:rgba(255,255,255,.03);padding:18px;border:1px solid rgba(201,168,76,.1);cursor:pointer;transition:all .4s;position:relative;overflow:hidden; }
-.shard:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04);} .shard.healed{border-color:rgba(201,168,76,.5);}
+.shard:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04);} 
 .shard-text{font-size:12px;line-height:2;color:var(--fog);}
 .shard-glow{ position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0;transition:opacity .4s; }
-.shard:hover .shard-glow{opacity:1;} .shard.healed .shard-glow{opacity:.8;}
+.shard:hover .shard-glow{opacity:1;}
 .shard-healed-tag{ font-size:8px;color:var(--gold);letter-spacing:2px;margin-top:10px;display:none; } .shard.healed .shard-healed-tag{display:block;}
 .p-healed-count{ font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(201,168,76,.4);letter-spacing:2px;margin-top:20px; }
 
-/* ===== A ROOM (🌟 沙畫引擎升級) ===== */
+/* 🌟 金繼質感升級 */
+.shard.healed { border: 1px solid #BF953F !important; background: rgba(201,168,76,0.08) !important; box-shadow: 0 0 12px rgba(191, 149, 63, 0.4) !important; }
+.shard.healed .shard-glow { background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important; height: 2px !important; opacity: 1 !important; box-shadow: 0 0 8px rgba(252, 246, 186, 0.8) !important; }
+
+/* ===== A ROOM (沙畫引擎) ===== */
 #room-a{background:linear-gradient(180deg,#0D1B2A 0%,#071014 100%);}
 #sand-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:0.75;}
 #room-a .room-content{position:relative;z-index:1;}
@@ -149,11 +153,9 @@ nav{
 .sand-timer-wrap{ display:flex;align-items:center;gap:8px;margin-top:10px; }
 .sand-timer-label{font-size:9px;color:var(--a);letter-spacing:2px;}
 .sand-timer-bar{flex:1;height:1px;background:rgba(122,158,159,.15);}
-/* 🌟 進度條改為沙流漸層 */
 .sand-timer-fill{height:100%;background:repeating-linear-gradient(90deg, var(--a), var(--a) 2px, transparent 2px, transparent 4px); transition:width 1s linear;}
 .sand-time-left{font-size:9px;color:rgba(122,158,159,.5);letter-spacing:1px;white-space:nowrap;}
 .sand-dissolve-overlay{ position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);opacity:0;pointer-events:none;transition:opacity 2s; }
-/* 🌟 真正的化為塵埃消散特效 */
 .sand-msg.dissolving { filter: blur(3px); opacity: 0; transform: translateY(15px) scale(0.98); }
 .a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(122,158,159,.4);margin-top:24px;letter-spacing:1px; line-height:1.6; }
 
@@ -274,55 +276,34 @@ footer{ padding:32px 40px;border-top:1px solid rgba(255,255,255,.05);display:fle
 .footer-letters{ display:flex;gap:8px; }
 .footer-l{ font-family:'Cormorant Garamond',serif;font-size:13px;opacity:.25;letter-spacing:2px; }
 
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  nav{padding:14px 20px;} .room{padding:90px 20px 60px;} .room-letter{font-size:80px;top:70px;right:20px;}
-  .t-layout{grid-template-columns:1fr;} .kintsugi-board{grid-template-columns:1fr;} .hero-quotes{flex-direction:column;gap:16px;}
-}
-
-/* ==========================================
-   🌟 原作者深夜緊急維修 (UX & UI 微調)
-   ========================================== */
-
-/* 1. 提升整體文字對比度 (解決長輩閱讀痛點) */
+/* 🌟 整體文字對比度提升 */
 body, p, h1, h2, h3, .room-desc, .hero-desc, .input-area, .e-msg, .sand-msg-text, .warmth-item, .shard-text {
     color: #F5F5F5 !important;
     text-shadow: 0 0 2px rgba(255, 255, 255, 0.15);
 }
-
-/* (降噪模式下的文字保持原本設定以防過亮) */
 body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     color: rgba(201, 197, 188, 0.7) !important;
     text-shadow: none !important;
 }
 
-/* 3. 碎片卡片的高級金繼發光質感 */
-.shard.healed {
-    border: 1px solid #BF953F !important;
-    background: rgba(201,168,76,0.08) !important;
-    box-shadow: 0 0 12px rgba(191, 149, 63, 0.4) !important;
-}
-.shard.healed .shard-glow {
-    background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important;
-    height: 2px !important;
-    opacity: 1 !important;
-    box-shadow: 0 0 8px rgba(252, 246, 186, 0.8) !important;
-}
-
-/* 4. 手機版降噪按鈕緊急修復 */
-@media screen and (max-width: 768px) {
-    #hsp-btn {
-        position: fixed !important;
-        bottom: 25px !important;
-        right: 20px !important;
-        z-index: 9999 !important;
-        transform: scale(0.9);
-        background: rgba(13, 27, 42, 0.95) !important;
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        padding: 6px 16px !important;
-        border-radius: 20px !important;
-        backdrop-filter: blur(8px);
-    }
+/* ===== 🌟 完美的手機版 RWD 修正 ===== */
+@media(max-width:768px){
+  /* 縮小 Padding，確保空間足夠 */
+  nav { padding: 12px 16px; }
+  .room { padding: 90px 20px 60px; } 
+  .room-letter { font-size: 80px; top: 70px; right: 20px; }
+  .t-layout { grid-template-columns: 1fr; } 
+  .kintsugi-board { grid-template-columns: 1fr; } 
+  .hero-quotes { flex-direction: column; gap: 16px; }
+  
+  /* 🌟 手機版 Nav：無縫融入，不再消失或跑版 */
+  .nav-logo { font-size: 16px; letter-spacing: 2px; }
+  .nav-letters { gap: 4px; }
+  .nav-letter { width: 28px; height: 28px; font-size: 13px; }
+  
+  /* 隱藏降噪文字，保留圖示，並調整按鈕寬度 */
+  .hsp-toggle-btn { padding: 0 8px; margin-left: 4px; min-width: auto; border-radius: 8px; }
+  .hsp-text { display: none; }
 }
 </style>
 </head>
@@ -362,8 +343,8 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     <a class="nav-letter" data-l="A" href="#room-a">A</a>
     <a class="nav-letter" data-l="T" href="#room-t">T</a>
     <a class="nav-letter" data-l="H" href="#room-h">H</a>
-    <!-- 👁️ 視覺降噪按鈕 -->
-    <button class="nav-letter hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️ 降噪</button>
+    <!-- 👁️ 視覺降噪按鈕，加上了 span 包裹文字方便手機版隱藏 -->
+    <button class="nav-letter hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️<span class="hsp-text"> 降噪</span></button>
   </div>
 </nav>
 
@@ -864,34 +845,62 @@ onSnapshot(collection(db, "stars"), (snapshot) => {
   updateMStats(); 
 });
 
+/* 🌟 原作者修復：最純粹的光芒四散，使用貝茲曲線畫出優雅星芒 */
+function drawSparkle(ctx, x, y, radius, r, g, b, alpha) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.beginPath();
+  ctx.moveTo(0, -radius);
+  ctx.quadraticCurveTo(0, 0, radius, 0);
+  ctx.quadraticCurveTo(0, 0, 0, radius);
+  ctx.quadraticCurveTo(0, 0, -radius, 0);
+  ctx.quadraticCurveTo(0, 0, 0, -radius);
+  ctx.closePath();
+  ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+  ctx.shadowBlur = radius; 
+  ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`;
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawStars(){
   if(!canvas.width) return; ctx.clearRect(0,0,canvas.width,canvas.height);
   
-  /* 🌟 原作者修復：星空背景加上閃爍變化與自然發光 */
+  /* 背景柔和星塵 */
   bgStars.forEach(s => { 
     s.a+=s.da; 
-    if(s.a>0.8||s.a<0.1) s.da*=-1; // 增加閃爍落差 
+    if(s.a>0.8||s.a<0.1) s.da*=-1; 
     ctx.beginPath(); 
     ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
     ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; 
-    ctx.shadowBlur = 6; 
-    ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`;
+    // 只讓大星星有光暈，避免效能與畫面雜亂
+    if(s.r > 0.7) { 
+      ctx.shadowBlur = 4; 
+      ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; 
+    }
     ctx.fill(); 
-    ctx.shadowBlur = 0; // 重置
+    ctx.shadowBlur = 0; 
   });
   
+  /* 思念的星芒（四角散光效果） */
   starMessages.forEach(s => {
     s.x = s.relX*canvas.width; s.y = s.relY*canvas.height;
     const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; 
-    const coreR = 1 + (b * 0.3); const glowR = coreR + (b * 3);
+    const coreR = 1.5 + (b * 0.4); 
+    const glowR = coreR * 5;
+    
+    // 1. 底層大範圍柔和光暈
     const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
-    grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 1)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
-    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill();
-    if(b >= 5){ 
-      ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.3)`; ctx.lineWidth = 0.5; const arm = coreR * 5;
-      ctx.beginPath(); ctx.moveTo(s.x-arm, s.y); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(s.x, s.y-arm); ctx.lineTo(s.x+arm, s.y); ctx.stroke();
-    }
+    grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`);
+    grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`);
+    grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+    ctx.fillStyle = grd; 
+    ctx.beginPath(); 
+    ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); 
+    ctx.fill();
+    
+    // 2. 上層細緻星芒 (✦) 完美取代之前的十字直線
+    drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2, c.r, c.g, c.b, 0.9);
   });
   requestAnimationFrame(drawStars);
 }
@@ -959,7 +968,6 @@ function drawKintsugiVessel(){
     c.moveTo(crack.sx, crack.sy); 
     c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); 
     
-    /* 🌟 原作者修復： Canvas 繪製的金屬漸層與光暈升級 */
     const gradient = c.createLinearGradient(crack.sx, crack.sy, crack.ex, crack.ey);
     gradient.addColorStop(0, '#BF953F');
     gradient.addColorStop(0.5, '#FCF6BA');
@@ -970,7 +978,7 @@ function drawKintsugiVessel(){
     c.shadowBlur = 10;
     c.shadowColor = 'rgba(252, 246, 186, 0.8)';
     c.stroke(); 
-    c.shadowBlur = 0; // 重置
+    c.shadowBlur = 0;
   }
 }
 
