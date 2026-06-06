@@ -283,20 +283,22 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
 
 /* ===== 🌟 完美的手機版 RWD 修正 ===== */
 @media(max-width:768px){
-  nav { padding: 12px 16px; }
-  .room { padding: 90px 20px 60px; } 
-  .room-letter { font-size: 80px; top: 70px; right: 20px; }
+  nav { flex-direction: column; padding: 12px 16px; gap: 10px; }
+  .room { padding: 110px 20px 60px; } /* 增加一點頂部空間，因為導覽列變兩排了 */
+  .room-letter { font-size: 80px; top: 90px; right: 20px; }
   .t-layout { grid-template-columns: 1fr; } 
   .kintsugi-board { grid-template-columns: 1fr; } 
   .hero-quotes { flex-direction: column; gap: 16px; }
   
-  .nav-logo { font-size: 16px; letter-spacing: 2px; }
-  .nav-letters { gap: 4px; }
+  .nav-logo { font-size: 16px; letter-spacing: 2px; margin-bottom: 2px; }
+  .nav-letters { gap: 6px; flex-wrap: wrap; justify-content: center; }
   .nav-letter { width: 28px; height: 28px; font-size: 13px; }
   
-  .func-btn { padding: 0 8px; margin-left: 4px; min-width: auto; border-radius: 8px; position: static !important; background: transparent !important;}
-  .lang-btn { display: none; } /* 手機版空間有限，可將語系選單收納，此處暫不顯示所有選項或使用 dropdown */
-  .lang-btn.active-lang { display: inline-block; } /* 只顯示當前語言按鈕 */
+  .func-btn { padding: 0 8px; margin-left: 0; min-width: auto; border-radius: 8px; position: static !important; background: transparent !important; height: 28px; line-height: 28px; display: inline-flex; align-items: center; justify-content: center;}
+  
+  /* 解除隱藏設定！讓手機版顯示全部語言按鈕，並稍微縮小間距 */
+  .lang-btn { display: inline-flex; padding: 0 6px; font-size: 11px; margin-left: 2px; }
+  
   .hsp-text { display: none; }
   
   .star-tooltip {
@@ -341,7 +343,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     <a class="nav-letter" data-l="T" href="#room-t">T</a>
     <a class="nav-letter" data-l="H" href="#room-h">H</a>
     <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma"> 降噪</span></button>
-    <div style="display:flex; gap:2px; margin-left:6px;">
+    <div style="display:flex; gap:2px; margin-left:6px; flex-wrap:wrap; justify-content:center;">
         <button class="func-btn lang-btn active-lang" onclick="window.switchLang('zh')">繁</button>
         <button class="func-btn lang-btn" onclick="window.switchLang('en')">EN</button>
         <button class="func-btn lang-btn" onclick="window.switchLang('ja')">日</button>
@@ -650,6 +652,10 @@ window.switchLang = function(lang) {
   
   updateDynamicTexts();
   
+  // 🌟 強制清空並重新渲染時間軸，確保小字標籤被翻譯！
+  document.getElementById('h-events').innerHTML = '';
+  initTimeline();
+  
   window.showToast(t('已切換為繁體中文 ✦', 'Switched to English ✨', '日本語に切り替えました ✦', 'Cambiado a Español ✨'));
 }
 
@@ -825,6 +831,7 @@ window.loadExistingSoulKey = async function() {
       const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] };
       localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
       state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0;
+      document.getElementById('h-events').innerHTML = '';
       initTimeline(); updateSyncUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!')); input.value='';
     } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada')); }
   } catch(err) {}
@@ -996,7 +1003,7 @@ window.addEventListener('load', async () => {
   onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; } });
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; initTimeline(); } } catch(err) {} }
+  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); } } catch(err) {} }
   setTimeout(() => { resizeCanvas(); drawStars(); drawSand(); }, 200);
   setInterval(() => {
     if(document.getElementById('g-v-count')) document.getElementById('g-v-count').textContent = globalCounts.v;
