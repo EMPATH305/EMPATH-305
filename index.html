@@ -44,7 +44,10 @@ nav{
   border-bottom:1px solid rgba(255,255,255,.06);z-index:500;
 }
 .nav-logo{ font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--white);letter-spacing:6px; }
-.nav-letters{display:flex;gap:6px;align-items:center;}
+.nav-letters{display:flex;gap:6px;}
+.nav-controls{display:flex;align-items:center;gap:6px;}
+.lang-wrapper{display:flex;gap:4px;}
+
 .nav-letter{
   width:36px;height:36px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;
   font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;color:var(--fog);
@@ -60,13 +63,13 @@ nav{
 .func-btn {
   font-family: 'Noto Sans TC', sans-serif; font-size: 11px; letter-spacing: 2px;
   background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--fog);
-  padding: 0 12px; border-radius: 20px; margin-left: 6px; font-weight: normal; opacity: 0.7;
-  height: 36px; cursor: pointer; transition: all 0.3s;
+  padding: 0 12px; border-radius: 20px; font-weight: normal; opacity: 0.7;
+  height: 36px; cursor: pointer; transition: all 0.3s; margin: 0;
 }
 .func-btn:hover { background: rgba(255,255,255,0.1); opacity: 1; }
 .hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
 
-.lang-btn { padding: 0 8px; border-radius: 8px; margin-left: 2px; min-width: auto; }
+.lang-btn { padding: 0 8px; border-radius: 8px; min-width: auto; }
 .lang-btn.active-lang { color: var(--gold); border-color: var(--gold); opacity: 1; font-weight: bold; }
 
 /* ===== HERO ===== */
@@ -283,30 +286,33 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
 
 /* ===== 🌟 完美的手機版 RWD 修正 ===== */
 @media(max-width:768px){
-  nav { flex-direction: column; padding: 12px 16px; gap: 10px; }
-  .room { padding: 110px 20px 60px; } /* 增加一點頂部空間，因為導覽列變兩排了 */
-  .room-letter { font-size: 80px; top: 90px; right: 20px; }
-  .t-layout { grid-template-columns: 1fr; } 
-  .kintsugi-board { grid-template-columns: 1fr; } 
-  .hero-quotes { flex-direction: column; gap: 16px; }
+  nav { flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 16px; }
+  .nav-logo { font-size: 18px; margin-top: 4px; }
   
-  .nav-logo { font-size: 16px; letter-spacing: 2px; margin-bottom: 2px; }
-  .nav-letters { gap: 6px; flex-wrap: wrap; justify-content: center; }
-  .nav-letter { width: 28px; height: 28px; font-size: 13px; }
-  
-  .func-btn { padding: 0 8px; margin-left: 0; min-width: auto; border-radius: 8px; position: static !important; background: transparent !important; height: 28px; line-height: 28px; display: inline-flex; align-items: center; justify-content: center;}
-  
-  /* 解除隱藏設定！讓手機版顯示全部語言按鈕，並稍微縮小間距 */
-  .lang-btn { display: inline-flex; padding: 0 6px; font-size: 11px; margin-left: 2px; }
-  
+  /* 🌟 把語言切換跟降噪鈕釘在右上角，不會擠到下一行 */
+  .nav-controls { position: absolute; top: 12px; right: 16px; gap: 4px; }
+  .lang-wrapper { margin-left: 2px; }
   .hsp-text { display: none; }
   
-  .star-tooltip {
-    width: 85%;
-    max-width: none;
-    text-align: center;
-    border-radius: 12px;
-  }
+  /* 🌟 六個房間按鈕平均分散，完美填滿寬度 */
+  .nav-letters { width: 100%; justify-content: space-between; gap: 0; }
+  .nav-letter { width: 32px; height: 32px; font-size: 14px; }
+  .lang-btn { padding: 0 6px; font-size: 11px; height: 28px; }
+  .func-btn { height: 28px; line-height: 26px; padding: 0 8px; }
+  
+  /* 🌟 核心修正：強制首頁內容從 140px 往下排，絕對不覆蓋！ */
+  #hero { justify-content: flex-start; padding-top: 140px; }
+  .hero-title { font-size: 14vw; letter-spacing: 12px; margin-top: 8vh; margin-bottom: 16px; }
+  .hero-bg-text { font-size: 32vw; top: 40%; }
+  .hero-sub { font-size: 12px; margin-bottom: 30px; }
+  .hero-desc { margin-bottom: 40px; }
+  
+  .room { padding: 120px 20px 60px; }
+  .room-letter { font-size: 70px; top: 80px; right: 16px; }
+  
+  .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
+  .hero-quotes { flex-direction: column; gap: 16px; }
+  .star-tooltip { width: 85%; max-width: none; text-align: center; border-radius: 12px; }
 }
 </style>
 </head>
@@ -333,6 +339,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
+<!-- 🌟 重新建構的導覽列 HTML：完美分區 -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -342,8 +349,10 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     <a class="nav-letter" data-l="A" href="#room-a">A</a>
     <a class="nav-letter" data-l="T" href="#room-t">T</a>
     <a class="nav-letter" data-l="H" href="#room-h">H</a>
+  </div>
+  <div class="nav-controls">
     <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma"> 降噪</span></button>
-    <div style="display:flex; gap:2px; margin-left:6px; flex-wrap:wrap; justify-content:center;">
+    <div class="lang-wrapper">
         <button class="func-btn lang-btn active-lang" onclick="window.switchLang('zh')">繁</button>
         <button class="func-btn lang-btn" onclick="window.switchLang('en')">EN</button>
         <button class="func-btn lang-btn" onclick="window.switchLang('ja')">日</button>
