@@ -83,7 +83,7 @@ nav{
 .hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.015); border-left:2px solid rgba(255,255,255,.15);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
 .hero-quote cite{ display:block;margin-top:8px;font-style:normal;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.25); }
 
-/* 🌟 新增：首頁初次引導宣言 (Onboarding) */
+/* 🌟 首頁初次引導宣言 (Onboarding) */
 .onboarding-box { max-width: 600px; margin: 0 auto 48px; padding: 24px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.15); border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.5s both; }
 .onboarding-box p { font-size: 13px; line-height: 2.2; color: var(--dawn); letter-spacing: 1px; }
 
@@ -111,12 +111,12 @@ nav{
 .room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.04); border-left-color: var(--dawn); }
 .room-desc::after { content: ' 🔊'; font-size: 10px; opacity: 0.5; }
 
-/* 🌟 增強輸入框邊界感 */
+/* 🌟 輸入框邊界感 */
 .input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,.15);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:14px;padding:18px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
 .input-area:focus{border-color:rgba(255,255,255,.4); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.05); background: rgba(0,0,0,0.3);} 
 .input-area::placeholder{color:rgba(255,255,255,.25);}
 
-/* 🌟 增強按鈕呼吸感與邊界 */
+/* 🌟 按鈕呼吸感與邊界 */
 .send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:12px 32px;background:rgba(255,255,255,0.03);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
@@ -151,7 +151,7 @@ nav{
 .p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.5);text-align:center;margin-top:12px; line-height: 1.8; }
 .kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;margin-top:16px; }
 
-/* 🌟 增強碎片卡片的按鈕感 */
+/* 🌟 碎片卡片的按鈕感 */
 .shard{ background:rgba(0,0,0,.2);padding:20px;border:1px solid rgba(201,168,76,.2); border-radius: 6px; cursor:pointer;transition:all .4s;position:relative;overflow:hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 .shard:hover{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.06); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(201,168,76,0.15);} 
 .shard-text{font-size:12px;line-height:2;color:var(--fog);}
@@ -308,7 +308,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     text-shadow: none !important;
 }
 
-/* ===== 🌟 完美的手機版 RWD 修正 ===== */
+/* ===== 🌟 完美的手機版 RWD 修正與 UX 強化 ===== */
 @media(max-width:768px){
   nav { flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 16px; }
   .nav-logo { font-size: 18px; margin-top: 4px; }
@@ -335,6 +335,20 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   .hero-quotes { flex-direction: column; gap: 16px; }
   .star-tooltip { width: 85%; max-width: none; text-align: center; border-radius: 12px; }
   .onboarding-box { padding: 16px; margin-bottom: 32px; }
+
+  /* 🌟 手機版 UX 強化：預設界線更清晰 */
+  .input-area { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.3); }
+  .send-btn, .action-btn { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .door-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .shard { background: rgba(0,0,0,0.35); border: 1px solid rgba(201,168,76,0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+  /* 🌟 手機版專屬：真實物理按壓回饋 (Active state) */
+  .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active {
+    transform: scale(0.95) !important; /* 點下去會瞬間微縮，產生下陷感 */
+    background: rgba(255,255,255,0.12) !important;
+    box-shadow: none !important; /* 陰影消失，加強被按下的錯覺 */
+    transition: all 0.1s !important; /* 反應要極快，不延遲 */
+  }
 }
 </style>
 </head>
@@ -361,7 +375,6 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
-<!-- 🌟 重新建構的導覽列 HTML：完美分區 -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -400,7 +413,6 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     </div>
   </div>
 
-  <!-- 🌟 新增：著陸頁的溫柔宣言 (Onboarding) -->
   <div class="onboarding-box">
     <p data-zh="這裡是一個沒有演算法、沒有評斷的空間。<br>如果覺得外面的世界太吵，請在這裡找一個房間，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。" 
        data-en="This is a space free of algorithms and judgments.<br>If the world outside is too loud, choose a room,<br>turn your anxiety into sand, your brokenness into stars.<br>No one is watching; you can safely let go." 
@@ -1059,6 +1071,8 @@ window.addEventListener('load', async () => {
     if(document.getElementById('h-t-count')) document.getElementById('h-t-count').textContent = state.tCount;
   }, 1000);
 });
+
+// Reminder: Rotate your Google API key to secure your project.
 </script>
 </body>
 </html>
