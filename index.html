@@ -37,11 +37,11 @@ body.hsp-mode * { animation-play-state: paused !important; }
 body.hsp-mode .room-desc { color: rgba(255,255,255,0.3); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
 
-/* ===== 🌟 升級：NAV 的區隔感加強 ===== */
+/* ===== 🌟 NAV：對比加深，區隔更明顯 ===== */
 nav{
   position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
-  padding:16px 40px;background:rgba(5, 12, 18, 0.98);backdrop-filter:blur(16px);
-  border-bottom:1px solid rgba(255,255,255,.15);z-index:500;
+  padding:16px 40px;background:#03070a;backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,.08);z-index:500;
   box-shadow: 0 4px 30px rgba(0,0,0,0.8);
 }
 .nav-logo{ font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--white);letter-spacing:6px; }
@@ -54,7 +54,7 @@ nav{
   font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;color:var(--fog);
   border-radius: 2px;
 }
-.nav-letter:hover{transform:translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
+.nav-letter:hover{transform:translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4);}
 .nav-letter[data-l="E"]{color:var(--e);} .nav-letter[data-l="E"]:hover{border-color:var(--e);background:rgba(123,143,161,.15);}
 .nav-letter[data-l="M"]{color:var(--m);} .nav-letter[data-l="M"]:hover{border-color:var(--m);background:rgba(168,184,200,.15);}
 .nav-letter[data-l="P"]{color:var(--p);} .nav-letter[data-l="P"]:hover{border-color:var(--p);background:rgba(201,168,76,.15);}
@@ -88,7 +88,7 @@ nav{
 .onboarding-box { max-width: 600px; margin: 0 auto 48px; padding: 24px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.25); border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.5s both; box-shadow: 0 8px 30px rgba(0,0,0,0.4);}
 .onboarding-box p { font-size: 13px; line-height: 2.2; color: var(--dawn); letter-spacing: 1px; }
 
-/* 🌟 升級：按鈕對比增強 */
+/* 🌟 升級：門按鈕對比增強 */
 .doors-nav{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
 .door-btn{ display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 18px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,.15); border-radius: 6px; cursor:pointer;transition:all .35s;min-width:86px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
 .door-btn:hover{transform:translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: rgba(255,255,255,0.07);}
@@ -121,6 +121,11 @@ nav{
 .send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:12px 32px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
+/* 🌟 危機支援出口樣式 */
+.crisis-support { margin-top: 48px; text-align: left; max-width: 600px; }
+.crisis-support a { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif;}
+.crisis-support a:hover { color: var(--fog); border-bottom-color: var(--fog); }
+
 /* ===== E ROOM ===== */
 #room-e{background:linear-gradient(180deg,#0D1B2A 0%,#0c1824 100%);}
 #room-e .room-letter{color:var(--e);} #room-e .room-tag{color:var(--e);} 
@@ -130,7 +135,7 @@ nav{
 .e-anon-label{ font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.6);margin-bottom:6px; }
 .e-char-count{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
 
-/* 🌟 升級：E 房間的折疊機制 UI */
+/* E 房間的折疊機制 UI */
 .e-feed-container { position:relative; max-width:600px; margin-top:36px; }
 .e-feed{ display:flex;flex-direction:column;gap:12px; }
 .e-msg{ background:rgba(0,0,0,.3);padding:20px 24px;border-left:2px solid rgba(123,143,161,.4);border-radius:0 6px 6px 0;font-size:13px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
@@ -146,7 +151,17 @@ nav{
 #room-m .send-btn:hover{background:rgba(168,184,200,.15); box-shadow: 0 0 16px rgba(168,184,200,0.3); transform: translateY(-2px);}
 #star-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;} #room-m .room-content{position:relative;z-index:1;}
 .m-input-wrap{max-width:480px;}
-.star-tooltip{ position:fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.5); padding:20px; font-size:13px; color:var(--fog); z-index:600; max-width:260px; line-height:1.9; display:none; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(168,184,200,0.2); pointer-events: none; transition: opacity 0.3s ease; }
+
+/* 🌟 升級：星空 Tooltip 邏輯 (預設與行動版 Bottom Sheet) */
+.star-tooltip {
+    position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.5);
+    padding:20px; font-size:13px; color:var(--fog); z-index:600; max-width:260px; line-height:1.9;
+    border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(168,184,200,0.2);
+    pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+}
+.star-tooltip.active {
+    opacity: 1; visibility: visible; pointer-events: auto;
+}
 .m-stats{ display:flex;gap:24px;margin-top:20px; }
 .m-stat{font-size:10px;letter-spacing:2px;color:rgba(168,184,200,.7);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;}
 
@@ -155,12 +170,19 @@ nav{
 #room-p .room-letter{color:var(--p);} #room-p .room-tag{color:var(--p);} 
 #room-p .send-btn{border-color:var(--p);color:var(--p);} 
 #room-p .send-btn:hover{background:rgba(201,168,76,.15); box-shadow: 0 0 16px rgba(201,168,76,0.3); transform: translateY(-2px);}
+
+/* 🌟 升級：Room P 的步驟引導與動線重構 */
+.p-step-label {
+    font-family: 'Noto Serif TC', serif; font-size: 12px; font-weight: 700;
+    color: var(--gold); letter-spacing: 3px; margin-bottom: 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.3); padding-bottom: 8px;
+    display: inline-block;
+}
 .p-vessel{ max-width:540px;margin-bottom:32px;position:relative; }
 #p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.5);border:1px solid rgba(201,168,76,.3); border-radius: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,0.6);}
 .p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.6);text-align:center;margin-top:12px; line-height: 1.8; }
 .kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;margin-top:16px; }
 
-/* 🌟 升級：碎片卡片對比提升 */
 .shard{ background:rgba(0,0,0,.35);padding:20px;border:1px solid rgba(201,168,76,.3); border-radius: 6px; cursor:pointer;transition:all .4s;position:relative;overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .shard:hover{border-color:rgba(201,168,76,.6);background:rgba(201,168,76,.08); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(201,168,76,0.2);} 
 .shard-text{font-size:12px;line-height:2;color:var(--fog);}
@@ -178,7 +200,16 @@ nav{
 #room-a .room-letter{color:var(--a);} #room-a .room-tag{color:var(--a);} 
 #room-a .send-btn{border-color:var(--a);color:var(--a);} 
 #room-a .send-btn:hover{background:rgba(122,158,159,.15); box-shadow: 0 0 16px rgba(122,158,159,0.3); transform: translateY(-2px);}
-.a-feed{margin-top:32px;display:flex;flex-direction:column;gap:16px;max-width:600px;}
+
+/* 🌟 升級：A 房間防護遮罩 */
+.a-warning-mask {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 48px 24px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(122,158,159,0.3);
+    border-radius: 8px; max-width: 600px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); text-align: center;
+}
+.a-warning-mask p { font-size: 13px; line-height: 2.2; color: var(--dawn); letter-spacing: 1px; }
+
+.a-feed{display:flex;flex-direction:column;gap:16px;max-width:600px;}
 .sand-msg{ background:rgba(0,0,0,.3);padding:22px 26px;border-left:2px solid rgba(122,158,159,.5);border-radius:0 6px 6px 0;position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:all 4s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
 .sand-msg-text{font-size:13px;line-height:2;color:var(--fog); transition: filter 3s ease;}
 .sand-timer-wrap{ display:flex;align-items:center;gap:10px;margin-top:14px; }
@@ -196,7 +227,6 @@ nav{
 #room-t .send-btn{border-color:var(--t);color:var(--t);} 
 #room-t .send-btn:hover{background:rgba(232,168,124,.15); box-shadow: 0 0 16px rgba(232,168,124,0.3); transform: translateY(-2px);}
 .t-layout{ display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:840px;margin-top:32px; }
-/* 🌟 升級：對話框面板對比提升 */
 .t-panel{background:rgba(0,0,0,.3);padding:26px;border:1px solid rgba(232,168,124,.25); border-radius: 6px; box-shadow: 0 4px 18px rgba(0,0,0,0.3);}
 .t-panel-title{ font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;color:var(--white);margin-bottom:20px;letter-spacing:2px; }
 .t-feed{display:flex;flex-direction:column;gap:12px;max-height:400px;overflow-y:auto; padding-right: 8px;}
@@ -221,7 +251,6 @@ nav{
 #room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.5);}
 .h-journey{max-width:700px;}
 .journey-summary, .global-summary{ display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:32px; }
-/* 🌟 升級：卡片對比提升 */
 .j-card, .g-card{ background:rgba(0,0,0,.3);padding:24px 14px;text-align:center;border-top:2px solid; border-radius: 0 0 6px 6px; transition:all .3s;cursor:default; box-shadow: 0 6px 15px rgba(0,0,0,0.3);}
 .j-card:hover, .g-card:hover{background:rgba(255,255,255,.06); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.4);}
 .j-card:nth-child(1){border-top-color:var(--e);} .j-card:nth-child(2){border-top-color:var(--m);}
@@ -279,7 +308,7 @@ nav{
 }
 .action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.2); }
 
-/* 🌟 真實圖片生成：分享卡 Modal */
+/* 真實圖片生成：分享卡 Modal */
 .share-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.85); z-index: 99999;
@@ -306,7 +335,6 @@ nav{
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ===== FOOTER ===== */
-/* 🌟 升級：底部版權宣告與排版 */
 footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); background: rgba(5,12,18,0.9); display:flex; flex-direction:column; align-items:center; }
 .footer-main { width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:32px; }
 .footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.4);letter-spacing:2px; }
@@ -315,7 +343,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
 .footer-l{ font-family:'Cormorant Garamond',serif;font-size:13px;opacity:.4;letter-spacing:2px; }
 .footer-copy { width:100%; text-align:center; padding-top:24px; border-top:1px dashed rgba(255,255,255,0.08); font-size:10px; color:rgba(255,255,255,0.25); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
 
-/* 🌟 整體文字對比度提升 */
+/* 整體文字對比度提升 */
 body, p, h1, h2, h3, .room-desc, .hero-desc, .input-area, .e-msg, .sand-msg-text, .warmth-item, .shard-text {
     color: #F5F5F5 !important;
     text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
@@ -350,16 +378,33 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   
   .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
   .hero-quotes { flex-direction: column; gap: 16px; }
-  .star-tooltip { width: 85%; max-width: none; text-align: center; border-radius: 12px; }
   .onboarding-box { padding: 16px; margin-bottom: 32px; }
 
-  /* 🌟 手機版 UX 強化：預設界線更清晰 */
+  /* 🌟 手機版專屬：Room M 星空 Tooltip 的 Bottom Sheet */
+  .star-tooltip {
+      top: auto !important; bottom: 0 !important; left: 0 !important;
+      width: 100% !important; max-width: none !important;
+      border-radius: 20px 20px 0 0 !important;
+      padding: 40px 24px 48px !important;
+      transform: translateY(100%) !important;
+      transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.4s ease !important;
+      border-bottom: none !important;
+  }
+  .star-tooltip.active {
+      transform: translateY(0) !important;
+  }
+  .star-tooltip::before {
+      content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px;
+  }
+
+  /* 手機版 UX 強化：預設界線更清晰 */
   .input-area { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.35); }
   .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   .door-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
   .shard { background: rgba(0,0,0,0.4); border: 1px solid rgba(201,168,76,0.4); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
 
-  /* 🌟 手機版專屬：真實物理按壓回饋 (Active state) */
+  /* 手機版專屬：真實物理按壓回饋 (Active state) */
   .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active {
     transform: scale(0.95) !important; 
     background: rgba(255,255,255,0.15) !important;
@@ -392,7 +437,6 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 
-<!-- 🌟 重新建構的導覽列 HTML：完美分區 -->
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
   <div class="nav-letters">
@@ -471,12 +515,15 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   <br>
   <button class="send-btn" onclick="window.submitE()" data-zh="投入黑暗 →" data-en="Cast into Dark →" data-ja="闇に投じる →" data-es="Lanzar a la Oscuridad →">投入黑暗 →</button>
   
-  <!-- 🌟 升級：E 房間動態展開結構 -->
   <div class="e-feed-container">
     <div class="e-feed" id="e-feed"></div>
     <div class="e-feed-fade" id="e-feed-fade"></div>
   </div>
   <button id="e-expand-btn" class="e-expand-btn" onclick="window.toggleEFeed()"></button>
+
+  <div class="crisis-support">
+    <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+  </div>
 
 </section>
 
@@ -513,10 +560,8 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   <p class="room-desc" onclick="window.speakText(this.textContent)" title="點擊聆聽文字" data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca.">
     金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。
   </p>
-  <div class="p-vessel">
-    <canvas id="p-canvas" width="540" height="300"></canvas>
-    <p class="p-canvas-hint" data-zh="點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦" data-en="Click the shards below to collaboratively mend the porcelain.<br>∗ Had a good day? Mend someone else's shard and light up a golden crack for the world. ✦" data-ja="下の欠片をクリックして、世界中で一緒に金継ぎを完成させましょう。<br>∗ 今日は良い一日でしたか？それなら誰かのカードをクリックして、世界に黄金のひび割れを灯してください。 ✦" data-es="Haz clic en los fragmentos a continuación para reparar juntos la porcelana.<br>∗ ¿Tuviste un buen día? Repara el fragmento de alguien más e ilumina una grieta dorada para el mundo. ✦">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦</p>
-  </div>
+
+  <div class="p-step-label" data-zh="STEP 1. 交付破碎" data-en="STEP 1. Cast Brokenness" data-ja="STEP 1. 欠片を預ける" data-es="PASO 1. Entregar Ruptura">STEP 1. 交付破碎</div>
   <textarea class="input-area" id="p-input" rows="3"
     data-zh-ph="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"
     data-en-ph="Write down a piece of your shattered heart—a pain, a regret, a loss..."
@@ -525,6 +570,13 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
   <br>
   <button class="send-btn" onclick="window.submitP()" data-zh="放入瓷器 →" data-en="Place in Vessel →" data-ja="器に入れる →" data-es="Colocar en la Vasija →">放入瓷器 →</button>
+
+  <div class="p-step-label" style="margin-top:48px;" data-zh="STEP 2. 修補遺憾" data-en="STEP 2. Mend Regrets" data-ja="STEP 2. 後悔を修復する" data-es="PASO 2. Reparar Arrepentimientos">STEP 2. 修補遺憾</div>
+  <div class="p-vessel">
+    <canvas id="p-canvas" width="540" height="300"></canvas>
+    <p class="p-canvas-hint" data-zh="點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦" data-en="Click the shards below to collaboratively mend the porcelain.<br>∗ Had a good day? Mend someone else's shard and light up a golden crack for the world. ✦" data-ja="下の欠片をクリックして、世界中で一緒に金継ぎを完成させましょう。<br>∗ 今日は良い一日でしたか？それなら誰かのカードをクリックして、世界に黄金のひび割れを灯してください。 ✦" data-es="Haz clic en los fragmentos a continuación para reparar juntos la porcelana.<br>∗ ¿Tuviste un buen día? Repara el fragmento de alguien más e ilumina una grieta dorada para el mundo. ✦">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦</p>
+  </div>
+  
   <div class="kintsugi-board" id="p-board"></div>
   <p class="p-healed-count" id="p-healed-count"></p>
 </section>
@@ -548,7 +600,22 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     <button class="send-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →">放入沙畫 →</button>
     <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia.">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
     <p class="a-note" style="margin-top:8px;" data-zh="∗ 所有留言將在 24 小時後化為塵埃，如沙畫般不留痕跡" data-en="∗ All messages will turn to dust after 24 hours, leaving no trace." data-ja="∗ すべての言葉は24時間後に塵となり、痕跡を残しません。" data-es="∗ Todos los mensajes se convertirán en polvo después de 24 horas.">∗ 所有留言將在 24 小時後化為塵埃，如沙畫般不留痕跡</p>
-    <div class="a-feed" id="a-feed"></div>
+    
+    <div id="a-feed-wrapper" style="position: relative; margin-top:36px; min-height:200px;">
+        <div id="a-warning-mask" class="a-warning-mask">
+            <p data-zh="接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。" data-en="The following section contains the real pain and trauma of others.<br>If you are not in an emotional state to hold space, please hide it.<br>Your empathy is precious, but please protect yourself first." data-ja="以下のセクションには、他人の真の痛みやトラウマが含まれています。<br>受け止める心の準備ができていない場合は、非表示にしてください。<br>あなたの優しさは尊いですが、まずは自分を守ってください。" data-es="La siguiente sección contiene el dolor y trauma real de otros.<br>Si no estás en un estado emocional para sostener este espacio, ocúltalo.<br>Tu empatía es preciosa, pero por favor protégete primero.">接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。</p>
+            <div style="display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap;">
+                <button class="send-btn" onclick="window.acceptARead()" style="border-color:var(--a); color:var(--a); padding:8px 20px; font-size:11px;" data-zh="願意承接" data-en="I can hold space" data-ja="受け止める" data-es="Puedo sostenerlo">願意承接</button>
+                <button class="send-btn" onclick="window.hideAFeed()" style="border-color:var(--muted); color:var(--muted); padding:8px 20px; font-size:11px;" data-zh="僅投遞，不閱讀" data-en="Post only, do not read" data-ja="投稿のみ、読まない" data-es="Solo publicar, no leer">僅投遞，不閱讀</button>
+            </div>
+        </div>
+        <div class="a-feed" id="a-feed" style="display:none; filter:blur(8px); transition: filter 1s ease;"></div>
+    </div>
+
+    <div class="crisis-support">
+      <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+    </div>
+
   </div>
 </section>
 
@@ -632,6 +699,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
       <div class="sync-actions" id="sync-active-actions" style="display:none;">
         <span style="font-size:11px; color:var(--fog);" data-zh="已開啟即時雲端同步。你的靈魂鑰匙：" data-en="Cloud sync active. Your Soul Key:" data-ja="クラウド同期中。あなたの魂の鍵：" data-es="Sincronización activa. Tu Llave del Alma:">已開啟即時雲端同步。你的靈魂鑰匙：</span>
         <span class="key-display" id="active-key-display">-</span>
+        <button class="sync-btn-small" onclick="window.copySoulKey()" id="copy-key-btn" style="border-color:var(--gold); color:var(--gold); margin-right:8px;" data-zh="複製鑰匙" data-en="Copy Key" data-ja="キーをコピー" data-es="Copiar Llave">複製鑰匙</button>
         <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:10px; padding:8px 14px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular">解除綁定</button>
       </div>
     </div>
@@ -666,7 +734,6 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   </div>
 </section>
 
-<!-- 🌟 升級：加入完整版權宣告的 Footer -->
 <footer>
   <div class="footer-main">
     <div class="footer-left">Every Moment As Truth Heals</div>
@@ -737,7 +804,6 @@ window.switchLang = function(lang) {
   document.getElementById('h-events').innerHTML = '';
   initTimeline();
   
-  // 觸發 E 房間的語言更新
   if(typeof window.renderEFeed === 'function') window.renderEFeed();
   
   window.showToast(t('已切換為繁體中文 ✦', 'Switched to English ✨', '日本語に切り替えました ✦', 'Cambiado a Español ✨'));
@@ -903,7 +969,25 @@ function initTimeline(){
   journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time));
 }
 
+/* 🌟 升級：靈魂鑰匙複製功能 */
 window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!')); }
+window.copySoulKey = function() {
+    const key = localStorage.getItem('empath_soul_key');
+    if (key) {
+        navigator.clipboard.writeText(key).then(() => {
+            const btn = document.getElementById('copy-key-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado');
+            btn.style.color = '#fff'; btn.style.borderColor = '#fff';
+            window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada'));
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)';
+            }, 2000);
+        }).catch(err => { window.showToast('複製失敗 / Copy failed'); });
+    }
+}
+
 window.loadExistingSoulKey = async function() {
   const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase();
   if(!key) return;
@@ -926,7 +1010,6 @@ function updateSyncUI() {
   else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; }
 }
 
-/* 🌟 升級：E 房間動態展開邏輯 */
 let allEmotions = [];
 let eFeedExpanded = false;
 
@@ -1005,16 +1088,24 @@ function drawStars(){
   requestAnimationFrame(drawStars);
 }
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
+
+/* 🌟 升級：星空 Tooltip 邏輯 (改為 Class 控制，以支援 Mobile Bottom Sheet) */
 roomM.addEventListener('click', async e => {
   if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return;
   const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; const star = getStarAt(x, y);
   if(star){
     if(activeStarId !== star.id) {
-      activeStarId = star.id; tooltip.style.display = 'block'; 
-      if(window.innerWidth <= 768) { tooltip.style.left = '50%'; tooltip.style.transform = 'translateX(-50%)'; tooltip.style.top = 'auto'; tooltip.style.bottom = '120px'; } else { tooltip.style.transform = 'none'; let tx = e.clientX + 16; let ty = e.clientY - 16; if (tx + 260 > window.innerWidth) tx = e.clientX - 280; tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; }
+      activeStarId = star.id; 
+      tooltip.classList.add('active'); 
+      if(window.innerWidth > 768) { 
+          tooltip.style.transform = 'none'; 
+          let tx = e.clientX + 16; let ty = e.clientY - 16; 
+          if (tx + 260 > window.innerWidth) tx = e.clientX - 280; 
+          tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; 
+      }
       tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo')}<br>${star.text}<br><span style="font-size:9px;color:var(--gold);margin-top:8px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar')}</span>`;
-    } else { try { await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦')); window.triggerHeartbeat(); tooltip.style.display = 'none'; activeStarId = null; } catch (err) {} }
-  } else { tooltip.style.display = 'none'; activeStarId = null; }
+    } else { try { await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦')); window.triggerHeartbeat(); tooltip.classList.remove('active'); activeStarId = null; } catch (err) {} }
+  } else { tooltip.classList.remove('active'); activeStarId = null; }
 });
 
 window.submitM = async function(){ 
@@ -1064,6 +1155,25 @@ function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandPa
 function drawSand() {
   const c = document.getElementById('sand-canvas'); if(!c || !c.width) return; const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h);
   sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; requestAnimationFrame(drawSand);
+}
+
+/* 🌟 升級：A 房間防護遮罩邏輯 */
+window.acceptARead = function() {
+    document.getElementById('a-warning-mask').style.display = 'none';
+    const feed = document.getElementById('a-feed');
+    feed.style.display = 'flex';
+    setTimeout(() => feed.style.filter = 'blur(0px)', 50);
+    localStorage.setItem('empath_a_accepted', 'true');
+}
+window.hideAFeed = function() {
+    document.getElementById('a-warning-mask').innerHTML = `
+        <p style="color:var(--muted); font-size:12px;"
+            data-zh="已隱藏他人留言。你的痛苦依然會被這裡安放。"
+            data-en="Messages hidden. Your pain will still be held here."
+            data-ja="他人のメッセージを非表示にしました。あなたの痛みはここで大切に保管されます。"
+            data-es="Mensajes ocultos. Tu dolor seguirá siendo sostenido aquí.">
+            ${t('已隱藏他人留言。你的痛苦依然會被這裡安放。', 'Messages hidden. Your pain will still be held here.', '他人のメッセージを非表示にしました。あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos. Tu dolor seguirá siendo sostenido aquí.')}
+        </p>`;
 }
 
 onSnapshot(collection(db, "sand"), (snapshot) => {
@@ -1119,6 +1229,18 @@ window.addEventListener('load', async () => {
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
   onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; } });
+  
+  // 檢查是否曾授權閱讀 A 房間留言
+  if(localStorage.getItem('empath_a_accepted') === 'true') {
+      const mask = document.getElementById('a-warning-mask');
+      const feed = document.getElementById('a-feed');
+      if(mask && feed) {
+          mask.style.display = 'none';
+          feed.style.display = 'flex';
+          feed.style.filter = 'blur(0px)';
+      }
+  }
+
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); } } catch(err) {} }
