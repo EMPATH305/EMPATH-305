@@ -17,20 +17,22 @@
 <style>
 :root{
   --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
-  --white:#F7F4EF;--fog:#C9C5BC;--muted:#7B8FA1;
+  /* 🌟 優化：微調字體顏色變數，不用 !important 也能維持好對比 */
+  --white:#FDFCF8;--fog:#D8D5CD;--muted:#8C9EAE;
   --gold:#C9A84C;--amber:#E8A87C;--dawn:#F2E8D9;
   --e:#7B8FA1;--m:#A8B8C8;--p:#C9A84C;
   --a:#7A9E9F;--t:#E8A87C;--h:#F2E8D9;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease;}
+/* 🌟 優化：將 text-shadow 寫在 body，保留立體感但不破壞層次 */
+body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease; text-shadow: 0 0 2px rgba(255, 255, 255, 0.1);}
 a{text-decoration:none;color:inherit;}
 
 body.hsp-mode {
   --white: rgba(247, 244, 239, 0.65); --fog: rgba(201, 197, 188, 0.55);
   --gold: rgba(201, 168, 76, 0.6); --amber: rgba(232, 168, 124, 0.6);
-  --muted: rgba(123, 143, 161, 0.4); background: #080d14; 
+  --muted: rgba(123, 143, 161, 0.4); background: #080d14; text-shadow: none;
 }
 body.hsp-mode * { animation-play-state: paused !important; }
 body.hsp-mode .room-desc { color: rgba(255,255,255,0.3); }
@@ -77,6 +79,7 @@ nav{
 .hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;position:relative; }
 .hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,2.2vw,20px);color:var(--gold);letter-spacing:3px;margin-bottom:14px;position:relative; }
 .hero-desc{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:40px;position:relative;}
+
 .hero-quotes{ display:flex;gap:40px;margin-bottom:40px;position:relative;flex-wrap:wrap;justify-content:center; }
 .hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,.2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
 .hero-quote cite{ display:block;margin-top:8px;font-style:normal;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3); }
@@ -284,6 +287,7 @@ nav{
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
 .lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dawn);line-height:2.2; }
 
+/* 🌟 分享按鈕與下載功能區塊 */
 .share-action-box { display:flex; flex-wrap:wrap; gap:16px; margin-top: 48px; }
 .action-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px;
@@ -294,6 +298,7 @@ nav{
 }
 .action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.2); }
 
+/* 真實圖片生成：分享卡 Modal */
 .share-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.85); z-index: 99999;
@@ -315,9 +320,11 @@ nav{
 .close-modal-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size: 12px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 4px; }
 .close-modal-btn:hover { color: var(--white); border-color: var(--white); background: rgba(255,255,255,0.1); }
 
+/* ===== TOAST ===== */
 .toast{ position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px); background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.2); padding:14px 28px;font-size:12px;color:var(--fog);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(10px); border-radius: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.6);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* ===== FOOTER ===== */
 footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); background: rgba(5,12,18,0.9); display:flex; flex-direction:column; align-items:center; }
 .footer-main { width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:32px; }
 .footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.4);letter-spacing:2px; }
@@ -326,15 +333,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
 .footer-l{ font-family:'Cormorant Garamond',serif;font-size:13px;opacity:.4;letter-spacing:2px; }
 .footer-copy { width:100%; text-align:center; padding-top:24px; border-top:1px dashed rgba(255,255,255,0.08); font-size:10px; color:rgba(255,255,255,0.25); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
 
-body, p, h1, h2, h3, .room-desc, .hero-desc, .input-area, .e-msg, .sand-msg-text, .warmth-item, .shard-text {
-    color: #F5F5F5 !important;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
-}
-body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
-    color: rgba(201, 197, 188, 0.75) !important;
-    text-shadow: none !important;
-}
-
+/* ===== 🌟 完美的手機版 RWD 修正與 UX 強化 ===== */
 @media(max-width:768px){
   nav { flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 16px; }
   .nav-logo { font-size: 18px; margin-top: 4px; }
@@ -358,7 +357,12 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   .room-letter { font-size: 70px; top: 80px; right: 16px; }
   
   .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
-  .hero-quotes { flex-direction: column; gap: 16px; }
+  
+  /* 🌟 優化：手機版預設折疊引言，降低認知負擔 */
+  .hero-quotes { display: none; flex-direction: column; gap: 16px; }
+  .hero-quotes.show-quotes { display: flex; animation: fadeSlideIn 0.5s ease; }
+  #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 32px; align-items: center; }
+
   .onboarding-box { padding: 16px; margin-bottom: 32px; }
 
   .star-tooltip {
@@ -389,6 +393,16 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     box-shadow: none !important; 
     transition: all 0.1s !important; 
   }
+}
+
+/* 🌟 優化：針對 480px 以下極小螢幕的排版壓縮 */
+@media(max-width:480px){
+  .room { padding: 100px 16px 40px; }
+  .t-panel, .t-send-panel { padding: 16px; }
+  .input-area { padding: 12px; font-size: 13px; }
+  .hero-title { font-size: 16vw; letter-spacing: 8px; }
+  .doors-nav { gap: 8px; }
+  .door-btn { padding: 16px 12px; min-width: 72px; }
 }
 </style>
 </head>
@@ -428,10 +442,10 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   <div class="nav-controls">
     <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()" title="高敏降噪模式">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma"> 降噪</span></button>
     <div class="lang-wrapper">
-        <button class="func-btn lang-btn active-lang" onclick="window.switchLang('zh')">繁</button>
-        <button class="func-btn lang-btn" onclick="window.switchLang('en')">EN</button>
-        <button class="func-btn lang-btn" onclick="window.switchLang('ja')">日</button>
-        <button class="func-btn lang-btn" onclick="window.switchLang('es')">ES</button>
+        <button class="func-btn lang-btn active-lang" data-lang="zh" onclick="window.switchLang('zh')">繁</button>
+        <button class="func-btn lang-btn" data-lang="en" onclick="window.switchLang('en')">EN</button>
+        <button class="func-btn lang-btn" data-lang="ja" onclick="window.switchLang('ja')">日</button>
+        <button class="func-btn lang-btn" data-lang="es" onclick="window.switchLang('es')">ES</button>
     </div>
   </div>
 </nav>
@@ -442,7 +456,9 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   <p class="hero-sub">Every Moment As Truth Heals</p>
   <p class="hero-desc" data-zh="數位時代的情緒安放平台 以文學敘事對抗視覺霸權的設計實踐" data-en="An emotional sanctuary for the digital age. A design practice countering visual hegemony through literary narrative." data-ja="デジタル時代の感情のサンクチュアリ。文学的アプローチによるデザイン実践。" data-es="Un santuario emocional para la era digital. Práctica de diseño mediante narrativa.">數位時代的情緒安放平台 以文學敘事對抗視覺霸權的設計實踐</p>
   
-  <div class="hero-quotes">
+  <button id="hero-quotes-toggle" class="func-btn" style="display:none;" onclick="window.toggleHeroQuotes()" data-zh="📖 閱讀設計理念 ↓" data-en="📖 Read Philosophy ↓" data-ja="📖 コンセプトを読む ↓" data-es="📖 Leer Filosofía ↓">📖 閱讀設計理念 ↓</button>
+  
+  <div class="hero-quotes" id="hero-quotes">
     <div class="hero-quote" data-zh="廣告以「迷人(Glamour)」製造幻覺，讓人相信擁有某種形象就能被渴望。<cite>—— JOHN BERGER《觀看的方式》</cite>" data-en="Glamour is an illusion manufactured by advertising, making us believe that possessing a certain image makes us desirable.<cite>— JOHN BERGER, Ways of Seeing</cite>" data-ja="広告は「グラマー」によって幻想を作り出し、特定のイメージを持てば望まれると信じさせる。<cite>— ジョン・バージャー</cite>" data-es="La publicidad crea ilusiones, haciéndonos creer que poseer cierta imagen nos hace deseables.<cite>— John Berger</cite>">
       廣告以「迷人(Glamour)」製造幻覺，讓人相信擁有某種形象就能被渴望。
       <cite>—— JOHN BERGER《觀看的方式》</cite>
@@ -670,7 +686,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
       </p>
       <div class="sync-actions" id="sync-initial-actions">
         <button class="sync-btn-small" onclick="window.createSoulKey()" data-zh="生成我的靈魂鑰匙" data-en="Generate Soul Key" data-ja="魂の鍵を生成する" data-es="Generar Llave del Alma">生成我的靈魂鑰匙</button>
-        <span style="font-size:11px; color:rgba(255,255,255,0.25);" data-zh="或" data-en="OR" data-ja="または" data-es="O">或</span>
+        <span style="font-size:11px; color:rgba(255,255,255,0.15);" data-zh="或" data-en="OR" data-ja="または" data-es="O">或</span>
         <input type="text" class="sync-input" id="sync-key-input" data-zh-ph="輸入既有鑰匙..." data-en-ph="Enter existing key..." data-ja-ph="既存の鍵を入力..." data-es-ph="Ingresa llave existente..." placeholder="輸入既有鑰匙..." style="width:140px; text-transform:uppercase;">
         <button class="sync-btn-small" onclick="window.loadExistingSoulKey()" style="border-color:var(--gold); color:var(--gold);" data-zh="共振同步足跡" data-en="Sync Footprint" data-ja="足跡を同期する" data-es="Sincronizar Huella">共振同步足跡</button>
       </div>
@@ -678,7 +694,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
         <span style="font-size:11px; color:var(--fog);" data-zh="已開啟即時雲端同步。你的靈魂鑰匙：" data-en="Cloud sync active. Your Soul Key:" data-ja="クラウド同期中。あなたの魂の鍵：" data-es="Sincronización activa. Tu Llave del Alma:">已開啟即時雲端同步。你的靈魂鑰匙：</span>
         <span class="key-display" id="active-key-display">-</span>
         <button class="sync-btn-small" onclick="window.copySoulKey()" id="copy-key-btn" style="border-color:var(--gold); color:var(--gold); margin-right:8px;" data-zh="複製鑰匙" data-en="Copy Key" data-ja="キーをコピー" data-es="Copiar Llave">複製鑰匙</button>
-        <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:10px; padding:8px 14px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular">解除綁定</button>
+        <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:10px; padding:6px 12px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular">解除綁定</button>
       </div>
     </div>
 
@@ -692,7 +708,7 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
         <div class="h-events" id="h-events" style="max-height: 280px; overflow: hidden; transition: max-height 0.5s ease;"></div>
         <div id="h-events-fade" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; transition: opacity 0.5s ease;"></div>
       </div>
-      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 10px 20px; font-size: 10px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓">展開完整旅程 ↓</button>
+      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 8px 18px; font-size: 10px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓">展開完整旅程 ↓</button>
     </div>
     
     <div class="lighthouse">
@@ -748,7 +764,6 @@ const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
 let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 
-/* 🌟 核心：移除 setInterval，改由資料驅動 DOM 更新 */
 function updateCountersUI() {
     if(document.getElementById('g-v-count')) document.getElementById('g-v-count').textContent = globalCounts.v;
     if(document.getElementById('g-e-count')) document.getElementById('g-e-count').textContent = globalCounts.e;
@@ -771,10 +786,11 @@ function t(zh, en, ja, es) {
     return zh;
 }
 
+/* 🌟 優化：將切換邏輯改為使用 dataset，更為健壯 */
 window.switchLang = function(lang) {
   window.currentLang = lang;
   document.querySelectorAll('.lang-btn').forEach(btn => {
-    if(btn.getAttribute('onclick').includes(`'${lang}'`)) btn.classList.add('active-lang');
+    if(btn.dataset.lang === lang) btn.classList.add('active-lang');
     else btn.classList.remove('active-lang');
   });
   document.querySelectorAll('[data-zh]').forEach(el => {
@@ -807,6 +823,12 @@ function updateDynamicTexts() {
   if(toggleBtn) {
      const isExpanded = document.getElementById('h-events').style.maxHeight === '5000px';
      toggleBtn.innerHTML = isExpanded ? t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑') : t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓');
+  }
+  
+  const quotesBtn = document.getElementById('hero-quotes-toggle');
+  if(quotesBtn) {
+     const isExpandedQuotes = document.getElementById('hero-quotes').classList.contains('show-quotes');
+     quotesBtn.innerHTML = isExpandedQuotes ? t('📖 收起理念 ↑', '📖 Collapse ↑', '📖 閉じる ↑', '📖 Ocultar ↑') : t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓');
   }
 }
 
@@ -842,6 +864,18 @@ window.toggleTimeline = function() {
   }
 }
 
+/* 🌟 優化：手機版收合 Hero 理念區塊 */
+window.toggleHeroQuotes = function() {
+    const el = document.getElementById('hero-quotes');
+    const btn = document.getElementById('hero-quotes-toggle');
+    el.classList.toggle('show-quotes');
+    if(el.classList.contains('show-quotes')){
+        btn.innerHTML = t('📖 收起理念 ↑', '📖 Collapse ↑', '📖 閉じる ↑', '📖 Ocultar ↑');
+    } else {
+        btn.innerHTML = t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓');
+    }
+}
+
 function loadLocalJourney() {
   const savedJourney = localStorage.getItem('empath_user_journey');
   if(savedJourney){
@@ -854,19 +888,16 @@ function loadLocalJourney() {
 }
 loadLocalJourney();
 
-/* 🌟 動畫控制與 Page Visibility API 整合 */
 let isAnimating = true;
 let starsRafId = null;
 let sandRafId = null;
 
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-        // 進入背景：停止消耗 CPU 的 Canvas 運算
         isAnimating = false;
         if(starsRafId) cancelAnimationFrame(starsRafId);
         if(sandRafId) cancelAnimationFrame(sandRafId);
     } else {
-        // 回到網頁：若非 HSP 模式，重新啟動動畫
         if (!document.body.classList.contains('hsp-mode')) {
             isAnimating = true;
             drawStars();
@@ -882,7 +913,6 @@ window.toggleHSP = function() {
   if(body.classList.contains('hsp-mode')) {
     btn.classList.add('active');
     localStorage.setItem('empath_hsp_mode', 'true');
-    // 🌟 確實切斷 RequestAnimationFrame
     isAnimating = false;
     if(starsRafId) cancelAnimationFrame(starsRafId);
     if(sandRafId) cancelAnimationFrame(sandRafId);
@@ -890,7 +920,6 @@ window.toggleHSP = function() {
   } else {
     btn.classList.remove('active');
     localStorage.setItem('empath_hsp_mode', 'false');
-    // 🌟 重新啟動 RequestAnimationFrame
     isAnimating = true;
     drawStars();
     drawSand();
