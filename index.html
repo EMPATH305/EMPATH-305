@@ -11,45 +11,50 @@
 <meta property="og:image" content="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop" /> 
 <meta name="twitter:card" content="summary_large_image" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
-  --white:#FDFCF8;--fog:#D8D5CD;--muted:#8C9EAE;
+  /* 🌟 優化對比度：提升霧灰與暗灰色調的明度，符合 WCAG AA */
+  --white:#FDFCF8;--fog:#E4E1DA;--muted:#A1B4C5;
   --gold:#C9A84C;--amber:#E8A87C;--dawn:#F2E8D9;
   --e:#7B8FA1;--m:#A8B8C8;--p:#C9A84C;
   --a:#7A9E9F;--t:#E8A87C;--h:#F2E8D9;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease; text-shadow: 0 0 2px rgba(255, 255, 255, 0.1);}
+body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease; font-size: 14px;} /* 🌟 提升基礎字體大小 */
 a{text-decoration:none;color:inherit;}
 
+/* 🌟 局部陰影：移除 body 的 text-shadow，只套用於標題，避免小字模糊 */
+h1, h2, .hero-title, .room-letter { text-shadow: 0 0 4px rgba(255, 255, 255, 0.15); }
+
 body.hsp-mode {
-  --white: rgba(247, 244, 239, 0.65); --fog: rgba(201, 197, 188, 0.55);
-  --gold: rgba(201, 168, 76, 0.6); --amber: rgba(232, 168, 124, 0.6);
-  --muted: rgba(123, 143, 161, 0.4); background: #080d14; text-shadow: none;
+  --white: rgba(247, 244, 239, 0.7); --fog: rgba(201, 197, 188, 0.65);
+  --gold: rgba(201, 168, 76, 0.7); --amber: rgba(232, 168, 124, 0.7);
+  --muted: rgba(161, 180, 197, 0.6); background: #080d14; 
 }
 body.hsp-mode * { animation-play-state: paused !important; }
-body.hsp-mode .room-desc { color: rgba(255,255,255,0.3); }
+body.hsp-mode .room-desc { color: rgba(255,255,255,0.4); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
+body.hsp-mode h1, body.hsp-mode h2, body.hsp-mode .hero-title { text-shadow: none; }
 
 nav{
   position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
   padding:16px 40px;background:#03070a;backdrop-filter:blur(16px);
   border-bottom:1px solid rgba(255,255,255,.08);z-index:500;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.8); flex-wrap: wrap; /* 🌟 允許手機版優雅換行 */
 }
-.nav-logo{ font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--white);letter-spacing:6px; }
+.nav-logo{ font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--white);letter-spacing:6px; }
 .nav-letters{display:flex;gap:6px;}
-.nav-controls{display:flex;align-items:center;gap:12px;}
+.nav-controls{display:flex;align-items:center;gap:12px; flex-wrap: wrap;}
 
 .nav-letter{
-  width:36px;height:36px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
   font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;color:var(--fog);
-  border-radius: 2px;
+  border-radius: 4px;
 }
 .nav-letter:hover{transform:translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4);}
 .nav-letter[data-l="E"]{color:var(--e);} .nav-letter[data-l="E"]:hover{border-color:var(--e);background:rgba(123,143,161,.15);}
@@ -60,114 +65,123 @@ nav{
 .nav-letter[data-l="H"]{color:var(--h);} .nav-letter[data-l="H"]:hover{border-color:var(--h);background:rgba(242,232,217,.15);}
 
 .func-btn {
-  font-family: 'Noto Sans TC', sans-serif; font-size: 11px; letter-spacing: 2px;
+  font-family: 'Noto Sans TC', sans-serif; font-size: 13px; letter-spacing: 2px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); color: var(--fog);
   padding: 0 16px; border-radius: 20px; font-weight: normal; opacity: 0.9;
-  height: 36px; cursor: pointer; transition: all 0.3s; margin: 0; display:flex; align-items:center; gap:6px;
+  height: 38px; cursor: pointer; transition: all 0.3s; margin: 0; display:flex; align-items:center; gap:6px;
 }
 .func-btn:hover { background: rgba(255,255,255,0.15); opacity: 1; border-color: rgba(255,255,255,0.5); }
 .hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
 
-/* 🌟 升級：語言下拉選單 */
 .lang-dropdown-wrapper { position: relative; display: inline-block; }
 .lang-dropdown-list {
-  position: absolute; right: 0; top: 46px; background: rgba(5,12,18,0.98);
+  position: absolute; right: 0; top: 48px; background: rgba(5,12,18,0.98);
   border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; overflow: hidden;
-  display: none; flex-direction: column; width: 140px; box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+  display: none; flex-direction: column; width: 150px; box-shadow: 0 8px 30px rgba(0,0,0,0.8);
   z-index: 999; backdrop-filter: blur(10px);
 }
 .lang-dropdown-list.show { display: flex; animation: fadeSlideIn 0.3s ease; }
 .lang-option {
-  padding: 12px 16px; font-size: 12px; color: var(--fog); cursor: pointer; transition: all 0.2s;
+  padding: 14px 16px; font-size: 13px; color: var(--fog); cursor: pointer; transition: all 0.2s;
   font-family: 'Noto Sans TC', sans-serif; text-align: left; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .lang-option:last-child { border-bottom: none; }
 .lang-option:hover { background: rgba(255,255,255,0.08); color: var(--gold); }
 .lang-option.active-lang { color: var(--gold); font-weight: bold; background: rgba(201,168,76,0.1); }
 
-/* 🌟 升級：HSP 初見 Tooltip */
+/* 🌟 HSP Tooltip 持久化與關閉按鈕 */
 .hsp-tooltip-wrap { position: relative; display: flex; align-items: center; }
 .hsp-first-visit-tooltip {
-  position: absolute; top: 48px; right: 0; background: rgba(8,13,18,0.98);
-  border: 1px solid rgba(201,168,76,0.5); color: var(--gold); padding: 10px 14px;
-  font-size: 11px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
+  position: absolute; top: 50px; right: 0; background: rgba(8,13,18,0.98);
+  border: 1px solid rgba(201,168,76,0.5); color: var(--gold); padding: 12px 30px 12px 16px;
+  font-size: 12px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
   white-space: nowrap; letter-spacing: 1.5px; font-family: 'Noto Sans TC', sans-serif;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 1000;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 1000; display: none;
 }
+.hsp-first-visit-tooltip.show { opacity: 1; pointer-events: auto; display: block;}
 .hsp-first-visit-tooltip::before {
-  content: ''; position: absolute; top: -5px; right: 16px; width: 8px; height: 8px;
+  content: ''; position: absolute; top: -5px; right: 24px; width: 8px; height: 8px;
   background: rgba(8,13,18,0.98); border-top: 1px solid rgba(201,168,76,0.5);
   border-left: 1px solid rgba(201,168,76,0.5); transform: rotate(45deg);
 }
+.hsp-tooltip-close {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  color: var(--gold); cursor: pointer; font-size: 16px; opacity: 0.7; padding: 4px;
+}
+.hsp-tooltip-close:hover { opacity: 1; }
 
-#hero{ min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:100px 40px 80px;position:relative;overflow:hidden; }
+#hero{ min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 40px 80px;position:relative;overflow:hidden; }
 .hero-bg-text{ position:absolute;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap; }
-.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;position:relative; }
-.hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,2.2vw,20px);color:var(--gold);letter-spacing:3px;margin-bottom:14px;position:relative; }
-.hero-desc{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:40px;position:relative;}
+.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:16px;position:relative; }
+.hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2.5vw,22px);color:var(--gold);letter-spacing:3px;margin-bottom:24px;position:relative; }
 
-.hero-quotes{ display:flex;gap:40px;margin-bottom:40px;position:relative;flex-wrap:wrap;justify-content:center; }
-.hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,.2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
-.hero-quote cite{ display:block;margin-top:8px;font-style:normal;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3); }
+/* 🌟 UX 優化：將 Onboarding 移至最高視覺層級，並放大字體 */
+.onboarding-box { max-width: 680px; margin: 0 auto 40px; padding: 28px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.25); border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.3s both; box-shadow: 0 8px 30px rgba(0,0,0,0.4);}
+.onboarding-box p { font-size: 15px; line-height: 2; color: var(--dawn); letter-spacing: 1.5px; }
 
-.onboarding-box { max-width: 600px; margin: 0 auto 48px; padding: 24px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.25); border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.5s both; box-shadow: 0 8px 30px rgba(0,0,0,0.4);}
-.onboarding-box p { font-size: 13px; line-height: 2.2; color: var(--dawn); letter-spacing: 1px; }
+.hero-quotes{ display:flex;gap:40px;margin-bottom:48px;position:relative;flex-wrap:wrap;justify-content:center; }
+.hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,.2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
+.hero-quote cite{ display:block;margin-top:10px;font-style:normal;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4); }
 
-.doors-nav{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
-.door-btn{ display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 18px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,.15); border-radius: 6px; cursor:pointer;transition:all .35s;min-width:86px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
-.door-btn:hover{transform:translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: rgba(255,255,255,0.07);}
-.door-btn .dl{ font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1; transition: color 0.3s;}
-.door-btn .dz{font-size:10px;letter-spacing:2px;color:var(--fog); opacity: 0.9;}
+.doors-nav{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
+.door-btn{ display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 20px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,.15); border-radius: 6px; cursor:pointer;transition:all .35s;min-width:100px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+.door-btn:hover{transform:translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: rgba(255,255,255,0.08);}
+.door-btn .dl{ font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;line-height:1; transition: color 0.3s;}
+.door-btn .dz{font-size:12px;letter-spacing:2px;color:var(--fog); opacity: 0.9; font-weight:bold;}
+/* 🌟 UX 優化：加入行動呼籲小字 */
+.door-btn .d-act{font-size:10px;letter-spacing:1px;color:var(--muted); opacity: 0.8; margin-top:2px;}
+
 .door-btn[data-d="E"]{border-color:rgba(123,143,161,.4);} .door-btn[data-d="E"]:hover{border-color:var(--e); box-shadow: 0 8px 20px rgba(123,143,161,.25);} .door-btn[data-d="E"] .dl{color:var(--e);}
 .door-btn[data-d="M"]{border-color:rgba(168,184,200,.4);} .door-btn[data-d="M"]:hover{border-color:var(--m); box-shadow: 0 8px 20px rgba(168,184,200,.25);} .door-btn[data-d="M"] .dl{color:var(--m);}
 .door-btn[data-d="P"]{border-color:rgba(201,168,76,.4);} .door-btn[data-d="P"]:hover{border-color:var(--p); box-shadow: 0 8px 20px rgba(201,168,76,.25);} .door-btn[data-d="P"] .dl{color:var(--p);}
 .door-btn[data-d="A"]{border-color:rgba(122,158,159,.4);} .door-btn[data-d="A"]:hover{border-color:var(--a); box-shadow: 0 8px 20px rgba(122,158,159,.25);} .door-btn[data-d="A"] .dl{color:var(--a);}
 .door-btn[data-d="T"]{border-color:rgba(232,168,124,.4);} .door-btn[data-d="T"]:hover{border-color:var(--t); box-shadow: 0 8px 20px rgba(232,168,124,.25);} .door-btn[data-d="T"] .dl{color:var(--t);}
 .door-btn[data-d="H"]{border-color:rgba(242,232,217,.4);} .door-btn[data-d="H"]:hover{border-color:var(--h); box-shadow: 0 8px 20px rgba(242,232,217,.25);} .door-btn[data-d="H"] .dl{color:var(--h);}
-.flow-line{ font-family:'Noto Serif TC',serif;font-size:10px;letter-spacing:3px;color:var(--muted);position:relative;margin-bottom:12px; }
-.scroll-hint{font-size:10px;color:var(--muted);letter-spacing:3px;animation:pulse 2.5s infinite;position:relative;}
+.flow-line{ font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:4px;color:var(--muted);position:relative;margin-bottom:20px; font-weight:bold;}
+.scroll-hint{font-size:11px;color:var(--muted);letter-spacing:3px;animation:pulse 2.5s infinite;position:relative;}
 @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
 
 .room{min-height:100vh;padding:100px 40px 80px;position:relative;overflow:hidden;}
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
-.room-tag{font-size:10px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;}
-.room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(20px,3vw,30px);color:var(--white);margin-bottom:10px; }
-
-/* 🌟 升級：細緻的 SVG 音波 icon */
-.room-desc{ display:inline-block; font-size:13px;color:var(--muted);line-height:2;max-width:480px;margin-bottom:32px; cursor:pointer; transition: all 0.3s; padding: 12px 16px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
+.room-tag{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase; font-weight:bold;}
+.room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(22px,3.5vw,34px);color:var(--white);margin-bottom:14px; }
+.room-desc{ font-size:14px;color:var(--muted);line-height:2;max-width:500px;margin-bottom:32px; cursor:pointer; transition: all 0.3s; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
 .room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.06); border-left-color: var(--dawn); }
-.room-desc::after {
-    content: ''; display: inline-block; width: 14px; height: 14px; margin-left: 10px; vertical-align: -2px; opacity: 0.4;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FDFCF8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'%3E%3C/polygon%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.07'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
-    background-size: contain; transition: opacity 0.3s;
-}
-.room-desc:hover::after { opacity: 0.9; }
 
-.input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:14px;padding:18px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
-.input-area:focus{border-color:rgba(255,255,255,.6); box-shadow: inset 0 2px 15px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.1); background: rgba(0,0,0,0.5);} 
+/* 🌟 UX 優化：精緻的 SVG 音波 icon */
+.room-desc::after {
+    content: ''; display: inline-block; width: 16px; height: 16px; margin-left: 12px; vertical-align: -3px; opacity: 0.5;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D8D5CD' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'%3E%3C/polygon%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.07'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
+    background-size: contain; transition: all 0.3s;
+}
+.room-desc:hover::after { opacity: 1; transform: scale(1.1);}
+
+.input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:15px;padding:20px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
+.input-area:focus{border-color:rgba(255,255,255,.6); box-shadow: inset 0 2px 15px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.15); background: rgba(0,0,0,0.5);} 
 .input-area::placeholder{color:rgba(255,255,255,.3);}
 
-.send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:12px 32px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit;}
+.send-btn{ display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:14px 36px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit; min-width: 160px;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-.crisis-support { margin-top: 48px; text-align: left; max-width: 600px; }
-.crisis-support a { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif;}
-.crisis-support a:hover { color: var(--fog); border-bottom-color: var(--fog); }
+/* 🌟 UX 優化：提升危機支援對比度 */
+.crisis-support { margin-top: 56px; text-align: left; max-width: 600px; }
+.crisis-support a { font-size: 13px; color: rgba(255,255,255,0.7); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif; font-weight: bold;}
+.crisis-support a:hover { color: var(--white); border-bottom-color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.3);}
 
 /* ===== E ROOM ===== */
 #room-e{background:linear-gradient(180deg,#0D1B2A 0%,#0c1824 100%);}
 #room-e .room-letter{color:var(--e);} #room-e .room-tag{color:var(--e);} 
 #room-e .send-btn{border-color:var(--e);color:var(--e);} 
 #room-e .send-btn:hover{background:rgba(123,143,161,.15); box-shadow: 0 0 16px rgba(123,143,161,0.3); transform: translateY(-2px);}
-.e-warning{ font-size:10px; color:var(--amber); margin-bottom:12px; letter-spacing:1px; line-height:1.6; opacity: 0.9; }
-.e-anon-label{ font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.6);margin-bottom:6px; }
-.e-char-count{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
-.e-feed-container { position:relative; max-width:600px; margin-top:36px; }
-.e-feed{ display:flex;flex-direction:column;gap:12px; }
-.e-msg{ background:rgba(0,0,0,.3);padding:20px 24px;border-left:2px solid rgba(123,143,161,.4);border-radius:0 6px 6px 0;font-size:13px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-.e-msg-anon{font-size:9px;color:rgba(123,143,161,.7);letter-spacing:3px;margin-bottom:6px;} .e-msg-time{font-size:9px;color:rgba(255,255,255,.25);margin-top:8px;letter-spacing:1px;}
+.e-warning{ font-size:12px; color:var(--amber); margin-bottom:16px; letter-spacing:1px; line-height:1.6; opacity: 0.95; }
+.e-anon-label{ font-size:11px;letter-spacing:3px;color:rgba(123,143,161,.7);margin-bottom:8px; font-weight:bold;}
+.e-char-count{font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:1px;}
+.e-feed-container { position:relative; max-width:600px; margin-top:40px; }
+.e-feed{ display:flex;flex-direction:column;gap:16px; }
+.e-msg{ background:rgba(0,0,0,.3);padding:24px 28px;border-left:2px solid rgba(123,143,161,.5);border-radius:0 6px 6px 0;font-size:14px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+.e-msg-anon{font-size:10px;color:rgba(123,143,161,.8);letter-spacing:3px;margin-bottom:8px;} .e-msg-time{font-size:10px;color:rgba(255,255,255,.3);margin-top:10px;letter-spacing:1px;}
 .e-feed-fade { position:absolute; bottom:0; left:0; right:0; height:80px; background:linear-gradient(to bottom, transparent, #0c1824); pointer-events:none; display:none; }
-.e-expand-btn { display:none; align-items:center; justify-content:center; gap:8px; margin: 16px auto 0; padding:10px 24px; background:rgba(123,143,161,0.05); border:1px solid rgba(123,143,161,0.3); border-radius:20px; font-family:'Noto Serif TC',serif; font-size:11px; letter-spacing:2px; color:var(--e); cursor:pointer; transition:all 0.3s; }
+.e-expand-btn { display:none; align-items:center; justify-content:center; gap:8px; margin: 20px auto 0; padding:12px 28px; background:rgba(123,143,161,0.05); border:1px solid rgba(123,143,161,0.4); border-radius:24px; font-family:'Noto Serif TC',serif; font-size:12px; letter-spacing:2px; color:var(--e); cursor:pointer; transition:all 0.3s; }
 .e-expand-btn:hover { background:rgba(123,143,161,0.15); border-color:var(--e); box-shadow: 0 4px 15px rgba(123,143,161,0.2); }
 
 /* ===== M ROOM ===== */
@@ -179,14 +193,14 @@ nav{
 .m-input-wrap{max-width:480px;}
 
 .star-tooltip {
-    position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.5);
-    padding:20px; font-size:13px; color:var(--fog); z-index:600; max-width:260px; line-height:1.9;
-    border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(168,184,200,0.2);
+    position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.6);
+    padding:24px; font-size:14px; color:var(--fog); z-index:600; max-width:280px; line-height:2;
+    border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 20px rgba(168,184,200,0.25);
     pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
 }
 .star-tooltip.active { opacity: 1; visibility: visible; pointer-events: auto; }
-.m-stats{ display:flex;gap:24px;margin-top:20px; }
-.m-stat{font-size:10px;letter-spacing:2px;color:rgba(168,184,200,.7);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;}
+.m-stats{ display:flex;gap:32px;margin-top:24px; }
+.m-stat{font-size:11px;letter-spacing:2px;color:rgba(168,184,200,.8);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;}
 
 /* ===== P ROOM ===== */
 #room-p{background:linear-gradient(180deg,#0D1B2A 0%,#100e08 100%);}
@@ -195,25 +209,25 @@ nav{
 #room-p .send-btn:hover{background:rgba(201,168,76,.15); box-shadow: 0 0 16px rgba(201,168,76,0.3); transform: translateY(-2px);}
 
 .p-step-label {
-    font-family: 'Noto Serif TC', serif; font-size: 12px; font-weight: 700;
-    color: var(--gold); letter-spacing: 3px; margin-bottom: 20px;
-    border-bottom: 1px solid rgba(201,168,76,0.3); padding-bottom: 8px;
+    font-family: 'Noto Serif TC', serif; font-size: 14px; font-weight: 700;
+    color: var(--gold); letter-spacing: 3px; margin-bottom: 24px;
+    border-bottom: 1px solid rgba(201,168,76,0.4); padding-bottom: 8px;
     display: inline-block;
 }
-.p-vessel{ max-width:540px;margin-bottom:32px;position:relative; }
-#p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.5);border:1px solid rgba(201,168,76,.3); border-radius: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,0.6);}
-.p-canvas-hint{ font-size:10px;letter-spacing:2px;color:rgba(201,168,76,.6);text-align:center;margin-top:12px; line-height: 1.8; }
-.kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;margin-top:16px; }
+.p-vessel{ max-width:540px;margin-bottom:36px;position:relative; }
+#p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.5);border:1px solid rgba(201,168,76,.4); border-radius: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,0.7);}
+.p-canvas-hint{ font-size:11px;letter-spacing:2px;color:rgba(201,168,76,.7);text-align:center;margin-top:16px; line-height: 1.8; }
+.kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin-top:20px; }
 
-.shard{ background:rgba(0,0,0,.35);padding:20px;border:1px solid rgba(201,168,76,.3); border-radius: 6px; cursor:pointer;transition:all .4s;position:relative;overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-.shard:hover{border-color:rgba(201,168,76,.6);background:rgba(201,168,76,.08); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(201,168,76,0.2);} 
-.shard-text{font-size:12px;line-height:2;color:var(--fog);}
-.shard-glow{ position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0;transition:opacity .4s; }
+.shard{ background:rgba(0,0,0,.35);padding:24px;border:1px solid rgba(201,168,76,.4); border-radius: 6px; cursor:pointer;transition:all .4s;position:relative;overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.shard:hover{border-color:rgba(201,168,76,.7);background:rgba(201,168,76,.1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(201,168,76,0.3);} 
+.shard-text{font-size:13px;line-height:2;color:var(--fog);}
+.shard-glow{ position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0;transition:opacity .4s; }
 .shard:hover .shard-glow{opacity:1;}
-.shard-healed-tag{ font-size:8px;color:var(--gold);letter-spacing:2px;margin-top:12px;display:none; font-weight: bold;} .shard.healed .shard-healed-tag{display:block;}
-.p-healed-count{ font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(201,168,76,.7);letter-spacing:2px;margin-top:24px; }
-.shard.healed { border: 1px solid #BF953F !important; background: rgba(201,168,76,0.12) !important; box-shadow: 0 0 15px rgba(191, 149, 63, 0.5) !important; cursor: default; transform: none;}
-.shard.healed .shard-glow { background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important; height: 3px !important; opacity: 1 !important; box-shadow: 0 -2px 8px rgba(252, 246, 186, 0.5) !important; }
+.shard-healed-tag{ font-size:9px;color:var(--gold);letter-spacing:2px;margin-top:14px;display:none; font-weight: bold;} .shard.healed .shard-healed-tag{display:block;}
+.p-healed-count{ font-family:'Cormorant Garamond',serif;font-size:15px;color:rgba(201,168,76,.8);letter-spacing:2px;margin-top:28px; }
+.shard.healed { border: 1px solid #BF953F !important; background: rgba(201,168,76,0.15) !important; box-shadow: 0 0 15px rgba(191, 149, 63, 0.5) !important; cursor: default; transform: none;}
+.shard.healed .shard-glow { background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important; height: 4px !important; opacity: 1 !important; box-shadow: 0 -2px 10px rgba(252, 246, 186, 0.6) !important; }
 
 /* ===== A ROOM ===== */
 #room-a{background:linear-gradient(180deg,#0D1B2A 0%,#071014 100%);}
@@ -225,173 +239,186 @@ nav{
 
 .a-warning-mask {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 48px 24px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(122,158,159,0.3);
-    border-radius: 8px; max-width: 600px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); text-align: center;
+    padding: 56px 32px; background: rgba(0,0,0,0.5); border: 1px dashed rgba(122,158,159,0.4);
+    border-radius: 8px; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center;
 }
-.a-warning-mask p { font-size: 13px; line-height: 2.2; color: var(--dawn); letter-spacing: 1px; }
+.a-warning-mask p { font-size: 14px; line-height: 2.2; color: var(--dawn); letter-spacing: 1.5px; }
 
-.a-feed{display:flex;flex-direction:column;gap:16px;max-width:600px;}
-.sand-msg{ background:rgba(0,0,0,.3);padding:22px 26px;border-left:2px solid rgba(122,158,159,.5);border-radius:0 6px 6px 0;position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:all 4s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-.sand-msg-text{font-size:13px;line-height:2;color:var(--fog); transition: filter 3s ease;}
-.sand-timer-wrap{ display:flex;align-items:center;gap:10px;margin-top:14px; }
-.sand-timer-label{font-size:9px;color:var(--a);letter-spacing:2px;}
-.sand-timer-bar{flex:1;height:2px;background:rgba(122,158,159,.2); border-radius: 2px; overflow:hidden;}
+.a-feed{display:flex;flex-direction:column;gap:20px;max-width:600px;}
+.sand-msg{ background:rgba(0,0,0,.4);padding:26px 32px;border-left:2px solid rgba(122,158,159,.6);border-radius:0 6px 6px 0;position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:all 4s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.4);}
+.sand-msg-text{font-size:14px;line-height:2;color:var(--fog); transition: filter 3s ease;}
+.sand-timer-wrap{ display:flex;align-items:center;gap:12px;margin-top:18px; }
+.sand-timer-label{font-size:10px;color:var(--a);letter-spacing:2px; font-weight:bold;}
+.sand-timer-bar{flex:1;height:3px;background:rgba(122,158,159,.25); border-radius: 3px; overflow:hidden;}
 .sand-timer-fill{height:100%;background:repeating-linear-gradient(90deg, var(--a), var(--a) 2px, transparent 2px, transparent 4px); transition:width 1s linear;}
-.sand-time-left{font-size:9px;color:rgba(122,158,159,.7);letter-spacing:1px;white-space:nowrap;}
+.sand-time-left{font-size:10px;color:rgba(122,158,159,.8);letter-spacing:1px;white-space:nowrap; font-weight:bold;}
 .sand-dissolve-overlay{ position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);opacity:0;pointer-events:none;transition:opacity 2s; }
-.sand-msg.dissolving { filter: blur(4px); opacity: 0; transform: translateY(15px) scale(0.98); }
-.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(122,158,159,.6);margin-top:24px;letter-spacing:1px; line-height:1.6; }
+.sand-msg.dissolving { filter: blur(5px); opacity: 0; transform: translateY(20px) scale(0.96); }
+.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(122,158,159,.7);margin-top:28px;letter-spacing:1px; line-height:1.8; }
 
 /* ===== T ROOM ===== */
 #room-t{background:linear-gradient(180deg,#0D1B2A 0%,#140f08 100%);}
 #room-t .room-letter{color:var(--t);} #room-t .room-tag{color:var(--t);} 
 #room-t .send-btn{border-color:var(--t);color:var(--t);} 
 #room-t .send-btn:hover{background:rgba(232,168,124,.15); box-shadow: 0 0 16px rgba(232,168,124,0.3); transform: translateY(-2px);}
-.t-layout{ display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:840px;margin-top:32px; }
-.t-panel{background:rgba(0,0,0,.3);padding:26px;border:1px solid rgba(232,168,124,.25); border-radius: 6px; box-shadow: 0 4px 18px rgba(0,0,0,0.3);}
-.t-panel-title{ font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;color:var(--white);margin-bottom:20px;letter-spacing:2px; }
-.t-feed{display:flex;flex-direction:column;gap:12px;max-height:400px;overflow-y:auto; padding-right: 8px;}
-.t-feed::-webkit-scrollbar{width:4px;} .t-feed::-webkit-scrollbar-thumb{background:rgba(232,168,124,.4); border-radius: 4px;}
-.warmth-item{ padding:16px 20px;background:rgba(232,168,124,.08);border-left:2px solid rgba(232,168,124,.4);border-radius:0 6px 6px 0;font-size:12px;line-height:1.9;color:var(--fog);position:relative;animation:fadeSlideIn .5s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.2);}
-.warmth-pulse{ position:absolute;top:12px;right:12px;width:6px;height:6px;border-radius:50%;background:var(--amber);animation:heartbeat 2.5s ease-in-out infinite; box-shadow: 0 0 10px var(--amber);}
+.t-layout{ display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:880px;margin-top:40px; }
+.t-panel{background:rgba(0,0,0,.35);padding:32px;border:1px solid rgba(232,168,124,.3); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);}
+.t-panel-title{ font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--white);margin-bottom:24px;letter-spacing:2px; }
+.t-feed{display:flex;flex-direction:column;gap:16px;max-height:450px;overflow-y:auto; padding-right: 12px;}
+.t-feed::-webkit-scrollbar{width:6px;} .t-feed::-webkit-scrollbar-thumb{background:rgba(232,168,124,.5); border-radius: 6px;}
+.warmth-item{ padding:20px 24px;background:rgba(232,168,124,.08);border-left:2px solid rgba(232,168,124,.5);border-radius:0 6px 6px 0;font-size:13px;line-height:2;color:var(--fog);position:relative;animation:fadeSlideIn .5s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.2);}
+.warmth-pulse{ position:absolute;top:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--amber);animation:heartbeat 2.5s ease-in-out infinite; box-shadow: 0 0 12px var(--amber);}
 @keyframes heartbeat{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:1;transform:scale(1.4);} }
-.echo-btn{ display:flex;align-items:center;gap:6px;margin-top:10px;padding:6px 12px;background:rgba(0,0,0,0.3);border:1px solid rgba(232,168,124,0.3); border-radius:4px; cursor:pointer;font-size:10px;color:var(--muted);letter-spacing:1px;transition:all .3s;font-family:'Noto Sans TC',sans-serif; }
-.echo-btn:hover{color:var(--amber); border-color:var(--amber); background:rgba(232,168,124,0.08);} .echo-btn.pulsed{color:var(--amber); border-color:var(--amber); cursor:default;}
+.echo-btn{ display:flex;align-items:center;gap:8px;margin-top:14px;padding:8px 16px;background:rgba(0,0,0,0.4);border:1px solid rgba(232,168,124,0.4); border-radius:4px; cursor:pointer;font-size:11px;color:var(--muted);letter-spacing:1px;transition:all .3s;font-family:'Noto Sans TC',sans-serif; font-weight:bold;}
+.echo-btn:hover{color:var(--amber); border-color:var(--amber); background:rgba(232,168,124,0.1);} .echo-btn.pulsed{color:var(--amber); border-color:var(--amber); cursor:default;}
 .echo-btn .heart{transition:transform .2s;} .echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
-.echo-count{ font-family:'Cormorant Garamond',serif;font-size:14px;color:rgba(232,168,124,.5);margin-top:20px; }
-.t-send-panel{background:rgba(0,0,0,.3);padding:26px;border:1px solid rgba(232,168,124,.25); border-radius: 6px; box-shadow: 0 4px 18px rgba(0,0,0,0.3);} .t-send-panel .t-panel-title{margin-bottom:16px;}
-.echo-pulse-ring{ width:80px;height:80px;border-radius:50%;border:1px solid rgba(232,168,124,.5);display:flex;align-items:center;justify-content:center;margin:24px auto 8px;position:relative; box-shadow: inset 0 0 20px rgba(232,168,124,0.15); }
-.echo-pulse-ring::before{ content:'';position:absolute;top:-8px;left:-8px;right:-8px;bottom:-8px;border-radius:50%;border:1px solid rgba(232,168,124,.3); }
-.echo-pulse-ring::after{ content:'';position:absolute;top:-16px;left:-16px;right:-16px;bottom:-16px;border-radius:50%;border:1px solid rgba(232,168,124,.15); }
-.echo-heart{ font-size:28px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
-@keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 15px var(--amber);}}
-.echo-label{ text-align:center;font-size:10px;letter-spacing:2px;color:rgba(232,168,124,.7);margin-bottom:16px; font-weight: bold;}
+.echo-count{ font-family:'Cormorant Garamond',serif;font-size:16px;color:rgba(232,168,124,.6);margin-top:24px; }
+.t-send-panel{background:rgba(0,0,0,.35);padding:32px;border:1px solid rgba(232,168,124,.3); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);} .t-send-panel .t-panel-title{margin-bottom:20px;}
+.echo-pulse-ring{ width:100px;height:100px;border-radius:50%;border:1px solid rgba(232,168,124,.5);display:flex;align-items:center;justify-content:center;margin:32px auto 16px;position:relative; box-shadow: inset 0 0 25px rgba(232,168,124,0.2); }
+.echo-pulse-ring::before{ content:'';position:absolute;top:-10px;left:-10px;right:-10px;bottom:-10px;border-radius:50%;border:1px solid rgba(232,168,124,.3); }
+.echo-pulse-ring::after{ content:'';position:absolute;top:-20px;left:-20px;right:-20px;bottom:-20px;border-radius:50%;border:1px solid rgba(232,168,124,.15); }
+.echo-heart{ font-size:36px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
+@keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 20px var(--amber);}}
+.echo-label{ text-align:center;font-size:12px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
 
 /* ===== H ROOM ===== */
 #room-h{background:linear-gradient(180deg,#0D1B2A 0%,#0f0f1a 100%);}
-#room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.5);}
-.h-journey{max-width:700px;}
-.journey-summary, .global-summary{ display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:32px; }
-.j-card, .g-card{ background:rgba(0,0,0,.3);padding:24px 14px;text-align:center;border-top:2px solid; border-radius: 0 0 6px 6px; transition:all .3s;cursor:default; box-shadow: 0 6px 15px rgba(0,0,0,0.3);}
-.j-card:hover, .g-card:hover{background:rgba(255,255,255,.06); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.4);}
+#room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.6);}
+.h-journey{max-width:740px;}
+.journey-summary, .global-summary{ display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:16px;margin-bottom:40px; }
+.j-card, .g-card{ background:rgba(0,0,0,.35);padding:28px 16px;text-align:center;border-top:2px solid; border-radius: 0 0 6px 6px; transition:all .3s;cursor:default; box-shadow: 0 6px 15px rgba(0,0,0,0.4);}
+.j-card:hover, .g-card:hover{background:rgba(255,255,255,.06); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.5);}
 .j-card:nth-child(1){border-top-color:var(--e);} .j-card:nth-child(2){border-top-color:var(--m);}
 .j-card:nth-child(3){border-top-color:var(--p);} .j-card:nth-child(4){border-top-color:var(--a);}
 .j-card:nth-child(5){border-top-color:var(--t);}
-.g-card{ background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-top:2px solid var(--gold); }
-.g-card:hover{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.35);}
+.g-card{ background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-top:2px solid var(--gold); }
+.g-card:hover{background:rgba(201,168,76,0.12);border-color:rgba(201,168,76,0.4);}
 .g-card.visitor-card { border-top-color: var(--white); background: rgba(255,255,255,0.05); }
 
-.j-num, .g-num{ font-family:'Noto Serif TC',serif;font-size:36px;font-weight:700;color:var(--white);line-height:1;margin-bottom:8px; }
+.j-num, .g-num{ font-family:'Noto Serif TC',serif;font-size:40px;font-weight:700;color:var(--white);line-height:1;margin-bottom:10px; }
 .g-num{color:var(--gold);} .g-card.visitor-card .g-num { color: var(--white); }
-.j-label, .g-label{font-size:9px;color:var(--muted);letter-spacing:2px;}
-.j-letter, .g-letter{ display:block;font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:600;margin-bottom:6px;letter-spacing:1px; }
+.j-label, .g-label{font-size:11px;color:var(--muted);letter-spacing:2px; font-weight:bold;}
+.j-letter, .g-letter{ display:block;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;margin-bottom:8px;letter-spacing:1px; }
 .j-card:nth-child(1) .j-letter{color:var(--e);} .j-card:nth-child(2) .j-letter{color:var(--m);}
 .j-card:nth-child(3) .j-letter{color:var(--p);} .j-card:nth-child(4) .j-letter{color:var(--a);}
 .j-card:nth-child(5) .j-letter{color:var(--t);}
 .g-letter{color:var(--gold);} .g-card.visitor-card .g-letter { color: var(--white); }
 
-.sync-box { background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.15); padding: 28px; max-width: 600px; margin: 36px 0; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
-.sync-title { font-family:'Noto Serif TC',serif; font-size: 11px; letter-spacing: 3px; color: var(--gold); margin-bottom: 12px; font-weight: 700; }
-.sync-actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
-.sync-input { background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.3); color: var(--white); padding: 10px 14px; font-size: 11px; outline: none; letter-spacing: 2px; border-radius: 4px; transition: border-color 0.3s; }
-.sync-input:focus { border-color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.2);}
-.sync-btn-small { background: rgba(255,255,255,0.04); border: 1px solid var(--muted); color: var(--muted); padding: 10px 20px; font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: all .3s; font-family:'Noto Serif TC',serif; border-radius: 4px; }
-.sync-btn-small:hover { border-color: var(--white); color: var(--white); background: rgba(255,255,255,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
-.key-display { font-family: monospace; font-size: 13px; color: var(--white); letter-spacing: 2px; background: rgba(201,168,76,0.15); border: 1px dashed rgba(201,168,76,0.5); padding: 8px 16px; margin-right: 8px; font-weight: bold; border-radius: 4px;}
+.sync-box { background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2); padding: 32px; max-width: 640px; margin: 48px 0; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
+.sync-title { font-family:'Noto Serif TC',serif; font-size: 13px; letter-spacing: 3px; color: var(--gold); margin-bottom: 16px; font-weight: 700; }
+.sync-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
+.sync-input { background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.35); color: var(--white); padding: 12px 16px; font-size: 13px; outline: none; letter-spacing: 2px; border-radius: 4px; transition: border-color 0.3s; }
+.sync-input:focus { border-color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.3);}
+.sync-btn-small { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size: 12px; letter-spacing: 2px; cursor: pointer; transition: all .3s; font-family:'Noto Serif TC',serif; border-radius: 4px; font-weight:bold; }
+.sync-btn-small:hover { border-color: var(--white); color: var(--white); background: rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.4);}
+.key-display { font-family: monospace; font-size: 15px; color: var(--white); letter-spacing: 3px; background: rgba(201,168,76,0.2); border: 1px dashed rgba(201,168,76,0.6); padding: 10px 20px; margin-right: 10px; font-weight: bold; border-radius: 4px;}
 
-.home-quote{ background:rgba(0,0,0,.3);padding:32px 36px;border-left:2px solid rgba(242,232,217,.3);margin:36px 0 28px; border-radius: 0 6px 6px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
-.home-quote p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--dawn);line-height:2.2; }
-.h-timeline{max-width:600px;margin-bottom:36px;}
-.h-timeline-title{ font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:20px; font-weight: bold; }
+.home-quote{ background:rgba(0,0,0,.4);padding:40px 48px;border-left:2px solid rgba(242,232,217,.4);margin:48px 0 36px; border-radius: 0 8px 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,0.3);}
+.home-quote p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--dawn);line-height:2.2; }
+.h-timeline{max-width:640px;margin-bottom:48px;}
+.h-timeline-title{ font-size:12px;letter-spacing:3px;color:var(--muted);margin-bottom:24px; font-weight: bold; }
 .h-events{display:flex;flex-direction:column;gap:0;}
-.h-event{ display:flex;gap:20px;padding:16px 0;border-left:1px solid rgba(255,255,255,.15); padding-left:24px;position:relative;font-size:12px;line-height:1.9;color:var(--fog);animation:fadeSlideIn .5s ease; }
-.h-event::before{ content:'';position:absolute;left:-5px;top:22px;width:9px;height:9px;border-radius:50%; border:1px solid rgba(255,255,255,.4);background:var(--bg); box-shadow: 0 0 8px rgba(0,0,0,0.6); }
-.h-event.e-event::before{border-color:var(--e);background:rgba(123,143,161,.5);} .h-event.m-event::before{border-color:var(--m);background:rgba(168,184,200,.5);}
-.h-event.p-event::before{border-color:var(--p);background:rgba(201,168,76,.5);} .h-event.a-event::before{border-color:var(--a);background:rgba(122,158,159,.5);}
-.h-event.t-event::before{border-color:var(--t);background:rgba(232,168,124,.5);}
-.h-event-label{ font-size:9px;letter-spacing:2px;margin-bottom:4px; font-weight: bold;}
+.h-event{ display:flex;gap:24px;padding:20px 0;border-left:1px solid rgba(255,255,255,.2); padding-left:28px;position:relative;font-size:13px;line-height:1.9;color:var(--fog);animation:fadeSlideIn .5s ease; }
+.h-event::before{ content:'';position:absolute;left:-6px;top:26px;width:11px;height:11px;border-radius:50%; border:1px solid rgba(255,255,255,.5);background:var(--bg); box-shadow: 0 0 10px rgba(0,0,0,0.7); }
+.h-event.e-event::before{border-color:var(--e);background:rgba(123,143,161,.6);} .h-event.m-event::before{border-color:var(--m);background:rgba(168,184,200,.6);}
+.h-event.p-event::before{border-color:var(--p);background:rgba(201,168,76,.6);} .h-event.a-event::before{border-color:var(--a);background:rgba(122,158,159,.6);}
+.h-event.t-event::before{border-color:var(--t);background:rgba(232,168,124,.6);}
+.h-event-label{ font-size:10px;letter-spacing:2px;margin-bottom:6px; font-weight: bold;}
 .h-event.e-event .h-event-label{color:var(--e);} .h-event.m-event .h-event-label{color:var(--m);} .h-event.p-event .h-event-label{color:var(--p);} .h-event.a-event .h-event-label{color:var(--a);} .h-event.t-event .h-event-label{color:var(--t);}
-.h-event-text{font-size:12px;color:var(--fog);line-height:1.9;} .h-event-time{font-size:9px;color:rgba(255,255,255,.3);margin-top:6px;}
+.h-event-text{font-size:14px;color:var(--fog);line-height:1.9;} .h-event-time{font-size:10px;color:rgba(255,255,255,.4);margin-top:8px; font-weight:bold;}
 
-.lighthouse{ text-align:center;padding:40px 20px;border:1px solid rgba(242,232,217,.2);max-width:500px; background: rgba(0,0,0,0.3); border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.4); margin-top: 24px;}
-.lighthouse-flame{ font-size:44px;margin-bottom:14px;animation:flicker 3s ease-in-out infinite;display:block; text-shadow: 0 0 25px rgba(255,200,100,0.5); }
+.lighthouse{ text-align:center;padding:48px 24px;border:1px solid rgba(242,232,217,.3);max-width:540px; background: rgba(0,0,0,0.4); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 32px;}
+.lighthouse-flame{ font-size:52px;margin-bottom:16px;animation:flicker 3s ease-in-out infinite;display:block; text-shadow: 0 0 30px rgba(255,200,100,0.6); }
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
-.lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dawn);line-height:2.2; }
+.lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--dawn);line-height:2.2; }
 
-.share-action-box { display:flex; flex-wrap:wrap; gap:16px; margin-top: 48px; }
+.share-action-box { display:flex; flex-wrap:wrap; gap:20px; margin-top: 56px; }
 .action-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.25);
-  color: var(--white); font-family: 'Noto Serif TC', serif; font-size: 13px; font-weight: bold;
-  letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 6px; flex: 1; min-width: 240px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 20px 32px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.3);
+  color: var(--white); font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: bold;
+  letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 6px; flex: 1; min-width: 260px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
-.action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.2); }
+.action-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(201,168,76,0.3); }
 
+/* 真實圖片生成：分享卡 Modal */
 .share-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85); z-index: 99999;
+  background: rgba(0,0,0,0.9); z-index: 99999;
   display: none; flex-direction: column; justify-content: center; align-items: center;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
 .share-modal.show { display: flex !important; animation: fadeSlideIn 0.4s ease; }
 .wrapped-card {
-  background: linear-gradient(135deg, #16243b, #0a111a); border: 1px solid rgba(201,168,76,0.4);
-  padding: 40px 30px; border-radius: 6px; text-align: center; max-width: 320px; width: 90%;
-  box-shadow: 0 15px 50px rgba(0,0,0,0.9); position: relative;
+  background: linear-gradient(135deg, #16243b, #0a111a); border: 1px solid rgba(201,168,76,0.5);
+  padding: 48px 36px; border-radius: 8px; text-align: center; max-width: 360px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.9); position: relative;
 }
-.share-modal-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; align-items: center; width: 100%; z-index: 2; }
-.wrapped-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); letter-spacing: 6px; margin-bottom: 8px; font-weight: 600;}
-.wrapped-sub { font-size: 10px; color: var(--fog); letter-spacing: 4px; margin-bottom: 30px; }
-.wrapped-item { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding: 14px 0; color: var(--white); letter-spacing: 2px;}
+.share-modal-actions { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; align-items: center; width: 100%; z-index: 2; }
+.wrapped-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--gold); letter-spacing: 8px; margin-bottom: 12px; font-weight: 600;}
+.wrapped-sub { font-size: 12px; color: var(--fog); letter-spacing: 5px; margin-bottom: 36px; font-weight:bold;}
+.wrapped-item { display: flex; justify-content: space-between; font-size: 15px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding: 16px 0; color: var(--white); letter-spacing: 2px;}
 .wrapped-item span { font-family: 'Noto Serif TC', serif; font-weight: 700; color: var(--gold); }
-.wrapped-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 32px; letter-spacing: 1px;}
-.close-modal-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size: 12px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 4px; }
-.close-modal-btn:hover { color: var(--white); border-color: var(--white); background: rgba(255,255,255,0.1); }
+.wrapped-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: rgba(255,255,255,0.7); margin-top: 40px; letter-spacing: 1px; line-height:1.8;}
+.close-modal-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--muted); color: var(--muted); padding: 14px 28px; font-size: 13px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 6px; font-weight:bold;}
+.close-modal-btn:hover { color: var(--white); border-color: var(--white); background: rgba(255,255,255,0.15); }
 
-.toast{ position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px); background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.2); padding:14px 28px;font-size:12px;color:var(--fog);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(10px); border-radius: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.6);}
+/* ===== TOAST ===== */
+.toast{ position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px); background:rgba(27,42,74,.98);border:1px solid rgba(255,255,255,.3); padding:16px 32px;font-size:14px;color:var(--white);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(12px); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); font-weight:bold;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* 🌟 返回頂部按鈕 */
+#btt-btn {
+    position: fixed; bottom: 40px; right: 40px; width: 48px; height: 48px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%; color: var(--white); font-size: 20px; cursor: pointer;
+    display: none; align-items: center; justify-content: center; z-index: 900;
+    transition: all 0.3s; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+#btt-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--white); transform: translateY(-3px); }
+
 /* 🌟 升級：Footer 對比度提升，符合 WCAG 無障礙標準 */
-footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); background: rgba(5,12,18,0.9); display:flex; flex-direction:column; align-items:center; }
-.footer-main { width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:32px; }
-.footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.6);letter-spacing:2px; }
-.footer-right{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:3px;}
-.footer-letters{ display:flex;gap:8px; }
-.footer-l{ font-family:'Cormorant Garamond',serif;font-size:13px;opacity:.5;letter-spacing:2px; }
-.footer-copy { width:100%; text-align:center; padding-top:24px; border-top:1px dashed rgba(255,255,255,0.1); font-size:10px; color:rgba(255,255,255,0.5); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
+footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); background: rgba(5,12,18,0.95); display:flex; flex-direction:column; align-items:center; }
+.footer-main { width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; margin-bottom:40px; }
+.footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:rgba(255,255,255,.7);letter-spacing:2px; }
+.footer-right{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:3px; font-weight:bold;}
+.footer-letters{ display:flex;gap:10px; }
+.footer-l{ font-family:'Cormorant Garamond',serif;font-size:15px;opacity:.6;letter-spacing:2px; }
+.footer-copy { width:100%; text-align:center; padding-top:28px; border-top:1px dashed rgba(255,255,255,0.15); font-size:11px; color:rgba(255,255,255,0.6); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
+
 
 @media(max-width:768px){
-  nav { flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 16px; }
-  .nav-logo { font-size: 18px; margin-top: 4px; }
+  nav { padding: 12px 16px; }
+  .nav-logo { font-size: 20px; }
   
-  .nav-controls { position: absolute; top: 12px; right: 16px; gap: 8px; }
+  .nav-controls { gap: 8px; }
   .hsp-text { display: none; }
   
-  .nav-letters { width: 100%; justify-content: space-between; gap: 0; }
-  .nav-letter { width: 32px; height: 32px; font-size: 14px; }
-  .func-btn { height: 28px; line-height: 26px; padding: 0 8px; }
+  /* 🌟 優化：手機版導覽列字母允許滑動，不擠壓 */
+  .nav-letters { width: 100%; justify-content: flex-start; gap: 8px; overflow-x: auto; padding-bottom: 4px; padding-top:4px;}
+  .nav-letters::-webkit-scrollbar { display: none; }
+  .nav-letter { min-width: 36px; height: 36px; font-size: 15px; }
+  .func-btn { height: 32px; font-size: 12px; padding: 0 12px; }
 
-  /* 🌟 手機版 Tooltip 位置微調 */
-  .hsp-first-visit-tooltip { right: 16px; top: 50px; }
+  .hsp-first-visit-tooltip { right: 16px; top: 54px; font-size:11px; padding: 10px 24px 10px 12px;}
   .hsp-first-visit-tooltip::before { right: 12px; }
   
-  #hero { justify-content: flex-start; padding-top: 140px; }
-  .hero-title { font-size: 14vw; letter-spacing: 12px; margin-top: 8vh; margin-bottom: 16px; }
-  .hero-bg-text { font-size: 32vw; top: 40%; }
-  .hero-sub { font-size: 12px; margin-bottom: 30px; }
-  .hero-desc { margin-bottom: 30px; }
+  #hero { justify-content: flex-start; padding-top: 150px; }
+  .hero-title { font-size: 15vw; letter-spacing: 10px; margin-top: 6vh; margin-bottom: 20px; }
+  .hero-bg-text { font-size: 34vw; top: 45%; }
+  .hero-sub { font-size: 13px; margin-bottom: 36px; }
   
   .room { padding: 120px 20px 60px; }
-  .room-letter { font-size: 70px; top: 80px; right: 16px; }
+  .room-letter { font-size: 80px; top: 80px; right: 16px; }
   
   .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
   
-  .hero-quotes { display: none; flex-direction: column; gap: 16px; }
+  .hero-quotes { display: none; flex-direction: column; gap: 20px; margin-bottom: 40px;}
   .hero-quotes.show-quotes { display: flex; animation: fadeSlideIn 0.5s ease; }
-  #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 32px; align-items: center; }
+  #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 36px; align-items: center; }
 
-  .onboarding-box { padding: 16px; margin-bottom: 32px; }
+  .onboarding-box { padding: 20px; margin-bottom: 40px; }
 
   .star-tooltip {
       top: auto !important; bottom: 0 !important; left: 0 !important;
@@ -408,10 +435,10 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
       width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px;
   }
 
-  .input-area { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.35); }
-  .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-  .door-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
-  .shard { background: rgba(0,0,0,0.4); border: 1px solid rgba(201,168,76,0.4); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+  .input-area { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); }
+  .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .door-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+  .shard { background: rgba(0,0,0,0.45); border: 1px solid rgba(201,168,76,0.45); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
 
   .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active {
     transform: scale(0.95) !important; 
@@ -419,16 +446,19 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
     box-shadow: none !important; 
     transition: all 0.1s !important; 
   }
+  
+  #btt-btn { bottom: 20px; right: 20px; width: 40px; height: 40px; font-size: 16px; }
 }
 
-/* 🌟 針對 480px 以下極小螢幕的排版壓縮 */
 @media(max-width:480px){
-  .room { padding: 100px 16px 40px; }
-  .t-panel, .t-send-panel { padding: 16px; }
-  .input-area { padding: 12px; font-size: 13px; }
-  .hero-title { font-size: 16vw; letter-spacing: 8px; }
-  .doors-nav { gap: 8px; }
-  .door-btn { padding: 16px 12px; min-width: 72px; }
+  .room { padding: 110px 16px 40px; }
+  .t-panel, .t-send-panel { padding: 20px; }
+  .input-area { padding: 16px; font-size: 14px; }
+  .hero-title { font-size: 17vw; letter-spacing: 6px; }
+  .doors-nav { gap: 10px; }
+  .door-btn { padding: 16px 10px; min-width: 80px; }
+  .door-btn .dl{ font-size: 28px; }
+  .door-btn .dz{ font-size: 11px; }
 }
 </style>
 </head>
@@ -454,6 +484,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
 
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
+<button id="btt-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
 
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
@@ -468,7 +499,10 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
   <div class="nav-controls">
     <div class="hsp-tooltip-wrap">
       <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
-      <div class="hsp-first-visit-tooltip" id="hsp-tooltip" data-zh="給高感官敏感者的靜心模式" data-en="Calm Mode for Highly Sensitive Persons" data-ja="HSPのための静寂モード" data-es="Modo Calma para Personas Altamente Sensibles" data-fr="Mode Calme pour personnes hypersensibles" data-de="Ruhemodus für hochsensible Personen" data-zh-cn="给高感官敏感者的静心模式">給高感官敏感者的靜心模式</div>
+      <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
+          <span data-zh="給高感官敏感者的靜心模式" data-en="Calm Mode for Highly Sensitive Persons" data-ja="HSPのための静寂モード" data-es="Modo Calma para Personas Altamente Sensibles" data-fr="Mode Calme pour personnes hypersensibles" data-de="Ruhemodus für hochsensible Personen" data-zh-cn="给高感官敏感者的静心模式">給高感官敏感者的靜心模式</span>
+          <span class="hsp-tooltip-close" onclick="this.parentElement.classList.remove('show')">×</span>
+      </div>
     </div>
     
     <div class="lang-dropdown-wrapper">
@@ -491,6 +525,48 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
   <div class="hero-bg-text">EMPATH</div>
   <h1 class="hero-title">EMPATH</h1>
   <p class="hero-sub">Every Moment As Truth Heals</p>
+  
+  <div class="onboarding-box">
+    <p style="font-weight:bold; color:var(--gold); margin-bottom:12px; letter-spacing:2px;" data-zh="這是一個什麼樣的空間？" data-en="What is this space?" data-ja="ここはどんな空間ですか？" data-es="¿Qué es este espacio?" data-fr="Quel est cet espace ?" data-de="Was ist dieser Raum?" data-zh-cn="这是一个什么样的空间？">這是一個什麼樣的空間？</p>
+    <p data-zh="這裡是一個沒有演算法、沒有評斷的數位避難所。<br>如果覺得外面的世界太吵，請在下方選擇一扇門，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。" 
+       data-en="This is a digital sanctuary free of algorithms and judgments.<br>If the world outside is too loud, choose a door below,<br>turn your anxiety into sand, your brokenness into stars.<br>No one is watching; you can safely let go." 
+       data-ja="ここはアルゴリズムも評価もないデジタルの避難所です。<br>外の世界が騒がしすぎると感じたら、下の扉を選び、<br>不安を砂に、欠片を星に変えてください。<br>誰も見ていません。安心して手放してください。" 
+       data-es="Este es un santuario digital libre de algoritmos y juicios.<br>Si el mundo exterior es demasiado ruidoso, elige una puerta abajo,<br>convierte tu ansiedad en arena, tu ruptura en estrellas.<br>Nadie te observa; puedes soltarlo con seguridad."
+       data-fr="C'est un sanctuaire numérique sans algorithmes ni jugements.<br>Si le monde est trop bruyant, choisissez une porte ci-dessous,<br>transformez votre anxiété en sable, vos brisures en étoiles.<br>Personne ne regarde ; vous pouvez lâcher prise en toute sécurité."
+       data-de="Dies ist ein digitales Heiligtum frei von Algorithmen und Urteilen.<br>Wenn die Welt zu laut ist, wähle unten eine Tür,<br>verwandle deine Angst in Sand, deine Zerbrochenheit in Sterne.<br>Niemand schaut zu; du kannst sicher loslassen."
+       data-zh-cn="这里是一个没有算法、没有评断的数字避难所。<br>如果觉得外面的世界太吵，请在下方选择一扇门，<br>将你的焦虑化为沙、碎裂化为星。<br>没有人会看见，你可以安心地放下。">
+       這裡是一個沒有演算法、沒有評斷的數位避難所。<br>如果覺得外面的世界太吵，請在下方選擇一扇門，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。
+    </p>
+  </div>
+
+  <p class="flow-line" data-zh="承認 → 安放 → 修補 → 釋放 → 交換 → 回家" data-en="Acknowledge → Place → Repair → Release → Exchange → Home" data-ja="承認 → 安置 → 修復 → 解放 → 交換 → 帰郷" data-es="Reconocer → Colocar → Reparar → Liberar → Intercambiar → Hogar" data-fr="Reconnaître → Placer → Réparer → Libérer → Échanger → Maison" data-de="Anerkennen → Platzieren → Reparieren → Befreien → Austauschen → Zuhause" data-zh-cn="承认 → 安放 → 修补 → 释放 → 交换 → 回家">承認 → 安放 → 修補 → 釋放 → 交換 → 回家</p>
+  <div class="doors-nav">
+    <a class="door-btn" data-d="E" href="#room-e">
+        <span class="dl">E</span><span class="dz" data-zh="情緒出口" data-en="Emotional Exit" data-ja="感情の出口" data-es="Salida Emocional" data-fr="Sortie Émotionnelle" data-de="Emotionaler Ausgang" data-zh-cn="情绪出口">情緒出口</span>
+        <span class="d-act" data-zh="拋下煩惱" data-en="Drop Worries" data-ja="悩みを捨てる" data-es="Soltar Preocupaciones" data-fr="Lâcher les soucis" data-de="Sorgen abwerfen" data-zh-cn="抛下烦恼">拋下煩惱</span>
+    </a>
+    <a class="door-btn" data-d="M" href="#room-m">
+        <span class="dl">M</span><span class="dz" data-zh="思念映射" data-en="Memory Mapping" data-ja="想いの投影" data-es="Mapeo de Recuerdos" data-fr="Cartographie des Souvenirs" data-de="Erinnerungskartierung" data-zh-cn="思念映射">思念映射</span>
+        <span class="d-act" data-zh="化作星星" data-en="Turn to Stars" data-ja="星になる" data-es="Convertir en Estrellas" data-fr="Devenir Étoiles" data-de="Zu Sternen werden" data-zh-cn="化作星星">化作星星</span>
+    </a>
+    <a class="door-btn" data-d="P" href="#room-p">
+        <span class="dl">P</span><span class="dz" data-zh="碎片修補" data-en="Kintsugi Repair" data-ja="欠片の修復" data-es="Reparación Kintsugi" data-fr="Réparation Kintsugi" data-de="Kintsugi-Reparatur" data-zh-cn="碎片修补">碎片修補</span>
+        <span class="d-act" data-zh="修復遺憾" data-en="Mend Regrets" data-ja="後悔を修復" data-es="Reparar Arrepentimientos" data-fr="Réparer Regrets" data-de="Reue reparieren" data-zh-cn="修复遗憾">修復遺憾</span>
+    </a>
+    <a class="door-btn" data-d="A" href="#room-a">
+        <span class="dl">A</span><span class="dz" data-zh="神聖避難所" data-en="Sacred Asylum" data-ja="神聖な避難所" data-es="Asilo Sagrado" data-fr="Asile Sacré" data-de="Heiliges Asyl" data-zh-cn="神圣避难所">神聖避難所</span>
+        <span class="d-act" data-zh="隨風消散" data-en="Fade in Wind" data-ja="風に消える" data-es="Desvanecer en el Viento" data-fr="S'effacer au vent" data-de="Im Wind verblassen" data-zh-cn="随风消散">隨風消散</span>
+    </a>
+    <a class="door-btn" data-d="T" href="#room-t">
+        <span class="dl">T</span><span class="dz" data-zh="能量共振" data-en="Energy Resonance" data-ja="エネルギー共鳴" data-es="Resonancia" data-fr="Résonance" data-de="Resonanz" data-zh-cn="能量共振">能量共振</span>
+        <span class="d-act" data-zh="給予溫暖" data-en="Give Warmth" data-ja="温もりを与える" data-es="Dar Calidez" data-fr="Donner Chaleur" data-de="Wärme geben" data-zh-cn="给予温暖">給予溫暖</span>
+    </a>
+    <a class="door-btn" data-d="H" href="#room-h">
+        <span class="dl">H</span><span class="dz" data-zh="靈魂歸宿" data-en="Soul's Home" data-ja="魂の帰郷" data-es="Hogar del Alma" data-fr="Foyer de l'Âme" data-de="Zuhause der Seele" data-zh-cn="灵魂归宿">靈魂歸宿</span>
+        <span class="d-act" data-zh="備份足跡" data-en="Save Journey" data-ja="足跡を保存" data-es="Guardar Viaje" data-fr="Sauvegarder Voyage" data-de="Reise speichern" data-zh-cn="备份足迹">備份足跡</span>
+    </a>
+  </div>
+  
   <p class="hero-desc" data-zh="數位時代的情緒安放平台 以文學敘事對抗視覺霸權的設計實踐" data-en="An emotional sanctuary for the digital age. A design practice countering visual hegemony through literary narrative." data-ja="デジタル時代の感情のサンクチュアリ。文学的アプローチによるデザイン実践。" data-es="Un santuario emocional para la era digital. Práctica de diseño mediante narrativa." data-fr="Un sanctuaire émotionnel pour l'ère numérique. Une pratique de conception contre l'hégémonie visuelle." data-de="Ein emotionales Heiligtum für das digitale Zeitalter. Ein Designansatz gegen visuelle Hegemonie." data-zh-cn="数字时代的情绪安放平台 以文学叙事对抗视觉霸权的设计实践">數位時代的情緒安放平台 以文學敘事對抗視覺霸權的設計實踐</p>
   
   <button id="hero-quotes-toggle" class="func-btn" style="display:none;" onclick="window.toggleHeroQuotes()" data-zh="📖 閱讀設計理念 ↓" data-en="📖 Read Philosophy ↓" data-ja="📖 コンセプトを読む ↓" data-es="📖 Leer Filosofía ↓" data-fr="📖 Lire la philosophie ↓" data-de="📖 Philosophie lesen ↓" data-zh-cn="📖 阅读设计理念 ↓">📖 閱讀設計理念 ↓</button>
@@ -506,27 +582,6 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
     </div>
   </div>
 
-  <div class="onboarding-box">
-    <p data-zh="這裡是一個沒有演算法、沒有評斷的空間。<br>如果覺得外面的世界太吵，請在這裡找一個房間，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。" 
-       data-en="This is a space free of algorithms and judgments.<br>If the world outside is too loud, choose a room,<br>turn your anxiety into sand, your brokenness into stars.<br>No one is watching; you can safely let go." 
-       data-ja="ここはアルゴリズムも評価もない空間です。<br>外の世界が騒がしすぎると感じたら、扉を選び、<br>不安を砂に、欠片を星に変えてください。<br>誰も見ていません。安心して手放してください。" 
-       data-es="Este es un espacio libre de algoritmos y juicios.<br>Si el mundo exterior es demasiado ruidoso, elige una puerta,<br>convierte tu ansiedad en arena, tu ruptura en estrellas.<br>Nadie te observa; puedes soltarlo con seguridad."
-       data-fr="Ceci est un espace sans algorithmes ni jugements.<br>Si le monde extérieur est trop bruyant, choisissez une porte,<br>transformez votre anxiété en sable, vos brisures en étoiles.<br>Personne ne regarde ; vous pouvez lâcher prise en toute sécurité."
-       data-de="Dies ist ein Raum frei von Algorithmen und Urteilen.<br>Wenn die Welt draußen zu laut ist, wähle eine Tür,<br>verwandle deine Angst in Sand, deine Zerbrochenheit in Sterne.<br>Niemand schaut zu; du kannst sicher loslassen."
-       data-zh-cn="这里是一个没有算法、没有评断的空间。<br>如果觉得外面的世界太吵，请在这里找一个房间，<br>将你的焦虑化为沙、碎裂化为星。<br>没有人会看见，你可以安心地放下。">
-       這裡是一個沒有演算法、沒有評斷的空間。<br>如果覺得外面的世界太吵，請在這裡找一個房間，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。
-    </p>
-  </div>
-
-  <p class="flow-line" data-zh="承認 → 安放 → 修補 → 釋放 → 交換 → 回家" data-en="Acknowledge → Place → Repair → Release → Exchange → Home" data-ja="承認 → 安置 → 修復 → 解放 → 交換 → 帰郷" data-es="Reconocer → Colocar → Reparar → Liberar → Intercambiar → Hogar" data-fr="Reconnaître → Placer → Réparer → Libérer → Échanger → Maison" data-de="Anerkennen → Platzieren → Reparieren → Befreien → Austauschen → Zuhause" data-zh-cn="承认 → 安放 → 修补 → 释放 → 交换 → 回家">承認 → 安放 → 修補 → 釋放 → 交換 → 回家</p>
-  <div class="doors-nav">
-    <a class="door-btn" data-d="E" href="#room-e"><span class="dl">E</span><span class="dz" data-zh="情緒出口" data-en="Emotional Exit" data-ja="感情の出口" data-es="Salida Emocional" data-fr="Sortie Émotionnelle" data-de="Emotionaler Ausgang" data-zh-cn="情绪出口">情緒出口</span></a>
-    <a class="door-btn" data-d="M" href="#room-m"><span class="dl">M</span><span class="dz" data-zh="思念映射" data-en="Memory Mapping" data-ja="想いの投影" data-es="Mapeo de Recuerdos" data-fr="Cartographie des Souvenirs" data-de="Erinnerungskartierung" data-zh-cn="思念映射">思念映射</span></a>
-    <a class="door-btn" data-d="P" href="#room-p"><span class="dl">P</span><span class="dz" data-zh="碎片修補" data-en="Kintsugi Repair" data-ja="欠片の修復" data-es="Reparación Kintsugi" data-fr="Réparation Kintsugi" data-de="Kintsugi-Reparatur" data-zh-cn="碎片修补">碎片修補</span></a>
-    <a class="door-btn" data-d="A" href="#room-a"><span class="dl">A</span><span class="dz" data-zh="神聖避難所" data-en="Sacred Asylum" data-ja="神聖な避難所" data-es="Asilo Sagrado" data-fr="Asile Sacré" data-de="Heiliges Asyl" data-zh-cn="神圣避难所">神聖避難所</span></a>
-    <a class="door-btn" data-d="T" href="#room-t"><span class="dl">T</span><span class="dz" data-zh="能量共振" data-en="Energy Resonance" data-ja="エネルギー共鳴" data-es="Resonancia" data-fr="Résonance" data-de="Resonanz" data-zh-cn="能量共振">能量共振</span></a>
-    <a class="door-btn" data-d="H" href="#room-h"><span class="dl">H</span><span class="dz" data-zh="靈魂歸宿" data-en="Soul's Home" data-ja="魂の帰郷" data-es="Hogar del Alma" data-fr="Foyer de l'Âme" data-de="Zuhause der Seele" data-zh-cn="灵魂归宿">靈魂歸宿</span></a>
-  </div>
   <span class="scroll-hint">↓ &nbsp; SCROLL</span>
 </section>
 
@@ -539,7 +594,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
   </p>
   <p class="e-warning" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦" data-en="∗ This place holds vulnerability, not malice. Please refrain from personal attacks or hate speech. ✦" data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。個人攻撃やヘイトスピーチはお控えください。 ✦" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia. Por favor abstente de ataques personales o discursos de odio. ✦" data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice. Veuillez vous abstenir d'attaques personnelles ou de discours de haine. ✦" data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit. Bitte verzichten Sie auf persönliche Angriffe oder Hassreden. ✦" data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论，让避难所维持纯净。 ✦">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦</p>
   <p class="e-anon-label">ANONYMOUS — <span data-zh="完全匿名" data-en="Completely Anonymous" data-ja="完全匿名" data-es="Totalmente Anónimo" data-fr="Totalement Anonyme" data-de="Völlig Anonym" data-zh-cn="完全匿名">完全匿名</span></p>
-  <textarea class="input-area" id="e-input" rows="5" maxlength="300" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 300'"
+  <textarea class="input-area" id="e-input" rows="5" maxlength="500" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 500'"
     data-zh-ph="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。" 
     data-en-ph="Write down what you cannot say...&#10;Anger, grievance, sorrow, or any weight you want to let go of.&#10;No one knows it is you."
     data-ja-ph="言えなかった言葉をここに書いてください...&#10;怒り、悲しみ、または手放したいあらゆる重荷を。&#10;あなたが書いたことは誰にもわかりません。"
@@ -548,9 +603,9 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
     data-de-ph="Schreibe auf, was du nicht sagen kannst...&#10;Wut, Kummer, Trauer oder jedes Gewicht, das du loslassen möchtest.&#10;Niemand weiß, dass du es bist."
     data-zh-cn-ph="在这里写下你说不出口的话……&#10;可以是愤怒、委屈、悲伤、或任何你想放下的重量。&#10;没有人知道是你。"
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
-  <div class="e-char-count" id="e-char">0 / 300</div>
+  <div class="e-char-count" id="e-char">0 / 500</div>
   <br>
-  <button class="send-btn" onclick="window.submitE()" data-zh="投入黑暗 →" data-en="Cast into Dark →" data-ja="闇に投じる →" data-es="Lanzar a la Oscuridad →" data-fr="Jeter dans l'obscurité →" data-de="In die Dunkelheit werfen →" data-zh-cn="投入黑暗 →">投入黑暗 →</button>
+  <button class="send-btn" id="e-submit-btn" onclick="window.submitE()" data-zh="投入黑暗 →" data-en="Cast into Dark →" data-ja="闇に投じる →" data-es="Lanzar a la Oscuridad →" data-fr="Jeter dans l'obscurité →" data-de="In die Dunkelheit werfen →" data-zh-cn="投入黑暗 →">投入黑暗 →</button>
   
   <div class="e-feed-container">
     <div class="e-feed" id="e-feed"></div>
@@ -574,7 +629,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
       每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。
     </p>
     <div class="m-input-wrap">
-      <textarea class="input-area" id="m-input" rows="4"
+      <textarea class="input-area" id="m-input" rows="4" maxlength="500"
         data-zh-ph="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"
         data-en-ph="Who came to your mind tonight?&#10;Write their initials, or continue:&#10;'I miss the days when...'&#10;'I wonder how you are doing now...'"
         data-ja-ph="今夜、誰を思い出しましたか？&#10;イニシャルを書くか、こう続けてみてください：&#10;『あの時のことを想うと...』&#10;『今、どうしているのかな...』"
@@ -584,7 +639,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
         data-zh-cn-ph="今晚，你突然想起了谁？&#10;你可以直接写下他的名字缩写，或者试着接下去写：&#10;『很想念那时候的……』&#10;『不知道在另一个学校的你，现在……』"
         placeholder="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"></textarea>
       <br>
-      <button class="send-btn" onclick="window.submitM()" data-zh="放上星空 →" data-en="Place in Sky →" data-ja="夜空に放つ →" data-es="Colocar en el Cielo →" data-fr="Placer dans le ciel →" data-de="In den Himmel setzen →" data-zh-cn="放上星空 →">放上星空 →</button>
+      <button class="send-btn" id="m-submit-btn" onclick="window.submitM()" data-zh="放上星空 →" data-en="Place in Sky →" data-ja="夜空に放つ →" data-es="Colocar en el Cielo →" data-fr="Placer dans le ciel →" data-de="In den Himmel setzen →" data-zh-cn="放上星空 →">放上星空 →</button>
     </div>
     <div class="m-stats">
       <div class="m-stat"><span id="m-count">0</span> <span data-zh="顆星" data-en="Stars" data-ja="個の星" data-es="Estrellas" data-fr="Étoiles" data-de="Sterne" data-zh-cn="颗星">顆星</span></div>
@@ -602,7 +657,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
   </p>
 
   <div class="p-step-label" data-zh="STEP 1. 交付破碎" data-en="STEP 1. Cast Brokenness" data-ja="STEP 1. 欠片を預ける" data-es="PASO 1. Entregar Ruptura" data-fr="ÉTAPE 1. Jeter la Brisure" data-de="SCHRITT 1. Zerbrochenheit abgeben" data-zh-cn="STEP 1. 交付破碎">STEP 1. 交付破碎</div>
-  <textarea class="input-area" id="p-input" rows="3"
+  <textarea class="input-area" id="p-input" rows="3" maxlength="500"
     data-zh-ph="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"
     data-en-ph="Write down a piece of your shattered heart—a pain, a regret, a loss..."
     data-ja-ph="心の欠片を書き残してください — 痛み、後悔、あるいは喪失..."
@@ -612,7 +667,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
     data-zh-cn-ph="写下你心中一块碎片——一段伤痛、一个遗憾、一次失落……"
     placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
   <br>
-  <button class="send-btn" onclick="window.submitP()" data-zh="放入瓷器 →" data-en="Place in Vessel →" data-ja="器に入れる →" data-es="Colocar en la Vasija →" data-fr="Placer dans le récipient →" data-de="In das Gefäß setzen →" data-zh-cn="放入瓷器 →">放入瓷器 →</button>
+  <button class="send-btn" id="p-submit-btn" onclick="window.submitP()" data-zh="放入瓷器 →" data-en="Place in Vessel →" data-ja="器に入れる →" data-es="Colocar en la Vasija →" data-fr="Placer dans le récipient →" data-de="In das Gefäß setzen →" data-zh-cn="放入瓷器 →">放入瓷器 →</button>
 
   <div class="p-step-label" style="margin-top:48px;" data-zh="STEP 2. 修補遺憾" data-en="STEP 2. Mend Regrets" data-ja="STEP 2. 後悔を修復する" data-es="PASO 2. Reparar Arrepentimientos" data-fr="ÉTAPE 2. Réparer les Regrets" data-de="SCHRITT 2. Reue reparieren" data-zh-cn="STEP 2. 修补遗憾">STEP 2. 修補遺憾</div>
   <div class="p-vessel">
@@ -633,7 +688,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
     <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." data-fr="La douleur se dissout ici. Chaque message disparaît complètement après 24 heures, comme du sable au vent. Dites-le, puis partez." data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。">
       痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。
     </p>
-    <textarea class="input-area" id="a-input" rows="4"
+    <textarea class="input-area" id="a-input" rows="4" maxlength="500"
       data-zh-ph="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"
       data-en-ph="Whisper your deepest pain or secret here...&#10;After 24 hours, these words will fade away.&#10;Nothing is forever, only the feeling of being caught in this moment."
       data-ja-ph="今日の深い苦しみや秘密をここで吐き出してください...&#10;24時間後、このテキストは完全に消滅します。&#10;永遠はありません。ただ今、受け止められているという感覚だけです。"
@@ -643,7 +698,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
       data-zh-cn-ph="在这里说出今天最深的痛苦或秘密……&#10;24 小时后，这段文字将自动消失。&#10;没有永远，只有此刻被接住的感觉。"
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
     <br>
-    <button class="send-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →" data-fr="Transformer en sable →" data-de="Zu Sand machen →" data-zh-cn="放入沙画 →">放入沙畫 →</button>
+    <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →" data-fr="Transformer en sable →" data-de="Zu Sand machen →" data-zh-cn="放入沙画 →">放入沙畫 →</button>
     <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia." data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice." data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit." data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论。">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
     <p class="a-note" style="margin-top:8px;" data-zh="∗ 所有留言將在 24 小時後化為塵埃，如沙畫般不留痕跡" data-en="∗ All messages will turn to dust after 24 hours, leaving no trace." data-ja="∗ すべての言葉は24時間後に塵となり、痕跡を残しません。" data-es="∗ Todos los mensajes se convertirán en polvo después de 24 horas." data-fr="∗ Tous les messages redeviendront poussière après 24 heures." data-de="∗ Alle Nachrichten werden nach 24 Stunden zu Staub zerfallen." data-zh-cn="∗ 所有留言将在 24 小时后化为尘埃，如沙画般不留痕迹">∗ 所有留言將在 24 小時後化為塵埃，如沙畫般不留痕跡</p>
     
@@ -651,8 +706,8 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
         <div id="a-warning-mask" class="a-warning-mask">
             <p data-zh="接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。" data-en="The following section contains the real pain and trauma of others.<br>If you are not in an emotional state to hold space, please hide it.<br>Your empathy is precious, but please protect yourself first." data-ja="以下のセクションには、他人の真の痛みやトラウマが含まれています。<br>受け止める心の準備ができていない場合は、非表示にしてください。<br>あなたの優しさは尊いですが、まずは自分を守ってください。" data-es="La siguiente sección contiene el dolor y trauma real de otros.<br>Si no estás en un estado emocional para sostener este espacio, ocúltalo.<br>Tu empatía es preciosa, pero por favor protégete primero." data-fr="La section suivante contient la vraie douleur et les traumatismes d'autres personnes.<br>Si vous n'êtes pas en état émotionnel, veuillez la masquer.<br>Votre empathie est précieuse, mais protégez-vous d'abord." data-de="Der folgende Abschnitt enthält den echten Schmerz und das Trauma anderer.<br>Wenn du nicht im emotionalen Zustand bist, blende ihn bitte aus.<br>Deine Empathie ist kostbar, aber bitte schütze dich zuerst." data-zh-cn="接下来的留言区包含他人真实的痛苦与创伤。<br>若你目前的情绪无法承接，请选择隐藏。<br>你的善良很珍贵，但也请保护好自己。">接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。</p>
             <div style="display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap;">
-                <button class="send-btn" onclick="window.acceptARead()" style="border-color:var(--a); color:var(--a); padding:8px 20px; font-size:11px;" data-zh="願意承接" data-en="I can hold space" data-ja="受け止める" data-es="Puedo sostenerlo" data-fr="Je peux soutenir" data-de="Ich kann Raum halten" data-zh-cn="愿意承接">願意承接</button>
-                <button class="send-btn" onclick="window.hideAFeed()" style="border-color:var(--muted); color:var(--muted); padding:8px 20px; font-size:11px;" data-zh="僅投遞，不閱讀" data-en="Post only, do not read" data-ja="投稿のみ、読まない" data-es="Solo publicar, no leer" data-fr="Publier seulement" data-de="Nur posten" data-zh-cn="仅投递，不阅读">僅投遞，不閱讀</button>
+                <button class="send-btn" onclick="window.acceptARead()" style="border-color:var(--a); color:var(--a); padding:8px 20px; font-size:12px;" data-zh="願意承接" data-en="I can hold space" data-ja="受け止める" data-es="Puedo sostenerlo" data-fr="Je peux soutenir" data-de="Ich kann Raum halten" data-zh-cn="愿意承接">願意承接</button>
+                <button class="send-btn" onclick="window.hideAFeed()" style="border-color:var(--muted); color:var(--muted); padding:8px 20px; font-size:12px;" data-zh="僅投遞，不閱讀" data-en="Post only, do not read" data-ja="投稿のみ、読まない" data-es="Solo publicar, no leer" data-fr="Publier seulement" data-de="Nur posten" data-zh-cn="仅投递，不阅读">僅投遞，不閱讀</button>
             </div>
         </div>
         <div class="a-feed" id="a-feed" style="display:none; filter:blur(8px); transition: filter 1s ease;"></div>
@@ -683,7 +738,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
     <div style="display:flex;flex-direction:column;gap:24px;">
       <div class="t-send-panel">
         <p class="t-panel-title" data-zh="傳送你的溫暖" data-en="Send Your Warmth" data-ja="温もりを送る" data-es="Envía tu Calidez" data-fr="Envoyez votre Chaleur" data-de="Sende deine Wärme" data-zh-cn="传送你的温暖">傳送你的溫暖</p>
-        <textarea class="input-area" id="t-input" rows="4"
+        <textarea class="input-area" id="t-input" rows="4" maxlength="500"
           data-zh-ph="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"
           data-en-ph="Write a warm word, an encouragement, a virtual hug...&#10;It will float to someone who needs it."
           data-ja-ph="温かい言葉、励まし、または抱擁の言葉を書き残してください...&#10;それは、必要としている誰かのもとへ漂っていきます。"
@@ -693,13 +748,13 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
           data-zh-cn-ph="写下一句温暖的话、一个鼓励、一个拥抱的文字……&#10;它会漂浮到某个需要的人身边。"
           placeholder="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"></textarea>
         <br>
-        <button class="send-btn" onclick="window.submitT()" data-zh="傳出去 →" data-en="Send it Out →" data-ja="送る →" data-es="Enviar →" data-fr="Envoyer →" data-de="Senden →" data-zh-cn="传出去 →">傳出去 →</button>
+        <button class="send-btn" id="t-submit-btn" onclick="window.submitT()" data-zh="傳出去 →" data-en="Send it Out →" data-ja="送る →" data-es="Enviar →" data-fr="Envoyer →" data-de="Senden →" data-zh-cn="传出去 →">傳出去 →</button>
       </div>
       <div class="t-panel" style="text-align:center;">
         <p class="t-panel-title" style="text-align:center;">Echo Pulse</p>
         <div class="echo-pulse-ring"><span class="echo-heart">🕯️</span></div>
         <p class="echo-label" data-zh="共鳴之震 — 情感不被量化" data-en="Echo Pulse — Emotion Unquantified" data-ja="共鳴の波 — 感情は数値化されない" data-es="Pulso de Eco — Emoción no cuantificada" data-fr="Pulso d'Écho — Émotion non quantifiée" data-de="Echo-Puls — Emotion unquantifiziert" data-zh-cn="共鸣之震 — 情感不被量化">共鳴之震 — 情感不被量化</p>
-        <p style="font-size:11px;color:var(--muted);line-height:1.9;" data-zh="當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字" data-en="When someone feels your warmth,<br>you receive a gentle vibration like a heartbeat.<br>No numbers shown." data-ja="誰かがあなたの温もりを感じた時<br>心臓の鼓動のような微かな振動が届きます<br>数字は表示されません" data-es="Cuando alguien siente tu calidez,<br>recibes una suave vibración como un latido.<br>No se muestran números." data-fr="Quand quelqu'un ressent votre chaleur,<br>vous recevez une vibration comme un battement de cœur.<br>Aucun chiffre n'est affiché." data-de="Wenn jemand deine Wärme spürt,<br>erhältst du eine sanfte Vibration wie einen Herzschlag.<br>Keine Zahlen werden angezeigt." data-zh-cn="当有人感应到你的温暖<br>你收到一次如心跳般的微震动<br>不显示数字">
+        <p style="font-size:12px;color:var(--muted);line-height:1.9;" data-zh="當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字" data-en="When someone feels your warmth,<br>you receive a gentle vibration like a heartbeat.<br>No numbers shown." data-ja="誰かがあなたの温もりを感じた時<br>心臓の鼓動のような微かな振動が届きます<br>数字は表示されません" data-es="Cuando alguien siente tu calidez,<br>recibes una suave vibración como un latido.<br>No se muestran números." data-fr="Quand quelqu'un ressent votre chaleur,<br>vous recevez une vibration comme un battement de cœur.<br>Aucun chiffre n'est affiché." data-de="Wenn jemand deine Wärme spürt,<br>erhältst du eine sanfte Vibration wie einen Herzschlag.<br>Keine Zahlen werden angezeigt." data-zh-cn="当有人感应到你的温暖<br>你收到一次如心跳般的微震动<br>不显示数字">
           當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字
         </p>
       </div>
@@ -736,20 +791,20 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
 
     <div class="sync-box">
       <div class="sync-title" data-zh="SOUL SYNC — 靈魂共振同步" data-en="SOUL SYNC — Cloud Sync" data-ja="SOUL SYNC — クラウド同期" data-es="SOUL SYNC — Sincronización" data-fr="SOUL SYNC — Synchronisation" data-de="SOUL SYNC — Synchronisierung" data-zh-cn="SOUL SYNC — 灵魂共振同步">SOUL SYNC — 靈魂共振同步</div>
-      <p style="font-size:11px; color:var(--muted); line-height:1.7;" data-zh="無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。" data-en="No personal data required. Generate a unique 'Soul Key' to back up your journey to the cloud. Enter this key on other devices to restore your footprint." data-ja="個人情報は不要です。「魂の鍵」を生成して足跡をクラウドにバックアップし、他のデバイスで入力することで履歴を復元できます。" data-es="No se requieren datos personales. Genera una 'Llave del Alma' para respaldar tu viaje en la nube. Introdúcela en otros dispositivos para restaurar tu huella." data-fr="Aucune donnée personnelle requise. Générez une 'Clé de l'Âme' pour sauvegarder votre voyage. Entrez cette clé sur d'autres appareils pour restaurer votre empreinte." data-de="Keine persönlichen Daten erforderlich. Generiere einen 'Seelenschlüssel', um deine Reise zu sichern. Gib diesen Schlüssel auf anderen Geräten ein, um deine Fußspuren wiederherzustellen." data-zh-cn="无需绑定任何隐私个资。生成一串专属的「灵魂钥匙」即可将旅程足迹备份至云端保险箱；在其他装置（如手机）输入既有钥匙，即可完美共振、完整呼唤回你的历史纪录。">
+      <p style="font-size:12px; color:var(--muted); line-height:1.8;" data-zh="無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。" data-en="No personal data required. Generate a unique 'Soul Key' to back up your journey to the cloud. Enter this key on other devices to restore your footprint." data-ja="個人情報は不要です。「魂の鍵」を生成して足跡をクラウドにバックアップし、他のデバイスで入力することで履歴を復元できます。" data-es="No se requieren datos personales. Genera una 'Llave del Alma' para respaldar tu viaje en la nube. Introdúcela en otros dispositivos para restaurar tu huella." data-fr="Aucune donnée personnelle requise. Générez une 'Clé de l'Âme' pour sauvegarder votre voyage. Entrez cette clé sur d'autres appareils pour restaurer votre empreinte." data-de="Keine persönlichen Daten erforderlich. Generiere einen 'Seelenschlüssel', um deine Reise zu sichern. Gib diesen Schlüssel auf anderen Geräten ein, um deine Fußspuren wiederherzustellen." data-zh-cn="无需绑定任何隐私个资。生成一串专属的「灵魂钥匙」即可将旅程足迹备份至云端保险箱；在其他装置（如手机）输入既有钥匙，即可完美共振、完整呼唤回你的历史纪录。">
         無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。
       </p>
       <div class="sync-actions" id="sync-initial-actions">
         <button class="sync-btn-small" onclick="window.createSoulKey()" data-zh="生成我的靈魂鑰匙" data-en="Generate Soul Key" data-ja="魂の鍵を生成する" data-es="Generar Llave del Alma" data-fr="Générer la Clé de l'Âme" data-de="Seelenschlüssel generieren" data-zh-cn="生成我的灵魂钥匙">生成我的靈魂鑰匙</button>
-        <span style="font-size:11px; color:rgba(255,255,255,0.15);" data-zh="或" data-en="OR" data-ja="または" data-es="O" data-fr="OU" data-de="ODER" data-zh-cn="或">或</span>
-        <input type="text" class="sync-input" id="sync-key-input" data-zh-ph="輸入既有鑰匙..." data-en-ph="Enter existing key..." data-ja-ph="既存の鍵を入力..." data-es-ph="Ingresa llave existente..." data-fr-ph="Entrer clé existante..." data-de-ph="Bestehenden Schlüssel eingeben..." data-zh-cn-ph="输入既有钥匙..." placeholder="輸入既有鑰匙..." style="width:140px; text-transform:uppercase;">
+        <span style="font-size:12px; color:rgba(255,255,255,0.15);" data-zh="或" data-en="OR" data-ja="または" data-es="O" data-fr="OU" data-de="ODER" data-zh-cn="或">或</span>
+        <input type="text" class="sync-input" id="sync-key-input" data-zh-ph="輸入既有鑰匙..." data-en-ph="Enter existing key..." data-ja-ph="既存の鍵を入力..." data-es-ph="Ingresa llave existente..." data-fr-ph="Entrer clé existante..." data-de-ph="Bestehenden Schlüssel eingeben..." data-zh-cn-ph="输入既有钥匙..." placeholder="輸入既有鑰匙..." style="width:160px; text-transform:uppercase;">
         <button class="sync-btn-small" onclick="window.loadExistingSoulKey()" style="border-color:var(--gold); color:var(--gold);" data-zh="共振同步足跡" data-en="Sync Footprint" data-ja="足跡を同期する" data-es="Sincronizar Huella" data-fr="Synchroniser l'Empreinte" data-de="Fußspur synchronisieren" data-zh-cn="共振同步足迹">共振同步足跡</button>
       </div>
       <div class="sync-actions" id="sync-active-actions" style="display:none;">
-        <span style="font-size:11px; color:var(--fog);" data-zh="已開啟即時雲端同步。你的靈魂鑰匙：" data-en="Cloud sync active. Your Soul Key:" data-ja="クラウド同期中。あなたの魂の鍵：" data-es="Sincronización activa. Tu Llave del Alma:" data-fr="Synchronisation cloud active. Votre Clé de l'Âme :" data-de="Cloud-Sync aktiv. Dein Seelenschlüssel :" data-zh-cn="已开启即时云端同步。你的灵魂钥匙：">已開啟即時雲端同步。你的靈魂鑰匙：</span>
+        <span style="font-size:12px; color:var(--fog);" data-zh="已開啟即時雲端同步。你的靈魂鑰匙：" data-en="Cloud sync active. Your Soul Key:" data-ja="クラウド同期中。あなたの魂の鍵：" data-es="Sincronización activa. Tu Llave del Alma:" data-fr="Synchronisation cloud active. Votre Clé de l'Âme :" data-de="Cloud-Sync aktiv. Dein Seelenschlüssel :" data-zh-cn="已开启即时云端同步。你的灵魂钥匙：">已開啟即時雲端同步。你的靈魂鑰匙：</span>
         <span class="key-display" id="active-key-display">-</span>
         <button class="sync-btn-small" onclick="window.copySoulKey()" id="copy-key-btn" style="border-color:var(--gold); color:var(--gold); margin-right:8px;" data-zh="複製鑰匙" data-en="Copy Key" data-ja="キーをコピー" data-es="Copiar Llave" data-fr="Copier la Clé" data-de="Schlüssel kopieren" data-zh-cn="复制钥匙">複製鑰匙</button>
-        <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:10px; padding:6px 12px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular" data-fr="Dissocier" data-de="Entkoppeln" data-zh-cn="解除绑定">解除綁定</button>
+        <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:11px; padding:8px 14px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular" data-fr="Dissocier" data-de="Entkoppeln" data-zh-cn="解除绑定">解除綁定</button>
       </div>
     </div>
 
@@ -763,7 +818,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
         <div class="h-events" id="h-events" style="max-height: 280px; overflow: hidden; transition: max-height 0.5s ease;"></div>
         <div id="h-events-fade" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; transition: opacity 0.5s ease;"></div>
       </div>
-      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 8px 18px; font-size: 10px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓" data-fr="Voir le parcours complet ↓" data-de="Gesamte Reise anzeigen ↓" data-zh-cn="展开完整旅程 ↓">展開完整旅程 ↓</button>
+      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 10px 20px; font-size: 11px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓" data-fr="Voir le parcours complet ↓" data-de="Gesamte Reise anzeigen ↓" data-zh-cn="展开完整旅程 ↓">展開完整旅程 ↓</button>
     </div>
     
     <div class="lighthouse">
@@ -795,6 +850,7 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
   </div>
   <div class="footer-copy">
     &copy; 2026 EMPATH. All rights reserved.
+    <br><span style="font-size:9px; opacity:0.5; margin-top:8px; display:inline-block;">Firebase Security Rules & Firestore Configured</span>
   </div>
 </footer>
 
@@ -802,6 +858,8 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+// Note: To secure these credentials fully, configure Firestore Security Rules in your Firebase Console.
+// Example: allow create: if true; allow update, delete: if false;
 const firebaseConfig = {
   apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90",
   authDomain: "empath-62582.firebaseapp.com",
@@ -818,6 +876,34 @@ const db = getFirestore(app);
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
 let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
+
+/* 🌟 前端防洪機制 (Rate Limiting) */
+let lastSubmitTime = 0;
+const SUBMIT_COOLDOWN = 3000; // 3 seconds
+
+function canSubmit() {
+    const now = Date.now();
+    if (now - lastSubmitTime < SUBMIT_COOLDOWN) {
+        window.showToast(t('請稍候再送出...', 'Please wait...', '少しお待ちください...', 'Espera un momento...', 'Veuillez patienter...', 'Bitte warten...', '请稍候再送出...'));
+        return false;
+    }
+    lastSubmitTime = now;
+    return true;
+}
+
+/* 🌟 UX 優化：送出後的儀式感反饋 */
+function playRitual(btnId, origText) {
+    const btn = document.getElementById(btnId);
+    if(!btn) return;
+    btn.innerHTML = t('✨ 已接住', '✨ Caught', '✨ 受け止めました', '✨ Atrapado', '✨ Attrapé', '✨ Aufgefangen', '✨ 已接住');
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+    setTimeout(() => {
+        btn.innerHTML = origText;
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+    }, SUBMIT_COOLDOWN);
+}
 
 function updateCountersUI() {
     if(document.getElementById('g-v-count')) document.getElementById('g-v-count').textContent = globalCounts.v;
@@ -846,7 +932,6 @@ function t(zh, en, ja, es, fr, de, zh_cn) {
     return zh;
 }
 
-/* 🌟 擴充：語言下拉選單開關邏輯 */
 window.toggleLangDropdown = function() {
     document.getElementById('lang-dropdown-list').classList.toggle('show');
 }
@@ -857,7 +942,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-/* 🌟 優化：使用 dataset 切換多國語言，並關閉下拉選單 */
 window.switchLang = function(lang) {
   window.currentLang = lang;
   const langNames = {
@@ -881,7 +965,6 @@ window.switchLang = function(lang) {
     el.setAttribute('placeholder', el.getAttribute('data-' + targetLang + '-ph') || el.getAttribute('data-en-ph') || el.getAttribute('data-zh-ph'));
   });
   
-  // 🌟 處理 SVG 的 Tooltip
   document.querySelectorAll('[data-zh-title]').forEach(el => {
     el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title'));
   });
@@ -937,7 +1020,8 @@ function formatTimeLeft(secs){
 }
 
 function cleanText(text) {
-  const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾'];
+  // 基礎前端防護，建議後續配合 Firebase Cloud Functions 實作完整過濾
+  const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '殺', 'kill', 'suicide', 'rape'];
   let cleaned = text;
   badWords.forEach(word => {
     const regex = new RegExp(word, 'gi');
@@ -969,6 +1053,16 @@ window.toggleHeroQuotes = function() {
         btn.innerHTML = t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓', '📖 Lire la philosophie ↓', '📖 Philosophie lesen ↓', '📖 阅读设计理念 ↓');
     }
 }
+
+// 🌟 Back to top 邏輯
+window.addEventListener('scroll', () => {
+    const btt = document.getElementById('btt-btn');
+    if(window.scrollY > 500) {
+        btt.style.display = 'flex';
+    } else {
+        btt.style.display = 'none';
+    }
+});
 
 function loadLocalJourney() {
   const savedJourney = localStorage.getItem('empath_user_journey');
@@ -1098,7 +1192,7 @@ function renderTimelineHTML(type, text, time){
 
 function initTimeline(){
   const container = document.getElementById('h-events');
-  container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:12px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`;
+  container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:13px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`;
   journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time));
 }
 
@@ -1166,9 +1260,16 @@ onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (sna
 });
 
 window.submitE = async function(){ 
+  if(!canSubmit()) return;
   const input = document.getElementById('e-input'); let text = input.value.trim(); if(!text) return; 
   text = cleanText(text);
-  try { await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); input.value=''; document.getElementById('e-char').textContent = '0 / 300'; logJourney('e', text); window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); } catch(e){} 
+  try { 
+      const origText = document.getElementById('e-submit-btn').innerHTML;
+      await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); 
+      input.value=''; document.getElementById('e-char').textContent = '0 / 500'; logJourney('e', text); 
+      playRitual('e-submit-btn', origText);
+      window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
+  } catch(e){} 
 }
 
 const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m');
@@ -1204,14 +1305,21 @@ roomM.addEventListener('click', async e => {
     if(activeStarId !== star.id) {
       activeStarId = star.id; tooltip.classList.add('active'); 
       if(window.innerWidth > 768) { tooltip.style.transform = 'none'; let tx = e.clientX + 16; let ty = e.clientY - 16; if (tx + 260 > window.innerWidth) tx = e.clientX - 280; tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; }
-      tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:9px;color:var(--gold);margin-top:8px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`;
+      tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:10px;color:var(--gold);margin-top:10px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`;
     } else { try { await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); window.triggerHeartbeat(); tooltip.classList.remove('active'); activeStarId = null; } catch (err) {} }
   } else { tooltip.classList.remove('active'); activeStarId = null; }
 });
 
 window.submitM = async function(){ 
+  if(!canSubmit()) return;
   const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
-  try { await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} 
+  try { 
+      const origText = document.getElementById('m-submit-btn').innerHTML;
+      await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); 
+      input.value=''; logJourney('m', text); 
+      playRitual('m-submit-btn', origText);
+      window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); 
+  } catch(err){} 
 }
 
 let pCanvas, pCtx, pHealedTotal = 0;
@@ -1241,8 +1349,13 @@ function drawKintsugiVessel(){
 }
 
 window.submitP = async function(){ 
+  if(!canSubmit()) return;
   const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
-  await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); 
+  const origText = document.getElementById('p-submit-btn').innerHTML;
+  await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); 
+  input.value = ''; logJourney('p', text); 
+  playRitual('p-submit-btn', origText);
+  window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); 
 }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
@@ -1262,7 +1375,7 @@ window.acceptARead = function() {
 }
 window.hideAFeed = function() {
     document.getElementById('a-warning-mask').innerHTML = `
-        <p style="color:var(--muted); font-size:12px;">${t('已隱藏他人留言。你的痛苦依然會被這裡安放。', 'Messages hidden. Your pain will still be held here.', '他人のメッセージを非表示にしました。あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos. Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués. Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet. Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。你的痛苦依然会被这里安放。')}</p>`;
+        <p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`;
 }
 
 onSnapshot(collection(db, "sand"), (snapshot) => {
@@ -1280,8 +1393,13 @@ onSnapshot(collection(db, "sand"), (snapshot) => {
 });
 
 window.submitA = async function(){ 
+  if(!canSubmit()) return;
   const input = document.getElementById('a-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
-  await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); input.value=''; logJourney('a', text); window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena', 'Transformé en sable', 'Zu Sand geworden', '放入沙画')); 
+  const origText = document.getElementById('a-submit-btn').innerHTML;
+  await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); 
+  input.value=''; logJourney('a', text); 
+  playRitual('a-submit-btn', origText);
+  window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena', 'Transformé en sable', 'Zu Sand geworden', '放入沙画')); 
 }
 
 onSnapshot(collection(db, "warmth"), (snapshot) => {
@@ -1295,8 +1413,13 @@ onSnapshot(collection(db, "warmth"), (snapshot) => {
 });
 
 window.submitT = async function(){ 
+  if(!canSubmit()) return;
   const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
-  await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
+  const origText = document.getElementById('t-submit-btn').innerHTML;
+  await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); 
+  input.value=''; logJourney('t', text); 
+  playRitual('t-submit-btn', origText);
+  window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
 }
 
 window.addEventListener('load', async () => {
@@ -1304,16 +1427,16 @@ window.addEventListener('load', async () => {
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
   onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } });
   
-  // 🌟 初見 HSP 提示邏輯
+  // 🌟 HSP 初見提示邏輯 (停留 8 秒)
   if(!localStorage.getItem('empath_hsp_hint_shown')) {
       setTimeout(() => {
           const ttip = document.getElementById('hsp-tooltip');
           if(ttip) {
-              ttip.style.opacity = '1';
-              setTimeout(() => { ttip.style.opacity = '0'; }, 5000);
+              ttip.classList.add('show');
+              setTimeout(() => { ttip.classList.remove('show'); }, 8000);
               localStorage.setItem('empath_hsp_hint_shown', 'true');
           }
-      }, 1500);
+      }, 1000);
   }
 
   if(localStorage.getItem('empath_a_accepted') === 'true') {
