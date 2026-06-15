@@ -27,7 +27,6 @@ html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease;}
 a{text-decoration:none;color:inherit;}
 
-/* 通用設計：高敏感視覺降噪模式 */
 body.hsp-mode {
   --white: rgba(247, 244, 239, 0.65); --fog: rgba(201, 197, 188, 0.55);
   --gold: rgba(201, 168, 76, 0.6); --amber: rgba(232, 168, 124, 0.6);
@@ -37,7 +36,6 @@ body.hsp-mode * { animation-play-state: paused !important; }
 body.hsp-mode .room-desc { color: rgba(255,255,255,0.3); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
 
-/* ===== 🌟 NAV：對比加深，區隔更明顯 ===== */
 nav{
   position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
   padding:16px 40px;background:#03070a;backdrop-filter:blur(16px);
@@ -74,7 +72,6 @@ nav{
 .lang-btn { padding: 0 8px; border-radius: 8px; min-width: auto; }
 .lang-btn.active-lang { color: var(--gold); border-color: var(--gold); background: rgba(201,168,76,0.15); opacity: 1; font-weight: bold; }
 
-/* ===== HERO ===== */
 #hero{ min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:100px 40px 80px;position:relative;overflow:hidden; }
 .hero-bg-text{ position:absolute;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap; }
 .hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:20px;position:relative; }
@@ -84,11 +81,9 @@ nav{
 .hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,.2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
 .hero-quote cite{ display:block;margin-top:8px;font-style:normal;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3); }
 
-/* 🌟 首頁初次引導宣言 */
 .onboarding-box { max-width: 600px; margin: 0 auto 48px; padding: 24px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.25); border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.5s both; box-shadow: 0 8px 30px rgba(0,0,0,0.4);}
 .onboarding-box p { font-size: 13px; line-height: 2.2; color: var(--dawn); letter-spacing: 1px; }
 
-/* 🌟 升級：門按鈕對比增強 */
 .doors-nav{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
 .door-btn{ display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 18px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,.15); border-radius: 6px; cursor:pointer;transition:all .35s;min-width:86px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
 .door-btn:hover{transform:translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: rgba(255,255,255,0.07);}
@@ -104,7 +99,6 @@ nav{
 .scroll-hint{font-size:10px;color:var(--muted);letter-spacing:3px;animation:pulse 2.5s infinite;position:relative;}
 @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
 
-/* ===== COMMON ROOM STYLES ===== */
 .room{min-height:100vh;padding:100px 40px 80px;position:relative;overflow:hidden;}
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
 .room-tag{font-size:10px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;}
@@ -113,7 +107,6 @@ nav{
 .room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.06); border-left-color: var(--dawn); }
 .room-desc::after { content: ' 🔊'; font-size: 10px; opacity: 0.5; }
 
-/* 🌟 升級：輸入框邊界感更強 */
 .input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:14px;padding:18px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
 .input-area:focus{border-color:rgba(255,255,255,.6); box-shadow: inset 0 2px 15px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.1); background: rgba(0,0,0,0.5);} 
 .input-area::placeholder{color:rgba(255,255,255,.3);}
@@ -121,7 +114,6 @@ nav{
 .send-btn{ display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:12px 32px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-/* 🌟 危機支援出口樣式 */
 .crisis-support { margin-top: 48px; text-align: left; max-width: 600px; }
 .crisis-support a { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif;}
 .crisis-support a:hover { color: var(--fog); border-bottom-color: var(--fog); }
@@ -134,8 +126,6 @@ nav{
 .e-warning{ font-size:10px; color:var(--amber); margin-bottom:12px; letter-spacing:1px; line-height:1.6; opacity: 0.9; }
 .e-anon-label{ font-size:10px;letter-spacing:3px;color:rgba(123,143,161,.6);margin-bottom:6px; }
 .e-char-count{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
-
-/* E 房間的折疊機制 UI */
 .e-feed-container { position:relative; max-width:600px; margin-top:36px; }
 .e-feed{ display:flex;flex-direction:column;gap:12px; }
 .e-msg{ background:rgba(0,0,0,.3);padding:20px 24px;border-left:2px solid rgba(123,143,161,.4);border-radius:0 6px 6px 0;font-size:13px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
@@ -152,7 +142,6 @@ nav{
 #star-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;} #room-m .room-content{position:relative;z-index:1;}
 .m-input-wrap{max-width:480px;}
 
-/* 🌟 升級：星空 Tooltip 邏輯 (預設與行動版 Bottom Sheet) */
 .star-tooltip {
     position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.5);
     padding:20px; font-size:13px; color:var(--fog); z-index:600; max-width:260px; line-height:1.9;
@@ -171,7 +160,6 @@ nav{
 #room-p .send-btn{border-color:var(--p);color:var(--p);} 
 #room-p .send-btn:hover{background:rgba(201,168,76,.15); box-shadow: 0 0 16px rgba(201,168,76,0.3); transform: translateY(-2px);}
 
-/* 🌟 升級：Room P 的步驟引導與動線重構 */
 .p-step-label {
     font-family: 'Noto Serif TC', serif; font-size: 12px; font-weight: 700;
     color: var(--gold); letter-spacing: 3px; margin-bottom: 20px;
@@ -201,7 +189,6 @@ nav{
 #room-a .send-btn{border-color:var(--a);color:var(--a);} 
 #room-a .send-btn:hover{background:rgba(122,158,159,.15); box-shadow: 0 0 16px rgba(122,158,159,0.3); transform: translateY(-2px);}
 
-/* 🌟 升級：A 房間防護遮罩 */
 .a-warning-mask {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 48px 24px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(122,158,159,0.3);
@@ -297,7 +284,6 @@ nav{
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
 .lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dawn);line-height:2.2; }
 
-/* 🌟 分享按鈕與下載功能區塊 */
 .share-action-box { display:flex; flex-wrap:wrap; gap:16px; margin-top: 48px; }
 .action-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px;
@@ -308,7 +294,6 @@ nav{
 }
 .action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.2); }
 
-/* 真實圖片生成：分享卡 Modal */
 .share-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.85); z-index: 99999;
@@ -330,11 +315,9 @@ nav{
 .close-modal-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size: 12px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 4px; }
 .close-modal-btn:hover { color: var(--white); border-color: var(--white); background: rgba(255,255,255,0.1); }
 
-/* ===== TOAST ===== */
 .toast{ position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px); background:rgba(27,42,74,.97);border:1px solid rgba(255,255,255,.2); padding:14px 28px;font-size:12px;color:var(--fog);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(10px); border-radius: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.6);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ===== FOOTER ===== */
 footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); background: rgba(5,12,18,0.9); display:flex; flex-direction:column; align-items:center; }
 .footer-main { width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:32px; }
 .footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.4);letter-spacing:2px; }
@@ -343,7 +326,6 @@ footer{ padding:40px 40px 24px;border-top:1px solid rgba(255,255,255,.08); backg
 .footer-l{ font-family:'Cormorant Garamond',serif;font-size:13px;opacity:.4;letter-spacing:2px; }
 .footer-copy { width:100%; text-align:center; padding-top:24px; border-top:1px dashed rgba(255,255,255,0.08); font-size:10px; color:rgba(255,255,255,0.25); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
 
-/* 整體文字對比度提升 */
 body, p, h1, h2, h3, .room-desc, .hero-desc, .input-area, .e-msg, .sand-msg-text, .warmth-item, .shard-text {
     color: #F5F5F5 !important;
     text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
@@ -353,7 +335,6 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
     text-shadow: none !important;
 }
 
-/* ===== 🌟 完美的手機版 RWD 修正與 UX 強化 ===== */
 @media(max-width:768px){
   nav { flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 16px; }
   .nav-logo { font-size: 18px; margin-top: 4px; }
@@ -380,7 +361,6 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
   .hero-quotes { flex-direction: column; gap: 16px; }
   .onboarding-box { padding: 16px; margin-bottom: 32px; }
 
-  /* 🌟 手機版專屬：Room M 星空 Tooltip 的 Bottom Sheet */
   .star-tooltip {
       top: auto !important; bottom: 0 !important; left: 0 !important;
       width: 100% !important; max-width: none !important;
@@ -398,13 +378,11 @@ body.hsp-mode, body.hsp-mode p, body.hsp-mode .room-desc {
       width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px;
   }
 
-  /* 手機版 UX 強化：預設界線更清晰 */
   .input-area { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.35); }
   .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   .door-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
   .shard { background: rgba(0,0,0,0.4); border: 1px solid rgba(201,168,76,0.4); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
 
-  /* 手機版專屬：真實物理按壓回饋 (Active state) */
   .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active {
     transform: scale(0.95) !important; 
     background: rgba(255,255,255,0.15) !important;
@@ -770,7 +748,20 @@ const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
 let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 
-/* 🌟 GLOBAL i18n ENGINE 🌟 */
+/* 🌟 核心：移除 setInterval，改由資料驅動 DOM 更新 */
+function updateCountersUI() {
+    if(document.getElementById('g-v-count')) document.getElementById('g-v-count').textContent = globalCounts.v;
+    if(document.getElementById('g-e-count')) document.getElementById('g-e-count').textContent = globalCounts.e;
+    if(document.getElementById('g-m-count')) document.getElementById('g-m-count').textContent = globalCounts.m;
+    if(document.getElementById('g-p-count')) document.getElementById('g-p-count').textContent = globalCounts.p;
+    if(document.getElementById('g-t-count')) document.getElementById('g-t-count').textContent = globalCounts.t;
+    if(document.getElementById('h-e-count')) document.getElementById('h-e-count').textContent = state.eCount;
+    if(document.getElementById('h-m-count')) document.getElementById('h-m-count').textContent = state.mCount;
+    if(document.getElementById('h-p-count')) document.getElementById('h-p-count').textContent = state.pCount;
+    if(document.getElementById('h-a-count')) document.getElementById('h-a-count').textContent = state.aCount;
+    if(document.getElementById('h-t-count')) document.getElementById('h-t-count').textContent = state.tCount;
+}
+
 window.currentLang = 'zh';
 
 function t(zh, en, ja, es) {
@@ -782,30 +773,20 @@ function t(zh, en, ja, es) {
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
-  
   document.querySelectorAll('.lang-btn').forEach(btn => {
-    if(btn.getAttribute('onclick').includes(`'${lang}'`)) {
-      btn.classList.add('active-lang');
-    } else {
-      btn.classList.remove('active-lang');
-    }
+    if(btn.getAttribute('onclick').includes(`'${lang}'`)) btn.classList.add('active-lang');
+    else btn.classList.remove('active-lang');
   });
-  
   document.querySelectorAll('[data-zh]').forEach(el => {
     el.innerHTML = el.getAttribute('data-' + lang) || el.getAttribute('data-en') || el.getAttribute('data-zh');
   });
-  
   document.querySelectorAll('[data-zh-ph]').forEach(el => {
     el.setAttribute('placeholder', el.getAttribute('data-' + lang + '-ph') || el.getAttribute('data-en-ph') || el.getAttribute('data-zh-ph'));
   });
-  
   updateDynamicTexts();
-  
   document.getElementById('h-events').innerHTML = '';
   initTimeline();
-  
   if(typeof window.renderEFeed === 'function') window.renderEFeed();
-  
   window.showToast(t('已切換為繁體中文 ✦', 'Switched to English ✨', '日本語に切り替えました ✦', 'Cambiado a Español ✨'));
 }
 
@@ -852,14 +833,11 @@ window.toggleTimeline = function() {
   const wrapper = document.getElementById('h-events');
   const btn = document.getElementById('timeline-toggle-btn');
   const fade = document.getElementById('h-events-fade');
-  
   if (wrapper.style.maxHeight === '280px' || wrapper.style.maxHeight === '') {
-    wrapper.style.maxHeight = '5000px'; 
-    fade.style.opacity = '0'; 
+    wrapper.style.maxHeight = '5000px'; fade.style.opacity = '0'; 
     btn.innerHTML = t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑');
   } else {
-    wrapper.style.maxHeight = '280px'; 
-    fade.style.opacity = '1'; 
+    wrapper.style.maxHeight = '280px'; fade.style.opacity = '1'; 
     btn.innerHTML = t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓');
   }
 }
@@ -876,6 +854,27 @@ function loadLocalJourney() {
 }
 loadLocalJourney();
 
+/* 🌟 動畫控制與 Page Visibility API 整合 */
+let isAnimating = true;
+let starsRafId = null;
+let sandRafId = null;
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        // 進入背景：停止消耗 CPU 的 Canvas 運算
+        isAnimating = false;
+        if(starsRafId) cancelAnimationFrame(starsRafId);
+        if(sandRafId) cancelAnimationFrame(sandRafId);
+    } else {
+        // 回到網頁：若非 HSP 模式，重新啟動動畫
+        if (!document.body.classList.contains('hsp-mode')) {
+            isAnimating = true;
+            drawStars();
+            drawSand();
+        }
+    }
+});
+
 window.toggleHSP = function() {
   const body = document.body;
   const btn = document.getElementById('hsp-btn');
@@ -883,10 +882,18 @@ window.toggleHSP = function() {
   if(body.classList.contains('hsp-mode')) {
     btn.classList.add('active');
     localStorage.setItem('empath_hsp_mode', 'true');
+    // 🌟 確實切斷 RequestAnimationFrame
+    isAnimating = false;
+    if(starsRafId) cancelAnimationFrame(starsRafId);
+    if(sandRafId) cancelAnimationFrame(sandRafId);
     window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado'));
   } else {
     btn.classList.remove('active');
     localStorage.setItem('empath_hsp_mode', 'false');
+    // 🌟 重新啟動 RequestAnimationFrame
+    isAnimating = true;
+    drawStars();
+    drawSand();
     window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado'));
   }
 }
@@ -896,8 +903,7 @@ window.speakText = function(text) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     const langs = { 'zh': 'zh-TW', 'en': 'en-US', 'ja': 'ja-JP', 'es': 'es-ES' };
-    utterance.lang = langs[window.currentLang]; 
-    utterance.rate = 0.9;
+    utterance.lang = langs[window.currentLang]; utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
     window.showToast(t('🔉 語音導航朗讀中...', '🔉 Reading...', '🔉 読み上げ中...', '🔉 Leyendo...'));
   }
@@ -948,7 +954,7 @@ function nowStr(){ const d = new Date(); return d.getHours().toString().padStart
 function logJourney(type, text){
   const time = nowStr(); journeyData.counters[type] = (journeyData.counters[type] || 0) + 1;
   journeyData.events.push({ type, text, time }); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
-  state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud();
+  state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud(); updateCountersUI();
 }
 
 function renderTimelineHTML(type, text, time){
@@ -969,7 +975,6 @@ function initTimeline(){
   journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time));
 }
 
-/* 🌟 升級：靈魂鑰匙複製功能 */
 window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!')); }
 window.copySoulKey = function() {
     const key = localStorage.getItem('empath_soul_key');
@@ -980,10 +985,7 @@ window.copySoulKey = function() {
             btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado');
             btn.style.color = '#fff'; btn.style.borderColor = '#fff';
             window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada'));
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)';
-            }, 2000);
+            setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000);
         }).catch(err => { window.showToast('複製失敗 / Copy failed'); });
     }
 }
@@ -997,8 +999,8 @@ window.loadExistingSoulKey = async function() {
       const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] };
       localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
       state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0;
-      document.getElementById('h-events').innerHTML = '';
-      initTimeline(); updateSyncUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!')); input.value='';
+      document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI();
+      window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!')); input.value='';
     } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada')); }
   } catch(err) {}
 }
@@ -1012,54 +1014,32 @@ function updateSyncUI() {
 
 let allEmotions = [];
 let eFeedExpanded = false;
-
 window.renderEFeed = function() {
-  const feed = document.getElementById('e-feed'); 
-  const fade = document.getElementById('e-feed-fade');
-  const btn = document.getElementById('e-expand-btn');
-  if(!feed) return;
-  feed.innerHTML = '';
-  
+  const feed = document.getElementById('e-feed'); const fade = document.getElementById('e-feed-fade'); const btn = document.getElementById('e-expand-btn');
+  if(!feed) return; feed.innerHTML = '';
   const limit = eFeedExpanded ? allEmotions.length : 3;
-  
   allEmotions.slice(0, limit).forEach(data => {
     const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr();
     const div = document.createElement('div'); div.className = 'e-msg'; 
     div.innerHTML = `<div class="e-msg-anon">${t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO')}</div><div>${data.text}</div><div class="e-msg-time">${timeStr}</div>`; 
     feed.appendChild(div);
   });
-  
   if(allEmotions.length > 3) {
     btn.style.display = 'inline-flex';
-    if(!eFeedExpanded) {
-      fade.style.display = 'block';
-      btn.innerHTML = t('↓ 展開更多留言', '↓ Show More', '↓ もっと見る', '↓ Ver más');
-    } else {
-      fade.style.display = 'none';
-      btn.innerHTML = t('↑ 收起留言', '↑ Collapse', '↑ 閉じる', '↑ Ocultar');
-    }
-  } else {
-    btn.style.display = 'none';
-    fade.style.display = 'none';
-  }
+    if(!eFeedExpanded) { fade.style.display = 'block'; btn.innerHTML = t('↓ 展開更多留言', '↓ Show More', '↓ もっと見る', '↓ Ver más'); } 
+    else { fade.style.display = 'none'; btn.innerHTML = t('↑ 收起留言', '↑ Collapse', '↑ 閉じる', '↑ Ocultar'); }
+  } else { btn.style.display = 'none'; fade.style.display = 'none'; }
 }
-
-window.toggleEFeed = function() {
-  eFeedExpanded = !eFeedExpanded;
-  window.renderEFeed();
-}
+window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
 
 onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => {
-  globalCounts.e = snapshot.size; 
-  allEmotions = [];
+  globalCounts.e = snapshot.size; allEmotions = [];
   snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
-  window.renderEFeed();
+  window.renderEFeed(); updateCountersUI();
 });
 
 window.submitE = async function(){ 
-  const input = document.getElementById('e-input'); 
-  let text = input.value.trim(); 
-  if(!text) return; 
+  const input = document.getElementById('e-input'); let text = input.value.trim(); if(!text) return; 
   text = cleanText(text);
   try { await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); input.value=''; document.getElementById('e-char').textContent = '0 / 300'; logJourney('e', text); window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad')); } catch(e){} 
 }
@@ -1079,40 +1059,31 @@ function updateMStats(){
   if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; }
   const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
 }
-onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, text: data.text, brightness: data.brightness||1, clicks: data.clicks||0, colorIdx: data.colorIdx||0, relX: data.relX, relY: data.relY }); }); updateMStats(); });
+onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, text: data.text, brightness: data.brightness||1, clicks: data.clicks||0, colorIdx: data.colorIdx||0, relX: data.relX, relY: data.relY }); }); updateMStats(); updateCountersUI(); });
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
+
 function drawStars(){
   if(!canvas.width) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h);
   bgStars.forEach(s => { s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } ctx.fill(); ctx.shadowBlur = 0; });
   starMessages.forEach(s => { s.x = s.relX*w; s.y = s.relY*h; const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); });
-  requestAnimationFrame(drawStars);
+  if(isAnimating) starsRafId = requestAnimationFrame(drawStars);
 }
-function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
 
-/* 🌟 升級：星空 Tooltip 邏輯 (改為 Class 控制，以支援 Mobile Bottom Sheet) */
+function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
 roomM.addEventListener('click', async e => {
   if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return;
   const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; const star = getStarAt(x, y);
   if(star){
     if(activeStarId !== star.id) {
-      activeStarId = star.id; 
-      tooltip.classList.add('active'); 
-      if(window.innerWidth > 768) { 
-          tooltip.style.transform = 'none'; 
-          let tx = e.clientX + 16; let ty = e.clientY - 16; 
-          if (tx + 260 > window.innerWidth) tx = e.clientX - 280; 
-          tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; 
-      }
+      activeStarId = star.id; tooltip.classList.add('active'); 
+      if(window.innerWidth > 768) { tooltip.style.transform = 'none'; let tx = e.clientX + 16; let ty = e.clientY - 16; if (tx + 260 > window.innerWidth) tx = e.clientX - 280; tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; }
       tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo')}<br>${star.text}<br><span style="font-size:9px;color:var(--gold);margin-top:8px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar')}</span>`;
     } else { try { await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦')); window.triggerHeartbeat(); tooltip.classList.remove('active'); activeStarId = null; } catch (err) {} }
   } else { tooltip.classList.remove('active'); activeStarId = null; }
 });
 
 window.submitM = async function(){ 
-  const input = document.getElementById('m-input'); 
-  let text = input.value.trim(); 
-  if(!text) return; 
-  text = cleanText(text);
+  const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   try { await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦')); } catch(err){} 
 }
 
@@ -1131,7 +1102,7 @@ onSnapshot(collection(db, "shards"), (snapshot) => {
     div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado')}</div><div class="shard-glow"></div>`;
     div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦')); }); board.appendChild(div);
   });
-  globalCounts.p = pHealedTotal; drawKintsugiVessel(); updateDynamicTexts();
+  globalCounts.p = pHealedTotal; drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI();
 });
 function drawKintsugiVessel(){
   if(!pCtx) return; const c=pCtx; const w=pCanvas.offsetWidth||540; const h=300; c.clearRect(0,0,w,h);
@@ -1143,10 +1114,7 @@ function drawKintsugiVessel(){
 }
 
 window.submitP = async function(){ 
-  const input = document.getElementById('p-input'); 
-  let text = input.value.trim(); 
-  if(!text) return; 
-  text = cleanText(text);
+  const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija')); 
 }
 
@@ -1154,10 +1122,10 @@ let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
 function drawSand() {
   const c = document.getElementById('sand-canvas'); if(!c || !c.width) return; const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h);
-  sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; requestAnimationFrame(drawSand);
+  sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; 
+  if(isAnimating) sandRafId = requestAnimationFrame(drawSand);
 }
 
-/* 🌟 升級：A 房間防護遮罩邏輯 */
 window.acceptARead = function() {
     document.getElementById('a-warning-mask').style.display = 'none';
     const feed = document.getElementById('a-feed');
@@ -1167,45 +1135,26 @@ window.acceptARead = function() {
 }
 window.hideAFeed = function() {
     document.getElementById('a-warning-mask').innerHTML = `
-        <p style="color:var(--muted); font-size:12px;"
-            data-zh="已隱藏他人留言。你的痛苦依然會被這裡安放。"
-            data-en="Messages hidden. Your pain will still be held here."
-            data-ja="他人のメッセージを非表示にしました。あなたの痛みはここで大切に保管されます。"
-            data-es="Mensajes ocultos. Tu dolor seguirá siendo sostenido aquí.">
-            ${t('已隱藏他人留言。你的痛苦依然會被這裡安放。', 'Messages hidden. Your pain will still be held here.', '他人のメッセージを非表示にしました。あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos. Tu dolor seguirá siendo sostenido aquí.')}
-        </p>`;
+        <p style="color:var(--muted); font-size:12px;">${t('已隱藏他人留言。你的痛苦依然會被這裡安放。', 'Messages hidden. Your pain will still be held here.', '他人のメッセージを非表示にしました。あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos. Tu dolor seguirá siendo sostenido aquí.')}</p>`;
 }
 
 onSnapshot(collection(db, "sand"), (snapshot) => {
   globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); feed.innerHTML = ''; const nowMs = Date.now();
   snapshot.forEach(docSnap => {
-    const data = docSnap.data(); 
-    const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
+    const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
     const leftSecs = (24*60*60) - ((nowMs - msgTime)/1000); 
-    
     if(leftSecs <= 0) return;
-    
     const div = document.createElement('div'); div.className = 'sand-msg'; const pct = (leftSecs / 86400) * 100;
-    div.innerHTML = `
-      <div class="sand-dissolve-overlay"></div>
-      <div class="sand-msg-text">${data.text}</div>
-      <div class="sand-timer-wrap">
-        <div class="sand-timer-label">DISSOLVING</div>
-        <div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div>
-        <div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div>
-      </div>`;
+    div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
     feed.appendChild(div); let simSecs = leftSecs; const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
     const interval = setInterval(() => { simSecs -= 1; if(simSecs <= 0){ clearInterval(interval); div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; } if(fill) fill.style.width = (simSecs / (24 * 60 * 60)) * 100 + '%'; if(label) label.textContent = formatTimeLeft(simSecs); }, 1000);
   });
+  updateCountersUI();
 });
 
 window.submitA = async function(){ 
-  const input = document.getElementById('a-input'); 
-  let text = input.value.trim(); 
-  if(!text) return; 
-  text = cleanText(text);
-  await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); 
-  input.value=''; logJourney('a', text); window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena')); 
+  const input = document.getElementById('a-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
+  await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); input.value=''; logJourney('a', text); window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena')); 
 }
 
 onSnapshot(collection(db, "warmth"), (snapshot) => {
@@ -1215,48 +1164,28 @@ onSnapshot(collection(db, "warmth"), (snapshot) => {
     div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`;
     div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div);
   });
+  updateCountersUI();
 });
 
 window.submitT = async function(){ 
-  const input = document.getElementById('t-input'); 
-  let text = input.value.trim(); 
-  if(!text) return; 
-  text = cleanText(text);
+  const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante')); 
 }
 
 window.addEventListener('load', async () => {
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
-  onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; } });
+  onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } });
   
-  // 檢查是否曾授權閱讀 A 房間留言
   if(localStorage.getItem('empath_a_accepted') === 'true') {
-      const mask = document.getElementById('a-warning-mask');
-      const feed = document.getElementById('a-feed');
-      if(mask && feed) {
-          mask.style.display = 'none';
-          feed.style.display = 'flex';
-          feed.style.filter = 'blur(0px)';
-      }
+      const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed');
+      if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; }
   }
 
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); } } catch(err) {} }
-  setTimeout(() => { resizeCanvas(); drawStars(); drawSand(); }, 200);
-  setInterval(() => {
-    if(document.getElementById('g-v-count')) document.getElementById('g-v-count').textContent = globalCounts.v;
-    if(document.getElementById('g-e-count')) document.getElementById('g-e-count').textContent = globalCounts.e;
-    if(document.getElementById('g-m-count')) document.getElementById('g-m-count').textContent = globalCounts.m;
-    if(document.getElementById('g-p-count')) document.getElementById('g-p-count').textContent = globalCounts.p;
-    if(document.getElementById('g-t-count')) document.getElementById('g-t-count').textContent = globalCounts.t;
-    if(document.getElementById('h-e-count')) document.getElementById('h-e-count').textContent = state.eCount;
-    if(document.getElementById('h-m-count')) document.getElementById('h-m-count').textContent = state.mCount;
-    if(document.getElementById('h-p-count')) document.getElementById('h-p-count').textContent = state.pCount;
-    if(document.getElementById('h-a-count')) document.getElementById('h-a-count').textContent = state.aCount;
-    if(document.getElementById('h-t-count')) document.getElementById('h-t-count').textContent = state.tCount;
-  }, 1000);
+  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
+  setTimeout(() => { resizeCanvas(); drawStars(); drawSand(); updateCountersUI(); }, 200);
 });
 </script>
 </body>
