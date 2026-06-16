@@ -17,7 +17,6 @@
 <style>
 :root{
   --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
-  /* 🌟 優化對比度與基礎大小，符合 WCAG AA */
   --white:#FDFCF8;--fog:#E8E6E1;--muted:#A9B9C7;
   --gold:#C9A84C;--amber:#E8A87C;--dawn:#F2E8D9;
   --e:#7B8FA1;--m:#A8B8C8;--p:#C9A84C;
@@ -25,7 +24,6 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-/* 🌟 基礎字體提升為 16px，減輕行動端閱讀負擔 */
 body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease; font-size: 16px;} 
 a{text-decoration:none;color:inherit;}
 
@@ -40,8 +38,9 @@ body.hsp-mode * { animation-play-state: paused !important; }
 body.hsp-mode .room-desc { color: rgba(255,255,255,0.45); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
 body.hsp-mode h1, body.hsp-mode h2, body.hsp-mode .hero-title { text-shadow: none; }
+/* HSP 模式下關閉背景的環境漸層，保持最純粹的黑 */
+body.hsp-mode #room-e, body.hsp-mode #room-p, body.hsp-mode #room-t, body.hsp-mode #room-h { background: #080d14 !important; }
 
-/* 🌟 NAV：加入漢堡選單的結構 */
 nav{
   position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
   padding:16px 40px;background:#03070a;backdrop-filter:blur(16px);
@@ -50,7 +49,6 @@ nav{
 }
 .nav-logo{ font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--white);letter-spacing:6px; z-index: 501;}
 
-/* 手機版漢堡按鈕 */
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; z-index: 501; padding: 5px;}
 .hamburger span { width: 24px; height: 2px; background: var(--white); transition: all 0.3s; border-radius: 2px; }
 .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -124,7 +122,6 @@ nav{
 .hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:16px;position:relative; }
 .hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2.5vw,22px);color:var(--gold);letter-spacing:3px;margin-bottom:24px;position:relative; }
 
-/* 🌟 互動式 Onboarding 區塊 */
 .onboarding-box { 
     max-width: 680px; width:100%; margin: 0 auto 40px; padding: 32px 24px; 
     background: rgba(0,0,0,0.35); border: 1px dashed rgba(255,255,255,0.25); 
@@ -167,16 +164,21 @@ nav{
 .room{min-height:100vh;padding:100px 40px 80px;position:relative;overflow:hidden;}
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
 .room-tag{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase; font-weight:bold;}
-.room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(24px,3.5vw,36px);color:var(--white);margin-bottom:14px; }
-.room-desc{ font-size:16px;color:var(--muted);line-height:2;max-width:540px;margin-bottom:32px; cursor:pointer; transition: all 0.3s; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
-.room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.06); border-left-color: var(--dawn); }
 
-.room-desc::after {
-    content: ''; display: inline-block; width: 16px; height: 16px; margin-left: 12px; vertical-align: -3px; opacity: 0.5;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D8D5CD' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'%3E%3C/polygon%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.07'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
-    background-size: contain; transition: all 0.3s;
+/* 🌟 Z-axis Hierarchy：房間標題旁加入獨特印記 */
+.room-title-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(24px,3.5vw,36px);color:var(--white); margin-bottom:0; }
+.room-title-icon { width: 24px; height: 24px; opacity: 0.8; }
+
+/* 🌟 無障礙 TTS 按鈕 */
+.desc-wrap { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 32px; max-width: 600px; }
+.room-desc{ font-size:16px;color:var(--muted);line-height:2; flex: 1; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
+.tts-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--muted);
+    border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s; flex-shrink: 0; margin-top: 8px;
 }
-.room-desc:hover::after { opacity: 1; transform: scale(1.1);}
+.tts-btn:hover { background: rgba(255,255,255,0.1); color: var(--dawn); border-color: var(--dawn); transform: scale(1.05); }
 
 .input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:16px;padding:20px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
 .input-area:focus{border-color:rgba(255,255,255,.6); box-shadow: inset 0 2px 15px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.15); background: rgba(0,0,0,0.5);} 
@@ -186,11 +188,11 @@ nav{
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
 .crisis-support { margin-top: 56px; text-align: left; max-width: 600px; }
-.crisis-support a { font-size: 13px; color: rgba(255,255,255,0.8); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.5); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif; font-weight: bold;}
-.crisis-support a:hover { color: var(--white); border-bottom-color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.4);}
+.crisis-support a { font-size: 13px; color: rgba(255,255,255,0.7); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif; font-weight: bold;}
+.crisis-support a:hover { color: var(--white); border-bottom-color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.3);}
 
-/* ===== E ROOM ===== */
-#room-e{background:linear-gradient(180deg,#0D1B2A 0%,#0c1824 100%);}
+/* ===== 🌟 E ROOM: Deep Void Gradient ===== */
+#room-e{background: radial-gradient(circle at 70% 30%, #1a2a3a 0%, #0c1824 60%);}
 #room-e .room-letter{color:var(--e);} #room-e .room-tag{color:var(--e);} 
 #room-e .send-btn{border-color:var(--e);color:var(--e);} 
 #room-e .send-btn:hover{background:rgba(123,143,161,.15); box-shadow: 0 0 16px rgba(123,143,161,0.3); transform: translateY(-2px);}
@@ -223,8 +225,8 @@ nav{
 .m-stats{ display:flex;gap:32px;margin-top:24px; }
 .m-stat{font-size:12px;letter-spacing:2px;color:rgba(168,184,200,.8);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:20px;font-weight:600;}
 
-/* ===== P ROOM ===== */
-#room-p{background:linear-gradient(180deg,#0D1B2A 0%,#100e08 100%);}
+/* ===== 🌟 P ROOM: Subtle Gold Accents ===== */
+#room-p{background: radial-gradient(circle at 30% 80%, rgba(201,168,76,0.05) 0%, #100e08 60%);}
 #room-p .room-letter{color:var(--p);} #room-p .room-tag{color:var(--p);} 
 #room-p .send-btn{border-color:var(--p);color:var(--p);} 
 #room-p .send-btn:hover{background:rgba(201,168,76,.15); box-shadow: 0 0 16px rgba(201,168,76,0.3); transform: translateY(-2px);}
@@ -265,6 +267,9 @@ nav{
 }
 .a-warning-mask p { font-size: 15px; line-height: 2.2; color: var(--dawn); letter-spacing: 1.5px; }
 
+/* 🌟 A 房間專屬提示字 */
+.a-fade-hint { font-size: 13px; color: var(--a); margin-bottom: 12px; letter-spacing: 1.5px; font-style: italic; opacity: 0.8;}
+
 .a-feed{display:flex;flex-direction:column;gap:20px;max-width:600px;}
 .sand-msg{ background:rgba(0,0,0,.4);padding:26px 32px;border-left:2px solid rgba(122,158,159,.6);border-radius:0 6px 6px 0;position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:all 4s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.4);}
 .sand-msg-text{font-size:15px;line-height:2;color:var(--fog); transition: filter 3s ease;}
@@ -277,8 +282,8 @@ nav{
 .sand-msg.dissolving { filter: blur(5px); opacity: 0; transform: translateY(20px) scale(0.96); }
 .a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:rgba(122,158,159,.7);margin-top:28px;letter-spacing:1px; line-height:1.8; }
 
-/* ===== T ROOM ===== */
-#room-t{background:linear-gradient(180deg,#0D1B2A 0%,#140f08 100%);}
+/* ===== 🌟 T ROOM: Warm Ambient Glow ===== */
+#room-t{background: radial-gradient(circle at 50% 50%, rgba(232,168,124,0.05) 0%, #140f08 70%);}
 #room-t .room-letter{color:var(--t);} #room-t .room-tag{color:var(--t);} 
 #room-t .send-btn{border-color:var(--t);color:var(--t);} 
 #room-t .send-btn:hover{background:rgba(232,168,124,.15); box-shadow: 0 0 16px rgba(232,168,124,0.3); transform: translateY(-2px);}
@@ -302,8 +307,8 @@ nav{
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 20px var(--amber);}}
 .echo-label{ text-align:center;font-size:13px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
 
-/* ===== H ROOM ===== */
-#room-h{background:linear-gradient(180deg,#0D1B2A 0%,#0f0f1a 100%);}
+/* ===== 🌟 H ROOM: Horizon Line Effect ===== */
+#room-h{background: linear-gradient(180deg, #0D1B2A 0%, #0f0f1a 40%, #05050a 100%); border-top: 1px solid rgba(255,255,255,0.02);}
 #room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.6);}
 .h-journey{max-width:740px;}
 .journey-summary, .global-summary{ display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:16px;margin-bottom:40px; }
@@ -387,7 +392,6 @@ nav{
 .toast{ position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px); background:rgba(27,42,74,.98);border:1px solid rgba(255,255,255,.3); padding:16px 32px;font-size:15px;color:var(--white);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(12px); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); font-weight:bold;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* 🌟 返回頂部按鈕 */
 #btt-btn {
     position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px;
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
@@ -409,7 +413,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   nav { padding: 16px 20px; }
   .nav-logo { font-size: 22px; }
   
-  /* 🌟 手機版漢堡選單邏輯：將 nav-menu 改為下拉式 */
   .hamburger { display: flex; }
   .nav-menu { 
       position: absolute; top: 100%; left: 0; right: 0; background: #03070a; 
@@ -639,10 +642,18 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
   <p class="room-tag">E — Emptiness / Exit</p>
-  <h2 class="room-title" data-zh="情緒出口" data-en="Emotional Exit" data-ja="感情の出口" data-es="Salida Emocional" data-fr="Sortie Émotionnelle" data-de="Emotionaler Ausgang" data-zh-cn="情绪出口">情緒出口</h2>
-  <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。" data-en="Say what you cannot say. Cast it anonymously. Only the emotion itself is caught here." data-ja="言えなかった言葉をここで。完全匿名、誰にも知られることはありません。ただ感情だけがここで受け止められます。" data-es="Di lo que no puedes decir. Envíalo de forma anónima, nadie sabrá que eres tú. Solo la emoción es atrapada aquí." data-fr="Dites ce que vous ne pouvez pas dire. Lancez-le anonymement. Seule l'émotion elle-même est capturée ici." data-de="Sag, was du nicht sagen kannst. Wirf es anonym aus. Nur die Emotion selbst wird hier aufgefangen." data-zh-cn="说出那些说不出口的话。匿名投递，没有人知道是你。只有情绪本身，被这里接住。">
-    說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。
-  </p>
+  <div class="room-title-wrap">
+      <h2 class="room-title" data-zh="情緒出口" data-en="Emotional Exit" data-ja="感情の出口" data-es="Salida Emocional" data-fr="Sortie Émotionnelle" data-de="Emotionaler Ausgang" data-zh-cn="情绪出口">情緒出口</h2>
+      <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--e)" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+  </div>
+  
+  <div class="desc-wrap">
+      <p class="room-desc" data-zh="說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。" data-en="Say what you cannot say. Cast it anonymously. Only the emotion itself is caught here." data-ja="言えなかった言葉をここで。完全匿名、誰にも知られることはありません。ただ感情だけがここで受け止められます。" data-es="Di lo que no puedes decir. Envíalo de forma anónima, nadie sabrá que eres tú. Solo la emoción es atrapada aquí." data-fr="Dites ce que vous ne pouvez pas dire. Lancez-le anonymement. Seule l'émotion elle-même est capturée ici." data-de="Sag, was du nicht sagen kannst. Wirf es anonym aus. Nur die Emotion selbst wird hier aufgefangen." data-zh-cn="说出那些说不出口的话。匿名投递，没有人知道是你。只有情绪本身，被这里接住。">說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。</p>
+      <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+      </button>
+  </div>
+
   <p class="e-warning" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦" data-en="∗ This place holds vulnerability, not malice. Please refrain from personal attacks or hate speech. ✦" data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。個人攻撃やヘイトスピーチはお控えください。 ✦" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia. Por favor abstente de ataques personales o discursos de odio. ✦" data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice. Veuillez vous abstenir d'attaques personnelles ou de discours de haine. ✦" data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit. Bitte verzichten Sie auf persönliche Angriffe oder Hassreden. ✦" data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论，让避难所维持纯净。 ✦">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦</p>
   <p class="e-anon-label">ANONYMOUS — <span data-zh="完全匿名" data-en="Completely Anonymous" data-ja="完全匿名" data-es="Totalmente Anónimo" data-fr="Totalement Anonyme" data-de="Völlig Anonym" data-zh-cn="完全匿名">完全匿名</span></p>
   <textarea class="input-area" id="e-input" rows="5" maxlength="500" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 500'"
@@ -667,7 +678,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   <div class="crisis-support">
     <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
   </div>
-
 </section>
 
 <section id="room-m" class="room">
@@ -675,10 +685,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   <div class="room-letter">M</div>
   <div class="room-content">
     <p class="room-tag">M — Missing / Memory</p>
-    <h2 class="room-title" data-zh="思念映射" data-en="Memory Mapping" data-ja="想いの投影" data-es="Mapeo de Recuerdos" data-fr="Cartographie des Souvenirs" data-de="Erinnerungskartierung" data-zh-cn="思念映射">思念映射</h2>
-    <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。" data-en="Every memory becomes a star. Click a star to hear someone's secret. If it resonates, make it brighter." data-ja="すべての想いは星になります。星をクリックして、誰かの秘密を聴いてください。共鳴したら、その星をさらに輝かせてください。" data-es="Cada recuerdo se convierte en una estrella. Haz clic para escuchar los secretos ocultos. Si te conmueve, haz que brille más." data-fr="Chaque souvenir devient une étoile. Cliquez sur une étoile pour entendre le secret de quelqu'un. Si cela résonne, rendez-la plus brillante." data-de="Jede Erinnerung wird zu einem Stern. Klicke auf einen Stern, um das Geheimnis von jemandem zu hören. Wenn es nachhallt, mach ihn heller." data-zh-cn="每段思念都成为一颗星。点击星星，听见别人藏在夜空里的心事。感动了，就让它更亮一些。">
-      每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。
-    </p>
+    <div class="room-title-wrap">
+        <h2 class="room-title" data-zh="思念映射" data-en="Memory Mapping" data-ja="想いの投影" data-es="Mapeo de Recuerdos" data-fr="Cartographie des Souvenirs" data-de="Erinnerungskartierung" data-zh-cn="思念映射">思念映射</h2>
+        <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--m)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+    </div>
+    
+    <div class="desc-wrap">
+        <p class="room-desc" data-zh="每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。" data-en="Every memory becomes a star. Click a star to hear someone's secret. If it resonates, make it brighter." data-ja="すべての想いは星になります。星をクリックして、誰かの秘密を聴いてください。共鳴したら、その星をさらに輝かせてください。" data-es="Cada recuerdo se convierte en una estrella. Haz clic para escuchar los secretos ocultos. Si te conmueve, haz que brille más." data-fr="Chaque souvenir devient une étoile. Cliquez sur une étoile pour entendre le secret de quelqu'un. Si cela résonne, rendez-la plus brillante." data-de="Jede Erinnerung wird zu einem Stern. Klicke auf einen Stern, um das Geheimnis von jemandem zu hören. Wenn es nachhallt, mach ihn heller." data-zh-cn="每段思念都成为一颗星。点击星星，听见别人藏在夜空里的心事。感动了，就让它更亮一些。">每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。</p>
+        <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
+    </div>
+    
     <div class="m-input-wrap">
       <textarea class="input-area" id="m-input" rows="4" maxlength="500"
         data-zh-ph="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"
@@ -702,10 +718,15 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 <section id="room-p" class="room">
   <div class="room-letter">P</div>
   <p class="room-tag">P — Piece / Pain</p>
-  <h2 class="room-title" data-zh="碎片修補" data-en="Kintsugi Repair" data-ja="欠片の修復" data-es="Reparación Kintsugi" data-fr="Réparation Kintsugi" data-de="Kintsugi-Reparatur" data-zh-cn="碎片修补">碎片修補</h2>
-  <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca." data-fr="Kintsugi — réparer les fissures avec de l'or, transformant les brisures en magnifiques textures. Cliquez sur un éclat pour le guérir." data-de="Kintsugi — Risse mit Gold reparieren und Zerbrochenheit in wunderschöne Texturen verwandeln. Klicke auf eine Scherbe, um sie zu heilen." data-zh-cn="金继 — 以金修补裂缝，让破碎成为生命最美的纹理。点击碎片，让它重生。">
-    金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。
-  </p>
+  <div class="room-title-wrap">
+      <h2 class="room-title" data-zh="碎片修補" data-en="Kintsugi Repair" data-ja="欠片の修復" data-es="Reparación Kintsugi" data-fr="Réparation Kintsugi" data-de="Kintsugi-Reparatur" data-zh-cn="碎片修补">碎片修補</h2>
+      <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--p)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+  </div>
+  
+  <div class="desc-wrap">
+      <p class="room-desc" data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca." data-fr="Kintsugi — réparer les fissures avec de l'or, transformant les brisures en magnifiques textures. Cliquez sur un éclat pour le guérir." data-de="Kintsugi — Risse mit Gold reparieren und Zerbrochenheit in wunderschöne Texturen verwandeln. Klicke auf eine Scherbe, um sie zu heilen." data-zh-cn="金继 — 以金修补裂缝，让破碎成为生命最美的纹理。点击碎片，让它重生。">金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。</p>
+      <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
+  </div>
 
   <div class="p-step-label" data-zh="STEP 1. 交付破碎" data-en="STEP 1. Cast Brokenness" data-ja="STEP 1. 欠片を預ける" data-es="PASO 1. Entregar Ruptura" data-fr="ÉTAPE 1. Jeter la Brisure" data-de="SCHRITT 1. Zerbrochenheit abgeben" data-zh-cn="STEP 1. 交付破碎">STEP 1. 交付破碎</div>
   <textarea class="input-area" id="p-input" rows="3" maxlength="500"
@@ -735,10 +756,17 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   <div class="room-letter">A</div>
   <div class="room-content">
     <p class="room-tag">A — Asylum / Ache</p>
-    <h2 class="room-title" data-zh="神聖避難所" data-en="Sacred Asylum" data-ja="神聖な避難所" data-es="Asilo Sagrado" data-fr="Asile Sacré" data-de="Heiliges Asyl" data-zh-cn="神圣避难所">神聖避難所</h2>
-    <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." data-fr="La douleur se dissout ici. Chaque message disparaît complètement après 24 heures, comme du sable au vent. Dites-le, puis partez." data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。">
-      痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。
-    </p>
+    <div class="room-title-wrap">
+        <h2 class="room-title" data-zh="神聖避難所" data-en="Sacred Asylum" data-ja="神聖な避難所" data-es="Asilo Sagrado" data-fr="Asile Sacré" data-de="Heiliges Asyl" data-zh-cn="神圣避难所">神聖避難所</h2>
+        <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2"><path d="M12 2.69l5.66 4.12a8 8 0 0 1 2.34 5.3v4.6a8 8 0 0 1-16 0v-4.6a8 8 0 0 1 2.34-5.3L12 2.69z"></path></svg>
+    </div>
+    
+    <div class="desc-wrap">
+        <p class="room-desc" data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." data-fr="La douleur se dissout ici. Chaque message disparaît complètement après 24 heures, comme du sable au vent. Dites-le, puis partez." data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。">痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。</p>
+        <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
+    </div>
+
+    <p class="a-fade-hint" data-zh="你的話語將在 24 小時後消失於風中。" data-en="Your words will disappear in the wind after 24 hours." data-ja="あなたの言葉は24時間後に風に消えていきます。" data-es="Tus palabras desaparecerán en el viento después de 24 horas." data-fr="Tes mots disparaîtront dans le vent après 24 heures." data-de="Deine Worte werden nach 24 Stunden im Wind verblassen." data-zh-cn="你的话语将在 24 小时后消失于风中。">你的話語將在 24 小時後消失於風中。</p>
     <textarea class="input-area" id="a-input" rows="4" maxlength="500"
       data-zh-ph="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"
       data-en-ph="Whisper your deepest pain or secret here...&#10;After 24 hours, these words will fade away.&#10;Nothing is forever, only the feeling of being caught in this moment."
@@ -750,10 +778,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
     <br>
     <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →" data-fr="Transformer en sable →" data-de="Zu Sand machen →" data-zh-cn="放入沙画 →">放入沙畫 →</button>
-    <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia." data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice." data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit." data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论。">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
-    <p class="a-note" style="margin-top:8px;" data-zh="∗ 所有留言將在 24 小時後化為塵埃，如沙畫般不留痕跡" data-en="∗ All messages will turn to dust after 24 hours, leaving no trace." data-ja="∗ すべての言葉は24時間後に塵となり、痕跡を残しません。" data-es="∗ Todos los mensajes se convertirán en polvo después de 24 horas." data-fr="∗ Tous les messages redeviendront poussière après 24 heures." data-de="∗ Alle Nachrichten werden nach 24 Stunden zu Staub zerfallen." data-zh-cn="∗ 所有留言将在 24 小时后化为尘埃，如沙画般不留痕迹">∗ 所有留言將在 24 小時後化為塵埃，如沙畫般不留痕跡</p>
     
-    <div id="a-feed-wrapper" style="position: relative; margin-top:36px; min-height:200px;">
+    <div id="a-feed-wrapper" style="position: relative; margin-top:40px; min-height:200px;">
         <div id="a-warning-mask" class="a-warning-mask">
             <p data-zh="接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。" data-en="The following section contains the real pain and trauma of others.<br>If you are not in an emotional state to hold space, please hide it.<br>Your empathy is precious, but please protect yourself first." data-ja="以下のセクションには、他人の真の痛みやトラウマが含まれています。<br>受け止める心の準備ができていない場合は、非表示にしてください。<br>あなたの優しさは尊いですが、まずは自分を守ってください。" data-es="La siguiente sección contiene el dolor y trauma real de otros.<br>Si no estás en un estado emocional para sostener este espacio, ocúltalo.<br>Tu empatía es preciosa, pero por favor protégete primero." data-fr="La section suivante contient la vraie douleur et les traumatismes d'autres personnes.<br>Si vous n'êtes pas en état émotionnel, veuillez la masquer.<br>Votre empathie est précieuse, mais protégez-vous d'abord." data-de="Der folgende Abschnitt enthält den echten Schmerz und das Trauma anderer.<br>Wenn du nicht im emotionalen Zustand bist, blende ihn bitte aus.<br>Deine Empathie ist kostbar, aber bitte schütze dich zuerst." data-zh-cn="接下来的留言区包含他人真实的痛苦与创伤。<br>若你目前的情绪无法承接，请选择隐藏。<br>你的善良很珍贵，但也请保护好自己。">接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。</p>
             <div style="display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap;">
@@ -774,10 +800,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 <section id="room-t" class="room">
   <div class="room-letter">T</div>
   <p class="room-tag">T — Temperature / Truth</p>
-  <h2 class="room-title" data-zh="能量共振" data-en="Energy Resonance" data-ja="エネルギー共鳴" data-es="Resonancia" data-fr="Résonance" data-de="Resonanz" data-zh-cn="能量共振">能量共振</h2>
-  <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。" data-en="Light up others, and be illuminated. Send warmth and receive Echo Pulses from strangers—not likes, but heartbeats." data-ja="誰かを照らし、誰かに照らされる。温もりを送り、見知らぬ人からのEcho Pulseを受け取りましょう。それは「いいね」ではなく、鼓動です。" data-es="Ilumina a otros y sé iluminado. Envía calidez y recibe Pulsos de Eco de extraños; no son 'me gusta', son latidos." data-fr="Illuminez les autres, et soyez illuminé. Envoyez de la chaleur et recevez des Pulsos d'Écho—pas des likes, mais des battements de cœur." data-de="Erleuchte andere und werde erleuchtet. Sende Wärme und empfange Echo-Pulse—keine Likes, sondern Herzschläge." data-zh-cn="照亮他人，也被人照亮。送出你的温暖，接收陌生人的 Echo Pulse——不是按赞，是心跳。">
-    照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。
-  </p>
+  <div class="room-title-wrap">
+      <h2 class="room-title" data-zh="能量共振" data-en="Energy Resonance" data-ja="エネルギー共鳴" data-es="Resonancia" data-fr="Résonance" data-de="Resonanz" data-zh-cn="能量共振">能量共振</h2>
+      <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--t)" stroke-width="2"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/><path d="M12 7v5l3 3"/></svg>
+  </div>
+  
+  <div class="desc-wrap">
+      <p class="room-desc" data-zh="照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。" data-en="Light up others, and be illuminated. Send warmth and receive Echo Pulses from strangers—not likes, but heartbeats." data-ja="誰かを照らし、誰かに照らされる。温もりを送り、見知らぬ人からのEcho Pulseを受け取りましょう。それは「いいね」ではなく、鼓動です。" data-es="Ilumina a otros y sé iluminado. Envía calidez y recibe Pulsos de Eco de extraños; no son 'me gusta', son latidos." data-fr="Illuminez les autres, et soyez illuminé. Envoyez de la chaleur et recevez des Pulsos d'Écho—pas des likes, mais des battements de cœur." data-de="Erleuchte andere und werde erleuchtet. Sende Wärme und empfange Echo-Pulse—keine Likes, sondern Herzschläge." data-zh-cn="照亮他人，也被人照亮。送出你的温暖，接收陌生人的 Echo Pulse——不是按赞，是心跳。">照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。</p>
+      <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
+  </div>
+
   <div class="t-layout">
     <div>
       <div class="t-panel">
@@ -816,10 +848,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 <section id="room-h" class="room">
   <div class="room-letter">H</div>
   <p class="room-tag">H — Home / Heal</p>
-  <h2 class="room-title" data-zh="靈魂歸宿" data-en="Soul's Home" data-ja="魂の帰郷" data-es="Hogar del Alma" data-fr="Foyer de l'Âme" data-de="Zuhause der Seele" data-zh-cn="灵魂归宿">靈魂歸宿</h2>
-  <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." data-ja="おかえりなさい。偽りの必要がない場所へ。あなたが歩んできたすべての部屋が、あなたのものです。" data-es="Vuelve a casa, a un lugar donde no necesitas fingir. Cada habitación por la que has pasado, es tuya." data-fr="Rentrez chez vous, dans un endroit sans déguisement. Chaque pièce que vous avez traversée est la vôtre." data-de="Komm nach Hause, an einen Ort ohne Verstellung. Jedes Zimmer, durch das du gegangen bist, gehört dir." data-zh-cn="回家，回到不需伪装的地方。你走过的每个房间，都是你的。">
-    回家，回到不需偽裝的地方。你走過的每個房間，都是你的。
-  </p>
+  <div class="room-title-wrap">
+      <h2 class="room-title" data-zh="靈魂歸宿" data-en="Soul's Home" data-ja="魂の帰郷" data-es="Hogar del Alma" data-fr="Foyer de l'Âme" data-de="Zuhause der Seele" data-zh-cn="灵魂归宿">靈魂歸宿</h2>
+      <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--h)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+  </div>
+  
+  <div class="desc-wrap">
+      <p class="room-desc" data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." data-ja="おかえりなさい。偽りの必要がない場所へ。あなたが歩んできたすべての部屋が、あなたのものです。" data-es="Vuelve a casa, a un lugar donde no necesitas fingir. Cada habitación por la que has pasado, es tuya." data-fr="Rentrez chez vous, dans un endroit sans déguisement. Chaque pièce que vous avez traversée est la vôtre." data-de="Komm nach Hause, an einen Ort ohne Verstellung. Jedes Zimmer, durch das du gegangen bist, gehört dir." data-zh-cn="回家，回到不需伪装的地方。你走过的每个房间，都是你的。">回家，回到不需偽裝的地方。你走過的每個房間，都是你的。</p>
+      <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
+  </div>
+
   <div class="h-journey">
     
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;" data-zh="GLOBAL RESONANCE — 全網靈魂共鳴軌跡" data-en="GLOBAL RESONANCE — The World's Footprints" data-ja="GLOBAL RESONANCE — 全世界の魂の共鳴" data-es="GLOBAL RESONANCE — Huellas del Mundo" data-fr="RÉSONANCE MONDIALE — Empreintes du Monde" data-de="GLOBALE RESONANZ — Fußspuren der Welt" data-zh-cn="GLOBAL RESONANCE — 全网灵魂共鸣轨迹">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
@@ -1082,7 +1120,6 @@ window.switchLang = function(lang) {
     el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title'));
   });
 
-  // 如果導航正在顯示結果，同步更新文字
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") {
       for(let key in guideData) {
@@ -1143,11 +1180,13 @@ function formatTimeLeft(secs){
   return h>0 ? `${h}小時 ${m}分鐘 後消散` : `${m}分鐘 後消散`;
 }
 
+/* 🌟 升級版前端過濾器 (後端仍需實作 Cloud Functions) */
 function cleanText(text) {
   const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '殺', 'kill', 'suicide', 'rape'];
   let cleaned = text;
   badWords.forEach(word => {
-    const regex = new RegExp(word, 'gi');
+    // 允許空白或全形字元的變形繞過過濾
+    const regex = new RegExp(word.split('').join('\\s*'), 'gi');
     cleaned = cleaned.replace(regex, '***');
   });
   return cleaned;
@@ -1558,7 +1597,6 @@ window.addEventListener('load', async () => {
       }, 1000);
   }
 
-  /* 🌟 使用 sessionStorage 保護跨裝置隱私 */
   if(sessionStorage.getItem('empath_a_accepted') === 'true') {
       const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed');
       if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; }
