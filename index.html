@@ -17,39 +17,49 @@
 <style>
 :root{
   --bg:#0D1B2A;--bg2:#1B2A4A;--bg3:#0a1520;
-  /* 🌟 優化對比度：提升霧灰與暗灰色調的明度，符合 WCAG AA */
-  --white:#FDFCF8;--fog:#E4E1DA;--muted:#A1B4C5;
+  /* 🌟 優化對比度與基礎大小，符合 WCAG AA */
+  --white:#FDFCF8;--fog:#E8E6E1;--muted:#A9B9C7;
   --gold:#C9A84C;--amber:#E8A87C;--dawn:#F2E8D9;
   --e:#7B8FA1;--m:#A8B8C8;--p:#C9A84C;
   --a:#7A9E9F;--t:#E8A87C;--h:#F2E8D9;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease; font-size: 14px;} /* 🌟 提升基礎字體大小 */
+/* 🌟 基礎字體提升為 16px，減輕行動端閱讀負擔 */
+body{background:var(--bg);color:var(--fog);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden; transition: background 0.5s ease; font-size: 16px;} 
 a{text-decoration:none;color:inherit;}
 
-/* 🌟 局部陰影：移除 body 的 text-shadow，只套用於標題，避免小字模糊 */
-h1, h2, .hero-title, .room-letter { text-shadow: 0 0 4px rgba(255, 255, 255, 0.15); }
+h1, h2, .hero-title, .room-letter { text-shadow: 0 0 6px rgba(255, 255, 255, 0.15); }
 
 body.hsp-mode {
-  --white: rgba(247, 244, 239, 0.7); --fog: rgba(201, 197, 188, 0.65);
-  --gold: rgba(201, 168, 76, 0.7); --amber: rgba(232, 168, 124, 0.7);
-  --muted: rgba(161, 180, 197, 0.6); background: #080d14; 
+  --white: rgba(247, 244, 239, 0.75); --fog: rgba(201, 197, 188, 0.7);
+  --gold: rgba(201, 168, 76, 0.75); --amber: rgba(232, 168, 124, 0.75);
+  --muted: rgba(161, 180, 197, 0.65); background: #080d14; 
 }
 body.hsp-mode * { animation-play-state: paused !important; }
-body.hsp-mode .room-desc { color: rgba(255,255,255,0.4); }
+body.hsp-mode .room-desc { color: rgba(255,255,255,0.45); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
 body.hsp-mode h1, body.hsp-mode h2, body.hsp-mode .hero-title { text-shadow: none; }
 
+/* 🌟 NAV：加入漢堡選單的結構 */
 nav{
   position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
   padding:16px 40px;background:#03070a;backdrop-filter:blur(16px);
   border-bottom:1px solid rgba(255,255,255,.08);z-index:500;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.8); flex-wrap: wrap; /* 🌟 允許手機版優雅換行 */
+  box-shadow: 0 4px 30px rgba(0,0,0,0.8);
 }
-.nav-logo{ font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--white);letter-spacing:6px; }
-.nav-letters{display:flex;gap:6px;}
-.nav-controls{display:flex;align-items:center;gap:12px; flex-wrap: wrap;}
+.nav-logo{ font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--white);letter-spacing:6px; z-index: 501;}
+
+/* 手機版漢堡按鈕 */
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; z-index: 501; padding: 5px;}
+.hamburger span { width: 24px; height: 2px; background: var(--white); transition: all 0.3s; border-radius: 2px; }
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-menu { display: flex; align-items: center; gap: 32px; transition: all 0.4s ease-in-out; }
+.nav-letters{display:flex;gap:8px;}
+.nav-controls{display:flex;align-items:center;gap:12px;}
 
 .nav-letter{
   width:38px;height:38px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
@@ -68,7 +78,7 @@ nav{
   font-family: 'Noto Sans TC', sans-serif; font-size: 13px; letter-spacing: 2px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); color: var(--fog);
   padding: 0 16px; border-radius: 20px; font-weight: normal; opacity: 0.9;
-  height: 38px; cursor: pointer; transition: all 0.3s; margin: 0; display:flex; align-items:center; gap:6px;
+  height: 38px; cursor: pointer; transition: all 0.3s; margin: 0; display:flex; align-items:center; gap:6px; justify-content: center;
 }
 .func-btn:hover { background: rgba(255,255,255,0.15); opacity: 1; border-color: rgba(255,255,255,0.5); }
 .hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
@@ -89,12 +99,11 @@ nav{
 .lang-option:hover { background: rgba(255,255,255,0.08); color: var(--gold); }
 .lang-option.active-lang { color: var(--gold); font-weight: bold; background: rgba(201,168,76,0.1); }
 
-/* 🌟 HSP Tooltip 持久化與關閉按鈕 */
 .hsp-tooltip-wrap { position: relative; display: flex; align-items: center; }
 .hsp-first-visit-tooltip {
   position: absolute; top: 50px; right: 0; background: rgba(8,13,18,0.98);
   border: 1px solid rgba(201,168,76,0.5); color: var(--gold); padding: 12px 30px 12px 16px;
-  font-size: 12px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+  font-size: 13px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
   white-space: nowrap; letter-spacing: 1.5px; font-family: 'Noto Sans TC', sans-serif;
   box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 1000; display: none;
 }
@@ -106,7 +115,7 @@ nav{
 }
 .hsp-tooltip-close {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  color: var(--gold); cursor: pointer; font-size: 16px; opacity: 0.7; padding: 4px;
+  color: var(--gold); cursor: pointer; font-size: 18px; opacity: 0.7; padding: 4px;
 }
 .hsp-tooltip-close:hover { opacity: 1; }
 
@@ -115,21 +124,34 @@ nav{
 .hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:16px;position:relative; }
 .hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2.5vw,22px);color:var(--gold);letter-spacing:3px;margin-bottom:24px;position:relative; }
 
-/* 🌟 UX 優化：將 Onboarding 移至最高視覺層級，並放大字體 */
-.onboarding-box { max-width: 680px; margin: 0 auto 40px; padding: 28px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.25); border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.3s both; box-shadow: 0 8px 30px rgba(0,0,0,0.4);}
-.onboarding-box p { font-size: 15px; line-height: 2; color: var(--dawn); letter-spacing: 1.5px; }
+/* 🌟 互動式 Onboarding 區塊 */
+.onboarding-box { 
+    max-width: 680px; width:100%; margin: 0 auto 40px; padding: 32px 24px; 
+    background: rgba(0,0,0,0.35); border: 1px dashed rgba(255,255,255,0.25); 
+    border-radius: 8px; position: relative; animation: fadeSlideIn 1s ease 0.3s both; 
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5); min-height: 180px; display:flex; flex-direction:column; justify-content:center;
+}
+.ob-step { animation: fadeSlideIn 0.4s ease; width: 100%; }
+.ob-title { font-weight:bold; color:var(--gold); margin-bottom:16px; letter-spacing:2px; font-size: 15px;}
+.ob-desc { font-size: 15px; line-height: 2; color: var(--dawn); letter-spacing: 1.5px; margin-bottom: 24px;}
+.ob-options { display: flex; flex-direction: column; gap: 12px; align-items: center; width:100%; max-width: 480px; margin: 0 auto;}
+.ob-btn { 
+    width: 100%; padding: 14px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); 
+    color: var(--fog); border-radius: 6px; cursor: pointer; transition: all 0.3s; 
+    font-family: 'Noto Sans TC', sans-serif; font-size: 14px; letter-spacing: 1.5px;
+}
+.ob-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--white); transform: translateY(-2px); }
 
 .hero-quotes{ display:flex;gap:40px;margin-bottom:48px;position:relative;flex-wrap:wrap;justify-content:center; }
-.hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,.2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
-.hero-quote cite{ display:block;margin-top:10px;font-style:normal;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4); }
+.hero-quote{ max-width:280px;padding:20px 24px;background: rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,.2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--muted);line-height:1.9;text-align:left; border-radius: 0 4px 4px 0;}
+.hero-quote cite{ display:block;margin-top:10px;font-style:normal;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,.4); }
 
-.doors-nav{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;}
+.doors-nav{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative; z-index: 10;}
 .door-btn{ display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 20px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,.15); border-radius: 6px; cursor:pointer;transition:all .35s;min-width:100px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
 .door-btn:hover{transform:translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: rgba(255,255,255,0.08);}
 .door-btn .dl{ font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;line-height:1; transition: color 0.3s;}
-.door-btn .dz{font-size:12px;letter-spacing:2px;color:var(--fog); opacity: 0.9; font-weight:bold;}
-/* 🌟 UX 優化：加入行動呼籲小字 */
-.door-btn .d-act{font-size:10px;letter-spacing:1px;color:var(--muted); opacity: 0.8; margin-top:2px;}
+.door-btn .dz{font-size:13px;letter-spacing:2px;color:var(--fog); opacity: 0.9; font-weight:bold;}
+.door-btn .d-act{font-size:11px;letter-spacing:1px;color:var(--muted); opacity: 0.8; margin-top:2px;}
 
 .door-btn[data-d="E"]{border-color:rgba(123,143,161,.4);} .door-btn[data-d="E"]:hover{border-color:var(--e); box-shadow: 0 8px 20px rgba(123,143,161,.25);} .door-btn[data-d="E"] .dl{color:var(--e);}
 .door-btn[data-d="M"]{border-color:rgba(168,184,200,.4);} .door-btn[data-d="M"]:hover{border-color:var(--m); box-shadow: 0 8px 20px rgba(168,184,200,.25);} .door-btn[data-d="M"] .dl{color:var(--m);}
@@ -137,18 +159,18 @@ nav{
 .door-btn[data-d="A"]{border-color:rgba(122,158,159,.4);} .door-btn[data-d="A"]:hover{border-color:var(--a); box-shadow: 0 8px 20px rgba(122,158,159,.25);} .door-btn[data-d="A"] .dl{color:var(--a);}
 .door-btn[data-d="T"]{border-color:rgba(232,168,124,.4);} .door-btn[data-d="T"]:hover{border-color:var(--t); box-shadow: 0 8px 20px rgba(232,168,124,.25);} .door-btn[data-d="T"] .dl{color:var(--t);}
 .door-btn[data-d="H"]{border-color:rgba(242,232,217,.4);} .door-btn[data-d="H"]:hover{border-color:var(--h); box-shadow: 0 8px 20px rgba(242,232,217,.25);} .door-btn[data-d="H"] .dl{color:var(--h);}
+
 .flow-line{ font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:4px;color:var(--muted);position:relative;margin-bottom:20px; font-weight:bold;}
-.scroll-hint{font-size:11px;color:var(--muted);letter-spacing:3px;animation:pulse 2.5s infinite;position:relative;}
+.scroll-hint{font-size:12px;color:var(--muted);letter-spacing:3px;animation:pulse 2.5s infinite;position:relative;}
 @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
 
 .room{min-height:100vh;padding:100px 40px 80px;position:relative;overflow:hidden;}
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
 .room-tag{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase; font-weight:bold;}
-.room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(22px,3.5vw,34px);color:var(--white);margin-bottom:14px; }
-.room-desc{ font-size:14px;color:var(--muted);line-height:2;max-width:500px;margin-bottom:32px; cursor:pointer; transition: all 0.3s; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
+.room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(24px,3.5vw,36px);color:var(--white);margin-bottom:14px; }
+.room-desc{ font-size:16px;color:var(--muted);line-height:2;max-width:540px;margin-bottom:32px; cursor:pointer; transition: all 0.3s; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
 .room-desc:hover{ color: var(--dawn); background: rgba(255,255,255,0.06); border-left-color: var(--dawn); }
 
-/* 🌟 UX 優化：精緻的 SVG 音波 icon */
 .room-desc::after {
     content: ''; display: inline-block; width: 16px; height: 16px; margin-left: 12px; vertical-align: -3px; opacity: 0.5;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D8D5CD' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'%3E%3C/polygon%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.07'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
@@ -156,32 +178,31 @@ nav{
 }
 .room-desc:hover::after { opacity: 1; transform: scale(1.1);}
 
-.input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:15px;padding:20px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
+.input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:16px;padding:20px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
 .input-area:focus{border-color:rgba(255,255,255,.6); box-shadow: inset 0 2px 15px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.15); background: rgba(0,0,0,0.5);} 
 .input-area::placeholder{color:rgba(255,255,255,.3);}
 
-.send-btn{ display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:14px 36px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit; min-width: 160px;}
+.send-btn{ display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:14px 36px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit; min-width: 160px;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-/* 🌟 UX 優化：提升危機支援對比度 */
 .crisis-support { margin-top: 56px; text-align: left; max-width: 600px; }
-.crisis-support a { font-size: 13px; color: rgba(255,255,255,0.7); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif; font-weight: bold;}
-.crisis-support a:hover { color: var(--white); border-bottom-color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.3);}
+.crisis-support a { font-size: 13px; color: rgba(255,255,255,0.8); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.5); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif; font-weight: bold;}
+.crisis-support a:hover { color: var(--white); border-bottom-color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.4);}
 
 /* ===== E ROOM ===== */
 #room-e{background:linear-gradient(180deg,#0D1B2A 0%,#0c1824 100%);}
 #room-e .room-letter{color:var(--e);} #room-e .room-tag{color:var(--e);} 
 #room-e .send-btn{border-color:var(--e);color:var(--e);} 
 #room-e .send-btn:hover{background:rgba(123,143,161,.15); box-shadow: 0 0 16px rgba(123,143,161,0.3); transform: translateY(-2px);}
-.e-warning{ font-size:12px; color:var(--amber); margin-bottom:16px; letter-spacing:1px; line-height:1.6; opacity: 0.95; }
-.e-anon-label{ font-size:11px;letter-spacing:3px;color:rgba(123,143,161,.7);margin-bottom:8px; font-weight:bold;}
-.e-char-count{font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:1px;}
+.e-warning{ font-size:13px; color:var(--amber); margin-bottom:16px; letter-spacing:1px; line-height:1.6; opacity: 0.95; }
+.e-anon-label{ font-size:12px;letter-spacing:3px;color:rgba(123,143,161,.8);margin-bottom:8px; font-weight:bold;}
+.e-char-count{font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:1px;}
 .e-feed-container { position:relative; max-width:600px; margin-top:40px; }
 .e-feed{ display:flex;flex-direction:column;gap:16px; }
-.e-msg{ background:rgba(0,0,0,.3);padding:24px 28px;border-left:2px solid rgba(123,143,161,.5);border-radius:0 6px 6px 0;font-size:14px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-.e-msg-anon{font-size:10px;color:rgba(123,143,161,.8);letter-spacing:3px;margin-bottom:8px;} .e-msg-time{font-size:10px;color:rgba(255,255,255,.3);margin-top:10px;letter-spacing:1px;}
+.e-msg{ background:rgba(0,0,0,.3);padding:24px 28px;border-left:2px solid rgba(123,143,161,.5);border-radius:0 6px 6px 0;font-size:15px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+.e-msg-anon{font-size:11px;color:rgba(123,143,161,.8);letter-spacing:3px;margin-bottom:8px;} .e-msg-time{font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;letter-spacing:1px;}
 .e-feed-fade { position:absolute; bottom:0; left:0; right:0; height:80px; background:linear-gradient(to bottom, transparent, #0c1824); pointer-events:none; display:none; }
-.e-expand-btn { display:none; align-items:center; justify-content:center; gap:8px; margin: 20px auto 0; padding:12px 28px; background:rgba(123,143,161,0.05); border:1px solid rgba(123,143,161,0.4); border-radius:24px; font-family:'Noto Serif TC',serif; font-size:12px; letter-spacing:2px; color:var(--e); cursor:pointer; transition:all 0.3s; }
+.e-expand-btn { display:none; align-items:center; justify-content:center; gap:8px; margin: 20px auto 0; padding:12px 28px; background:rgba(123,143,161,0.05); border:1px solid rgba(123,143,161,0.4); border-radius:24px; font-family:'Noto Serif TC',serif; font-size:13px; letter-spacing:2px; color:var(--e); cursor:pointer; transition:all 0.3s; }
 .e-expand-btn:hover { background:rgba(123,143,161,0.15); border-color:var(--e); box-shadow: 0 4px 15px rgba(123,143,161,0.2); }
 
 /* ===== M ROOM ===== */
@@ -194,13 +215,13 @@ nav{
 
 .star-tooltip {
     position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.6);
-    padding:24px; font-size:14px; color:var(--fog); z-index:600; max-width:280px; line-height:2;
+    padding:24px; font-size:15px; color:var(--fog); z-index:600; max-width:280px; line-height:2;
     border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 20px rgba(168,184,200,0.25);
     pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
 }
 .star-tooltip.active { opacity: 1; visibility: visible; pointer-events: auto; }
 .m-stats{ display:flex;gap:32px;margin-top:24px; }
-.m-stat{font-size:11px;letter-spacing:2px;color:rgba(168,184,200,.8);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;}
+.m-stat{font-size:12px;letter-spacing:2px;color:rgba(168,184,200,.8);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:20px;font-weight:600;}
 
 /* ===== P ROOM ===== */
 #room-p{background:linear-gradient(180deg,#0D1B2A 0%,#100e08 100%);}
@@ -209,23 +230,23 @@ nav{
 #room-p .send-btn:hover{background:rgba(201,168,76,.15); box-shadow: 0 0 16px rgba(201,168,76,0.3); transform: translateY(-2px);}
 
 .p-step-label {
-    font-family: 'Noto Serif TC', serif; font-size: 14px; font-weight: 700;
+    font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: 700;
     color: var(--gold); letter-spacing: 3px; margin-bottom: 24px;
     border-bottom: 1px solid rgba(201,168,76,0.4); padding-bottom: 8px;
     display: inline-block;
 }
 .p-vessel{ max-width:540px;margin-bottom:36px;position:relative; }
 #p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.5);border:1px solid rgba(201,168,76,.4); border-radius: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,0.7);}
-.p-canvas-hint{ font-size:11px;letter-spacing:2px;color:rgba(201,168,76,.7);text-align:center;margin-top:16px; line-height: 1.8; }
+.p-canvas-hint{ font-size:12px;letter-spacing:2px;color:rgba(201,168,76,.7);text-align:center;margin-top:16px; line-height: 1.8; }
 .kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin-top:20px; }
 
 .shard{ background:rgba(0,0,0,.35);padding:24px;border:1px solid rgba(201,168,76,.4); border-radius: 6px; cursor:pointer;transition:all .4s;position:relative;overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 .shard:hover{border-color:rgba(201,168,76,.7);background:rgba(201,168,76,.1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(201,168,76,0.3);} 
-.shard-text{font-size:13px;line-height:2;color:var(--fog);}
+.shard-text{font-size:14px;line-height:2;color:var(--fog);}
 .shard-glow{ position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0;transition:opacity .4s; }
 .shard:hover .shard-glow{opacity:1;}
-.shard-healed-tag{ font-size:9px;color:var(--gold);letter-spacing:2px;margin-top:14px;display:none; font-weight: bold;} .shard.healed .shard-healed-tag{display:block;}
-.p-healed-count{ font-family:'Cormorant Garamond',serif;font-size:15px;color:rgba(201,168,76,.8);letter-spacing:2px;margin-top:28px; }
+.shard-healed-tag{ font-size:10px;color:var(--gold);letter-spacing:2px;margin-top:14px;display:none; font-weight: bold;} .shard.healed .shard-healed-tag{display:block;}
+.p-healed-count{ font-family:'Cormorant Garamond',serif;font-size:16px;color:rgba(201,168,76,.8);letter-spacing:2px;margin-top:28px; }
 .shard.healed { border: 1px solid #BF953F !important; background: rgba(201,168,76,0.15) !important; box-shadow: 0 0 15px rgba(191, 149, 63, 0.5) !important; cursor: default; transform: none;}
 .shard.healed .shard-glow { background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important; height: 4px !important; opacity: 1 !important; box-shadow: 0 -2px 10px rgba(252, 246, 186, 0.6) !important; }
 
@@ -242,19 +263,19 @@ nav{
     padding: 56px 32px; background: rgba(0,0,0,0.5); border: 1px dashed rgba(122,158,159,0.4);
     border-radius: 8px; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center;
 }
-.a-warning-mask p { font-size: 14px; line-height: 2.2; color: var(--dawn); letter-spacing: 1.5px; }
+.a-warning-mask p { font-size: 15px; line-height: 2.2; color: var(--dawn); letter-spacing: 1.5px; }
 
 .a-feed{display:flex;flex-direction:column;gap:20px;max-width:600px;}
 .sand-msg{ background:rgba(0,0,0,.4);padding:26px 32px;border-left:2px solid rgba(122,158,159,.6);border-radius:0 6px 6px 0;position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:all 4s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.4);}
-.sand-msg-text{font-size:14px;line-height:2;color:var(--fog); transition: filter 3s ease;}
+.sand-msg-text{font-size:15px;line-height:2;color:var(--fog); transition: filter 3s ease;}
 .sand-timer-wrap{ display:flex;align-items:center;gap:12px;margin-top:18px; }
-.sand-timer-label{font-size:10px;color:var(--a);letter-spacing:2px; font-weight:bold;}
+.sand-timer-label{font-size:11px;color:var(--a);letter-spacing:2px; font-weight:bold;}
 .sand-timer-bar{flex:1;height:3px;background:rgba(122,158,159,.25); border-radius: 3px; overflow:hidden;}
 .sand-timer-fill{height:100%;background:repeating-linear-gradient(90deg, var(--a), var(--a) 2px, transparent 2px, transparent 4px); transition:width 1s linear;}
-.sand-time-left{font-size:10px;color:rgba(122,158,159,.8);letter-spacing:1px;white-space:nowrap; font-weight:bold;}
+.sand-time-left{font-size:11px;color:rgba(122,158,159,.8);letter-spacing:1px;white-space:nowrap; font-weight:bold;}
 .sand-dissolve-overlay{ position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(7,16,20,.95) 0%,transparent 60%);opacity:0;pointer-events:none;transition:opacity 2s; }
 .sand-msg.dissolving { filter: blur(5px); opacity: 0; transform: translateY(20px) scale(0.96); }
-.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(122,158,159,.7);margin-top:28px;letter-spacing:1px; line-height:1.8; }
+.a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:rgba(122,158,159,.7);margin-top:28px;letter-spacing:1px; line-height:1.8; }
 
 /* ===== T ROOM ===== */
 #room-t{background:linear-gradient(180deg,#0D1B2A 0%,#140f08 100%);}
@@ -263,23 +284,23 @@ nav{
 #room-t .send-btn:hover{background:rgba(232,168,124,.15); box-shadow: 0 0 16px rgba(232,168,124,0.3); transform: translateY(-2px);}
 .t-layout{ display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:880px;margin-top:40px; }
 .t-panel{background:rgba(0,0,0,.35);padding:32px;border:1px solid rgba(232,168,124,.3); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);}
-.t-panel-title{ font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--white);margin-bottom:24px;letter-spacing:2px; }
+.t-panel-title{ font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--white);margin-bottom:24px;letter-spacing:2px; }
 .t-feed{display:flex;flex-direction:column;gap:16px;max-height:450px;overflow-y:auto; padding-right: 12px;}
 .t-feed::-webkit-scrollbar{width:6px;} .t-feed::-webkit-scrollbar-thumb{background:rgba(232,168,124,.5); border-radius: 6px;}
-.warmth-item{ padding:20px 24px;background:rgba(232,168,124,.08);border-left:2px solid rgba(232,168,124,.5);border-radius:0 6px 6px 0;font-size:13px;line-height:2;color:var(--fog);position:relative;animation:fadeSlideIn .5s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.2);}
+.warmth-item{ padding:20px 24px;background:rgba(232,168,124,.08);border-left:2px solid rgba(232,168,124,.5);border-radius:0 6px 6px 0;font-size:14px;line-height:2;color:var(--fog);position:relative;animation:fadeSlideIn .5s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.2);}
 .warmth-pulse{ position:absolute;top:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--amber);animation:heartbeat 2.5s ease-in-out infinite; box-shadow: 0 0 12px var(--amber);}
 @keyframes heartbeat{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:1;transform:scale(1.4);} }
-.echo-btn{ display:flex;align-items:center;gap:8px;margin-top:14px;padding:8px 16px;background:rgba(0,0,0,0.4);border:1px solid rgba(232,168,124,0.4); border-radius:4px; cursor:pointer;font-size:11px;color:var(--muted);letter-spacing:1px;transition:all .3s;font-family:'Noto Sans TC',sans-serif; font-weight:bold;}
+.echo-btn{ display:flex;align-items:center;gap:8px;margin-top:14px;padding:8px 16px;background:rgba(0,0,0,0.4);border:1px solid rgba(232,168,124,0.4); border-radius:4px; cursor:pointer;font-size:12px;color:var(--muted);letter-spacing:1px;transition:all .3s;font-family:'Noto Sans TC',sans-serif; font-weight:bold;}
 .echo-btn:hover{color:var(--amber); border-color:var(--amber); background:rgba(232,168,124,0.1);} .echo-btn.pulsed{color:var(--amber); border-color:var(--amber); cursor:default;}
 .echo-btn .heart{transition:transform .2s;} .echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
-.echo-count{ font-family:'Cormorant Garamond',serif;font-size:16px;color:rgba(232,168,124,.6);margin-top:24px; }
+.echo-count{ font-family:'Cormorant Garamond',serif;font-size:17px;color:rgba(232,168,124,.6);margin-top:24px; }
 .t-send-panel{background:rgba(0,0,0,.35);padding:32px;border:1px solid rgba(232,168,124,.3); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);} .t-send-panel .t-panel-title{margin-bottom:20px;}
 .echo-pulse-ring{ width:100px;height:100px;border-radius:50%;border:1px solid rgba(232,168,124,.5);display:flex;align-items:center;justify-content:center;margin:32px auto 16px;position:relative; box-shadow: inset 0 0 25px rgba(232,168,124,0.2); }
 .echo-pulse-ring::before{ content:'';position:absolute;top:-10px;left:-10px;right:-10px;bottom:-10px;border-radius:50%;border:1px solid rgba(232,168,124,.3); }
 .echo-pulse-ring::after{ content:'';position:absolute;top:-20px;left:-20px;right:-20px;bottom:-20px;border-radius:50%;border:1px solid rgba(232,168,124,.15); }
 .echo-heart{ font-size:36px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 20px var(--amber);}}
-.echo-label{ text-align:center;font-size:12px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
+.echo-label{ text-align:center;font-size:13px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
 
 /* ===== H ROOM ===== */
 #room-h{background:linear-gradient(180deg,#0D1B2A 0%,#0f0f1a 100%);}
@@ -297,52 +318,51 @@ nav{
 
 .j-num, .g-num{ font-family:'Noto Serif TC',serif;font-size:40px;font-weight:700;color:var(--white);line-height:1;margin-bottom:10px; }
 .g-num{color:var(--gold);} .g-card.visitor-card .g-num { color: var(--white); }
-.j-label, .g-label{font-size:11px;color:var(--muted);letter-spacing:2px; font-weight:bold;}
-.j-letter, .g-letter{ display:block;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;margin-bottom:8px;letter-spacing:1px; }
+.j-label, .g-label{font-size:12px;color:var(--muted);letter-spacing:2px; font-weight:bold;}
+.j-letter, .g-letter{ display:block;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;margin-bottom:8px;letter-spacing:1px; }
 .j-card:nth-child(1) .j-letter{color:var(--e);} .j-card:nth-child(2) .j-letter{color:var(--m);}
 .j-card:nth-child(3) .j-letter{color:var(--p);} .j-card:nth-child(4) .j-letter{color:var(--a);}
 .j-card:nth-child(5) .j-letter{color:var(--t);}
 .g-letter{color:var(--gold);} .g-card.visitor-card .g-letter { color: var(--white); }
 
 .sync-box { background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2); padding: 32px; max-width: 640px; margin: 48px 0; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
-.sync-title { font-family:'Noto Serif TC',serif; font-size: 13px; letter-spacing: 3px; color: var(--gold); margin-bottom: 16px; font-weight: 700; }
+.sync-title { font-family:'Noto Serif TC',serif; font-size: 14px; letter-spacing: 3px; color: var(--gold); margin-bottom: 16px; font-weight: 700; }
 .sync-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
-.sync-input { background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.35); color: var(--white); padding: 12px 16px; font-size: 13px; outline: none; letter-spacing: 2px; border-radius: 4px; transition: border-color 0.3s; }
+.sync-input { background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.35); color: var(--white); padding: 12px 16px; font-size: 14px; outline: none; letter-spacing: 2px; border-radius: 4px; transition: border-color 0.3s; }
 .sync-input:focus { border-color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.3);}
-.sync-btn-small { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size: 12px; letter-spacing: 2px; cursor: pointer; transition: all .3s; font-family:'Noto Serif TC',serif; border-radius: 4px; font-weight:bold; }
+.sync-btn-small { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size: 13px; letter-spacing: 2px; cursor: pointer; transition: all .3s; font-family:'Noto Serif TC',serif; border-radius: 4px; font-weight:bold; }
 .sync-btn-small:hover { border-color: var(--white); color: var(--white); background: rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.4);}
-.key-display { font-family: monospace; font-size: 15px; color: var(--white); letter-spacing: 3px; background: rgba(201,168,76,0.2); border: 1px dashed rgba(201,168,76,0.6); padding: 10px 20px; margin-right: 10px; font-weight: bold; border-radius: 4px;}
+.key-display { font-family: monospace; font-size: 16px; color: var(--white); letter-spacing: 3px; background: rgba(201,168,76,0.2); border: 1px dashed rgba(201,168,76,0.6); padding: 10px 20px; margin-right: 10px; font-weight: bold; border-radius: 4px;}
 
 .home-quote{ background:rgba(0,0,0,.4);padding:40px 48px;border-left:2px solid rgba(242,232,217,.4);margin:48px 0 36px; border-radius: 0 8px 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,0.3);}
-.home-quote p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--dawn);line-height:2.2; }
+.home-quote p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--dawn);line-height:2.2; }
 .h-timeline{max-width:640px;margin-bottom:48px;}
-.h-timeline-title{ font-size:12px;letter-spacing:3px;color:var(--muted);margin-bottom:24px; font-weight: bold; }
+.h-timeline-title{ font-size:13px;letter-spacing:3px;color:var(--muted);margin-bottom:24px; font-weight: bold; }
 .h-events{display:flex;flex-direction:column;gap:0;}
-.h-event{ display:flex;gap:24px;padding:20px 0;border-left:1px solid rgba(255,255,255,.2); padding-left:28px;position:relative;font-size:13px;line-height:1.9;color:var(--fog);animation:fadeSlideIn .5s ease; }
+.h-event{ display:flex;gap:24px;padding:20px 0;border-left:1px solid rgba(255,255,255,.2); padding-left:28px;position:relative;font-size:14px;line-height:1.9;color:var(--fog);animation:fadeSlideIn .5s ease; }
 .h-event::before{ content:'';position:absolute;left:-6px;top:26px;width:11px;height:11px;border-radius:50%; border:1px solid rgba(255,255,255,.5);background:var(--bg); box-shadow: 0 0 10px rgba(0,0,0,0.7); }
 .h-event.e-event::before{border-color:var(--e);background:rgba(123,143,161,.6);} .h-event.m-event::before{border-color:var(--m);background:rgba(168,184,200,.6);}
 .h-event.p-event::before{border-color:var(--p);background:rgba(201,168,76,.6);} .h-event.a-event::before{border-color:var(--a);background:rgba(122,158,159,.6);}
 .h-event.t-event::before{border-color:var(--t);background:rgba(232,168,124,.6);}
-.h-event-label{ font-size:10px;letter-spacing:2px;margin-bottom:6px; font-weight: bold;}
+.h-event-label{ font-size:11px;letter-spacing:2px;margin-bottom:6px; font-weight: bold;}
 .h-event.e-event .h-event-label{color:var(--e);} .h-event.m-event .h-event-label{color:var(--m);} .h-event.p-event .h-event-label{color:var(--p);} .h-event.a-event .h-event-label{color:var(--a);} .h-event.t-event .h-event-label{color:var(--t);}
-.h-event-text{font-size:14px;color:var(--fog);line-height:1.9;} .h-event-time{font-size:10px;color:rgba(255,255,255,.4);margin-top:8px; font-weight:bold;}
+.h-event-text{font-size:15px;color:var(--fog);line-height:1.9;} .h-event-time{font-size:11px;color:rgba(255,255,255,.4);margin-top:8px; font-weight:bold;}
 
 .lighthouse{ text-align:center;padding:48px 24px;border:1px solid rgba(242,232,217,.3);max-width:540px; background: rgba(0,0,0,0.4); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 32px;}
 .lighthouse-flame{ font-size:52px;margin-bottom:16px;animation:flicker 3s ease-in-out infinite;display:block; text-shadow: 0 0 30px rgba(255,200,100,0.6); }
 @keyframes flicker{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.06);}}
-.lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--dawn);line-height:2.2; }
+.lighthouse p{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--dawn);line-height:2.2; }
 
 .share-action-box { display:flex; flex-wrap:wrap; gap:20px; margin-top: 56px; }
 .action-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 20px 32px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.3);
-  color: var(--white); font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: bold;
+  color: var(--white); font-family: 'Noto Serif TC', serif; font-size: 16px; font-weight: bold;
   letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 6px; flex: 1; min-width: 260px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 .action-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(201,168,76,0.3); }
 
-/* 真實圖片生成：分享卡 Modal */
 .share-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.9); z-index: 99999;
@@ -357,57 +377,57 @@ nav{
 }
 .share-modal-actions { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; align-items: center; width: 100%; z-index: 2; }
 .wrapped-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--gold); letter-spacing: 8px; margin-bottom: 12px; font-weight: 600;}
-.wrapped-sub { font-size: 12px; color: var(--fog); letter-spacing: 5px; margin-bottom: 36px; font-weight:bold;}
-.wrapped-item { display: flex; justify-content: space-between; font-size: 15px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding: 16px 0; color: var(--white); letter-spacing: 2px;}
+.wrapped-sub { font-size: 13px; color: var(--fog); letter-spacing: 5px; margin-bottom: 36px; font-weight:bold;}
+.wrapped-item { display: flex; justify-content: space-between; font-size: 16px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding: 16px 0; color: var(--white); letter-spacing: 2px;}
 .wrapped-item span { font-family: 'Noto Serif TC', serif; font-weight: 700; color: var(--gold); }
-.wrapped-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: rgba(255,255,255,0.7); margin-top: 40px; letter-spacing: 1px; line-height:1.8;}
-.close-modal-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--muted); color: var(--muted); padding: 14px 28px; font-size: 13px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 6px; font-weight:bold;}
+.wrapped-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; color: rgba(255,255,255,0.7); margin-top: 40px; letter-spacing: 1px; line-height:1.8;}
+.close-modal-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--muted); color: var(--muted); padding: 14px 28px; font-size: 14px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; border-radius: 6px; font-weight:bold;}
 .close-modal-btn:hover { color: var(--white); border-color: var(--white); background: rgba(255,255,255,0.15); }
 
-/* ===== TOAST ===== */
-.toast{ position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px); background:rgba(27,42,74,.98);border:1px solid rgba(255,255,255,.3); padding:16px 32px;font-size:14px;color:var(--white);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(12px); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); font-weight:bold;}
+.toast{ position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px); background:rgba(27,42,74,.98);border:1px solid rgba(255,255,255,.3); padding:16px 32px;font-size:15px;color:var(--white);letter-spacing:1px; opacity:0;transition:all .4s;z-index:999999;pointer-events:none;backdrop-filter:blur(12px); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); font-weight:bold;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* 🌟 返回頂部按鈕 */
 #btt-btn {
-    position: fixed; bottom: 40px; right: 40px; width: 48px; height: 48px;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
     border-radius: 50%; color: var(--white); font-size: 20px; cursor: pointer;
     display: none; align-items: center; justify-content: center; z-index: 900;
     transition: all 0.3s; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 #btt-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--white); transform: translateY(-3px); }
 
-/* 🌟 升級：Footer 對比度提升，符合 WCAG 無障礙標準 */
 footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); background: rgba(5,12,18,0.95); display:flex; flex-direction:column; align-items:center; }
 .footer-main { width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; margin-bottom:40px; }
-.footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:rgba(255,255,255,.7);letter-spacing:2px; }
-.footer-right{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:3px; font-weight:bold;}
+.footer-left{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px; }
+.footer-right{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:3px; font-weight:bold;}
 .footer-letters{ display:flex;gap:10px; }
-.footer-l{ font-family:'Cormorant Garamond',serif;font-size:15px;opacity:.6;letter-spacing:2px; }
-.footer-copy { width:100%; text-align:center; padding-top:28px; border-top:1px dashed rgba(255,255,255,0.15); font-size:11px; color:rgba(255,255,255,0.6); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
-
+.footer-l{ font-family:'Cormorant Garamond',serif;font-size:16px;opacity:.6;letter-spacing:2px; }
+.footer-copy { width:100%; text-align:center; padding-top:28px; border-top:1px dashed rgba(255,255,255,0.15); font-size:12px; color:rgba(255,255,255,0.6); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
 
 @media(max-width:768px){
-  nav { padding: 12px 16px; }
-  .nav-logo { font-size: 20px; }
+  nav { padding: 16px 20px; }
+  .nav-logo { font-size: 22px; }
   
-  .nav-controls { gap: 8px; }
-  .hsp-text { display: none; }
-  
-  /* 🌟 優化：手機版導覽列字母允許滑動，不擠壓 */
-  .nav-letters { width: 100%; justify-content: flex-start; gap: 8px; overflow-x: auto; padding-bottom: 4px; padding-top:4px;}
-  .nav-letters::-webkit-scrollbar { display: none; }
-  .nav-letter { min-width: 36px; height: 36px; font-size: 15px; }
-  .func-btn { height: 32px; font-size: 12px; padding: 0 12px; }
+  /* 🌟 手機版漢堡選單邏輯：將 nav-menu 改為下拉式 */
+  .hamburger { display: flex; }
+  .nav-menu { 
+      position: absolute; top: 100%; left: 0; right: 0; background: #03070a; 
+      flex-direction: column; padding: 24px; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      transform: translateY(-150%); opacity: 0; pointer-events: none;
+  }
+  .nav-menu.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .nav-letters { flex-wrap: wrap; justify-content: center; width: 100%; gap: 12px; }
+  .nav-controls { justify-content: center; width: 100%; }
 
-  .hsp-first-visit-tooltip { right: 16px; top: 54px; font-size:11px; padding: 10px 24px 10px 12px;}
-  .hsp-first-visit-tooltip::before { right: 12px; }
+  .hsp-first-visit-tooltip { right: 50%; transform: translateX(50%); top: 56px; font-size:12px; padding: 12px 30px 12px 16px;}
+  .hsp-first-visit-tooltip::before { right: 50%; transform: translateX(50%) rotate(45deg); }
   
   #hero { justify-content: flex-start; padding-top: 150px; }
-  .hero-title { font-size: 15vw; letter-spacing: 10px; margin-top: 6vh; margin-bottom: 20px; }
+  .hero-title { font-size: 15vw; letter-spacing: 10px; margin-top: 4vh; margin-bottom: 20px; }
   .hero-bg-text { font-size: 34vw; top: 45%; }
-  .hero-sub { font-size: 13px; margin-bottom: 36px; }
+  .hero-sub { font-size: 14px; margin-bottom: 36px; }
   
   .room { padding: 120px 20px 60px; }
   .room-letter { font-size: 80px; top: 80px; right: 16px; }
@@ -418,7 +438,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   .hero-quotes.show-quotes { display: flex; animation: fadeSlideIn 0.5s ease; }
   #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 36px; align-items: center; }
 
-  .onboarding-box { padding: 20px; margin-bottom: 40px; }
+  .onboarding-box { padding: 24px 20px; margin-bottom: 40px; }
 
   .star-tooltip {
       top: auto !important; bottom: 0 !important; left: 0 !important;
@@ -447,18 +467,18 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     transition: all 0.1s !important; 
   }
   
-  #btt-btn { bottom: 20px; right: 20px; width: 40px; height: 40px; font-size: 16px; }
+  #btt-btn { bottom: 20px; right: 20px; width: 44px; height: 44px; font-size: 18px; }
 }
 
 @media(max-width:480px){
   .room { padding: 110px 16px 40px; }
   .t-panel, .t-send-panel { padding: 20px; }
-  .input-area { padding: 16px; font-size: 14px; }
+  .input-area { padding: 16px; font-size: 15px; }
   .hero-title { font-size: 17vw; letter-spacing: 6px; }
   .doors-nav { gap: 10px; }
   .door-btn { padding: 16px 10px; min-width: 80px; }
   .door-btn .dl{ font-size: 28px; }
-  .door-btn .dz{ font-size: 11px; }
+  .door-btn .dz{ font-size: 12px; }
 }
 </style>
 </head>
@@ -488,36 +508,41 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
-  <div class="nav-letters">
-    <a class="nav-letter" data-l="E" href="#room-e">E</a>
-    <a class="nav-letter" data-l="M" href="#room-m">M</a>
-    <a class="nav-letter" data-l="P" href="#room-p">P</a>
-    <a class="nav-letter" data-l="A" href="#room-a">A</a>
-    <a class="nav-letter" data-l="T" href="#room-t">T</a>
-    <a class="nav-letter" data-l="H" href="#room-h">H</a>
+  <div class="hamburger" id="hamburger-btn" onclick="window.toggleMobileNav()">
+      <span></span><span></span><span></span>
   </div>
-  <div class="nav-controls">
-    <div class="hsp-tooltip-wrap">
-      <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
-      <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
-          <span data-zh="給高感官敏感者的靜心模式" data-en="Calm Mode for Highly Sensitive Persons" data-ja="HSPのための静寂モード" data-es="Modo Calma para Personas Altamente Sensibles" data-fr="Mode Calme pour personnes hypersensibles" data-de="Ruhemodus für hochsensible Personen" data-zh-cn="给高感官敏感者的静心模式">給高感官敏感者的靜心模式</span>
-          <span class="hsp-tooltip-close" onclick="this.parentElement.classList.remove('show')">×</span>
+  <div class="nav-menu" id="nav-menu">
+      <div class="nav-letters">
+        <a class="nav-letter" data-l="E" href="#room-e" onclick="window.closeMobileNav()">E</a>
+        <a class="nav-letter" data-l="M" href="#room-m" onclick="window.closeMobileNav()">M</a>
+        <a class="nav-letter" data-l="P" href="#room-p" onclick="window.closeMobileNav()">P</a>
+        <a class="nav-letter" data-l="A" href="#room-a" onclick="window.closeMobileNav()">A</a>
+        <a class="nav-letter" data-l="T" href="#room-t" onclick="window.closeMobileNav()">T</a>
+        <a class="nav-letter" data-l="H" href="#room-h" onclick="window.closeMobileNav()">H</a>
       </div>
-    </div>
-    
-    <div class="lang-dropdown-wrapper">
-        <button class="func-btn lang-select-btn" onclick="window.toggleLangDropdown()">🌐 <span id="current-lang-display">繁體中文</span></button>
-        <div class="lang-dropdown-list" id="lang-dropdown-list">
-            <div class="lang-option active-lang" data-lang="zh" onclick="window.switchLang('zh')">繁體中文</div>
-            <div class="lang-option" data-lang="zh-cn" onclick="window.switchLang('zh-cn')">简体中文</div>
-            <div class="lang-option" data-lang="en" onclick="window.switchLang('en')">English (US)</div>
-            <div class="lang-option" data-lang="en-uk" onclick="window.switchLang('en-uk')">English (UK)</div>
-            <div class="lang-option" data-lang="ja" onclick="window.switchLang('ja')">日本語</div>
-            <div class="lang-option" data-lang="fr" onclick="window.switchLang('fr')">Français</div>
-            <div class="lang-option" data-lang="de" onclick="window.switchLang('de')">Deutsch</div>
-            <div class="lang-option" data-lang="es" onclick="window.switchLang('es')">Español</div>
+      <div class="nav-controls">
+        <div class="hsp-tooltip-wrap">
+          <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
+          <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
+              <span data-zh="給高感官敏感者的靜心模式" data-en="Calm Mode for Highly Sensitive Persons" data-ja="HSPのための静寂モード" data-es="Modo Calma para Personas Altamente Sensibles" data-fr="Mode Calme pour personnes hypersensibles" data-de="Ruhemodus für hochsensible Personen" data-zh-cn="给高感官敏感者的静心模式">給高感官敏感者的靜心模式</span>
+              <span class="hsp-tooltip-close" onclick="this.parentElement.classList.remove('show')">×</span>
+          </div>
         </div>
-    </div>
+        
+        <div class="lang-dropdown-wrapper">
+            <button class="func-btn lang-select-btn" onclick="window.toggleLangDropdown()">🌐 <span id="current-lang-display">繁體中文</span></button>
+            <div class="lang-dropdown-list" id="lang-dropdown-list">
+                <div class="lang-option active-lang" data-lang="zh" onclick="window.switchLang('zh')">繁體中文</div>
+                <div class="lang-option" data-lang="zh-cn" onclick="window.switchLang('zh-cn')">简体中文</div>
+                <div class="lang-option" data-lang="en" onclick="window.switchLang('en')">English (US)</div>
+                <div class="lang-option" data-lang="en-uk" onclick="window.switchLang('en-uk')">English (UK)</div>
+                <div class="lang-option" data-lang="ja" onclick="window.switchLang('ja')">日本語</div>
+                <div class="lang-option" data-lang="fr" onclick="window.switchLang('fr')">Français</div>
+                <div class="lang-option" data-lang="de" onclick="window.switchLang('de')">Deutsch</div>
+                <div class="lang-option" data-lang="es" onclick="window.switchLang('es')">Español</div>
+            </div>
+        </div>
+      </div>
   </div>
 </nav>
 
@@ -526,17 +551,43 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   <h1 class="hero-title">EMPATH</h1>
   <p class="hero-sub">Every Moment As Truth Heals</p>
   
-  <div class="onboarding-box">
-    <p style="font-weight:bold; color:var(--gold); margin-bottom:12px; letter-spacing:2px;" data-zh="這是一個什麼樣的空間？" data-en="What is this space?" data-ja="ここはどんな空間ですか？" data-es="¿Qué es este espacio?" data-fr="Quel est cet espace ?" data-de="Was ist dieser Raum?" data-zh-cn="这是一个什么样的空间？">這是一個什麼樣的空間？</p>
-    <p data-zh="這裡是一個沒有演算法、沒有評斷的數位避難所。<br>如果覺得外面的世界太吵，請在下方選擇一扇門，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。" 
-       data-en="This is a digital sanctuary free of algorithms and judgments.<br>If the world outside is too loud, choose a door below,<br>turn your anxiety into sand, your brokenness into stars.<br>No one is watching; you can safely let go." 
-       data-ja="ここはアルゴリズムも評価もないデジタルの避難所です。<br>外の世界が騒がしすぎると感じたら、下の扉を選び、<br>不安を砂に、欠片を星に変えてください。<br>誰も見ていません。安心して手放してください。" 
-       data-es="Este es un santuario digital libre de algoritmos y juicios.<br>Si el mundo exterior es demasiado ruidoso, elige una puerta abajo,<br>convierte tu ansiedad en arena, tu ruptura en estrellas.<br>Nadie te observa; puedes soltarlo con seguridad."
-       data-fr="C'est un sanctuaire numérique sans algorithmes ni jugements.<br>Si le monde est trop bruyant, choisissez une porte ci-dessous,<br>transformez votre anxiété en sable, vos brisures en étoiles.<br>Personne ne regarde ; vous pouvez lâcher prise en toute sécurité."
-       data-de="Dies ist ein digitales Heiligtum frei von Algorithmen und Urteilen.<br>Wenn die Welt zu laut ist, wähle unten eine Tür,<br>verwandle deine Angst in Sand, deine Zerbrochenheit in Sterne.<br>Niemand schaut zu; du kannst sicher loslassen."
-       data-zh-cn="这里是一个没有算法、没有评断的数字避难所。<br>如果觉得外面的世界太吵，请在下方选择一扇门，<br>将你的焦虑化为沙、碎裂化为星。<br>没有人会看见，你可以安心地放下。">
-       這裡是一個沒有演算法、沒有評斷的數位避難所。<br>如果覺得外面的世界太吵，請在下方選擇一扇門，<br>將你的焦慮化為沙、碎裂化為星。<br>沒有人會看見，你可以安心地放下。
-    </p>
+  <div class="onboarding-box" id="onboarding-box">
+    <div id="ob-state-0">
+      <p style="font-weight:bold; color:var(--gold); margin-bottom:12px; letter-spacing:2px; font-size:16px;" data-zh="這是一個什麼樣的空間？" data-en="What is this space?" data-ja="ここはどんな空間ですか？" data-es="¿Qué es este espacio?" data-fr="Quel est cet espace ?" data-de="Was ist dieser Raum?" data-zh-cn="这是一个什么样的空间？">這是一個什麼樣的空間？</p>
+      <p data-zh="這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？" 
+         data-en="This is a digital sanctuary free of algorithms and judgments.<br>Today, do you need to talk, remember, or give warmth?" 
+         data-ja="ここはアルゴリズムも評価もないデジタルの避難所です。<br>今日は、誰かに話したいですか、思い出したいですか、それとも温もりを与えたいですか？" 
+         data-es="Este es un santuario digital libre de algoritmos y juicios.<br>Hoy, ¿necesitas hablar, recordar o dar calidez?"
+         data-fr="C'est un sanctuaire numérique sans algorithmes ni jugements.<br>Aujourd'hui, avez-vous besoin de parler, de vous souvenir ou de donner de la chaleur ?"
+         data-de="Dies ist ein digitales Heiligtum frei von Algorithmen und Urteilen.<br>Musst du heute reden, dich erinnern oder Wärme geben?"
+         data-zh-cn="这里是一个没有算法、没有评断的数字避难所。<br>今天你是需要倾诉、怀念、还是给予温暖？">
+         這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？
+      </p>
+      <div style="margin-top: 28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button class="send-btn" onclick="window.startGuide()" data-zh="不知道從哪裡開始？" data-en="Don't know where to start?" data-ja="どこから始めればいいかわからない？" data-es="¿No sabes por dónde empezar?" data-fr="Vous ne savez pas par où commencer ?" data-de="Du weißt nicht, wo du anfangen sollst?" data-zh-cn="不知道从哪里开始？">不知道從哪裡開始？</button>
+      </div>
+    </div>
+    
+    <div id="ob-state-1" style="display:none;" class="ob-step">
+      <p style="font-weight:bold; color:var(--gold); margin-bottom:24px; letter-spacing:2px; font-size:16px;" data-zh="今晚，你帶著什麼來到這裡？" data-en="What did you bring here tonight?" data-ja="今夜、あなたは何を抱えてここに来ましたか？" data-es="¿Qué trajiste aquí esta noche?" data-fr="Qu'avez-vous apporté ici ce soir ?" data-de="Was hast du heute Abend hierher gebracht?" data-zh-cn="今晚，你带着什么来到这里？">今晚，你帶著什麼來到這裡？</p>
+      <div class="ob-options">
+          <button class="ob-btn" onclick="window.showGuideResult('E')" data-zh="心裡堵堵的，有話說不出口" data-en="Heavy heart, words unsaid" data-ja="心が重く、言葉が出ない" data-es="Corazón pesado, palabras no dichas" data-fr="Cœur lourd, mots non dits" data-de="Schweres Herz, ungesagte Worte" data-zh-cn="心里堵堵的，有话说不出口">心裡堵堵的，有話說不出口</button>
+          <button class="ob-btn" onclick="window.showGuideResult('M')" data-zh="忽然想起了一個人" data-en="Suddenly thought of someone" data-ja="突然誰かを思い出した" data-es="De repente pensé en alguien" data-fr="J'ai soudain pensé à quelqu'un" data-de="Plötzlich an jemanden gedacht" data-zh-cn="忽然想起了一个人">忽然想起了一個人</button>
+          <button class="ob-btn" onclick="window.showGuideResult('P')" data-zh="覺得自己碎掉了一塊" data-en="Feeling shattered" data-ja="自分が砕けてしまったように感じる" data-es="Sintiéndome destrozado" data-fr="Je me sens brisé" data-de="Ich fühle mich zerschmettert" data-zh-cn="觉得自己碎掉了一块">覺得自己碎掉了一塊</button>
+          <button class="ob-btn" onclick="window.showGuideResult('A')" data-zh="裝不下任何東西了，只想讓一切消失" data-en="Can't hold anything, want it to disappear" data-ja="もう何も抱えきれない、すべてを消したい" data-es="No puedo aguantar más, quiero que desaparezca" data-fr="Je ne peux plus rien supporter, je veux que ça disparaisse" data-de="Ich kann nichts mehr ertragen, möchte, dass es verschwindet" data-zh-cn="装不下任何东西了，只想让一切消失">裝不下任何東西了，只想讓一切消失</button>
+          <button class="ob-btn" onclick="window.showGuideResult('T')" data-zh="我很好，想給予這個世界一點光" data-en="I'm fine, want to give some light" data-ja="私は元気です、世界に少し光を与えたい" data-es="Estoy bien, quiero dar algo de luz" data-fr="Je vais bien, je veux donner de la lumière" data-de="Mir geht es gut, ich möchte etwas Licht geben" data-zh-cn="我很好，想给予这个世界一点光">我很好，想給予這個世界一點光</button>
+      </div>
+    </div>
+
+    <div id="ob-state-2" style="display:none;" class="ob-step">
+      <p style="font-weight:bold; color:var(--gold); margin-bottom:16px; letter-spacing:2px; font-size:14px;" data-zh="為你開啟：" data-en="Opening for you:" data-ja="あなたのために開きます：" data-es="Abriendo para ti:" data-fr="Ouverture pour vous :" data-de="Öffnet für dich:" data-zh-cn="为你开启：">為你開啟：</p>
+      <h3 id="ob-res-title" style="color:var(--white); font-family:'Cormorant Garamond',serif; font-size:28px; letter-spacing:4px; margin-bottom:20px;"></h3>
+      <p id="ob-res-desc" style="font-style:italic; color:var(--muted); font-size:15px; margin-bottom:32px; line-height:2;"></p>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+          <a id="ob-res-link" href="#" class="send-btn" style="border-color:var(--gold); color:var(--gold);" onclick="window.closeGuide()" data-zh="前往房間 →" data-en="Go to Room →" data-ja="部屋へ行く →" data-es="Ir a la Habitación →" data-fr="Aller à la Salle →" data-de="Gehe zum Raum →" data-zh-cn="前往房间 →">前往房間 →</a>
+          <button class="func-btn" onclick="window.startGuide()" style="height:auto; padding:14px 28px;" data-zh="重新選擇" data-en="Choose Again" data-ja="再選択" data-es="Elegir de Nuevo" data-fr="Choisir à Nouveau" data-de="Erneut wählen" data-zh-cn="重新选择">重新選擇</button>
+      </div>
+    </div>
   </div>
 
   <p class="flow-line" data-zh="承認 → 安放 → 修補 → 釋放 → 交換 → 回家" data-en="Acknowledge → Place → Repair → Release → Exchange → Home" data-ja="承認 → 安置 → 修復 → 解放 → 交換 → 帰郷" data-es="Reconocer → Colocar → Reparar → Liberar → Intercambiar → Hogar" data-fr="Reconnaître → Placer → Réparer → Libérer → Échanger → Maison" data-de="Anerkennen → Platzieren → Reparieren → Befreien → Austauschen → Zuhause" data-zh-cn="承认 → 安放 → 修补 → 释放 → 交换 → 回家">承認 → 安放 → 修補 → 釋放 → 交換 → 回家</p>
@@ -706,8 +757,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         <div id="a-warning-mask" class="a-warning-mask">
             <p data-zh="接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。" data-en="The following section contains the real pain and trauma of others.<br>If you are not in an emotional state to hold space, please hide it.<br>Your empathy is precious, but please protect yourself first." data-ja="以下のセクションには、他人の真の痛みやトラウマが含まれています。<br>受け止める心の準備ができていない場合は、非表示にしてください。<br>あなたの優しさは尊いですが、まずは自分を守ってください。" data-es="La siguiente sección contiene el dolor y trauma real de otros.<br>Si no estás en un estado emocional para sostener este espacio, ocúltalo.<br>Tu empatía es preciosa, pero por favor protégete primero." data-fr="La section suivante contient la vraie douleur et les traumatismes d'autres personnes.<br>Si vous n'êtes pas en état émotionnel, veuillez la masquer.<br>Votre empathie est précieuse, mais protégez-vous d'abord." data-de="Der folgende Abschnitt enthält den echten Schmerz und das Trauma anderer.<br>Wenn du nicht im emotionalen Zustand bist, blende ihn bitte aus.<br>Deine Empathie ist kostbar, aber bitte schütze dich zuerst." data-zh-cn="接下来的留言区包含他人真实的痛苦与创伤。<br>若你目前的情绪无法承接，请选择隐藏。<br>你的善良很珍贵，但也请保护好自己。">接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。</p>
             <div style="display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap;">
-                <button class="send-btn" onclick="window.acceptARead()" style="border-color:var(--a); color:var(--a); padding:8px 20px; font-size:12px;" data-zh="願意承接" data-en="I can hold space" data-ja="受け止める" data-es="Puedo sostenerlo" data-fr="Je peux soutenir" data-de="Ich kann Raum halten" data-zh-cn="愿意承接">願意承接</button>
-                <button class="send-btn" onclick="window.hideAFeed()" style="border-color:var(--muted); color:var(--muted); padding:8px 20px; font-size:12px;" data-zh="僅投遞，不閱讀" data-en="Post only, do not read" data-ja="投稿のみ、読まない" data-es="Solo publicar, no leer" data-fr="Publier seulement" data-de="Nur posten" data-zh-cn="仅投递，不阅读">僅投遞，不閱讀</button>
+                <button class="send-btn" onclick="window.acceptARead()" style="border-color:var(--a); color:var(--a); padding:10px 24px; font-size:13px;" data-zh="願意承接" data-en="I can hold space" data-ja="受け止める" data-es="Puedo sostenerlo" data-fr="Je peux soutenir" data-de="Ich kann Raum halten" data-zh-cn="愿意承接">願意承接</button>
+                <button class="send-btn" onclick="window.hideAFeed()" style="border-color:var(--muted); color:var(--muted); padding:10px 24px; font-size:13px;" data-zh="僅投遞，不閱讀" data-en="Post only, do not read" data-ja="投稿のみ、読まない" data-es="Solo publicar, no leer" data-fr="Publier seulement" data-de="Nur posten" data-zh-cn="仅投递，不阅读">僅投遞，不閱讀</button>
             </div>
         </div>
         <div class="a-feed" id="a-feed" style="display:none; filter:blur(8px); transition: filter 1s ease;"></div>
@@ -754,7 +805,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         <p class="t-panel-title" style="text-align:center;">Echo Pulse</p>
         <div class="echo-pulse-ring"><span class="echo-heart">🕯️</span></div>
         <p class="echo-label" data-zh="共鳴之震 — 情感不被量化" data-en="Echo Pulse — Emotion Unquantified" data-ja="共鳴の波 — 感情は数値化されない" data-es="Pulso de Eco — Emoción no cuantificada" data-fr="Pulso d'Écho — Émotion non quantifiée" data-de="Echo-Puls — Emotion unquantifiziert" data-zh-cn="共鸣之震 — 情感不被量化">共鳴之震 — 情感不被量化</p>
-        <p style="font-size:12px;color:var(--muted);line-height:1.9;" data-zh="當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字" data-en="When someone feels your warmth,<br>you receive a gentle vibration like a heartbeat.<br>No numbers shown." data-ja="誰かがあなたの温もりを感じた時<br>心臓の鼓動のような微かな振動が届きます<br>数字は表示されません" data-es="Cuando alguien siente tu calidez,<br>recibes una suave vibración como un latido.<br>No se muestran números." data-fr="Quand quelqu'un ressent votre chaleur,<br>vous recevez une vibration comme un battement de cœur.<br>Aucun chiffre n'est affiché." data-de="Wenn jemand deine Wärme spürt,<br>erhältst du eine sanfte Vibration wie einen Herzschlag.<br>Keine Zahlen werden angezeigt." data-zh-cn="当有人感应到你的温暖<br>你收到一次如心跳般的微震动<br>不显示数字">
+        <p style="font-size:13px;color:var(--muted);line-height:1.9;" data-zh="當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字" data-en="When someone feels your warmth,<br>you receive a gentle vibration like a heartbeat.<br>No numbers shown." data-ja="誰かがあなたの温もりを感じた時<br>心臓の鼓動のような微かな振動が届きます<br>数字は表示されません" data-es="Cuando alguien siente tu calidez,<br>recibes una suave vibración como un latido.<br>No se muestran números." data-fr="Quand quelqu'un ressent votre chaleur,<br>vous recevez une vibration comme un battement de cœur.<br>Aucun chiffre n'est affiché." data-de="Wenn jemand deine Wärme spürt,<br>erhältst du eine sanfte Vibration wie einen Herzschlag.<br>Keine Zahlen werden angezeigt." data-zh-cn="当有人感应到你的温暖<br>你收到一次如心跳般的微震动<br>不显示数字">
           當有人感應到你的溫暖<br>你收到一次如心跳般的微震動<br>不顯示數字
         </p>
       </div>
@@ -791,20 +842,20 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 
     <div class="sync-box">
       <div class="sync-title" data-zh="SOUL SYNC — 靈魂共振同步" data-en="SOUL SYNC — Cloud Sync" data-ja="SOUL SYNC — クラウド同期" data-es="SOUL SYNC — Sincronización" data-fr="SOUL SYNC — Synchronisation" data-de="SOUL SYNC — Synchronisierung" data-zh-cn="SOUL SYNC — 灵魂共振同步">SOUL SYNC — 靈魂共振同步</div>
-      <p style="font-size:12px; color:var(--muted); line-height:1.8;" data-zh="無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。" data-en="No personal data required. Generate a unique 'Soul Key' to back up your journey to the cloud. Enter this key on other devices to restore your footprint." data-ja="個人情報は不要です。「魂の鍵」を生成して足跡をクラウドにバックアップし、他のデバイスで入力することで履歴を復元できます。" data-es="No se requieren datos personales. Genera una 'Llave del Alma' para respaldar tu viaje en la nube. Introdúcela en otros dispositivos para restaurar tu huella." data-fr="Aucune donnée personnelle requise. Générez une 'Clé de l'Âme' pour sauvegarder votre voyage. Entrez cette clé sur d'autres appareils pour restaurer votre empreinte." data-de="Keine persönlichen Daten erforderlich. Generiere einen 'Seelenschlüssel', um deine Reise zu sichern. Gib diesen Schlüssel auf anderen Geräten ein, um deine Fußspuren wiederherzustellen." data-zh-cn="无需绑定任何隐私个资。生成一串专属的「灵魂钥匙」即可将旅程足迹备份至云端保险箱；在其他装置（如手机）输入既有钥匙，即可完美共振、完整呼唤回你的历史纪录。">
+      <p style="font-size:13px; color:var(--muted); line-height:1.8;" data-zh="無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。" data-en="No personal data required. Generate a unique 'Soul Key' to back up your journey to the cloud. Enter this key on other devices to restore your footprint." data-ja="個人情報は不要です。「魂の鍵」を生成して足跡をクラウドにバックアップし、他のデバイスで入力することで履歴を復元できます。" data-es="No se requieren datos personales. Genera una 'Llave del Alma' para respaldar tu viaje en la nube. Introdúcela en otros dispositivos para restaurar tu huella." data-fr="Aucune donnée personnelle requise. Générez une 'Clé de l'Âme' pour sauvegarder votre voyage. Entrez cette clé sur d'autres appareils pour restaurer votre empreinte." data-de="Keine persönlichen Daten erforderlich. Generiere einen 'Seelenschlüssel', um deine Reise zu sichern. Gib diesen Schlüssel auf anderen Geräten ein, um deine Fußspuren wiederherzustellen." data-zh-cn="无需绑定任何隐私个资。生成一串专属的「灵魂钥匙」即可将旅程足迹备份至云端保险箱；在其他装置（如手机）输入既有钥匙，即可完美共振、完整呼唤回你的历史纪录。">
         無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。
       </p>
       <div class="sync-actions" id="sync-initial-actions">
         <button class="sync-btn-small" onclick="window.createSoulKey()" data-zh="生成我的靈魂鑰匙" data-en="Generate Soul Key" data-ja="魂の鍵を生成する" data-es="Generar Llave del Alma" data-fr="Générer la Clé de l'Âme" data-de="Seelenschlüssel generieren" data-zh-cn="生成我的灵魂钥匙">生成我的靈魂鑰匙</button>
-        <span style="font-size:12px; color:rgba(255,255,255,0.15);" data-zh="或" data-en="OR" data-ja="または" data-es="O" data-fr="OU" data-de="ODER" data-zh-cn="或">或</span>
+        <span style="font-size:13px; color:rgba(255,255,255,0.25);" data-zh="或" data-en="OR" data-ja="または" data-es="O" data-fr="OU" data-de="ODER" data-zh-cn="或">或</span>
         <input type="text" class="sync-input" id="sync-key-input" data-zh-ph="輸入既有鑰匙..." data-en-ph="Enter existing key..." data-ja-ph="既存の鍵を入力..." data-es-ph="Ingresa llave existente..." data-fr-ph="Entrer clé existante..." data-de-ph="Bestehenden Schlüssel eingeben..." data-zh-cn-ph="输入既有钥匙..." placeholder="輸入既有鑰匙..." style="width:160px; text-transform:uppercase;">
         <button class="sync-btn-small" onclick="window.loadExistingSoulKey()" style="border-color:var(--gold); color:var(--gold);" data-zh="共振同步足跡" data-en="Sync Footprint" data-ja="足跡を同期する" data-es="Sincronizar Huella" data-fr="Synchroniser l'Empreinte" data-de="Fußspur synchronisieren" data-zh-cn="共振同步足迹">共振同步足跡</button>
       </div>
       <div class="sync-actions" id="sync-active-actions" style="display:none;">
-        <span style="font-size:12px; color:var(--fog);" data-zh="已開啟即時雲端同步。你的靈魂鑰匙：" data-en="Cloud sync active. Your Soul Key:" data-ja="クラウド同期中。あなたの魂の鍵：" data-es="Sincronización activa. Tu Llave del Alma:" data-fr="Synchronisation cloud active. Votre Clé de l'Âme :" data-de="Cloud-Sync aktiv. Dein Seelenschlüssel :" data-zh-cn="已开启即时云端同步。你的灵魂钥匙：">已開啟即時雲端同步。你的靈魂鑰匙：</span>
+        <span style="font-size:13px; color:var(--fog);" data-zh="已開啟即時雲端同步。你的靈魂鑰匙：" data-en="Cloud sync active. Your Soul Key:" data-ja="クラウド同期中。あなたの魂の鍵：" data-es="Sincronización activa. Tu Llave del Alma:" data-fr="Synchronisation cloud active. Votre Clé de l'Âme :" data-de="Cloud-Sync aktiv. Dein Seelenschlüssel :" data-zh-cn="已开启即时云端同步。你的灵魂钥匙：">已開啟即時雲端同步。你的靈魂鑰匙：</span>
         <span class="key-display" id="active-key-display">-</span>
         <button class="sync-btn-small" onclick="window.copySoulKey()" id="copy-key-btn" style="border-color:var(--gold); color:var(--gold); margin-right:8px;" data-zh="複製鑰匙" data-en="Copy Key" data-ja="キーをコピー" data-es="Copiar Llave" data-fr="Copier la Clé" data-de="Schlüssel kopieren" data-zh-cn="复制钥匙">複製鑰匙</button>
-        <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:11px; padding:8px 14px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular" data-fr="Dissocier" data-de="Entkoppeln" data-zh-cn="解除绑定">解除綁定</button>
+        <button class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:11px; padding:10px 16px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular" data-fr="Dissocier" data-de="Entkoppeln" data-zh-cn="解除绑定">解除綁定</button>
       </div>
     </div>
 
@@ -818,7 +869,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         <div class="h-events" id="h-events" style="max-height: 280px; overflow: hidden; transition: max-height 0.5s ease;"></div>
         <div id="h-events-fade" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; transition: opacity 0.5s ease;"></div>
       </div>
-      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 10px 20px; font-size: 11px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓" data-fr="Voir le parcours complet ↓" data-de="Gesamte Reise anzeigen ↓" data-zh-cn="展开完整旅程 ↓">展開完整旅程 ↓</button>
+      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size:12px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓" data-fr="Voir le parcours complet ↓" data-de="Gesamte Reise anzeigen ↓" data-zh-cn="展开完整旅程 ↓">展開完整旅程 ↓</button>
     </div>
     
     <div class="lighthouse">
@@ -850,7 +901,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   <div class="footer-copy">
     &copy; 2026 EMPATH. All rights reserved.
-    <br><span style="font-size:9px; opacity:0.5; margin-top:8px; display:inline-block;">Firebase Security Rules & Firestore Configured</span>
+    <br><span style="font-size:10px; opacity:0.5; margin-top:10px; display:inline-block;">Firebase Security Rules & Firestore Configured</span>
   </div>
 </footer>
 
@@ -859,7 +910,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // Note: To secure these credentials fully, configure Firestore Security Rules in your Firebase Console.
-// Example: allow create: if true; allow update, delete: if false;
+// Required Rules: allow create: if true; allow update, delete: if false;
 const firebaseConfig = {
   apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90",
   authDomain: "empath-62582.firebaseapp.com",
@@ -879,7 +930,7 @@ let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 
 /* 🌟 前端防洪機制 (Rate Limiting) */
 let lastSubmitTime = 0;
-const SUBMIT_COOLDOWN = 3000; // 3 seconds
+const SUBMIT_COOLDOWN = 3000; 
 
 function canSubmit() {
     const now = Date.now();
@@ -891,7 +942,7 @@ function canSubmit() {
     return true;
 }
 
-/* 🌟 UX 優化：送出後的儀式感反饋 */
+/* 🌟 儀式感反饋 */
 function playRitual(btnId, origText) {
     const btn = document.getElementById(btnId);
     if(!btn) return;
@@ -932,15 +983,77 @@ function t(zh, en, ja, es, fr, de, zh_cn) {
     return zh;
 }
 
-window.toggleLangDropdown = function() {
-    document.getElementById('lang-dropdown-list').classList.toggle('show');
+/* 🌟 手機版漢堡選單邏輯 */
+window.toggleMobileNav = function() {
+    document.getElementById('hamburger-btn').classList.toggle('open');
+    document.getElementById('nav-menu').classList.toggle('show');
 }
+window.closeMobileNav = function() {
+    document.getElementById('hamburger-btn').classList.remove('open');
+    document.getElementById('nav-menu').classList.remove('show');
+}
+
+window.toggleLangDropdown = function() { document.getElementById('lang-dropdown-list').classList.toggle('show'); }
 document.addEventListener('click', function(e) {
     if(!e.target.closest('.lang-dropdown-wrapper')) {
         const list = document.getElementById('lang-dropdown-list');
         if(list) list.classList.remove('show');
     }
 });
+
+/* 🌟 互動式 Onboarding 導航邏輯 */
+const guideData = {
+    'E': {
+        title: {zh: '房間 E — 情緒出口', en: 'Room E — Emotional Exit', ja: '部屋 E — 感情の出口', es: 'Habitación E — Salida Emocional', fr: 'Salle E — Sortie Émotionnelle', de: 'Raum E — Emotionaler Ausgang', 'zh-cn': '房间 E — 情绪出口'},
+        desc: {zh: '有些話堵在心口太久會生病。在這裡，你可以完全匿名地把那些沉重、憤怒或委屈倒出來，黑暗會安全地接住它們。', en: 'Words kept inside can make you sick. Here, you can pour out your heaviness anonymously. The dark will hold it safely.', ja: '胸に秘めた言葉を吐き出してください。暗闇がそれを安全に受け止めます。', es: 'Aquí puedes desahogarte de forma anónima. La oscuridad lo sostendrá.', fr: 'Ici, vous pouvez vous épancher anonymement. L\'obscurité le gardera en sécurité.', de: 'Hier kannst du dich anonym ausschütten. Die Dunkelheit wird es sicher halten.', 'zh-cn': '有些话堵在心口太久会生病。在这里，你可以完全匿名地把那些沉重、愤怒或委屈倒出来，黑暗会安全地接住它们。'},
+        link: '#room-e'
+    },
+    'M': {
+        title: {zh: '房間 M — 思念映射', en: 'Room M — Memory Mapping', ja: '部屋 M — 想いの投影', es: 'Habitación M — Mapeo de Recuerdos', fr: 'Salle M — Cartographie des Souvenirs', de: 'Raum M — Erinnerungskartierung', 'zh-cn': '房间 M — 思念映射'},
+        desc: {zh: '思念沒有實體，但可以有座標。來這裡點亮一顆星，讓那份想念在夜空裡被看見，或許對方也能感應得到。', en: 'Missing someone has no physical form, but it can have a coordinate. Light a star here.', ja: '想いを星に変えて夜空に灯しましょう。', es: 'Extrañar no tiene forma física, pero puede tener una coordenada. Enciende una estrella aquí.', fr: 'Le manque n\'a pas de forme physique, mais peut avoir une coordonnée. Allumez une étoile ici.', de: 'Vermissen hat keine physische Form, aber es kann eine Koordinate haben. Zünde hier einen Stern an.', 'zh-cn': '思念没有实体，但可以有坐标。来这里点亮一颗星，让那份想念在夜空里被看见。'},
+        link: '#room-m'
+    },
+    'P': {
+        title: {zh: '房間 P — 碎片修補', en: 'Room P — Kintsugi Repair', ja: '部屋 P — 欠片の修復', es: 'Habitación P — Reparación Kintsugi', fr: 'Salle P — Réparation Kintsugi', de: 'Raum P — Kintsugi-Reparatur', 'zh-cn': '房间 P — 碎片修补'},
+        desc: {zh: '碎裂不是結束，而是光照進來的地方。用金繼（Kintsugi）的方式，將你心中的遺憾與傷痛重新修補，化為最美的紋理。', en: 'Brokenness is not the end. Use Kintsugi to mend your regrets into beautiful textures.', ja: '金継ぎのようにもう一度つなぎ合わせましょう。', es: 'La ruptura no es el fin. Usa Kintsugi para reparar tus arrepentimientos en texturas hermosas.', fr: 'La brisure n\'est pas la fin. Utilisez le Kintsugi pour réparer vos regrets en de belles textures.', de: 'Zerbrochenheit ist nicht das Ende. Verwende Kintsugi, um deine Reue in wunderschöne Texturen zu flicken.', 'zh-cn': '碎裂不是结束，而是光照进来的地方。用金继（Kintsugi）的方式，将你心中的遗憾与伤痛重新修补。'},
+        link: '#room-p'
+    },
+    'A': {
+        title: {zh: '房間 A — 神聖避難所', en: 'Room A — Sacred Asylum', ja: '部屋 A — 神聖な避難所', es: 'Habitación A — Asilo Sagrado', fr: 'Salle A — Asile Sacré', de: 'Raum A — Heiliges Asyl', 'zh-cn': '房间 A — 神圣避难所'},
+        desc: {zh: '有些痛苦太重，不該永遠背負。在這裡寫下的所有秘密，都會在 24 小時後像沙畫一樣被風吹散，不留痕跡。', en: 'Some pain is too heavy to carry forever. Secrets here will turn to sand and blow away in 24 hours.', ja: 'ここでの秘密は24時間後に砂のように消え去ります。', es: 'Cierto dolor es demasiado pesado. Los secretos aquí se convertirán en arena en 24 horas.', fr: 'Certaines douleurs sont trop lourdes. Les secrets ici se transformeront en sable dans 24 heures.', de: 'Mancher Schmerz ist zu schwer. Geheimnisse hier werden in 24 Stunden zu Sand.', 'zh-cn': '有些痛苦太重，不该永远背负。在这里写下的所有秘密，都会在 24 小时后像沙画一样被风吹散。'},
+        link: '#room-a'
+    },
+    'T': {
+        title: {zh: '房間 T — 能量共振', en: 'Room T — Energy Resonance', ja: '部屋 T — エネルギー共鳴', es: 'Habitación T — Resonancia de Energía', fr: 'Salle T — Résonance d\'Énergie', de: 'Raum T — Energieresonanz', 'zh-cn': '房间 T — 能量共振'},
+        desc: {zh: '當你覺得自己有餘力時，來這裡給予他人一個無聲的擁抱吧。每一次共鳴，都會化作對方真實的心跳震動。', en: 'When you have the strength, give someone a silent hug here. Every resonance is a heartbeat.', ja: '余裕があるなら、誰かに無言の抱擁を贈りましょう。', es: 'Cuando tengas fuerza, dale a alguien un abrazo silencioso aquí.', fr: 'Quand vous avez la force, donnez un câlin silencieux ici.', de: 'Wenn du die Kraft hast, gib hier jemandem eine stille Umarmung.', 'zh-cn': '当你觉得自己有余力时，来这里给予他人一个无声的拥抱吧。每一次共鸣，都会化作对方真实的心跳震动。'},
+        link: '#room-t'
+    }
+};
+
+window.startGuide = function() {
+    document.getElementById('ob-state-0').style.display = 'none';
+    document.getElementById('ob-state-2').style.display = 'none';
+    document.getElementById('ob-state-1').style.display = 'block';
+}
+
+window.showGuideResult = function(roomKey) {
+    document.getElementById('ob-state-1').style.display = 'none';
+    document.getElementById('ob-state-2').style.display = 'block';
+    
+    const lang = (window.currentLang === 'en-uk') ? 'en' : window.currentLang;
+    const data = guideData[roomKey];
+    
+    document.getElementById('ob-res-title').textContent = data.title[lang] || data.title['zh'];
+    document.getElementById('ob-res-desc').textContent = data.desc[lang] || data.desc['zh'];
+    
+    const linkBtn = document.getElementById('ob-res-link');
+    linkBtn.href = data.link;
+    linkBtn.onclick = function() { window.closeMobileNav(); };
+}
+
+window.closeGuide = function() {
+    // Just lets the anchor tag work naturally
+}
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
@@ -968,6 +1081,17 @@ window.switchLang = function(lang) {
   document.querySelectorAll('[data-zh-title]').forEach(el => {
     el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title'));
   });
+
+  // 如果導航正在顯示結果，同步更新文字
+  const activeTitle = document.getElementById('ob-res-title').textContent;
+  if(activeTitle !== "") {
+      for(let key in guideData) {
+          if(Object.values(guideData[key].title).includes(activeTitle)) {
+             window.showGuideResult(key);
+             break;
+          }
+      }
+  }
 
   updateDynamicTexts();
   document.getElementById('h-events').innerHTML = '';
@@ -1020,7 +1144,6 @@ function formatTimeLeft(secs){
 }
 
 function cleanText(text) {
-  // 基礎前端防護，建議後續配合 Firebase Cloud Functions 實作完整過濾
   const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '殺', 'kill', 'suicide', 'rape'];
   let cleaned = text;
   badWords.forEach(word => {
@@ -1054,14 +1177,10 @@ window.toggleHeroQuotes = function() {
     }
 }
 
-// 🌟 Back to top 邏輯
 window.addEventListener('scroll', () => {
     const btt = document.getElementById('btt-btn');
-    if(window.scrollY > 500) {
-        btt.style.display = 'flex';
-    } else {
-        btt.style.display = 'none';
-    }
+    if(window.scrollY > 500) { btt.style.display = 'flex'; } 
+    else { btt.style.display = 'none'; }
 });
 
 function loadLocalJourney() {
@@ -1366,12 +1485,13 @@ function drawSand() {
   if(isAnimating) sandRafId = requestAnimationFrame(drawSand);
 }
 
+/* 🌟 UX 優化：改用 sessionStorage */
 window.acceptARead = function() {
     document.getElementById('a-warning-mask').style.display = 'none';
     const feed = document.getElementById('a-feed');
     feed.style.display = 'flex';
     setTimeout(() => feed.style.filter = 'blur(0px)', 50);
-    localStorage.setItem('empath_a_accepted', 'true');
+    sessionStorage.setItem('empath_a_accepted', 'true');
 }
 window.hideAFeed = function() {
     document.getElementById('a-warning-mask').innerHTML = `
@@ -1427,7 +1547,6 @@ window.addEventListener('load', async () => {
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
   onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } });
   
-  // 🌟 HSP 初見提示邏輯 (停留 8 秒)
   if(!localStorage.getItem('empath_hsp_hint_shown')) {
       setTimeout(() => {
           const ttip = document.getElementById('hsp-tooltip');
@@ -1439,7 +1558,8 @@ window.addEventListener('load', async () => {
       }, 1000);
   }
 
-  if(localStorage.getItem('empath_a_accepted') === 'true') {
+  /* 🌟 使用 sessionStorage 保護跨裝置隱私 */
+  if(sessionStorage.getItem('empath_a_accepted') === 'true') {
       const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed');
       if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; }
   }
