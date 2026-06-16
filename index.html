@@ -38,7 +38,6 @@ body.hsp-mode * { animation-play-state: paused !important; }
 body.hsp-mode .room-desc { color: rgba(255,255,255,0.45); }
 body.hsp-mode .shard-glow, body.hsp-mode .warmth-pulse { opacity: 0.1 !important; display: none; }
 body.hsp-mode h1, body.hsp-mode h2, body.hsp-mode .hero-title { text-shadow: none; }
-/* HSP 模式下關閉背景的環境漸層，保持最純粹的黑 */
 body.hsp-mode #room-e, body.hsp-mode #room-p, body.hsp-mode #room-t, body.hsp-mode #room-h { background: #080d14 !important; }
 
 nav{
@@ -165,19 +164,13 @@ nav{
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
 .room-tag{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase; font-weight:bold;}
 
-/* 🌟 Z-axis Hierarchy：房間標題旁加入獨特印記 */
 .room-title-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(24px,3.5vw,36px);color:var(--white); margin-bottom:0; }
 .room-title-icon { width: 24px; height: 24px; opacity: 0.8; }
 
-/* 🌟 無障礙 TTS 按鈕 */
 .desc-wrap { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 32px; max-width: 600px; }
 .room-desc{ font-size:16px;color:var(--muted);line-height:2; flex: 1; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
-.tts-btn {
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--muted);
-    border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.3s; flex-shrink: 0; margin-top: 8px;
-}
+.tts-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--muted); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; flex-shrink: 0; margin-top: 8px; }
 .tts-btn:hover { background: rgba(255,255,255,0.1); color: var(--dawn); border-color: var(--dawn); transform: scale(1.05); }
 
 .input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:16px;padding:20px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
@@ -191,7 +184,6 @@ nav{
 .crisis-support a { font-size: 13px; color: rgba(255,255,255,0.7); letter-spacing: 1.5px; line-height: 1.8; transition: color 0.3s; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 2px; display: inline-block; font-family: 'Noto Sans TC', sans-serif; font-weight: bold;}
 .crisis-support a:hover { color: var(--white); border-bottom-color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.3);}
 
-/* ===== 🌟 E ROOM: Deep Void Gradient ===== */
 #room-e{background: radial-gradient(circle at 70% 30%, #1a2a3a 0%, #0c1824 60%);}
 #room-e .room-letter{color:var(--e);} #room-e .room-tag{color:var(--e);} 
 #room-e .send-btn{border-color:var(--e);color:var(--e);} 
@@ -207,41 +199,26 @@ nav{
 .e-expand-btn { display:none; align-items:center; justify-content:center; gap:8px; margin: 20px auto 0; padding:12px 28px; background:rgba(123,143,161,0.05); border:1px solid rgba(123,143,161,0.4); border-radius:24px; font-family:'Noto Serif TC',serif; font-size:13px; letter-spacing:2px; color:var(--e); cursor:pointer; transition:all 0.3s; }
 .e-expand-btn:hover { background:rgba(123,143,161,0.15); border-color:var(--e); box-shadow: 0 4px 15px rgba(123,143,161,0.2); }
 
-/* ===== M ROOM ===== */
 #room-m{background:#060d1a;overflow:hidden;}
 #room-m .room-letter{color:var(--m);} #room-m .room-tag{color:var(--m);} 
 #room-m .send-btn{border-color:var(--m);color:var(--m);} 
 #room-m .send-btn:hover{background:rgba(168,184,200,.15); box-shadow: 0 0 16px rgba(168,184,200,0.3); transform: translateY(-2px);}
 #star-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;} #room-m .room-content{position:relative;z-index:1;}
 .m-input-wrap{max-width:480px;}
-
-.star-tooltip {
-    position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.6);
-    padding:24px; font-size:15px; color:var(--fog); z-index:600; max-width:280px; line-height:2;
-    border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 20px rgba(168,184,200,0.25);
-    pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
-}
+.star-tooltip { position: fixed; background:rgba(8,16,28,.97); border:1px solid rgba(168,184,200,.6); padding:24px; font-size:15px; color:var(--fog); z-index:600; max-width:280px; line-height:2; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 20px rgba(168,184,200,0.25); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
 .star-tooltip.active { opacity: 1; visibility: visible; pointer-events: auto; }
 .m-stats{ display:flex;gap:32px;margin-top:24px; }
 .m-stat{font-size:12px;letter-spacing:2px;color:rgba(168,184,200,.8);} .m-stat span{color:var(--m);font-family:'Noto Serif TC',serif;font-size:20px;font-weight:600;}
 
-/* ===== 🌟 P ROOM: Subtle Gold Accents ===== */
 #room-p{background: radial-gradient(circle at 30% 80%, rgba(201,168,76,0.05) 0%, #100e08 60%);}
 #room-p .room-letter{color:var(--p);} #room-p .room-tag{color:var(--p);} 
 #room-p .send-btn{border-color:var(--p);color:var(--p);} 
 #room-p .send-btn:hover{background:rgba(201,168,76,.15); box-shadow: 0 0 16px rgba(201,168,76,0.3); transform: translateY(-2px);}
-
-.p-step-label {
-    font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: 700;
-    color: var(--gold); letter-spacing: 3px; margin-bottom: 24px;
-    border-bottom: 1px solid rgba(201,168,76,0.4); padding-bottom: 8px;
-    display: inline-block;
-}
+.p-step-label { font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: 700; color: var(--gold); letter-spacing: 3px; margin-bottom: 24px; border-bottom: 1px solid rgba(201,168,76,0.4); padding-bottom: 8px; display: inline-block; }
 .p-vessel{ max-width:540px;margin-bottom:36px;position:relative; }
 #p-canvas{ width:100%;height:300px;display:block;background:rgba(0,0,0,.5);border:1px solid rgba(201,168,76,.4); border-radius: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,0.7);}
 .p-canvas-hint{ font-size:12px;letter-spacing:2px;color:rgba(201,168,76,.7);text-align:center;margin-top:16px; line-height: 1.8; }
 .kintsugi-board{ max-width:600px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin-top:20px; }
-
 .shard{ background:rgba(0,0,0,.35);padding:24px;border:1px solid rgba(201,168,76,.4); border-radius: 6px; cursor:pointer;transition:all .4s;position:relative;overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 .shard:hover{border-color:rgba(201,168,76,.7);background:rgba(201,168,76,.1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(201,168,76,0.3);} 
 .shard-text{font-size:14px;line-height:2;color:var(--fog);}
@@ -252,24 +229,15 @@ nav{
 .shard.healed { border: 1px solid #BF953F !important; background: rgba(201,168,76,0.15) !important; box-shadow: 0 0 15px rgba(191, 149, 63, 0.5) !important; cursor: default; transform: none;}
 .shard.healed .shard-glow { background: linear-gradient(90deg, transparent, #BF953F, #FCF6BA, #BF953F, transparent) !important; height: 4px !important; opacity: 1 !important; box-shadow: 0 -2px 10px rgba(252, 246, 186, 0.6) !important; }
 
-/* ===== A ROOM ===== */
 #room-a{background:linear-gradient(180deg,#0D1B2A 0%,#071014 100%);}
 #sand-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:0.8;}
 #room-a .room-content{position:relative;z-index:1;}
 #room-a .room-letter{color:var(--a);} #room-a .room-tag{color:var(--a);} 
 #room-a .send-btn{border-color:var(--a);color:var(--a);} 
 #room-a .send-btn:hover{background:rgba(122,158,159,.15); box-shadow: 0 0 16px rgba(122,158,159,0.3); transform: translateY(-2px);}
-
-.a-warning-mask {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 56px 32px; background: rgba(0,0,0,0.5); border: 1px dashed rgba(122,158,159,0.4);
-    border-radius: 8px; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center;
-}
+.a-warning-mask { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 56px 32px; background: rgba(0,0,0,0.5); border: 1px dashed rgba(122,158,159,0.4); border-radius: 8px; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; }
 .a-warning-mask p { font-size: 15px; line-height: 2.2; color: var(--dawn); letter-spacing: 1.5px; }
-
-/* 🌟 A 房間專屬提示字 */
 .a-fade-hint { font-size: 13px; color: var(--a); margin-bottom: 12px; letter-spacing: 1.5px; font-style: italic; opacity: 0.8;}
-
 .a-feed{display:flex;flex-direction:column;gap:20px;max-width:600px;}
 .sand-msg{ background:rgba(0,0,0,.4);padding:26px 32px;border-left:2px solid rgba(122,158,159,.6);border-radius:0 6px 6px 0;position:relative;overflow:hidden;animation:fadeSlideIn .5s ease;transition:all 4s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.4);}
 .sand-msg-text{font-size:15px;line-height:2;color:var(--fog); transition: filter 3s ease;}
@@ -282,7 +250,6 @@ nav{
 .sand-msg.dissolving { filter: blur(5px); opacity: 0; transform: translateY(20px) scale(0.96); }
 .a-note{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:rgba(122,158,159,.7);margin-top:28px;letter-spacing:1px; line-height:1.8; }
 
-/* ===== 🌟 T ROOM: Warm Ambient Glow ===== */
 #room-t{background: radial-gradient(circle at 50% 50%, rgba(232,168,124,0.05) 0%, #140f08 70%);}
 #room-t .room-letter{color:var(--t);} #room-t .room-tag{color:var(--t);} 
 #room-t .send-btn{border-color:var(--t);color:var(--t);} 
@@ -307,7 +274,6 @@ nav{
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 20px var(--amber);}}
 .echo-label{ text-align:center;font-size:13px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
 
-/* ===== 🌟 H ROOM: Horizon Line Effect ===== */
 #room-h{background: linear-gradient(180deg, #0D1B2A 0%, #0f0f1a 40%, #05050a 100%); border-top: 1px solid rgba(255,255,255,0.02);}
 #room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.6);}
 .h-journey{max-width:740px;}
@@ -412,7 +378,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 @media(max-width:768px){
   nav { padding: 16px 20px; }
   .nav-logo { font-size: 22px; }
-  
   .hamburger { display: flex; }
   .nav-menu { 
       position: absolute; top: 100%; left: 0; right: 0; background: #03070a; 
@@ -436,11 +401,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   .room-letter { font-size: 80px; top: 80px; right: 16px; }
   
   .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
-  
   .hero-quotes { display: none; flex-direction: column; gap: 20px; margin-bottom: 40px;}
   .hero-quotes.show-quotes { display: flex; animation: fadeSlideIn 0.5s ease; }
   #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 36px; align-items: center; }
-
   .onboarding-box { padding: 24px 20px; margin-bottom: 40px; }
 
   .star-tooltip {
@@ -453,23 +416,14 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       border-bottom: none !important;
   }
   .star-tooltip.active { transform: translateY(0) !important; }
-  .star-tooltip::before {
-      content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px;
-  }
+  .star-tooltip::before { content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; }
 
   .input-area { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); }
   .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   .door-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
   .shard { background: rgba(0,0,0,0.45); border: 1px solid rgba(201,168,76,0.45); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
 
-  .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active {
-    transform: scale(0.95) !important; 
-    background: rgba(255,255,255,0.15) !important;
-    box-shadow: none !important; 
-    transition: all 0.1s !important; 
-  }
-  
+  .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active { transform: scale(0.95) !important; background: rgba(255,255,255,0.15) !important; box-shadow: none !important; transition: all 0.1s !important; }
   #btt-btn { bottom: 20px; right: 20px; width: 44px; height: 44px; font-size: 18px; }
 }
 
@@ -498,7 +452,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     <div class="wrapped-item"><span data-zh="傳遞溫暖" data-en="Warmth Shared" data-ja="伝えた温もり" data-es="Calidez Compartida" data-fr="Chaleur Partagée" data-de="Wärme Geteilt" data-zh-cn="传递温暖">傳遞溫暖</span> <span id="sc-t">0</span></div>
     <div class="wrapped-footer" data-zh="我們雖然孤獨地存在<br>但我們可以溫暖地交會" data-en="Though we exist in solitude,<br>we can warmly intersect." data-ja="私たちは孤独に存在していますが、<br>温かく交わることができます。" data-es="Aunque existimos en soledad,<br>podemos cruzarnos cálidamente." data-fr="Bien que nous existions dans la solitude,<br>nous pouvons nous croiser chaleureusement." data-de="Obwohl wir in Einsamkeit existieren,<br>können wir uns warm überschneiden." data-zh-cn="我们虽然孤独地存在<br>但我们可以温暖地交会">我們雖然孤獨地存在<br>但我們可以溫暖地交會</div>
   </div>
-
   <div class="share-modal-actions">
     <button class="close-modal-btn" id="download-card-btn" onclick="window.downloadShareCard()" style="background:var(--gold); color:#000; border:none; font-weight:bold; box-shadow: 0 4px 15px rgba(201,168,76,0.4);" data-zh="⬇️ 下載為專屬圖片檔案" data-en="⬇️ Download Exclusive Card" data-ja="⬇️ 専用画像としてダウンロード" data-es="⬇️ Descargar Tarjeta Exclusiva" data-fr="⬇️ Télécharger la carte exclusive" data-de="⬇️ Exklusive Karte herunterladen" data-zh-cn="⬇️ 下载为专属图片档案">⬇️ 下載為專屬圖片檔案</button>
     <button class="close-modal-btn" onclick="window.closeShareModal()" data-zh="關閉視窗" data-en="Close Window" data-ja="ウィンドウを閉じる" data-es="Cerrar Ventana" data-fr="Fermer la fenêtre" data-de="Fenster schließen" data-zh-cn="关闭窗口">關閉視窗</button>
@@ -557,20 +510,11 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   <div class="onboarding-box" id="onboarding-box">
     <div id="ob-state-0">
       <p style="font-weight:bold; color:var(--gold); margin-bottom:12px; letter-spacing:2px; font-size:16px;" data-zh="這是一個什麼樣的空間？" data-en="What is this space?" data-ja="ここはどんな空間ですか？" data-es="¿Qué es este espacio?" data-fr="Quel est cet espace ?" data-de="Was ist dieser Raum?" data-zh-cn="这是一个什么样的空间？">這是一個什麼樣的空間？</p>
-      <p data-zh="這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？" 
-         data-en="This is a digital sanctuary free of algorithms and judgments.<br>Today, do you need to talk, remember, or give warmth?" 
-         data-ja="ここはアルゴリズムも評価もないデジタルの避難所です。<br>今日は、誰かに話したいですか、思い出したいですか、それとも温もりを与えたいですか？" 
-         data-es="Este es un santuario digital libre de algoritmos y juicios.<br>Hoy, ¿necesitas hablar, recordar o dar calidez?"
-         data-fr="C'est un sanctuaire numérique sans algorithmes ni jugements.<br>Aujourd'hui, avez-vous besoin de parler, de vous souvenir ou de donner de la chaleur ?"
-         data-de="Dies ist ein digitales Heiligtum frei von Algorithmen und Urteilen.<br>Musst du heute reden, dich erinnern oder Wärme geben?"
-         data-zh-cn="这里是一个没有算法、没有评断的数字避难所。<br>今天你是需要倾诉、怀念、还是给予温暖？">
-         這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？
-      </p>
+      <p data-zh="這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？" data-en="This is a digital sanctuary free of algorithms and judgments.<br>Today, do you need to talk, remember, or give warmth?" data-ja="ここはアルゴリズムも評価もないデジタルの避難所です。<br>今日は、誰かに話したいですか、思い出したいですか、それとも温もりを与えたいですか？" data-es="Este es un santuario digital libre de algoritmos y juicios.<br>Hoy, ¿necesitas hablar, recordar o dar calidez?" data-fr="C'est un sanctuaire numérique sans algorithmes ni jugements.<br>Aujourd'hui, avez-vous besoin de parler, de vous souvenir ou de donner de la chaleur ?" data-de="Dies ist ein digitales Heiligtum frei von Algorithmen und Urteilen.<br>Musst du heute reden, dich erinnern oder Wärme geben?" data-zh-cn="这里是一个没有算法、没有评断的数字避难所。<br>今天你是需要倾诉、怀念、还是给予温暖？">這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？</p>
       <div style="margin-top: 28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
           <button class="send-btn" onclick="window.startGuide()" data-zh="不知道從哪裡開始？" data-en="Don't know where to start?" data-ja="どこから始めればいいかわからない？" data-es="¿No sabes por dónde empezar?" data-fr="Vous ne savez pas par où commencer ?" data-de="Du weißt nicht, wo du anfangen sollst?" data-zh-cn="不知道从哪里开始？">不知道從哪裡開始？</button>
       </div>
     </div>
-    
     <div id="ob-state-1" style="display:none;" class="ob-step">
       <p style="font-weight:bold; color:var(--gold); margin-bottom:24px; letter-spacing:2px; font-size:16px;" data-zh="今晚，你帶著什麼來到這裡？" data-en="What did you bring here tonight?" data-ja="今夜、あなたは何を抱えてここに来ましたか？" data-es="¿Qué trajiste aquí esta noche?" data-fr="Qu'avez-vous apporté ici ce soir ?" data-de="Was hast du heute Abend hierher gebracht?" data-zh-cn="今晚，你带着什么来到这里？">今晚，你帶著什麼來到這裡？</p>
       <div class="ob-options">
@@ -581,7 +525,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
           <button class="ob-btn" onclick="window.showGuideResult('T')" data-zh="我很好，想給予這個世界一點光" data-en="I'm fine, want to give some light" data-ja="私は元気です、世界に少し光を与えたい" data-es="Estoy bien, quiero dar algo de luz" data-fr="Je vais bien, je veux donner de la lumière" data-de="Mir geht es gut, ich möchte etwas Licht geben" data-zh-cn="我很好，想给予这个世界一点光">我很好，想給予這個世界一點光</button>
       </div>
     </div>
-
     <div id="ob-state-2" style="display:none;" class="ob-step">
       <p style="font-weight:bold; color:var(--gold); margin-bottom:16px; letter-spacing:2px; font-size:14px;" data-zh="為你開啟：" data-en="Opening for you:" data-ja="あなたのために開きます：" data-es="Abriendo para ti:" data-fr="Ouverture pour vous :" data-de="Öffnet für dich:" data-zh-cn="为你开启：">為你開啟：</p>
       <h3 id="ob-res-title" style="color:var(--white); font-family:'Cormorant Garamond',serif; font-size:28px; letter-spacing:4px; margin-bottom:20px;"></h3>
@@ -678,6 +621,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   <div class="crisis-support">
     <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
   </div>
+
 </section>
 
 <section id="room-m" class="room">
@@ -691,7 +635,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     </div>
     
     <div class="desc-wrap">
-        <p class="room-desc" data-zh="每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。" data-en="Every memory becomes a star. Click a star to hear someone's secret. If it resonates, make it brighter." data-ja="すべての想いは星になります。星をクリックして、誰かの秘密を聴いてください。共鳴したら、その星をさらに輝かせてください。" data-es="Cada recuerdo se convierte en una estrella. Haz clic para escuchar los secretos ocultos. Si te conmueve, haz que brille más." data-fr="Chaque souvenir devient une étoile. Cliquez sur une étoile pour entendre le secret de quelqu'un. Si cela résonne, rendez-la plus brillante." data-de="Jede Erinnerung wird zu einem Stern. Klicke auf einen Stern, um das Geheimnis von jemandem zu hören. Wenn es nachhallt, mach ihn heller." data-zh-cn="每段思念都成为一颗星。点击星星，听见别人藏在夜空里的心事。感动了，就让它更亮一些。">每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。</p>
+        <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。" data-en="Every memory becomes a star. Click a star to hear someone's secret. If it resonates, make it brighter." data-ja="すべての想いは星になります。星をクリックして、誰かの秘密を聴いてください。共鳴したら、その星をさらに輝かせてください。" data-es="Cada recuerdo se convierte en una estrella. Haz clic para escuchar los secretos ocultos. Si te conmueve, haz que brille más." data-fr="Chaque souvenir devient une étoile. Cliquez sur une étoile pour entendre le secret de quelqu'un. Si cela résonne, rendez-la plus brillante." data-de="Jede Erinnerung wird zu einem Stern. Klicke auf einen Stern, um das Geheimnis von jemandem zu hören. Wenn es nachhallt, mach ihn heller." data-zh-cn="每段思念都成为一颗星。点击星星，听见别人藏在夜空里的心事。感动了，就让它更亮一些。">
+          每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。
+        </p>
         <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
     </div>
     
@@ -724,7 +670,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   
   <div class="desc-wrap">
-      <p class="room-desc" data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca." data-fr="Kintsugi — réparer les fissures avec de l'or, transformant les brisures en magnifiques textures. Cliquez sur un éclat pour le guérir." data-de="Kintsugi — Risse mit Gold reparieren und Zerbrochenheit in wunderschöne Texturen verwandeln. Klicke auf eine Scherbe, um sie zu heilen." data-zh-cn="金继 — 以金修补裂缝，让破碎成为生命最美的纹理。点击碎片，让它重生。">金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。</p>
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca." data-fr="Kintsugi — réparer les fissures avec de l'or, transformant les brisures en magnifiques textures. Cliquez sur un éclat pour le guérir." data-de="Kintsugi — Risse mit Gold reparieren und Zerbrochenheit in wunderschöne Texturen verwandeln. Klicke auf eine Scherbe, um sie zu heilen." data-zh-cn="金继 — 以金修补裂缝，让破碎成为生命最美的纹理。点击碎片，让它重生。">
+        金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。
+      </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
   </div>
 
@@ -762,7 +710,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     </div>
     
     <div class="desc-wrap">
-        <p class="room-desc" data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." data-fr="La douleur se dissout ici. Chaque message disparaît complètement après 24 heures, comme du sable au vent. Dites-le, puis partez." data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。">痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。</p>
+        <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." data-fr="La douleur se dissout ici. Chaque message disparaît complètement après 24 heures, comme du sable au vent. Dites-le, puis partez." data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。">
+          痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。
+        </p>
         <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
     </div>
 
@@ -778,8 +728,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
     <br>
     <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →" data-fr="Transformer en sable →" data-de="Zu Sand machen →" data-zh-cn="放入沙画 →">放入沙畫 →</button>
+    <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia." data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice." data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit." data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论。">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
     
-    <div id="a-feed-wrapper" style="position: relative; margin-top:40px; min-height:200px;">
+    <div id="a-feed-wrapper" style="position: relative; margin-top:36px; min-height:200px;">
         <div id="a-warning-mask" class="a-warning-mask">
             <p data-zh="接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。" data-en="The following section contains the real pain and trauma of others.<br>If you are not in an emotional state to hold space, please hide it.<br>Your empathy is precious, but please protect yourself first." data-ja="以下のセクションには、他人の真の痛みやトラウマが含まれています。<br>受け止める心の準備ができていない場合は、非表示にしてください。<br>あなたの優しさは尊いですが、まずは自分を守ってください。" data-es="La siguiente sección contiene el dolor y trauma real de otros.<br>Si no estás en un estado emocional para sostener este espacio, ocúltalo.<br>Tu empatía es preciosa, pero por favor protégete primero." data-fr="La section suivante contient la vraie douleur et les traumatismes d'autres personnes.<br>Si vous n'êtes pas en état émotionnel, veuillez la masquer.<br>Votre empathie est précieuse, mais protégez-vous d'abord." data-de="Der folgende Abschnitt enthält den echten Schmerz und das Trauma anderer.<br>Wenn du nicht im emotionalen Zustand bist, blende ihn bitte aus.<br>Deine Empathie ist kostbar, aber bitte schütze dich zuerst." data-zh-cn="接下来的留言区包含他人真实的痛苦与创伤。<br>若你目前的情绪无法承接，请选择隐藏。<br>你的善良很珍贵，但也请保护好自己。">接下來的留言區包含他人真實的痛苦與創傷。<br>若你目前的情緒無法承接，請選擇隱藏。<br>你的善良很珍貴，但也請保護好自己。</p>
             <div style="display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap;">
@@ -806,7 +757,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   
   <div class="desc-wrap">
-      <p class="room-desc" data-zh="照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。" data-en="Light up others, and be illuminated. Send warmth and receive Echo Pulses from strangers—not likes, but heartbeats." data-ja="誰かを照らし、誰かに照らされる。温もりを送り、見知らぬ人からのEcho Pulseを受け取りましょう。それは「いいね」ではなく、鼓動です。" data-es="Ilumina a otros y sé iluminado. Envía calidez y recibe Pulsos de Eco de extraños; no son 'me gusta', son latidos." data-fr="Illuminez les autres, et soyez illuminé. Envoyez de la chaleur et recevez des Pulsos d'Écho—pas des likes, mais des battements de cœur." data-de="Erleuchte andere und werde erleuchtet. Sende Wärme und empfange Echo-Pulse—keine Likes, sondern Herzschläge." data-zh-cn="照亮他人，也被人照亮。送出你的温暖，接收陌生人的 Echo Pulse——不是按赞，是心跳。">照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。</p>
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。" data-en="Light up others, and be illuminated. Send warmth and receive Echo Pulses from strangers—not likes, but heartbeats." data-ja="誰かを照らし、誰かに照らされる。温もりを送り、見知らぬ人からのEcho Pulseを受け取りましょう。それは「いいね」ではなく、鼓動です。" data-es="Ilumina a otros y sé iluminado. Envía calidez y recibe Pulsos de Eco de extraños; no son 'me gusta', son latidos." data-fr="Illuminez les autres, et soyez illuminé. Envoyez de la chaleur et recevez des Pulsos d'Écho—pas des likes, mais des battements de cœur." data-de="Erleuchte andere und werde erleuchtet. Sende Wärme und empfange Echo-Pulse—keine Likes, sondern Herzschläge." data-zh-cn="照亮他人，也被人照亮。送出你的温暖，接收陌生人的 Echo Pulse——不是按赞，是心跳。">
+        照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。
+      </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
   </div>
 
@@ -852,14 +805,14 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       <h2 class="room-title" data-zh="靈魂歸宿" data-en="Soul's Home" data-ja="魂の帰郷" data-es="Hogar del Alma" data-fr="Foyer de l'Âme" data-de="Zuhause der Seele" data-zh-cn="灵魂归宿">靈魂歸宿</h2>
       <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--h)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
   </div>
-  
   <div class="desc-wrap">
-      <p class="room-desc" data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." data-ja="おかえりなさい。偽りの必要がない場所へ。あなたが歩んできたすべての部屋が、あなたのものです。" data-es="Vuelve a casa, a un lugar donde no necesitas fingir. Cada habitación por la que has pasado, es tuya." data-fr="Rentrez chez vous, dans un endroit sans déguisement. Chaque pièce que vous avez traversée est la vôtre." data-de="Komm nach Hause, an einen Ort ohne Verstellung. Jedes Zimmer, durch das du gegangen bist, gehört dir." data-zh-cn="回家，回到不需伪装的地方。你走过的每个房间，都是你的。">回家，回到不需偽裝的地方。你走過的每個房間，都是你的。</p>
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." data-ja="おかえりなさい。偽りの必要がない場所へ。あなたが歩んできたすべての部屋が、あなたのものです。" data-es="Vuelve a casa, a un lugar donde no necesitas fingir. Cada habitación por la que has pasado, es tuya." data-fr="Rentrez chez vous, dans un endroit sans déguisement. Chaque pièce que vous avez traversée est la vôtre." data-de="Komm nach Hause, an einen Ort ohne Verstellung. Jedes Zimmer, durch das du gegangen bist, gehört dir." data-zh-cn="回家，回到不需伪装的地方。你走过的每个房间，都是你的。">
+        回家，回到不需偽裝的地方。你走過的每個房間，都是你的。
+      </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
   </div>
 
   <div class="h-journey">
-    
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;" data-zh="GLOBAL RESONANCE — 全網靈魂共鳴軌跡" data-en="GLOBAL RESONANCE — The World's Footprints" data-ja="GLOBAL RESONANCE — 全世界の魂の共鳴" data-es="GLOBAL RESONANCE — Huellas del Mundo" data-fr="RÉSONANCE MONDIALE — Empreintes du Monde" data-de="GLOBALE RESONANZ — Fußspuren der Welt" data-zh-cn="GLOBAL RESONANCE — 全网灵魂共鸣轨迹">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <div class="global-summary" id="g-summary">
       <div class="g-card visitor-card"><span class="g-letter">✦</span><div class="g-num" id="g-v-count">0</div><div class="g-label" data-zh="總造訪靈魂" data-en="Total Souls" data-ja="全訪問者の魂" data-es="Total de Almas" data-fr="Âmes Totales" data-de="Gesamte Seelen" data-zh-cn="总造访灵魂">總造訪靈魂</div></div>
@@ -923,7 +876,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         分享這座避難所連結
       </button>
     </div>
-
   </div>
 </section>
 
@@ -939,7 +891,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   <div class="footer-copy">
     &copy; 2026 EMPATH. All rights reserved.
-    <br><span style="font-size:10px; opacity:0.5; margin-top:10px; display:inline-block;">Firebase Security Rules & Firestore Configured</span>
+    <br><span style="font-size:10px; opacity:0.5; margin-top:10px; display:inline-block;">Firebase Security Rules Must Be Configured in Console</span>
   </div>
 </footer>
 
@@ -947,8 +899,9 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Note: To secure these credentials fully, configure Firestore Security Rules in your Firebase Console.
-// Required Rules: allow create: if true; allow update, delete: if false;
+// 🌟 App Check 模組引入 (未來啟用時使用)
+// import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90",
   authDomain: "empath-62582.firebaseapp.com",
@@ -960,6 +913,13 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// 🌟 啟用 App Check 範例程式碼 (需在 Firebase Console 設定)
+// const appCheck = initializeAppCheck(app, {
+//   provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_V3_SITE_KEY'),
+//   isTokenAutoRefreshEnabled: true
+// });
+
 const db = getFirestore(app);
 
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
@@ -1021,7 +981,6 @@ function t(zh, en, ja, es, fr, de, zh_cn) {
     return zh;
 }
 
-/* 🌟 手機版漢堡選單邏輯 */
 window.toggleMobileNav = function() {
     document.getElementById('hamburger-btn').classList.toggle('open');
     document.getElementById('nav-menu').classList.toggle('show');
@@ -1039,33 +998,12 @@ document.addEventListener('click', function(e) {
     }
 });
 
-/* 🌟 互動式 Onboarding 導航邏輯 */
 const guideData = {
-    'E': {
-        title: {zh: '房間 E — 情緒出口', en: 'Room E — Emotional Exit', ja: '部屋 E — 感情の出口', es: 'Habitación E — Salida Emocional', fr: 'Salle E — Sortie Émotionnelle', de: 'Raum E — Emotionaler Ausgang', 'zh-cn': '房间 E — 情绪出口'},
-        desc: {zh: '有些話堵在心口太久會生病。在這裡，你可以完全匿名地把那些沉重、憤怒或委屈倒出來，黑暗會安全地接住它們。', en: 'Words kept inside can make you sick. Here, you can pour out your heaviness anonymously. The dark will hold it safely.', ja: '胸に秘めた言葉を吐き出してください。暗闇がそれを安全に受け止めます。', es: 'Aquí puedes desahogarte de forma anónima. La oscuridad lo sostendrá.', fr: 'Ici, vous pouvez vous épancher anonymement. L\'obscurité le gardera en sécurité.', de: 'Hier kannst du dich anonym ausschütten. Die Dunkelheit wird es sicher halten.', 'zh-cn': '有些话堵在心口太久会生病。在这里，你可以完全匿名地把那些沉重、愤怒或委屈倒出来，黑暗会安全地接住它们。'},
-        link: '#room-e'
-    },
-    'M': {
-        title: {zh: '房間 M — 思念映射', en: 'Room M — Memory Mapping', ja: '部屋 M — 想いの投影', es: 'Habitación M — Mapeo de Recuerdos', fr: 'Salle M — Cartographie des Souvenirs', de: 'Raum M — Erinnerungskartierung', 'zh-cn': '房间 M — 思念映射'},
-        desc: {zh: '思念沒有實體，但可以有座標。來這裡點亮一顆星，讓那份想念在夜空裡被看見，或許對方也能感應得到。', en: 'Missing someone has no physical form, but it can have a coordinate. Light a star here.', ja: '想いを星に変えて夜空に灯しましょう。', es: 'Extrañar no tiene forma física, pero puede tener una coordenada. Enciende una estrella aquí.', fr: 'Le manque n\'a pas de forme physique, mais peut avoir une coordonnée. Allumez une étoile ici.', de: 'Vermissen hat keine physische Form, aber es kann eine Koordinate haben. Zünde hier einen Stern an.', 'zh-cn': '思念没有实体，但可以有坐标。来这里点亮一颗星，让那份想念在夜空里被看见。'},
-        link: '#room-m'
-    },
-    'P': {
-        title: {zh: '房間 P — 碎片修補', en: 'Room P — Kintsugi Repair', ja: '部屋 P — 欠片の修復', es: 'Habitación P — Reparación Kintsugi', fr: 'Salle P — Réparation Kintsugi', de: 'Raum P — Kintsugi-Reparatur', 'zh-cn': '房间 P — 碎片修补'},
-        desc: {zh: '碎裂不是結束，而是光照進來的地方。用金繼（Kintsugi）的方式，將你心中的遺憾與傷痛重新修補，化為最美的紋理。', en: 'Brokenness is not the end. Use Kintsugi to mend your regrets into beautiful textures.', ja: '金継ぎのようにもう一度つなぎ合わせましょう。', es: 'La ruptura no es el fin. Usa Kintsugi para reparar tus arrepentimientos en texturas hermosas.', fr: 'La brisure n\'est pas la fin. Utilisez le Kintsugi pour réparer vos regrets en de belles textures.', de: 'Zerbrochenheit ist nicht das Ende. Verwende Kintsugi, um deine Reue in wunderschöne Texturen zu flicken.', 'zh-cn': '碎裂不是结束，而是光照进来的地方。用金继（Kintsugi）的方式，将你心中的遗憾与伤痛重新修补。'},
-        link: '#room-p'
-    },
-    'A': {
-        title: {zh: '房間 A — 神聖避難所', en: 'Room A — Sacred Asylum', ja: '部屋 A — 神聖な避難所', es: 'Habitación A — Asilo Sagrado', fr: 'Salle A — Asile Sacré', de: 'Raum A — Heiliges Asyl', 'zh-cn': '房间 A — 神圣避难所'},
-        desc: {zh: '有些痛苦太重，不該永遠背負。在這裡寫下的所有秘密，都會在 24 小時後像沙畫一樣被風吹散，不留痕跡。', en: 'Some pain is too heavy to carry forever. Secrets here will turn to sand and blow away in 24 hours.', ja: 'ここでの秘密は24時間後に砂のように消え去ります。', es: 'Cierto dolor es demasiado pesado. Los secretos aquí se convertirán en arena en 24 horas.', fr: 'Certaines douleurs sont trop lourdes. Les secrets ici se transformeront en sable dans 24 heures.', de: 'Mancher Schmerz ist zu schwer. Geheimnisse hier werden in 24 Stunden zu Sand.', 'zh-cn': '有些痛苦太重，不该永远背负。在这里写下的所有秘密，都会在 24 小时后像沙画一样被风吹散。'},
-        link: '#room-a'
-    },
-    'T': {
-        title: {zh: '房間 T — 能量共振', en: 'Room T — Energy Resonance', ja: '部屋 T — エネルギー共鳴', es: 'Habitación T — Resonancia de Energía', fr: 'Salle T — Résonance d\'Énergie', de: 'Raum T — Energieresonanz', 'zh-cn': '房间 T — 能量共振'},
-        desc: {zh: '當你覺得自己有餘力時，來這裡給予他人一個無聲的擁抱吧。每一次共鳴，都會化作對方真實的心跳震動。', en: 'When you have the strength, give someone a silent hug here. Every resonance is a heartbeat.', ja: '余裕があるなら、誰かに無言の抱擁を贈りましょう。', es: 'Cuando tengas fuerza, dale a alguien un abrazo silencioso aquí.', fr: 'Quand vous avez la force, donnez un câlin silencieux ici.', de: 'Wenn du die Kraft hast, gib hier jemandem eine stille Umarmung.', 'zh-cn': '当你觉得自己有余力时，来这里给予他人一个无声的拥抱吧。每一次共鸣，都会化作对方真实的心跳震动。'},
-        link: '#room-t'
-    }
+    'E': { title: {zh: '房間 E — 情緒出口', en: 'Room E — Emotional Exit', ja: '部屋 E — 感情の出口', es: 'Habitación E — Salida Emocional', fr: 'Salle E — Sortie Émotionnelle', de: 'Raum E — Emotionaler Ausgang', 'zh-cn': '房间 E — 情绪出口'}, desc: {zh: '有些話堵在心口太久會生病。在這裡，你可以完全匿名地把那些沉重、憤怒或委屈倒出來，黑暗會安全地接住它們。', en: 'Words kept inside can make you sick. Here, you can pour out your heaviness anonymously. The dark will hold it safely.', ja: '胸に秘めた言葉を吐き出してください。暗闇がそれを安全に受け止めます。', es: 'Aquí puedes desahogarte de forma anónima. La oscuridad lo sostendrá.', fr: 'Ici, vous pouvez vous épancher anonymement. L\'obscurité le gardera en sécurité.', de: 'Hier kannst du dich anonym ausschütten. Die Dunkelheit wird es sicher halten.', 'zh-cn': '有些话堵在心口太久会生病。在这里，你可以完全匿名地把那些沉重、愤怒或委屈倒出来，黑暗会安全地接住它们。'}, link: '#room-e' },
+    'M': { title: {zh: '房間 M — 思念映射', en: 'Room M — Memory Mapping', ja: '部屋 M — 想いの投影', es: 'Habitación M — Mapeo de Recuerdos', fr: 'Salle M — Cartographie des Souvenirs', de: 'Raum M — Erinnerungskartierung', 'zh-cn': '房间 M — 思念映射'}, desc: {zh: '思念沒有實體，但可以有座標。來這裡點亮一顆星，讓那份想念在夜空裡被看見，或許對方也能感應得到。', en: 'Missing someone has no physical form, but it can have a coordinate. Light a star here.', ja: '想いを星に変えて夜空に灯しましょう。', es: 'Extrañar no tiene forma física, pero puede tener una coordenada. Enciende una estrella aquí.', fr: 'Le manque n\'a pas de forme physique, mais peut avoir une coordonnée. Allumez une étoile ici.', de: 'Vermissen hat keine physische Form, aber es kann eine Koordinate haben. Zünde hier einen Stern an.', 'zh-cn': '思念没有实体，但可以有坐标。来这里点亮一颗星，让那份想念在夜空里被看见。'}, link: '#room-m' },
+    'P': { title: {zh: '房間 P — 碎片修補', en: 'Room P — Kintsugi Repair', ja: '部屋 P — 欠片の修復', es: 'Habitación P — Reparación Kintsugi', fr: 'Salle P — Réparation Kintsugi', de: 'Raum P — Kintsugi-Reparatur', 'zh-cn': '房间 P — 碎片修补'}, desc: {zh: '碎裂不是結束，而是光照進來的地方。用金繼（Kintsugi）的方式，將你心中的遺憾與傷痛重新修補，化為最美的紋理。', en: 'Brokenness is not the end. Use Kintsugi to mend your regrets into beautiful textures.', ja: '金継ぎのようにもう一度つなぎ合わせましょう。', es: 'La ruptura no es el fin. Usa Kintsugi para reparar tus arrepentimientos en texturas hermosas.', fr: 'La brisure n\'est pas la fin. Utilisez le Kintsugi pour réparer vos regrets en de belles textures.', de: 'Zerbrochenheit ist nicht das Ende. Verwende Kintsugi, um deine Reue in wunderschöne Texturen zu flicken.', 'zh-cn': '碎裂不是结束，而是光照进来的地方。用金继（Kintsugi）的方式，将你心中的遗憾与伤痛重新修补。'}, link: '#room-p' },
+    'A': { title: {zh: '房間 A — 神聖避難所', en: 'Room A — Sacred Asylum', ja: '部屋 A — 神聖な避難所', es: 'Habitación A — Asilo Sagrado', fr: 'Salle A — Asile Sacré', de: 'Raum A — Heiliges Asyl', 'zh-cn': '房间 A — 神圣避难所'}, desc: {zh: '有些痛苦太重，不該永遠背負。在這裡寫下的所有秘密，都會在 24 小時後像沙畫一樣被風吹散，不留痕跡。', en: 'Some pain is too heavy to carry forever. Secrets here will turn to sand and blow away in 24 hours.', ja: 'ここでの秘密は24時間後に砂のように消え去ります。', es: 'Cierto dolor es demasiado pesado. Los secretos aquí se convertirán en arena en 24 horas.', fr: 'Certaines douleurs sont trop lourdes. Les secrets ici se transformeront en sable dans 24 heures.', de: 'Mancher Schmerz ist zu schwer. Geheimnisse hier werden in 24 Stunden zu Sand.', 'zh-cn': '有些痛苦太重，不该永远背负。在这里写下的所有秘密，都会在 24 小时后像沙画一样被风吹散。'}, link: '#room-a' },
+    'T': { title: {zh: '房間 T — 能量共振', en: 'Room T — Energy Resonance', ja: '部屋 T — エネルギー共鳴', es: 'Habitación T — Resonancia de Energía', fr: 'Salle T — Résonance d\'Énergie', de: 'Raum T — Energieresonanz', 'zh-cn': '房间 T — 能量共振'}, desc: {zh: '當你覺得自己有餘力時，來這裡給予他人一個無聲的擁抱吧。每一次共鳴，都會化作對方真實的心跳震動。', en: 'When you have the strength, give someone a silent hug here. Every resonance is a heartbeat.', ja: '余裕があるなら、誰かに無言の抱擁を贈りましょう。', es: 'Cuando tengas fuerza, dale a alguien un abrazo silencioso aquí.', fr: 'Quand vous avez la force, donnez un câlin silencieux ici.', de: 'Wenn du die Kraft hast, gib hier jemandem eine stille Umarmung.', 'zh-cn': '当你觉得自己有余力时，来这里给予他人一个无声的拥抱吧。每一次共鸣，都会化作对方真实的心跳震动。'}, link: '#room-t' }
 };
 
 window.startGuide = function() {
@@ -1077,78 +1015,47 @@ window.startGuide = function() {
 window.showGuideResult = function(roomKey) {
     document.getElementById('ob-state-1').style.display = 'none';
     document.getElementById('ob-state-2').style.display = 'block';
-    
     const lang = (window.currentLang === 'en-uk') ? 'en' : window.currentLang;
     const data = guideData[roomKey];
-    
     document.getElementById('ob-res-title').textContent = data.title[lang] || data.title['zh'];
     document.getElementById('ob-res-desc').textContent = data.desc[lang] || data.desc['zh'];
-    
     const linkBtn = document.getElementById('ob-res-link');
     linkBtn.href = data.link;
     linkBtn.onclick = function() { window.closeMobileNav(); };
 }
 
-window.closeGuide = function() {
-    // Just lets the anchor tag work naturally
-}
+window.closeGuide = function() {}
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
-  const langNames = {
-      'zh': '繁體中文', 'zh-cn': '简体中文', 'en': 'English (US)', 'en-uk': 'English (UK)',
-      'ja': '日本語', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch'
-  };
+  const langNames = { 'zh': '繁體中文', 'zh-cn': '简体中文', 'en': 'English (US)', 'en-uk': 'English (UK)', 'ja': '日本語', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch' };
   document.getElementById('current-lang-display').textContent = langNames[lang];
   document.getElementById('lang-dropdown-list').classList.remove('show');
 
   document.querySelectorAll('.lang-option').forEach(btn => {
-    if(btn.dataset.lang === lang) btn.classList.add('active-lang');
-    else btn.classList.remove('active-lang');
+    if(btn.dataset.lang === lang) btn.classList.add('active-lang'); else btn.classList.remove('active-lang');
   });
   
   const targetLang = (lang === 'en-uk') ? 'en' : lang;
 
-  document.querySelectorAll('[data-zh]').forEach(el => {
-    el.innerHTML = el.getAttribute('data-' + targetLang) || el.getAttribute('data-en') || el.getAttribute('data-zh');
-  });
-  document.querySelectorAll('[data-zh-ph]').forEach(el => {
-    el.setAttribute('placeholder', el.getAttribute('data-' + targetLang + '-ph') || el.getAttribute('data-en-ph') || el.getAttribute('data-zh-ph'));
-  });
-  
-  document.querySelectorAll('[data-zh-title]').forEach(el => {
-    el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title'));
-  });
+  document.querySelectorAll('[data-zh]').forEach(el => { el.innerHTML = el.getAttribute('data-' + targetLang) || el.getAttribute('data-en') || el.getAttribute('data-zh'); });
+  document.querySelectorAll('[data-zh-ph]').forEach(el => { el.setAttribute('placeholder', el.getAttribute('data-' + targetLang + '-ph') || el.getAttribute('data-en-ph') || el.getAttribute('data-zh-ph')); });
+  document.querySelectorAll('[data-zh-title]').forEach(el => { el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title')); });
 
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") {
-      for(let key in guideData) {
-          if(Object.values(guideData[key].title).includes(activeTitle)) {
-             window.showGuideResult(key);
-             break;
-          }
-      }
+      for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } }
   }
 
   updateDynamicTexts();
-  document.getElementById('h-events').innerHTML = '';
-  initTimeline();
+  document.getElementById('h-events').innerHTML = ''; initTimeline();
   if(typeof window.renderEFeed === 'function') window.renderEFeed();
-  
   window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦'));
 }
 
 function updateDynamicTexts() {
   if(document.getElementById('p-healed-count')) {
-    document.getElementById('p-healed-count').textContent = t(
-        `已有 ${pHealedTotal} 道裂紋，以金修補。`, 
-        `${pHealedTotal} cracks mended with gold.`,
-        `${pHealedTotal} 個のひび割れが金で修復されました。`,
-        `${pHealedTotal} grietas reparadas con oro.`,
-        `${pHealedTotal} fissures réparées avec de l'or.`,
-        `${pHealedTotal} Risse mit Gold geflickt.`,
-        `已有 ${pHealedTotal} 道裂纹，以金修补。`
-    );
+    document.getElementById('p-healed-count').textContent = t( `已有 ${pHealedTotal} 道裂紋，以金修補。`, `${pHealedTotal} cracks mended with gold.`, `${pHealedTotal} 個のひび割れが金で修復されました。`, `${pHealedTotal} grietas reparadas con oro.`, `${pHealedTotal} fissures réparées avec de l'or.`, `${pHealedTotal} Risse mit Gold geflickt.`, `已有 ${pHealedTotal} 道裂纹，以金修补。` );
   }
   document.querySelectorAll('.shard-healed-tag').forEach(el => el.innerHTML = t('✦ 已修補', '✦ Healed', '✦ 修復済', '✦ Reparado', '✦ Réparé', '✦ Geheilt', '✦ 已修补'));
   document.querySelectorAll('.e-msg-anon').forEach(el => el.textContent = t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS'));
@@ -1180,12 +1087,10 @@ function formatTimeLeft(secs){
   return h>0 ? `${h}小時 ${m}分鐘 後消散` : `${m}分鐘 後消散`;
 }
 
-/* 🌟 升級版前端過濾器 (後端仍需實作 Cloud Functions) */
 function cleanText(text) {
   const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '殺', 'kill', 'suicide', 'rape'];
   let cleaned = text;
   badWords.forEach(word => {
-    // 允許空白或全形字元的變形繞過過濾
     const regex = new RegExp(word.split('').join('\\s*'), 'gi');
     cleaned = cleaned.replace(regex, '***');
   });
@@ -1193,82 +1098,126 @@ function cleanText(text) {
 }
 
 window.toggleTimeline = function() {
-  const wrapper = document.getElementById('h-events');
-  const btn = document.getElementById('timeline-toggle-btn');
-  const fade = document.getElementById('h-events-fade');
-  if (wrapper.style.maxHeight === '280px' || wrapper.style.maxHeight === '') {
-    wrapper.style.maxHeight = '5000px'; fade.style.opacity = '0'; 
-    btn.innerHTML = t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑', 'Réduire ↑', 'Einklappen ↑', '收起旅程 ↑');
-  } else {
-    wrapper.style.maxHeight = '280px'; fade.style.opacity = '1'; 
-    btn.innerHTML = t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓', 'Voir le parcours complet ↓', 'Gesamte Reise anzeigen ↓', '展开完整旅程 ↓');
-  }
+  const wrapper = document.getElementById('h-events'); const btn = document.getElementById('timeline-toggle-btn'); const fade = document.getElementById('h-events-fade');
+  if (wrapper.style.maxHeight === '280px' || wrapper.style.maxHeight === '') { wrapper.style.maxHeight = '5000px'; fade.style.opacity = '0'; btn.innerHTML = t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑', 'Réduire ↑', 'Einklappen ↑', '收起旅程 ↑'); } 
+  else { wrapper.style.maxHeight = '280px'; fade.style.opacity = '1'; btn.innerHTML = t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓', 'Voir le parcours complet ↓', 'Gesamte Reise anzeigen ↓', '展开完整旅程 ↓'); }
 }
 
 window.toggleHeroQuotes = function() {
-    const el = document.getElementById('hero-quotes');
-    const btn = document.getElementById('hero-quotes-toggle');
-    el.classList.toggle('show-quotes');
-    if(el.classList.contains('show-quotes')){
-        btn.innerHTML = t('📖 收起理念 ↑', '📖 Collapse ↑', '📖 閉じる ↑', '📖 Ocultar ↑', '📖 Réduire ↑', '📖 Einklappen ↑', '📖 收起理念 ↑');
-    } else {
-        btn.innerHTML = t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓', '📖 Lire la philosophie ↓', '📖 Philosophie lesen ↓', '📖 阅读设计理念 ↓');
-    }
+    const el = document.getElementById('hero-quotes'); const btn = document.getElementById('hero-quotes-toggle'); el.classList.toggle('show-quotes');
+    if(el.classList.contains('show-quotes')){ btn.innerHTML = t('📖 收起理念 ↑', '📖 Collapse ↑', '📖 閉じる ↑', '📖 Ocultar ↑', '📖 Réduire ↑', '📖 Einklappen ↑', '📖 收起理念 ↑'); } 
+    else { btn.innerHTML = t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓', '📖 Lire la philosophie ↓', '📖 Philosophie lesen ↓', '📖 阅读设计理念 ↓'); }
 }
 
 window.addEventListener('scroll', () => {
     const btt = document.getElementById('btt-btn');
-    if(window.scrollY > 500) { btt.style.display = 'flex'; } 
-    else { btt.style.display = 'none'; }
+    if(window.scrollY > 500) { btt.style.display = 'flex'; } else { btt.style.display = 'none'; }
 });
 
 function loadLocalJourney() {
   const savedJourney = localStorage.getItem('empath_user_journey');
   if(savedJourney){
-    try {
-      journeyData = JSON.parse(savedJourney);
-      state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0;
-      state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0;
-    } catch(err) {}
+    try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) {}
   }
 }
 loadLocalJourney();
 
-let isAnimating = true;
-let starsRafId = null;
-let sandRafId = null;
+/* 🌟 防護機制：取消訂閱與單一計時器 */
+let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
 
+function subscribeAll() {
+    if(firestoreUnsubs.length > 0) return;
+    
+    // 訂閱 E Room
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => {
+            globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
+            if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI();
+    }));
+    
+    // 訂閱 M Room
+    firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { 
+            globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); 
+            if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); 
+    }));
+    
+    // 訂閱 P Room
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => {
+            const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0;
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++;
+                const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : '');
+                div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`;
+                div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div);
+            });
+            globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI();
+    }));
+    
+    // 訂閱 A Room (取消各自的 setInterval)
+    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => {
+            globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; feed.innerHTML = ''; const nowMs = Date.now();
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
+                const expiresAt = msgTime + (24 * 60 * 60 * 1000); const leftSecs = (expiresAt - nowMs) / 1000; 
+                if(leftSecs <= 0) return;
+                const div = document.createElement('div'); div.className = 'sand-msg'; div.dataset.expires = expiresAt; const pct = (leftSecs / 86400) * 100;
+                div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
+                feed.appendChild(div); 
+            });
+            updateCountersUI();
+    }));
+    
+    // 訂閱 T Room
+    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => {
+            globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = '';
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item';
+                div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`;
+                div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div);
+            });
+            updateCountersUI();
+    }));
+}
+
+function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
+
+// 🌟 全域單一沙畫計時器
+let sandGlobalTimer = null;
+function startGlobalSandTimer() {
+    if(sandGlobalTimer) clearInterval(sandGlobalTimer);
+    sandGlobalTimer = setInterval(() => {
+        if(document.hidden) return; // 隱藏時暫停運算
+        const now = Date.now();
+        document.querySelectorAll('.sand-msg:not(.dissolving)').forEach(div => {
+            const expiresAt = parseInt(div.dataset.expires); const leftSecs = (expiresAt - now) / 1000;
+            if(leftSecs <= 0) { div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; }
+            const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
+            if(fill) fill.style.width = ((leftSecs / 86400) * 100) + '%';
+            if(label) label.textContent = formatTimeLeft(Math.floor(leftSecs));
+        });
+    }, 1000);
+}
+
+// 🌟 Page Visibility API: 節省效能
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-        isAnimating = false;
-        if(starsRafId) cancelAnimationFrame(starsRafId);
-        if(sandRafId) cancelAnimationFrame(sandRafId);
+        isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll();
     } else {
+        subscribeAll();
         if (!document.body.classList.contains('hsp-mode')) {
-            isAnimating = true;
-            drawStars();
-            drawSand();
+            isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand();
         }
     }
 });
 
 window.toggleHSP = function() {
-  const body = document.body;
-  const btn = document.getElementById('hsp-btn');
-  body.classList.toggle('hsp-mode');
+  const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode');
   if(body.classList.contains('hsp-mode')) {
-    btn.classList.add('active');
-    localStorage.setItem('empath_hsp_mode', 'true');
-    isAnimating = false;
-    if(starsRafId) cancelAnimationFrame(starsRafId);
-    if(sandRafId) cancelAnimationFrame(sandRafId);
+    btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); isAnimating = false;
+    if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId);
     window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁'));
   } else {
-    btn.classList.remove('active');
-    localStorage.setItem('empath_hsp_mode', 'false');
-    isAnimating = true;
-    drawStars();
-    drawSand();
+    btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true;
+    if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand();
     window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式'));
   }
 }
@@ -1287,11 +1236,8 @@ window.speakText = function(text) {
 window.triggerHeartbeat = function() { if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); } };
 
 window.shareSite = function() {
-  if (navigator.share) {
-    navigator.share({ title: 'EMPATH', text: t('我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', 'I found a beautiful emotional sanctuary.', '温かい場所を見つけました。ここで感情を休めてみませんか：', 'Encontré un hermoso santuario emocional. Ven a echar un vistazo:', 'J\'ai trouvé un magnifique sanctuaire émotionnel.', 'Ich habe ein wunderschönes emotionales Heiligtum gefunden.', '我发现了一个很温暖的地方，可以在数字时代安放情绪。来这里看看吧：'), url: window.location.href }).catch(console.error);
-  } else {
-    navigator.clipboard.writeText(window.location.href); window.showToast(t('網址已複製！快去貼給朋友吧 ✦', 'Link copied!', 'リンクをコピーしました！', '¡Enlace copiado!', 'Lien copié !', 'Link kopiert!', '网址已复制！快去贴给朋友吧 ✦'));
-  }
+  if (navigator.share) { navigator.share({ title: 'EMPATH', text: t('我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', 'I found a beautiful emotional sanctuary.', '温かい場所を見つけました。ここで感情を休めてみませんか：', 'Encontré un hermoso santuario emocional. Ven a echar un vistazo:', 'J\'ai trouvé un magnifique sanctuaire émotionnel.', 'Ich habe ein wunderschönes emotionales Heiligtum gefunden.', '我发现了一个很温暖的地方，可以在数字时代安放情绪。来这里看看吧：'), url: window.location.href }).catch(console.error);
+  } else { navigator.clipboard.writeText(window.location.href); window.showToast(t('網址已複製！快去貼給朋友吧 ✦', 'Link copied!', 'リンクをコピーしました！', '¡Enlace copiado!', 'Lien copié !', 'Link kopiert!', '网址已复制！快去贴给朋友吧 ✦')); }
 }
 
 window.openShareCard = function() {
@@ -1310,10 +1256,7 @@ window.downloadShareCard = function() {
     imgEl.style.width = '100%'; imgEl.style.maxWidth = '320px'; imgEl.style.borderRadius = '4px'; imgEl.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)';
     card.parentNode.insertBefore(imgEl, document.querySelector('.share-modal-actions')); btn.style.display = 'none';
     let hint = document.getElementById('save-hint');
-    if(!hint) {
-      hint = document.createElement('p'); hint.id = 'save-hint'; hint.style.color = 'var(--gold)'; hint.style.fontSize = '12px'; hint.style.marginBottom = '16px';
-      document.querySelector('.share-modal-actions').prepend(hint);
-    } 
+    if(!hint) { hint = document.createElement('p'); hint.id = 'save-hint'; hint.style.color = 'var(--gold)'; hint.style.fontSize = '12px'; hint.style.marginBottom = '16px'; document.querySelector('.share-modal-actions').prepend(hint); } 
     hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享');
     hint.style.display = 'block'; window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦'));
   }).catch(err => { btn.textContent = originalText; window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); });
@@ -1334,15 +1277,7 @@ function logJourney(type, text){
 
 function renderTimelineHTML(type, text, time){
   const container = document.getElementById('h-events'); const div = document.createElement('div'); div.className = 'h-event ' + type + '-event';
-  const labels = {
-    'zh': {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'},
-    'en': {e:'Exit', m:'Stars', p:'Mended', a:'Asylum', t:'Resonance'},
-    'ja': {e:'出口', m:'星空', p:'修復', a:'避難所', t:'共鳴'},
-    'es': {e:'Salida', m:'Estrellas', p:'Reparado', a:'Asilo', t:'Resonancia'},
-    'fr': {e:'Sortie', m:'Étoiles', p:'Réparé', a:'Asile', t:'Résonance'},
-    'de': {e:'Ausgang', m:'Sterne', p:'Geflickt', a:'Asyl', t:'Resonanz'},
-    'zh-cn': {e:'情绪出口', m:'思念映射', p:'碎片修补', a:'避难所', t:'能量共振'}
-  };
+  const labels = { 'zh': {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'}, 'en': {e:'Exit', m:'Stars', p:'Mended', a:'Asylum', t:'Resonance'}, 'ja': {e:'出口', m:'星空', p:'修復', a:'避難所', t:'共鳴'}, 'es': {e:'Salida', m:'Estrellas', p:'Reparado', a:'Asilo', t:'Resonancia'}, 'fr': {e:'Sortie', m:'Étoiles', p:'Réparé', a:'Asile', t:'Résonance'}, 'de': {e:'Ausgang', m:'Sterne', p:'Geflickt', a:'Asyl', t:'Resonanz'}, 'zh-cn': {e:'情绪出口', m:'思念映射', p:'碎片修补', a:'避难所', t:'能量共振'} };
   const currentKey = window.currentLang === 'en-uk' ? 'en' : window.currentLang;
   div.innerHTML = `<div><div class="h-event-label">${labels[currentKey][type]||''}</div><div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div><div class="h-event-time">${time}</div></div>`;
   container.appendChild(div);
@@ -1359,8 +1294,7 @@ window.copySoulKey = function() {
     const key = localStorage.getItem('empath_soul_key');
     if (key) {
         navigator.clipboard.writeText(key).then(() => {
-            const btn = document.getElementById('copy-key-btn');
-            const originalText = btn.innerHTML;
+            const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML;
             btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制');
             btn.style.color = '#fff'; btn.style.borderColor = '#fff';
             window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板'));
@@ -1370,8 +1304,7 @@ window.copySoulKey = function() {
 }
 
 window.loadExistingSoulKey = async function() {
-  const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase();
-  if(!key) return;
+  const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return;
   try {
     const docSnap = await getDoc(doc(db, "user_journeys", key));
     if(docSnap.exists()) {
@@ -1391,8 +1324,7 @@ function updateSyncUI() {
   else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; }
 }
 
-let allEmotions = [];
-let eFeedExpanded = false;
+let allEmotions = []; let eFeedExpanded = false;
 window.renderEFeed = function() {
   const feed = document.getElementById('e-feed'); const fade = document.getElementById('e-feed-fade'); const btn = document.getElementById('e-expand-btn');
   if(!feed) return; feed.innerHTML = '';
@@ -1411,48 +1343,37 @@ window.renderEFeed = function() {
 }
 window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
 
-onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => {
-  globalCounts.e = snapshot.size; allEmotions = [];
-  snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
-  window.renderEFeed(); updateCountersUI();
-});
-
 window.submitE = async function(){ 
   if(!canSubmit()) return;
-  const input = document.getElementById('e-input'); let text = input.value.trim(); if(!text) return; 
-  text = cleanText(text);
+  const input = document.getElementById('e-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   try { 
       const origText = document.getElementById('e-submit-btn').innerHTML;
       await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); 
-      input.value=''; document.getElementById('e-char').textContent = '0 / 500'; logJourney('e', text); 
-      playRitual('e-submit-btn', origText);
-      window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
+      input.value=''; document.getElementById('e-char').textContent = '0 / 500'; logJourney('e', text); playRitual('e-submit-btn', origText); window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
   } catch(e){} 
 }
 
 const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m');
 let starMessages = [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
-function resizeCanvas(){ 
+window.resizeCanvas = function(){ 
   const dpr = window.devicePixelRatio || 1;
   if(canvas && roomM) { const w = roomM.offsetWidth; const h = roomM.offsetHeight; canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); initBgStars(w, h); }
   const sCanvas = document.getElementById('sand-canvas'); const roomA = document.getElementById('room-a');
   if(sCanvas && roomA) { const sw = roomA.offsetWidth; const sh = roomA.offsetHeight; sCanvas.width = sw * dpr; sCanvas.height = sh * dpr; sCanvas.style.width = sw + 'px'; sCanvas.style.height = sh + 'px'; sCanvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); initSandBg(sw, sh); }
 }
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', window.resizeCanvas);
 function initBgStars(w, h){ bgStars=[]; for(let i=0; i<100; i++){ bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.2, a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c:STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]}); } }
-function updateMStats(){
+window.updateMStats = function(){
   if(!document.getElementById('m-count')) return; document.getElementById('m-count').textContent = starMessages.length;
   if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; }
   const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text;
 }
-onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, text: data.text, brightness: data.brightness||1, clicks: data.clicks||0, colorIdx: data.colorIdx||0, relX: data.relX, relY: data.relY }); }); updateMStats(); updateCountersUI(); });
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
-
-function drawStars(){
-  if(!canvas.width) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h);
+window.drawStars = function(){
+  if(!canvas.width || !isAnimating) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h);
   bgStars.forEach(s => { s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } ctx.fill(); ctx.shadowBlur = 0; });
   starMessages.forEach(s => { s.x = s.relX*w; s.y = s.relY*h; const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); });
-  if(isAnimating) starsRafId = requestAnimationFrame(drawStars);
+  starsRafId = requestAnimationFrame(window.drawStars);
 }
 
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
@@ -1474,9 +1395,7 @@ window.submitM = async function(){
   try { 
       const origText = document.getElementById('m-submit-btn').innerHTML;
       await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); 
-      input.value=''; logJourney('m', text); 
-      playRitual('m-submit-btn', origText);
-      window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); 
+      input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); 
   } catch(err){} 
 }
 
@@ -1485,19 +1404,9 @@ window.addEventListener('load', () => {
   pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); 
   const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300;
   pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px';
-  pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); drawKintsugiVessel(); 
+  pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); 
 });
-onSnapshot(collection(db, "shards"), (snapshot) => {
-  const board = document.getElementById('p-board'); board.innerHTML = ''; pHealedTotal = 0;
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++;
-    const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : '');
-    div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`;
-    div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div);
-  });
-  globalCounts.p = pHealedTotal; drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI();
-});
-function drawKintsugiVessel(){
+window.drawKintsugiVessel = function(){
   if(!pCtx) return; const c=pCtx; const w=pCanvas.offsetWidth||540; const h=300; c.clearRect(0,0,w,h);
   c.strokeStyle='rgba(201,168,76,0.3)'; c.lineWidth=1; c.beginPath(); const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke();
   const predefinedCracks = [ {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80}, {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60}, {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20}, {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100}, {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60} ];
@@ -1511,90 +1420,59 @@ window.submitP = async function(){
   const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   const origText = document.getElementById('p-submit-btn').innerHTML;
   await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); 
-  input.value = ''; logJourney('p', text); 
-  playRitual('p-submit-btn', origText);
-  window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); 
+  input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); 
 }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
-function drawSand() {
-  const c = document.getElementById('sand-canvas'); if(!c || !c.width) return; const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h);
+window.drawSand = function() {
+  const c = document.getElementById('sand-canvas'); if(!c || !c.width || !isAnimating) return;
+  const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h);
   sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; 
-  if(isAnimating) sandRafId = requestAnimationFrame(drawSand);
+  sandRafId = requestAnimationFrame(window.drawSand);
 }
 
-/* 🌟 UX 優化：改用 sessionStorage */
 window.acceptARead = function() {
-    document.getElementById('a-warning-mask').style.display = 'none';
-    const feed = document.getElementById('a-feed');
-    feed.style.display = 'flex';
-    setTimeout(() => feed.style.filter = 'blur(0px)', 50);
-    sessionStorage.setItem('empath_a_accepted', 'true');
+    document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex';
+    setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true');
 }
 window.hideAFeed = function() {
-    document.getElementById('a-warning-mask').innerHTML = `
-        <p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`;
+    document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`;
 }
-
-onSnapshot(collection(db, "sand"), (snapshot) => {
-  globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); feed.innerHTML = ''; const nowMs = Date.now();
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
-    const leftSecs = (24*60*60) - ((nowMs - msgTime)/1000); 
-    if(leftSecs <= 0) return;
-    const div = document.createElement('div'); div.className = 'sand-msg'; const pct = (leftSecs / 86400) * 100;
-    div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
-    feed.appendChild(div); let simSecs = leftSecs; const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left');
-    const interval = setInterval(() => { simSecs -= 1; if(simSecs <= 0){ clearInterval(interval); div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; } if(fill) fill.style.width = (simSecs / (24 * 60 * 60)) * 100 + '%'; if(label) label.textContent = formatTimeLeft(simSecs); }, 1000);
-  });
-  updateCountersUI();
-});
 
 window.submitA = async function(){ 
   if(!canSubmit()) return;
   const input = document.getElementById('a-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   const origText = document.getElementById('a-submit-btn').innerHTML;
   await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); 
-  input.value=''; logJourney('a', text); 
-  playRitual('a-submit-btn', origText);
-  window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena', 'Transformé en sable', 'Zu Sand geworden', '放入沙画')); 
+  input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena', 'Transformé en sable', 'Zu Sand geworden', '放入沙画')); 
 }
-
-onSnapshot(collection(db, "warmth"), (snapshot) => {
-  globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); feed.innerHTML = '';
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item';
-    div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`;
-    div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div);
-  });
-  updateCountersUI();
-});
 
 window.submitT = async function(){ 
   if(!canSubmit()) return;
   const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text);
   const origText = document.getElementById('t-submit-btn').innerHTML;
   await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); 
-  input.value=''; logJourney('t', text); 
-  playRitual('t-submit-btn', origText);
-  window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
+  input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
 }
 
 window.addEventListener('load', async () => {
+  subscribeAll(); startGlobalSandTimer();
+
+  // 檢查是否初次到訪 (Firestore 寫入)
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
+  
+  // 監聽總人數
+  firestoreUnsubs.push(onSnapshot(metaRef, async (docSnap) => { 
+      if(!docSnap.exists()){ try { await setDoc(metaRef, { totalVisitors: 1 }, { merge: true }); } catch(e){} }
+      else { globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } 
+  }));
+
+  // 如果沒造訪過，送出新增請求
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
-  onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } });
   
   if(!localStorage.getItem('empath_hsp_hint_shown')) {
-      setTimeout(() => {
-          const ttip = document.getElementById('hsp-tooltip');
-          if(ttip) {
-              ttip.classList.add('show');
-              setTimeout(() => { ttip.classList.remove('show'); }, 8000);
-              localStorage.setItem('empath_hsp_hint_shown', 'true');
-          }
-      }, 1000);
+      setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000);
   }
 
   if(sessionStorage.getItem('empath_a_accepted') === 'true') {
@@ -1605,7 +1483,7 @@ window.addEventListener('load', async () => {
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
-  setTimeout(() => { resizeCanvas(); drawStars(); drawSand(); updateCountersUI(); }, 200);
+  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
 });
 </script>
 </body>
