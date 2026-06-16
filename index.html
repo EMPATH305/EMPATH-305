@@ -1024,7 +1024,24 @@ window.showGuideResult = function(roomKey) {
     linkBtn.onclick = function() { window.closeMobileNav(); };
 }
 
-window.closeGuide = function() {}
+window.closeGuide = function(){
+
+  const box =
+    document.querySelector('.onboarding-box');
+
+  if(box){
+
+    box.style.opacity = '0';
+
+    setTimeout(() => {
+
+      box.style.display = 'none';
+
+    },300);
+
+  }
+
+}
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
@@ -1088,7 +1105,7 @@ function formatTimeLeft(secs){
 }
 
 function cleanText(text) {
-  const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '殺', 'kill', 'suicide', 'rape'];
+  const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾' , 'rape'];
   let cleaned = text;
   badWords.forEach(word => {
     const regex = new RegExp(word.split('').join('\\s*'), 'gi');
