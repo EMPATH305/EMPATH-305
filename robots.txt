@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://empath305.github.io/EMPATH-305/sitemap.xml
