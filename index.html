@@ -57,15 +57,14 @@
 /* 懸浮按鈕的靜態美學與動畫綁定 */
 .behance-float {
   display: inline-block;
-  color: #D4AF37; /* 呼應妳的質感金色 */
+  color: #D4AF37; 
   text-decoration: none;
-  font-family: serif; /* 襯線字體，維持文學感 */
+  font-family: serif; 
   font-size: 0.85rem;
   letter-spacing: 2px;
   padding: 8px 20px;
   border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 30px;
-  /* 綁定漂浮動畫：4秒一週期的平滑移動 */
   animation: float-away 4s ease-in-out infinite;
   transition: all 0.4s ease;
 }
@@ -82,7 +81,7 @@
 /* 讓按鈕像呼吸一樣上下溫柔起伏的軌跡 */
 @keyframes float-away {
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); } /* 微微往上飄 6px */
+  50% { transform: translateY(-6px); } 
   100% { transform: translateY(0px); }
 }
 
@@ -571,10 +570,12 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
                 <div class="lang-option" data-lang="zh-cn" onclick="window.switchLang('zh-cn')">简体中文</div>
                 <div class="lang-option" data-lang="en" onclick="window.switchLang('en')">English (US)</div>
                 <div class="lang-option" data-lang="en-uk" onclick="window.switchLang('en-uk')">English (UK)</div>
-                <div class="lang-option" data-lang="ja" onclick="window.switchLang('ja')">日本語</div>
                 <div class="lang-option" data-lang="fr" onclick="window.switchLang('fr')">Français</div>
                 <div class="lang-option" data-lang="de" onclick="window.switchLang('de')">Deutsch</div>
                 <div class="lang-option" data-lang="es" onclick="window.switchLang('es')">Español</div>
+                <div class="lang-option" data-lang="ja" onclick="window.switchLang('ja')">日本語</div>
+                <div class="lang-option" data-lang="uk" onclick="window.switchLang('uk')">Українська</div>
+                <div class="lang-option" data-lang="pl" onclick="window.switchLang('pl')">Polski</div>
             </div>
         </div>
       </div>
@@ -674,7 +675,18 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   
   <div class="desc-wrap">
-      <p class="room-desc" data-zh="說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。" data-en="Say what you cannot say. Cast it anonymously. Only the emotion itself is caught here." data-ja="言えなかった言葉をここで。完全匿名、誰にも知られることはありません。ただ感情だけがここで受け止められます。" data-es="Di lo que no puedes decir. Envíalo de forma anónima, nadie sabrá que eres tú. Solo la emoción es atrapada aquí." data-fr="Dites ce que vous ne pouvez pas dire. Lancez-le anonymement. Seule l'émotion elle-même est capturée ici." data-de="Sag, was du nicht sagen kannst. Wirf es anonym aus. Nur die Emotion selbst wird hier aufgefangen." data-zh-cn="说出那些说不出口的话。匿名投递，没有人知道是你。只有情绪本身，被这里接住。">說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。</p>
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
+         data-zh="說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。" 
+         data-en="Say what you cannot say. Cast it anonymously. Only the emotion itself is caught here." 
+         data-ja="言えなかった言葉をここで。完全匿名、誰にも知られることはありません。ただ感情だけがここで受け止められます。" 
+         data-es="Di lo que no puedes decir. Envíalo de forma anónima, nadie sabrá que eres tú. Solo la emoción es atrapada aquí." 
+         data-fr="Dites l'indicible. Déposez-le dans l'anonymat. Seule l'émotion pure est recueillie ici." 
+         data-de="Sag, was du nicht sagen kannst. Wirf es anonym aus. Nur die Emotion selbst wird hier aufgefangen." 
+         data-zh-cn="说出那些说不出口的话。匿名投递，没有人知道是你。只有情绪本身，被这里接住。"
+         data-uk="Скажи те, що неможливо вимовити. Залиш це анонімно. Тут знайде прихисток лише сама емоція."
+         data-pl="Powiedz to, co niewypowiedziane. Rzuć to anonimowo. Tutaj schronienie znajduje tylko sama emocja.">
+         說出那些說不出口的話。匿名投遞，沒有人知道是你。只有情緒本身，被這裡接住。
+      </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
       </button>
@@ -690,6 +702,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     data-fr-ph="Écrivez ce que vous ne pouvez pas dire...&#10;Colère, chagrin, tristesse, ou tout poids que vous souhaitez relâcher.&#10;Personne ne saura que c'est vous."
     data-de-ph="Schreibe auf, was du nicht sagen kannst...&#10;Wut, Kummer, Trauer oder jedes Gewicht, das du loslassen möchtest.&#10;Niemand weiß, dass du es bist."
     data-zh-cn-ph="在这里写下你说不出口的话……&#10;可以是愤怒、委屈、悲伤、或任何你想放下的重量。&#10;没有人知道是你。"
+    data-uk-ph="Напишіть те, що неможливо сказати...&#10;Гнів, біль чи будь-який тягар.&#10;Ніхто не дізнається, що це ви."
+    data-pl-ph="Napisz to, czego nie możesz powiedzieć...&#10;Gniew, żal lub jakikolwiek ciężar.&#10;Nikt nie będzie wiedział, że to ty."
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 500</div>
   <br>
@@ -718,7 +732,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     </div>
     
     <div class="desc-wrap">
-        <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。" data-en="Every memory becomes a star. Click a star to hear someone's secret. If it resonates, make it brighter." data-ja="すべての想いは星になります。星をクリックして、誰かの秘密を聴いてください。共鳴したら、その星をさらに輝かせてください。" data-es="Cada recuerdo se convierte en una estrella. Haz clic para escuchar los secretos ocultos. Si te conmueve, haz que brille más." data-fr="Chaque souvenir devient une étoile. Cliquez sur une étoile pour entendre le secret de quelqu'un. Si cela résonne, rendez-la plus brillante." data-de="Jede Erinnerung wird zu einem Stern. Klicke auf einen Stern, um das Geheimnis von jemandem zu hören. Wenn es nachhallt, mach ihn heller." data-zh-cn="每段思念都成为一颗星。点击星星，听见别人藏在夜空里的心事。感动了，就让它更亮一些。">
+        <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
+           data-zh="每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。" 
+           data-en="Every memory becomes a star. Click a star to hear someone's secret. If it resonates, make it brighter." 
+           data-ja="すべての想いは星になります。星をクリックして、誰かの秘密を聴いてください。共鳴したら、その星をさらに輝かせてください。" 
+           data-es="Cada recuerdo se convierte en una estrella. Haz clic para escuchar los secretos ocultos. Si te conmueve, haz que brille más." 
+           data-fr="Chaque souvenir devient une étoile. Écoutez les secrets de la nuit. S'ils résonnent en vous, ravivez leur éclat." 
+           data-de="Jede Erinnerung wird zu einem Stern. Klicke auf einen Stern, um das Geheimnis von jemandem zu hören. Wenn es nachhallt, mach ihn heller." 
+           data-zh-cn="每段思念都成为一颗星。点击星星，听见别人藏在夜空里的心事。感动了，就让它更亮一些。"
+           data-uk="Кожен спогад стає зорею. Торкнися зірки, щоб почути чиюсь таємницю. Якщо вона відгукується в тобі, зроби її яскравішою."
+           data-pl="Każde wspomnienie staje się gwiazdą. Kliknij gwiazdę, by usłyszeć czyjś sekret. Jeśli z tobą rezonuje, spraw, by lśniła jaśniej.">
           每段思念都成為一顆星。點擊星星，聽見別人藏在夜空裡的心事。感動了，就讓它更亮一些。
         </p>
         <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
@@ -733,6 +756,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         data-fr-ph="Qui vous est venu à l'esprit ce soir ?&#10;Écrivez ses initiales, ou continuez :&#10;'Les jours où... me manquent'&#10;'Je me demande comment tu vas maintenant...'"
         data-de-ph="Wer ist dir heute Abend in den Sinn gekommen?&#10;Schreibe seine Initialen oder fahre fort:&#10;'Ich vermisse die Tage, als...'&#10;'Ich frage mich, wie es dir jetzt geht...'"
         data-zh-cn-ph="今晚，你突然想起了谁？&#10;你可以直接写下他的名字缩写，或者试着接下去写：&#10;『很想念那时候的……』&#10;『不知道在另一个学校的你，现在……』"
+        data-uk-ph="Про кого ви згадали сьогодні?&#10;Напишіть ініціали або продовжте:&#10;'Я сумую за тими днями...'"
+        data-pl-ph="O kim dzisiaj pomyślałeś?&#10;Napisz inicjały lub kontynuuj:&#10;'Tęsknię za dniami, kiedy...'"
         placeholder="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"></textarea>
       <br>
       <button class="send-btn" id="m-submit-btn" onclick="window.submitM()" data-zh="放上星空 →" data-en="Place in Sky →" data-ja="夜空に放つ →" data-es="Colocar en el Cielo →" data-fr="Placer dans le ciel →" data-de="In den Himmel setzen →" data-zh-cn="放上星空 →">放上星空 →</button>
@@ -753,7 +778,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   
   <div class="desc-wrap">
-      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca." data-fr="Kintsugi — réparer les fissures avec de l'or, transformant les brisures en magnifiques textures. Cliquez sur un éclat pour le guérir." data-de="Kintsugi — Risse mit Gold reparieren und Zerbrochenheit in wunderschöne Texturen verwandeln. Klicke auf eine Scherbe, um sie zu heilen." data-zh-cn="金继 — 以金修补裂缝，让破碎成为生命最美的纹理。点击碎片，让它重生。">
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
+         data-zh="金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。" 
+         data-en="Kintsugi — repairing cracks with gold, turning brokenness into beautiful textures. Click a shard to heal it." 
+         data-ja="金継ぎ — ひび割れを金で修復し、壊れたものを最も美しい模様に変える。欠片をクリックして、再生させてください。" 
+         data-es="Kintsugi — reparando grietas con oro, convirtiendo la ruptura en texturas hermosas. Haz clic en un fragmento para que renazca." 
+         data-fr="Kintsugi — réparer les failles avec de l'or, sublimant la brisure en la plus belle des textures. Cliquez pour la renaissance." 
+         data-de="Kintsugi — Risse mit Gold reparieren und Zerbrochenheit in wunderschöne Texturen verwandeln. Klicke auf eine Scherbe, um sie zu heilen." 
+         data-zh-cn="金继 — 以金修补裂缝，让破碎成为生命最美的纹理。点击碎片，让它重生。"
+         data-uk="Кінцуґі — зцілення тріщин золотом, що перетворює розбитість на найпрекрасніший візерунок душі. Торкнися, щоб зцілити."
+         data-pl="Kintsugi — naprawianie pęknięć złotem, przemieniające rozbicie w piękną fakturę. Kliknij odłamek, by go odrodzić.">
         金繼 — 以金修補裂縫，讓破碎成為生命最美的紋理。點擊碎片，讓它重生。
       </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
@@ -769,6 +803,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         data-fr-ph="Écrivez un morceau de votre cœur brisé : une douleur, un regret, une perte..."
         data-de-ph="Schreibe ein Stück deines gebrochenen Herzens auf: ein Schmerz, ein Bedauern, ein Verlust..."
         data-zh-cn-ph="写下你心中一块碎片——一段伤痛、一个遗憾、一次失落……"
+        data-uk-ph="Напишіть про уламок вашого серця — біль, жаль, втрату..."
+        data-pl-ph="Napisz o kawałku swojego serca — ból, żal, strata..."
         placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
       <br>
       <button class="send-btn" id="p-submit-btn" onclick="window.submitP()" data-zh="放入瓷器 →" data-en="Place in Vessel →" data-ja="器に入れる →" data-es="Colocar en la Vasija →" data-fr="Placer dans le récipient →" data-de="In das Gefäß setzen →" data-zh-cn="放入瓷器 →">放入瓷器 →</button>
@@ -802,7 +838,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     </div>
     
     <div class="desc-wrap">
-        <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." data-fr="La douleur se dissout ici. Chaque message disparaît complètement après 24 heures, comme du sable au vent. Dites-le, puis partez." data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。">
+        <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
+           data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" 
+           data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." 
+           data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" 
+           data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." 
+           data-fr="Ici, la douleur se dissout. Chaque murmure s'efface après 24 heures, comme du sable emporté par le vent. Dites-le, puis partez." 
+           data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." 
+           data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。"
+           data-uk="Тут біль розчиняється. Кожне слово зникає безслідно за 24 години, ніби пісок на вітрі. Скажи це, і йди."
+           data-pl="Ból rozpuszcza się tutaj. Każda wiadomość znika bez śladu po 24 godzinach, jak piasek na wietrze. Powiedz to, a potem odejdź.">
           痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。
         </p>
         <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
@@ -818,6 +863,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       data-fr-ph="Murmurez votre douleur ou secret le plus profond ici...&#10;Après 24 heures, ces mots s'effaceront.&#10;Rien n'est éternel, seule la sensation d'être compris à ce moment."
       data-de-ph="Flüstere hier deinen tiefsten Schmerz oder dein Geheimnis...&#10;Nach 24 Stunden werden diese Worte verblassen.&#10;Nichts ist für immer, nur das Gefühl, in diesem Moment aufgefangen zu werden."
       data-zh-cn-ph="在这里说出今天最深的痛苦或秘密……&#10;24 小时后，这段文字将自动消失。&#10;没有永远，只有此刻被接住的感觉。"
+      data-uk-ph="Прошепотіть свій найглибший біль тут...&#10;Через 24 години ці слова зникнуть."
+      data-pl-ph="Wyszeptaj swój najgłębszy ból tutaj...&#10;Po 24 godzinach te słowa znikną."
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
     <br>
     <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →" data-fr="Transformer en sable →" data-de="Zu Sand machen →" data-zh-cn="放入沙画 →">放入沙畫 →</button>
@@ -850,7 +897,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
   
   <div class="desc-wrap">
-      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。" data-en="Light up others, and be illuminated. Send warmth and receive Echo Pulses from strangers—not likes, but heartbeats." data-ja="誰かを照らし、誰かに照らされる。温もりを送り、見知らぬ人からのEcho Pulseを受け取りましょう。それは「いいね」ではなく、鼓動です。" data-es="Ilumina a otros y sé iluminado. Envía calidez y recibe Pulsos de Eco de extraños; no son 'me gusta', son latidos." data-fr="Illuminez les autres, et soyez illuminé. Envoyez de la chaleur et recevez des Pulsos d'Écho—pas des likes, mais des battements de cœur." data-de="Erleuchte andere und werde erleuchtet. Sende Wärme und empfange Echo-Pulse—keine Likes, sondern Herzschläge." data-zh-cn="照亮他人，也被人照亮。送出你的温暖，接收陌生人的 Echo Pulse——不是按赞，是心跳。">
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
+         data-zh="照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。" 
+         data-en="Light up others, and be illuminated. Send warmth and receive Echo Pulses from strangers—not likes, but heartbeats." 
+         data-ja="誰かを照らし、誰かに照らされる。温もりを送り、見知らぬ人からのEcho Pulseを受け取りましょう。それは「いいね」ではなく、鼓動です。" 
+         data-es="Ilumina a otros y sé iluminado. Envía calidez y recibe Pulsos de Eco de extraños; no son 'me gusta', son latidos." 
+         data-fr="Éclairez les autres, et soyez illuminé. Offrez votre chaleur et recevez un écho—pas de simples 'likes', mais des battements de cœur." 
+         data-de="Erleuchte andere und werde erleuchtet. Sende Wärme und empfange Echo-Pulse—keine Likes, sondern Herzschläge." 
+         data-zh-cn="照亮他人，也被人照亮。送出你的温暖，接收陌生人的 Echo Pulse——不是按赞，是心跳。"
+         data-uk="Освітлюй інших, і світло знайде тебе. Подаруй тепло й відчуй луну чужого серцебиття — це не лайки, це пульс."
+         data-pl="Oświetlaj innych i bądź oświetlany. Wyślij ciepło i otrzymaj Echo — to nie są polubienia, to bicie serca.">
         照亮他人，也被人照亮。送出你的溫暖，接收陌生人的 Echo Pulse——不是按讚，是心跳。
       </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
@@ -875,6 +931,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
           data-fr-ph="Écrivez un mot chaleureux, un encouragement, un câlin virtuel...&#10;Il flottera vers quelqu'un qui en a besoin."
           data-de-ph="Schreibe ein warmes Wort, eine Ermutigung, eine virtuelle Umarmung...&#10;Es wird zu jemandem schweben, der es braucht."
           data-zh-cn-ph="写下一句温暖的话、一个鼓励、一个拥抱的文字……&#10;它会漂浮到某个需要的人身边。"
+          data-uk-ph="Напишіть тепле слово, підбадьорення...&#10;Воно прилетить до того, хто цього потребує."
+          data-pl-ph="Napisz ciepłe słowo, wsparcie...&#10;Trafi do kogoś, kto tego potrzebuje."
           placeholder="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"></textarea>
         <br>
         <button class="send-btn" id="t-submit-btn" onclick="window.submitT()" data-zh="傳出去 →" data-en="Send it Out →" data-ja="送る →" data-es="Enviar →" data-fr="Envoyer →" data-de="Senden →" data-zh-cn="传出去 →">傳出去 →</button>
@@ -899,7 +957,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--h)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
   </div>
   <div class="desc-wrap">
-      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" title="點擊聆聽文字" data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." data-ja="おかえりなさい。偽りの必要がない場所へ。あなたが歩んできたすべての部屋が、あなたのものです。" data-es="Vuelve a casa, a un lugar donde no necesitas fingir. Cada habitación por la que has pasado, es tuya." data-fr="Rentrez chez vous, dans un endroit sans déguisement. Chaque pièce que vous avez traversée est la vôtre." data-de="Komm nach Hause, an einen Ort ohne Verstellung. Jedes Zimmer, durch das du gegangen bist, gehört dir." data-zh-cn="回家，回到不需伪装的地方。你走过的每个房间，都是你的。">
+      <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
+         data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" 
+         data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." 
+         data-ja="おかえりなさい。偽りの必要がない場所へ。あなたが歩んできたすべての部屋が、あなたのものです。" 
+         data-es="Vuelve a casa, a un lugar donde no necesitas fingir. Cada habitación por la que has pasado, es tuya." 
+         data-fr="Rentrez chez vous, là où les masques tombent. Chaque pièce que vous avez traversée vous appartient." 
+         data-de="Komm nach Hause, an einen Ort ohne Verstellung. Jedes Zimmer, durch das du gegangen bist, gehört dir." 
+         data-zh-cn="回家，回到不需伪装的地方。你走过的每个房间，都是你的。"
+         data-uk="Повертайся додому. Туди, де не потрібні маски. Кожна кімната, яку ти пройшов, належить тобі."
+         data-pl="Wróć do domu, do miejsca, gdzie nie trzeba udawać. Każdy pokój, przez który przeszedłeś, jest twój.">
         回家，回到不需偽裝的地方。你走過的每個房間，都是你的。
       </p>
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
@@ -1056,7 +1123,7 @@ function updateCountersUI() {
 
 window.currentLang = 'zh';
 
-function t(zh, en, ja, es, fr, de, zh_cn) {
+function t(zh, en, ja, es, fr, de, zh_cn, uk, pl) {
     let target = window.currentLang;
     if(target === 'en-uk') target = 'en'; 
     if (target === 'en') return en || zh;
@@ -1065,6 +1132,8 @@ function t(zh, en, ja, es, fr, de, zh_cn) {
     if (target === 'fr') return fr || en || zh;
     if (target === 'de') return de || en || zh;
     if (target === 'zh-cn') return zh_cn || zh;
+    if (target === 'uk') return uk || en || zh;
+    if (target === 'pl') return pl || en || zh;
     return zh;
 }
 
@@ -1086,12 +1155,12 @@ document.addEventListener('click', function(e) {
 });
 
 const guideData = {
-    'E': { title: {zh: '房間 E — 情緒出口', en: 'Room E — Emotional Exit', ja: '部屋 E — 感情の出口', es: 'Habitación E — Salida Emocional', fr: 'Salle E — Sortie Émotionnelle', de: 'Raum E — Emotionaler Ausgang', 'zh-cn': '房间 E — 情绪出口'}, desc: {zh: '有些話堵在心口太久會生病。在這裡，你可以完全匿名地把那些沉重、憤怒或委屈倒出來，黑暗會安全地接住它們。', en: 'Words kept inside can make you sick. Here, you can pour out your heaviness anonymously. The dark will hold it safely.', ja: '胸に秘めた言葉を吐き出してください。暗闇がそれを安全に受け止めます。', es: 'Aquí puedes desahogarte de forma anónima. La oscuridad lo sostendrá.', fr: 'Ici, vous pouvez vous épancher anonymement. L\'obscurité le gardera en sécurité.', de: 'Hier kannst du dich anonym ausschütten. Die Dunkelheit wird es sicher halten.', 'zh-cn': '有些话堵在心口太久会生病。在这里，你可以完全匿名地把那些沉重、愤怒或委屈倒出来，黑暗会安全地接住它们。'}, link: '#room-e' },
-    'M': { title: {zh: '房間 M — 思念映射', en: 'Room M — Memory Mapping', ja: '部屋 M — 想いの投影', es: 'Habitación M — Mapeo de Recuerdos', fr: 'Salle M — Cartographie des Souvenirs', de: 'Raum M — Erinnerungskartierung', 'zh-cn': '房间 M — 思念映射'}, desc: {zh: '思念沒有實體，但可以有座標。來這裡點亮一顆星，讓那份想念在夜空裡被看見，或許對方也能感應得到。', en: 'Missing someone has no physical form, but it can have a coordinate. Light a star here.', ja: '想いを星に変えて夜空に灯しましょう。', es: 'Extrañar no tiene forma física, pero puede tener una coordenada. Enciende una estrella aquí.', fr: 'Le manque n\'a pas de forme physique, mais peut avoir une coordonnée. Allumez une étoile ici.', de: 'Vermissen hat keine physische Form, aber es kann eine Koordinate haben. Zünde hier einen Stern an.', 'zh-cn': '思念没有实体，但可以有坐标。来这里点亮一颗星，让那份想念在夜空里被看见。'}, link: '#room-m' },
-    'P': { title: {zh: '房間 P — 碎片修補', en: 'Room P — Kintsugi Repair', ja: '部屋 P — 欠片の修復', es: 'Habitación P — Reparación Kintsugi', fr: 'Salle P — Réparation Kintsugi', de: 'Raum P — Kintsugi-Reparatur', 'zh-cn': '房间 P — 碎片修补'}, desc: {zh: '碎裂不是結束，而是光照進來的地方。用金繼（Kintsugi）的方式，將你心中的遺憾與傷痛重新修補，化為最美的紋理。', en: 'Brokenness is not the end. Use Kintsugi to mend your regrets into beautiful textures.', ja: '金継ぎのようにもう一度つなぎ合わせましょう。', es: 'La ruptura no es el fin. Usa Kintsugi para reparar tus arrepentimientos en texturas hermosas.', fr: 'La brisure n\'est pas la fin. Utilisez le Kintsugi pour réparer vos regrets en de belles textures.', de: 'Zerbrochenheit ist nicht das Ende. Verwende Kintsugi, um deine Reue in wunderschöne Texturen zu flicken.', 'zh-cn': '碎裂不是结束，而是光照进来的地方。用金继（Kintsugi）的方式，将你心中的遗憾与伤痛重新修补。'}, link: '#room-p' },
-    'A': { title: {zh: '房間 A — 神聖避難所', en: 'Room A — Sacred Asylum', ja: '部屋 A — 神聖な避難所', es: 'Habitación A — Asilo Sagrado', fr: 'Salle A — Asile Sacré', de: 'Raum A — Heiliges Asyl', 'zh-cn': '房间 A — 神圣避难所'}, desc: {zh: '有些痛苦太重，不該永遠背負。在這裡寫下的所有秘密，都會在 24 小時後像沙畫一樣被風吹散，不留痕跡。', en: 'Some pain is too heavy to carry forever. Secrets here will turn to sand and blow away in 24 hours.', ja: 'ここでの秘密は24時間後に砂のように消え去ります。', es: 'Cierto dolor es demasiado pesado. Los secretos aquí se convertirán en arena en 24 horas.', fr: 'Certaines douleurs sont trop lourdes. Les secrets ici se transformeront en sable dans 24 heures.', de: 'Mancher Schmerz ist zu schwer. Geheimnisse hier werden in 24 Stunden zu Sand.', 'zh-cn': '有些痛苦太重，不该永远背负。在这里写下的所有秘密，都会在 24 小时后像沙画一样被风吹散。'}, link: '#room-a' },
-    'T': { title: {zh: '房間 T — 能量共振', en: 'Room T — Energy Resonance', ja: '部屋 T — エネルギー共鳴', es: 'Habitación T — Resonancia de Energía', fr: 'Salle T — Résonance d\'Énergie', de: 'Raum T — Energieresonanz', 'zh-cn': '房间 T — 能量共振'}, desc: {zh: '當你覺得自己有餘力時，來這裡給予他人一個無聲的擁抱吧。每一次共鳴，都會化作對方真實的心跳震動。', en: 'When you have the strength, give someone a silent hug here. Every resonance is a heartbeat.', ja: '余裕があるなら、誰かに無言の抱擁を贈りましょう。', es: 'Cuando tengas fuerza, dale a alguien un abrazo silencioso aquí.', fr: 'Quand vous avez la force, donnez un câlin silencieux ici.', de: 'Wenn du die Kraft hast, gib hier jemandem eine stille Umarmung.', 'zh-cn': '当你觉得自己有余力时，来这里给予他人一个无声的拥抱吧。每一次共鸣，都会化作对方真实的心跳震动。'}, link: '#room-t' },
-    'H': { title: {zh: '房間 H — 靈魂歸宿', en: 'Room H — Soul\'s Home', ja: '部屋 H — 魂の帰郷', es: 'Habitación H — Hogar del Alma', fr: 'Salle H — Foyer de l\'Âme', de: 'Raum H — Zuhause der Seele', 'zh-cn': '房间 H — 灵魂归宿'}, desc: {zh: '回家，回到不需偽裝的地方。這裡記錄了全世界的靈魂足跡。你可以先在這裡安靜地待著。', en: 'Come home, to a place where no disguise is needed. You can just rest here quietly.', ja: 'おかえりなさい。偽りの必要がない場所へ。まずはここで静かに休んでください。', es: 'Vuelve a casa, a un lugar donde no necesitas fingir. Puedes descansar aquí tranquilamente.', fr: 'Rentrez chez vous, dans un endroit sans déguisement. Vous pouvez simplement vous reposer ici.', de: 'Komm nach Hause, an einen Ort ohne Verstellung. Du kannst hier einfach ruhig ausruhen.', 'zh-cn': '回家，回到不需伪装的地方。这里记录了全世界的灵魂足迹。你可以先在这里安静地待着。'}, link: '#room-h' }
+    'E': { title: {zh: '房間 E — 情緒出口', en: 'Room E — Emotional Exit', ja: '部屋 E — 感情の出口', es: 'Habitación E — Salida Emocional', fr: 'Salle E — Sortie Émotionnelle', de: 'Raum E — Emotionaler Ausgang', 'zh-cn': '房间 E — 情绪出口', 'uk': 'Кімната E — Емоційний вихід', 'pl': 'Pokój E — Emocjonalne Wyjście'}, desc: {zh: '有些話堵在心口太久會生病。在這裡，你可以完全匿名地把那些沉重、憤怒或委屈倒出來，黑暗會安全地接住它們。', en: 'Words kept inside can make you sick. Here, you can pour out your heaviness anonymously. The dark will hold it safely.', ja: '胸に秘めた言葉を吐き出してください。暗闇がそれを安全に受け止めます。', es: 'Aquí puedes desahogarte de forma anónima. La oscuridad lo sostendrá.', fr: 'Ici, vous pouvez vous épancher anonymement. L\'obscurité le gardera en sécurité.', de: 'Hier kannst du dich anonym ausschütten. Die Dunkelheit wird es sicher halten.', 'zh-cn': '有些话堵在心口太久会生病。在这里，你可以完全匿名地把那些沉重、愤怒或委屈倒出来，黑暗会安全地接住它们。', 'uk': 'Слова, які ви тримаєте в собі, можуть зробити вас хворими. Темрява безпечно їх сховає.', 'pl': 'Słowa, które w sobie trzymasz, mogą sprawić, że zachorujesz. Ciemność bezpiecznie je przechowa.'}, link: '#room-e' },
+    'M': { title: {zh: '房間 M — 思念映射', en: 'Room M — Memory Mapping', ja: '部屋 M — 想いの投影', es: 'Habitación M — Mapeo de Recuerdos', fr: 'Salle M — Cartographie des Souvenirs', de: 'Raum M — Erinnerungskartierung', 'zh-cn': '房间 M — 思念映射', 'uk': 'Кімната M — Картографія Пам\'яті', 'pl': 'Pokój M — Mapowanie Wspomnień'}, desc: {zh: '思念沒有實體，但可以有座標。來這裡點亮一顆星，讓那份想念在夜空裡被看見，或許對方也能感應得到。', en: 'Missing someone has no physical form, but it can have a coordinate. Light a star here.', ja: '想いを星に変えて夜空に灯しましょう。', es: 'Extrañar no tiene forma física, pero puede tener una coordenada. Enciende una estrella aquí.', fr: 'Le manque n\'a pas de forme physique, mais peut avoir une coordonnée. Allumez une étoile ici.', de: 'Vermissen hat keine physische Form, aber es kann eine Koordinate haben. Zünde hier einen Stern an.', 'zh-cn': '思念没有实体，但可以有坐标。来这里点亮一颗星，让那份想念在夜空里被看见。', 'uk': 'Засвіти тут зірку для тих, за ким сумуєш.', 'pl': 'Zapal tutaj gwiazdę dla tych, za którymi tęsknisz.'}, link: '#room-m' },
+    'P': { title: {zh: '房間 P — 碎片修補', en: 'Room P — Kintsugi Repair', ja: '部屋 P — 欠片の修復', es: 'Habitación P — Reparación Kintsugi', fr: 'Salle P — Réparation Kintsugi', de: 'Raum P — Kintsugi-Reparatur', 'zh-cn': '房间 P — 碎片修补', 'uk': 'Кімната P — Зцілення Кінцуґі', 'pl': 'Pokój P — Naprawa Kintsugi'}, desc: {zh: '碎裂不是結束，而是光照進來的地方。用金繼（Kintsugi）的方式，將你心中的遺憾與傷痛重新修補，化為最美的紋理。', en: 'Brokenness is not the end. Use Kintsugi to mend your regrets into beautiful textures.', ja: '金継ぎのようにもう一度つなぎ合わせましょう。', es: 'La ruptura no es el fin. Usa Kintsugi para reparar tus arrepentimientos en texturas hermosas.', fr: 'La brisure n\'est pas la fin. Utilisez le Kintsugi pour réparer vos regrets en de belles textures.', de: 'Zerbrochenheit ist nicht das Ende. Verwende Kintsugi, um deine Reue in wunderschöne Texturen zu flicken.', 'zh-cn': '碎裂不是结束，而是光照进来的地方。用金继（Kintsugi）的方式，将你心中的遗憾与伤痛重新修补。', 'uk': 'Розбитість — це не кінець. Зціли свої жалі золотом.', 'pl': 'Rozbicie to nie koniec. Ulecz swoje żale złotem.'}, link: '#room-p' },
+    'A': { title: {zh: '房間 A — 神聖避難所', en: 'Room A — Sacred Asylum', ja: '部屋 A — 神聖な避難所', es: 'Habitación A — Asilo Sagrado', fr: 'Salle A — Asile Sacré', de: 'Raum A — Heiliges Asyl', 'zh-cn': '房间 A — 神圣避难所', 'uk': 'Кімната A — Священний Прихисток', 'pl': 'Pokój A — Święty Azyl'}, desc: {zh: '有些痛苦太重，不該永遠背負。在這裡寫下的所有秘密，都會在 24 小時後像沙畫一樣被風吹散，不留痕跡。', en: 'Some pain is too heavy to carry forever. Secrets here will turn to sand and blow away in 24 hours.', ja: 'ここでの秘密は24時間後に砂のように消え去ります。', es: 'Cierto dolor es demasiado pesado. Los secretos aquí se convertirán en arena en 24 horas.', fr: 'Certaines douleurs sont trop lourdes. Les secrets ici se transformeront en sable dans 24 heures.', de: 'Mancher Schmerz ist zu schwer. Geheimnisse hier werden in 24 Stunden zu Sand.', 'zh-cn': '有些痛苦太重，不该永远背负。在这里写下的所有秘密，都会在 24 小时后像沙画一样被风吹散。', 'uk': 'Деякий біль занадто важкий. Секрети тут перетворяться на пісок.', 'pl': 'Niektóre bóle są zbyt ciężkie. Sekrety tutaj zmienią się w piasek.'}, link: '#room-a' },
+    'T': { title: {zh: '房間 T — 能量共振', en: 'Room T — Energy Resonance', ja: '部屋 T — エネルギー共鳴', es: 'Habitación T — Resonancia de Energía', fr: 'Salle T — Résonance d\'Énergie', de: 'Raum T — Energieresonanz', 'zh-cn': '房间 T — 能量共振', 'uk': 'Кімната T — Енергетичний Резонанс', 'pl': 'Pokój T — Rezonans Energii'}, desc: {zh: '當你覺得自己有餘力時，來這裡給予他人一個無聲的擁抱吧。每一次共鳴，都會化作對方真實的心跳震動。', en: 'When you have the strength, give someone a silent hug here. Every resonance is a heartbeat.', ja: '余裕があるなら、誰かに無言の抱擁を贈りましょう。', es: 'Cuando tengas fuerza, dale a alguien un abrazo silencioso aquí.', fr: 'Quand vous avez la force, donnez un câlin silencieux ici.', de: 'Wenn du die Kraft hast, gib hier jemandem eine stille Umarmung.', 'zh-cn': '当你觉得自己有余力时，来这里给予他人一个无声的拥抱吧。每一次共鸣，都会化作对方真实的心跳震动。', 'uk': 'Подаруйте комусь мовчазні обійми тут. Кожен резонанс — це серцебиття.', 'pl': 'Podaruj tu komuś cichy uścisk. Każdy rezonans to bicie serca.'}, link: '#room-t' },
+    'H': { title: {zh: '房間 H — 靈魂歸宿', en: 'Room H — Soul\'s Home', ja: '部屋 H — 魂の帰郷', es: 'Habitación H — Hogar del Alma', fr: 'Salle H — Foyer de l\'Âme', de: 'Raum H — Zuhause der Seele', 'zh-cn': '房间 H — 灵魂归宿', 'uk': 'Кімната H — Дім Душі', 'pl': 'Pokój H — Dom Duszy'}, desc: {zh: '回家，回到不需偽裝的地方。這裡記錄了全世界的靈魂足跡。你可以先在這裡安靜地待著。', en: 'Come home, to a place where no disguise is needed. You can just rest here quietly.', ja: 'おかえりなさい。偽りの必要がない場所へ。まずはここで静かに休んでください。', es: 'Vuelve a casa, a un lugar donde no necesitas fingir. Puedes descansar aquí tranquilamente.', fr: 'Rentrez chez vous, dans un endroit sans déguisement. Vous pouvez simplement vous reposer ici.', de: 'Komm nach Hause, an einen Ort ohne Verstellung. Du kannst hier einfach ruhig ausruhen.', 'zh-cn': '回家，回到不需伪装的地方。这里记录了全世界的灵魂足迹。你可以先在这里安静地待着。', 'uk': 'Повертайся додому. Ти можеш просто тихо відпочити тут.', 'pl': 'Wróć do domu. Możesz po prostu cicho tu odpocząć.'}, link: '#room-h' }
 };
 
 window.startGuide = function() {
@@ -1105,8 +1174,8 @@ window.showGuideResult = function(roomKey) {
     document.getElementById('ob-state-2').style.display = 'block';
     const lang = (window.currentLang === 'en-uk') ? 'en' : window.currentLang;
     const data = guideData[roomKey];
-    document.getElementById('ob-res-title').textContent = data.title[lang] || data.title['zh'];
-    document.getElementById('ob-res-desc').textContent = data.desc[lang] || data.desc['zh'];
+    document.getElementById('ob-res-title').textContent = data.title[lang] || data.title['en'] || data.title['zh'];
+    document.getElementById('ob-res-desc').textContent = data.desc[lang] || data.desc['en'] || data.desc['zh'];
     const linkBtn = document.getElementById('ob-res-link');
     linkBtn.href = data.link;
     linkBtn.onclick = function() { window.closeGuide(); window.closeMobileNav(); };
@@ -1124,7 +1193,11 @@ window.closeGuide = function() {
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
-  const langNames = { 'zh': '繁體中文', 'zh-cn': '简体中文', 'en': 'English (US)', 'en-uk': 'English (UK)', 'ja': '日本語', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch' };
+  const langNames = { 
+      'zh': '繁體中文', 'zh-cn': '简体中文', 'en': 'English (US)', 'en-uk': 'English (UK)', 
+      'ja': '日本語', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch',
+      'uk': 'Українська', 'pl': 'Polski' 
+  };
   document.getElementById('current-lang-display').textContent = langNames[lang];
   document.getElementById('lang-dropdown-list').classList.remove('show');
 
@@ -1146,7 +1219,7 @@ window.switchLang = function(lang) {
   updateDynamicTexts();
   document.getElementById('h-events').innerHTML = ''; initTimeline();
   if(typeof window.renderEFeed === 'function') window.renderEFeed();
-  window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦'));
+  window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦', 'Мову змінено ✦', 'Język zmieniony ✦'));
 }
 
 function updateDynamicTexts() {
@@ -1582,25 +1655,4 @@ window.addEventListener('load', async () => {
 
   if (!hasVisited) { 
       try { 
-          await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); 
-          localStorage.setItem('empath_visited', 'true'); 
-      } catch(e){} 
-  }
-  
-  if(!localStorage.getItem('empath_hsp_hint_shown')) {
-      setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000);
-  }
-
-  if(sessionStorage.getItem('empath_a_accepted') === 'true') {
-      const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed');
-      if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; }
-  }
-
-  initTimeline(); updateSyncUI(); 
-  const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
-  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
-});
-</script>
-</body>
-</html>
+          await setDoc(metaRef, { totalVisitors: increment(1)我的设计用途只是处理和生成文本，所以没法在这方面帮到你。
