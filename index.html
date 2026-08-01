@@ -839,8 +839,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
       data-uk-ph="Прошепотіть свій найглибший біль тут...&#10;Через 24 години ці слова зникнуть."
       data-pl-ph="Wyszeptaj swój najgłębszy ból tutaj...&#10;Po 24 godzinach te słowa znikną."
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
-    <br>
-    <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" data-zh="放入沙畫 →" data-en="Turn to Sand →" data-ja="砂絵にする →" data-es="Convertir en Arena →" data-fr="Transformer en sable →" data-de="Zu Sand machen →" data-zh-cn="放入沙画 →">放入沙畫 →</button>
+    
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; max-width:600px; flex-wrap: wrap; gap: 12px;">
+        <select id="a-timer-select" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(122,158,159,0.5); color: var(--a); padding: 10px 16px; border-radius: 4px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; outline:none; cursor:pointer;">
+            <option value="1">1 分鐘後消散</option>
+            <option value="60">1 小時後消散</option>
+            <option value="1440" selected>24 小時後消散</option>
+        </select>
+        <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" style="margin-top:0;" data-zh="放入沙畫 →">放入沙畫 →</button>
+    </div>
+    
     <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia." data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice." data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit." data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论。">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
     
     <div id="a-feed-wrapper" style="position: relative; margin-top:36px; min-height:200px;">
@@ -1388,15 +1396,55 @@ function subscribeAll() {
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
-    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; feed.innerHTML = ''; const nowMs = Date.now(); snapshot.forEach(docSnap => { const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); const expiresAt = msgTime + (24 * 60 * 60 * 1000); const leftSecs = (expiresAt - nowMs) / 1000; if(leftSecs <= 0) return; const div = document.createElement('div'); div.className = 'sand-msg'; div.dataset.expires = expiresAt; const pct = (leftSecs / 86400) * 100; div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; feed.appendChild(div); }); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { 
+        globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; 
+        feed.innerHTML = ''; const nowMs = Date.now(); 
+        snapshot.forEach(docSnap => { 
+            const data = docSnap.data(); 
+            const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); 
+            const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000); // 預設 24 小時
+            const expiresAt = msgTime + lifespanMs; 
+            const leftSecs = (expiresAt - nowMs) / 1000; 
+            
+            if(leftSecs <= 0) return; 
+            const div = document.createElement('div'); div.className = 'sand-msg'; 
+            div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs; // 存入 DOM 供計時器使用
+            
+            const pct = (leftSecs / (lifespanMs / 1000)) * 100; // 動態計算百分比
+            div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; 
+            feed.appendChild(div); 
+        }); 
+        updateCountersUI(); 
+    }));
+  
     firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div); }); updateCountersUI(); }));
 }
 
 function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
 
 let sandGlobalTimer = null;
-function startGlobalSandTimer() { if(sandGlobalTimer) clearInterval(sandGlobalTimer); sandGlobalTimer = setInterval(() => { if(document.hidden) return; const now = Date.now(); document.querySelectorAll('.sand-msg:not(.dissolving)').forEach(div => { const expiresAt = parseInt(div.dataset.expires); const leftSecs = (expiresAt - now) / 1000; if(leftSecs <= 0) { div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; } const fill = div.querySelector('.sand-timer-fill'); const label = div.querySelector('.sand-time-left'); if(fill) fill.style.width = ((leftSecs / 86400) * 100) + '%'; if(label) label.textContent = formatTimeLeft(Math.floor(leftSecs)); }); }, 1000); }
-
+function startGlobalSandTimer() { 
+    if(sandGlobalTimer) clearInterval(sandGlobalTimer); 
+    sandGlobalTimer = setInterval(() => { 
+        if(document.hidden) return; 
+        const now = Date.now(); 
+        document.querySelectorAll('.sand-msg:not(.dissolving)').forEach(div => { 
+            const expiresAt = parseInt(div.dataset.expires); 
+            const lifespanMs = parseInt(div.dataset.lifespan) || (24 * 60 * 60 * 1000);
+            const leftSecs = (expiresAt - now) / 1000; 
+            
+            if(leftSecs <= 0) { 
+                div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; 
+            } 
+            const fill = div.querySelector('.sand-timer-fill'); 
+            const label = div.querySelector('.sand-time-left'); 
+            
+            if(fill) fill.style.width = ((leftSecs / (lifespanMs / 1000)) * 100) + '%'; 
+            if(label) label.textContent = formatTimeLeft(Math.floor(leftSecs)); 
+        }); 
+    }, 1000); 
+}
+  
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
 window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
@@ -1509,7 +1557,21 @@ window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderE
 const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let starMessages = [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 window.resizeCanvas = function(){ const dpr = window.devicePixelRatio || 1; if(canvas && roomM) { const w = roomM.offsetWidth; const h = roomM.offsetHeight; canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); initBgStars(w, h); } const sCanvas = document.getElementById('sand-canvas'); const roomA = document.getElementById('room-a'); if(sCanvas && roomA) { const sw = roomA.offsetWidth; const sh = roomA.offsetHeight; sCanvas.width = sw * dpr; sCanvas.height = sh * dpr; sCanvas.style.width = sw + 'px'; sCanvas.style.height = sh + 'px'; sCanvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); initSandBg(sw, sh); } }
 window.addEventListener('resize', window.resizeCanvas);
-function initBgStars(w, h){ bgStars=[]; for(let i=0; i<100; i++){ bgStars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*0.8+0.2, a:Math.random()*0.4+0.1, da:(Math.random()-.5)*0.003, c:STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]}); } }
+function initBgStars(w, h){ 
+    bgStars=[]; 
+    // 動態計算：電腦給 100 顆，手機寬度小於 768px 時只給 35 顆
+    const starCount = w < 768 ? 35 : 100;
+    for(let i=0; i<starCount; i++){ 
+        bgStars.push({
+            x: Math.random()*w, 
+            y: Math.random()*h, 
+            r: Math.random()*0.8+0.2, 
+            a: Math.random()*0.4+0.1, 
+            da: (Math.random()-.5)*0.003, 
+            c: STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]
+        }); 
+    } 
+}
 window.updateMStats = function(){ if(!document.getElementById('m-count')) return; document.getElementById('m-count').textContent = starMessages.length; if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; } const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text; }
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ if(!canvas.width || !isAnimating) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h); bgStars.forEach(s => { s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } ctx.fill(); ctx.shadowBlur = 0; }); starMessages.forEach(s => { s.x = s.relX*w; s.y = s.relY*h; const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); }); starsRafId = requestAnimationFrame(window.drawStars); }
@@ -1621,7 +1683,27 @@ function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandPa
 window.drawSand = function() { const c = document.getElementById('sand-canvas'); if(!c || !c.width || !isAnimating) return; const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h); sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); }
 window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
 window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
-window.submitA = async function(){ if(!canSubmit()) return; const input = document.getElementById('a-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('a-submit-btn').innerHTML; await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena', 'Transformé en sable', 'Zu Sand geworden', '放入沙画')); }
+window.submitA = async function(){ 
+    if(!canSubmit()) return; 
+    const input = document.getElementById('a-input'); 
+    let text = input.value.trim(); 
+    if(!text) return; 
+    text = cleanText(text); 
+    
+    // 抓取使用者選擇的分鐘數，轉換成毫秒 (Lifespan)
+    const minutes = parseInt(document.getElementById('a-timer-select').value);
+    const lifespan = minutes * 60 * 1000;
+
+    const origText = document.getElementById('a-submit-btn').innerHTML; 
+    await addDoc(collection(db, "sand"), { 
+        text, 
+        absoluteTime: Date.now(), 
+        lifespan: lifespan, // 紀錄專屬壽命
+        createdAt: serverTimestamp() 
+    }); 
+    input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
+    window.showToast('放入沙畫 ✦'); 
+}
 
 window.submitT = async function(){ if(!canSubmit()) return; const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('t-submit-btn').innerHTML; await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); }
 
