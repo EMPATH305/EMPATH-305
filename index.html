@@ -1261,7 +1261,7 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
-    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; feed.innerHTML = ''; const nowMs = Date.now(); snapshot.forEach(docSnap => { const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); const expiresAt = msgTime + (24 * 60 * 60 * 1000); const leftSecs = (expiresAt - nowMs) / 1000; if(leftSecs <= 0) return; const div = document.createElement('div'); div.className = 'sand-msg'; div.dataset.expires = expiresAt; const pct = (leftSecs / 86400) * 100; div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; feed.appendChild(div); }); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div); }); updateCountersUI(); }));
 }
@@ -1392,9 +1392,69 @@ function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false;
 roomM.addEventListener('click', async e => { if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; const star = getStarAt(x, y); if(star){ if(activeStarId !== star.id) { activeStarId = star.id; tooltip.classList.add('active'); if(window.innerWidth > 768) { tooltip.style.transform = 'none'; let tx = e.clientX + 16; let ty = e.clientY - 16; if (tx + 260 > window.innerWidth) tx = e.clientX - 280; tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; } tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:10px;color:var(--gold);margin-top:10px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`; } else { try { await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); window.triggerHeartbeat(); tooltip.classList.remove('active'); activeStarId = null; } catch (err) {} } } else { tooltip.classList.remove('active'); activeStarId = null; } });
 window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} }
 
-let pCanvas, pCtx, pHealedTotal = 0;
+let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
-window.drawKintsugiVessel = function(){ if(!pCtx) return; const c=pCtx; const w=pCanvas.offsetWidth||540; const h=300; c.clearRect(0,0,w,h); c.strokeStyle='rgba(201,168,76,0.3)'; c.lineWidth=1; c.beginPath(); const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke(); const predefinedCracks = [ {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80}, {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60}, {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20}, {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100}, {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60} ]; predefinedCracks.forEach(crack => { c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); c.strokeStyle='rgba(201,168,76,0.15)'; c.lineWidth=0.5; c.stroke(); }); const goldLines = Math.min(pHealedTotal, predefinedCracks.length); for(let i=0; i<goldLines; i++){ const crack = predefinedCracks[i]; c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); const gradient = c.createLinearGradient(crack.sx, crack.sy, crack.ex, crack.ey); gradient.addColorStop(0, '#BF953F'); gradient.addColorStop(0.5, '#FCF6BA'); gradient.addColorStop(1, '#B38728'); c.strokeStyle = gradient; c.lineWidth = 2.5; c.shadowBlur = 10; c.shadowColor = 'rgba(252, 246, 186, 0.8)'; c.stroke(); c.shadowBlur = 0; } }
+window.drawKintsugiVessel = function(){ 
+    if(!pCtx) return; 
+    const c = pCtx; 
+    const w = pCanvas.offsetWidth || 540; 
+    const h = 300; 
+    c.clearRect(0,0,w,h); 
+    
+    // 畫出瓷器底座邊緣
+    c.strokeStyle = 'rgba(201,168,76,0.3)'; 
+    c.lineWidth = 1; 
+    c.beginPath(); 
+    const cx = w/2, cy = h/2, rx = w*0.3, ry = h*0.38; 
+    c.ellipse(cx, cy+10, rx, ry, 0, 0, Math.PI*2); 
+    c.stroke(); 
+
+    // 核心：根據總碎片數(pTotalShards)自動算出裂縫座標！
+    const dynamicCracks = [];
+    for(let i=0; i < pTotalShards; i++) {
+        // 利用 137.5度(2.39996弧度)黃金角，讓裂縫自然散開，永遠不會重疊
+        const angle = i * 2.39996; 
+        const distOffset = (i % 3) * 15; // 讓裂痕有長有短，更自然
+        const sx = cx + Math.cos(angle) * 20;
+        const sy = cy + Math.sin(angle) * 20;
+        const mx = cx + Math.cos(angle + 0.3) * (rx * 0.6 - distOffset);
+        const my = cy + Math.sin(angle + 0.3) * (ry * 0.6 - distOffset);
+        const ex = cx + Math.cos(angle - 0.1) * (rx + 10);
+        const ey = cy + Math.sin(angle - 0.1) * (ry + 10);
+        dynamicCracks.push({sx, sy, mx, my, ex, ey});
+    }
+
+    // 先畫出所有「未修補」的暗色裂縫
+    dynamicCracks.forEach(crack => { 
+        c.beginPath(); 
+        c.moveTo(crack.sx, crack.sy); 
+        c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); 
+        c.strokeStyle = 'rgba(201,168,76,0.15)'; 
+        c.lineWidth = 0.8; 
+        c.stroke(); 
+    }); 
+
+    // 再把「已修補」的數量(pHealedTotal)疊加上閃耀的金繼！
+    const goldLines = Math.min(pHealedTotal, pTotalShards); 
+    for(let i=0; i < goldLines; i++){ 
+        const crack = dynamicCracks[i]; 
+        c.beginPath(); 
+        c.moveTo(crack.sx, crack.sy); 
+        c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); 
+        
+        const gradient = c.createLinearGradient(crack.sx, crack.sy, crack.ex, crack.ey); 
+        gradient.addColorStop(0, '#BF953F'); 
+        gradient.addColorStop(0.5, '#FCF6BA'); 
+        gradient.addColorStop(1, '#B38728'); 
+        
+        c.strokeStyle = gradient; 
+        c.lineWidth = 2.5; 
+        c.shadowBlur = 10; 
+        c.shadowColor = 'rgba(252, 246, 186, 0.8)'; 
+        c.stroke(); 
+        c.shadowBlur = 0; // 重置光暈以免影響其他畫布
+    } 
+}
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
