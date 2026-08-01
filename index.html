@@ -838,16 +838,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     
     <div class="desc-wrap">
         <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
-           data-zh="痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。" 
-           data-en="Pain dissolves here. Every message vanishes completely after 24 hours, like sand in the wind. Say it, then leave." 
-           data-ja="ここにある痛みは風とともに消え去ります。すべてのメッセージは砂絵のように24時間後に完全に消滅します。吐き出して、去ってください。" 
-           data-es="El dolor aquí se disuelve con el viento. Cada mensaje desaparecerá en 24 horas, como un dibujo en la arena. Dilo y luego vete." 
-           data-fr="Ici, la douleur se dissout. Chaque murmure s'efface après 24 heures, comme du sable emporté par le vent. Dites-le, puis partez." 
-           data-de="Schmerz löst sich hier auf. Jede Nachricht verschwindet nach 24 Stunden vollständig, wie Sand im Wind. Sprich es aus und gehe dann." 
-           data-zh-cn="痛苦在此，随风消散。每则留言将在 24 小时后自动消失，像沙画一样。让它说完，再走。"
-           data-uk="Тут біль розчиняється. Кожне слово зникає безслідно за 24 години, ніби пісок на вітрі. Скажи це, і йди."
-           data-pl="Ból rozpuszcza się tutaj. Każda wiadomość znika bez śladu po 24 godzinach, jak piasek na wietrze. Powiedz to, a potem odejdź.">
-          痛苦在此，隨風消散。每則留言將在 24 小時後自動消失，像沙畫一樣。讓它說完，再走。
+           data-zh="痛苦在此，隨風消散。你可以選擇讓這段文字在 1 分鐘、1 小時或 24 小時後像沙畫一樣被風吹走。讓它說完，再走。" 
+           data-en="Pain dissolves here. You can choose to let these words blow away like sand in 1 minute, 1 hour, or 24 hours. Say it, then leave." 
+           data-ja="ここにある痛みは風とともに消え去ります。この言葉が砂絵のように1分、1時間、または24時間後に風に吹き飛ばされるのを選ぶことができます。吐き出して、去ってください。" 
+           data-es="El dolor aquí se disuelve con el viento. Puedes elegir que estas palabras se las lleve el viento como arena en 1 minuto, 1 hora o 24 horas. Dilo y luego vete." 
+           data-fr="Ici, la douleur se dissout. Vous pouvez choisir de laisser ces mots s'envoler comme du sable dans 1 minute, 1 heure ou 24 heures. Dites-le, puis partez." 
+           data-de="Schmerz löst sich hier auf. Du kannst wählen, ob diese Worte nach 1 Minute, 1 Stunde oder 24 Stunden wie Sand im Wind verwehen. Sprich es aus und gehe dann." 
+           data-zh-cn="痛苦在此，随风消散。你可以选择让这段文字在 1 分钟、1 小时或 24 小时后像沙画一样被风吹走。让它说完，再走。"
+           data-uk="Тут біль розчиняється. Ви можете обрати: дозволити цим словам зникнути, як пісок на вітрі, через 1 хвилину, 1 годину або 24 години. Скажи це, і йди."
+           data-pl="Ból rozpuszcza się tutaj. Możesz pozwolić tym słowom zniknąć jak piasek na wietrze po 1 minucie, 1 godzinie lub 24 godzinach. Powiedz to, a potem odejdź.">
+          痛苦在此，隨風消散。你可以選擇讓這段文字在 1 分鐘、1 小時或 24 小時後像沙畫一樣被風吹走。讓它說完，再走。
         </p>
         <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
     </div>
@@ -1443,24 +1443,40 @@ function subscribeAll() {
         updateCountersUI(); 
     }));
   
-    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; 
-    div.querySelector('.echo-btn').addEventListener('click', async function(e){ 
-    if(this.classList.contains('pulsed')) return; 
-    this.classList.add('pulsed'); 
-    localStorage.setItem('echoed_'+id, 'true'); 
-    await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); 
-    window.showToast('✦ Echo Pulse Sent'); 
-    window.triggerHeartbeat(); 
-    
-    // 觸發全螢幕共振漣漪
-    if (typeof window.createEchoRipple === 'function') {
-        window.createEchoRipple(e);
-    }
-    // 如果有開啟聲音，同時觸發清脆的共鳴音效
-    if (typeof window.playChime === 'function') {
-        window.playChime();
-    }
-});                                                                                                                                                                                                                              
+    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { 
+        globalCounts.t = snapshot.size; 
+        const feed = document.getElementById('t-feed'); 
+        if(!feed) return; 
+        feed.innerHTML = ''; 
+        snapshot.forEach(docSnap => { 
+            const data = docSnap.data(); 
+            const id = docSnap.id; 
+            const div = document.createElement('div'); 
+            div.className = 'warmth-item'; 
+            div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; 
+            
+            div.querySelector('.echo-btn').addEventListener('click', async function(e){ 
+                if(this.classList.contains('pulsed')) return; 
+                this.classList.add('pulsed'); 
+                localStorage.setItem('echoed_'+id, 'true'); 
+                await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); 
+                window.showToast('✦ Echo Pulse Sent'); 
+                window.triggerHeartbeat(); 
+                
+                // 觸發全螢幕共振漣漪與聲音
+                if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
+                if (typeof window.playChime === 'function') window.playChime();
+            }); 
+            feed.appendChild(div); 
+        }); 
+        updateCountersUI(); 
+    }));
+}
+
+function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
+
+let sandGlobalTimer = null;
+function startGlobalSandTimer() { 
     if(sandGlobalTimer) clearInterval(sandGlobalTimer); 
     sandGlobalTimer = setInterval(() => { 
         if(document.hidden) return; 
