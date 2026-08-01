@@ -118,6 +118,8 @@ nav{
 }
 .func-btn:hover { background: rgba(255,255,255,0.15); opacity: 1; border-color: rgba(255,255,255,0.5); }
 .hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
+.audio-btn { transition: all 0.3s ease; }
+.audio-btn.active { background: rgba(255,255,255,0.15); border-color: var(--white); color: var(--white); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
 
 .lang-dropdown-wrapper { position: relative; display: inline-block; }
 .lang-dropdown-list {
@@ -484,6 +486,10 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         <a class="nav-letter" data-l="H" href="#room-h" onclick="window.closeMobileNav()">H</a>
       </div>
       <div class="nav-controls">
+        <!-- 新增這顆聲音按鈕 -->
+<button class="func-btn audio-btn" id="audio-btn" onclick="window.toggleAudio()">
+  🔇<span class="audio-text" data-zh=" 聲音" data-en=" Audio" data-ja=" 音声" data-es=" Audio" data-fr=" Audio" data-de=" Audio" data-zh-cn=" 声音"> 聲音</span>
+</button>
         <div class="hsp-tooltip-wrap">
           <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
           <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
@@ -1083,6 +1089,79 @@ window.addEventListener('scroll', () => { const btt = document.getElementById('b
 
 function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) {} } }
 loadLocalJourney();
+// ==========================================
+// 音訊引擎 (Generative Web Audio API)
+// ==========================================
+let audioCtx; let ambientGain; let brushGain; let isAudioEnabled = false;
+
+window.toggleAudio = function() {
+    const btn = document.getElementById('audio-btn');
+    if(!audioCtx) initAudio();
+    isAudioEnabled = !isAudioEnabled;
+    if(isAudioEnabled) {
+        audioCtx.resume();
+        btn.innerHTML = `🔊<span class="audio-text">${t(' 聲音', ' Audio', ' 音声', ' Audio', ' Audio', ' Audio', ' 声音')}</span>`;
+        btn.classList.add('active');
+        window.showToast(t('🔊 環境聲景已開啟', '🔊 Soundscape On', '🔊 環境音オン', '🔊 Sonido Activado', '🔊 Son Activé', '🔊 Ton An', '🔊 环境声景已开启'));
+    } else {
+        audioCtx.suspend();
+        btn.innerHTML = `🔇<span class="audio-text">${t(' 聲音', ' Audio', ' 音声', ' Audio', ' Audio', ' Audio', ' 声音')}</span>`;
+        btn.classList.remove('active');
+        window.showToast(t('🔇 聲音已關閉', '🔇 Audio Off', '🔇 音声オフ', '🔇 Sonido Desactivado', '🔇 Son Désactivé', '🔇 Ton Aus', '🔇 声音已关闭'));
+    }
+}
+
+function initAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // 1. 深海呼吸底噪 (Ambient Drone)
+    const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator();
+    ambientGain = audioCtx.createGain();
+    osc1.type = 'sine'; osc1.frequency.value = 55; // 極低頻
+    osc2.type = 'triangle'; osc2.frequency.value = 55.5; // 產生些微的物理跳動
+    osc1.connect(ambientGain); osc2.connect(ambientGain);
+    ambientGain.connect(audioCtx.destination);
+    ambientGain.gain.value = 0.03; // 非常微弱
+    osc1.start(); osc2.start();
+    
+    // 加上 LFO 讓底噪有呼吸感
+    const lfo = audioCtx.createOscillator(); const lfoGain = audioCtx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 0.05; // 每 20 秒一次呼吸
+    lfo.connect(lfoGain); lfoGain.connect(ambientGain.gain);
+    lfoGain.gain.value = 0.015; lfo.start();
+
+    // 2. 炭筆塗鴉白噪音 (Brush Scratch)
+    const bufferSize = audioCtx.sampleRate * 2; 
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1; 
+    const noiseSrc = audioCtx.createBufferSource();
+    noiseSrc.buffer = noiseBuffer; noiseSrc.loop = true;
+    
+    const bandpass = audioCtx.createBiquadFilter();
+    bandpass.type = 'bandpass'; bandpass.frequency.value = 800; // 濾出接近紙筆摩擦的頻段
+    
+    brushGain = audioCtx.createGain(); brushGain.gain.value = 0; // 預設靜音
+    noiseSrc.connect(bandpass); bandpass.connect(brushGain);
+    brushGain.connect(audioCtx.destination); noiseSrc.start();
+}
+
+window.playChime = function() {
+    if(!isAudioEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(800 + Math.random()*400, audioCtx.currentTime); 
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2); // 尾音消散
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 2);
+}
+
+window.setBrushVolume = function(speed) {
+    if(!isAudioEnabled || !brushGain) return;
+    const targetVol = Math.min(speed * 0.003, 0.08); 
+    brushGain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.05);
+}
 
 // ==========================================
 // EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼 (強健修復版)
@@ -1148,6 +1227,7 @@ function initEDrawCanvas() {
         eCtx.shadowColor = 'rgba(123, 143, 161, 0.6)';
 
         eCtx.lineTo(pos.x, pos.y);
+      if(typeof window.setBrushVolume === 'function') window.setBrushVolume(dist);
         eCtx.stroke();
         eCtx.beginPath();
         eCtx.moveTo(pos.x, pos.y);
@@ -1156,6 +1236,7 @@ function initEDrawCanvas() {
 
     const stopDraw = (e) => {
         isDrawing = false;
+      if(typeof window.setBrushVolume === 'function') window.setBrushVolume(0);
         eCtx.beginPath();
         eDrawCanvas.releasePointerCapture(e.pointerId);
     };
@@ -1180,7 +1261,7 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
-    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; feed.innerHTML = ''; const nowMs = Date.now(); snapshot.forEach(docSnap => { const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); const expiresAt = msgTime + (24 * 60 * 60 * 1000); const leftSecs = (expiresAt - nowMs) / 1000; if(leftSecs <= 0) return; const div = document.createElement('div'); div.className = 'sand-msg'; div.dataset.expires = expiresAt; const pct = (leftSecs / 86400) * 100; div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; feed.appendChild(div); }); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div); }); updateCountersUI(); }));
 }
@@ -1192,7 +1273,7 @@ function startGlobalSandTimer() { if(sandGlobalTimer) clearInterval(sandGlobalTi
 
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
-window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
+window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
 
 window.speakText = function(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); const langs = { 'zh': 'zh-TW', 'zh-cn': 'zh-CN', 'en': 'en-US', 'en-uk': 'en-GB', 'ja': 'ja-JP', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE' }; utterance.lang = langs[window.currentLang] || 'zh-TW'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance); window.showToast(t('🔉 語音導航朗讀中...', '🔉 Reading...', '🔉 読み上げ中...', '🔉 Leyendo...', '🔉 Lecture...', '🔉 Lesen...', '🔉 语音导航朗读中...')); } };
 window.triggerHeartbeat = function() { if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); } };
