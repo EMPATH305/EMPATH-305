@@ -1401,7 +1401,7 @@ window.drawKintsugiVessel = function(){
     const h = 300; 
     c.clearRect(0,0,w,h); 
     
-    // 畫出瓷器底座邊緣
+    // 畫出瓷器底座邊緣 (帶一點微微的光澤感)
     c.strokeStyle = 'rgba(201,168,76,0.3)'; 
     c.lineWidth = 1; 
     c.beginPath(); 
@@ -1409,50 +1409,72 @@ window.drawKintsugiVessel = function(){
     c.ellipse(cx, cy+10, rx, ry, 0, 0, Math.PI*2); 
     c.stroke(); 
 
-    // 核心：根據總碎片數(pTotalShards)自動算出裂縫座標！
-    const dynamicCracks = [];
-    for(let i=0; i < pTotalShards; i++) {
-        // 利用 137.5度(2.39996弧度)黃金角，讓裂縫自然向外散開
-        const angle = i * 2.39996; 
-        const distOffset = (i % 3) * 15; // 讓裂痕有長有短，更自然
-        const sx = cx + Math.cos(angle) * 20;
-        const sy = cy + Math.sin(angle) * 20;
-        const mx = cx + Math.cos(angle + 0.3) * (rx * 0.6 - distOffset);
-        const my = cy + Math.sin(angle + 0.3) * (ry * 0.6 - distOffset);
-        const ex = cx + Math.cos(angle - 0.1) * (rx + 10);
-        const ey = cy + Math.sin(angle - 0.1) * (ry + 10);
-        dynamicCracks.push({sx, sy, mx, my, ex, ey});
+    // 建立一個簡易的「偽隨機數生成器」：確保每次畫面重整，裂縫的形狀都不會亂跳
+    const random = (seed) => {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    };
+
+    // 核心：繪製單一條「鋸齒狀」裂痕的函數
+    const drawCrack = (index, isHealed) => {
+        let seed = index * 999; // 每條裂縫有自己專屬的生長基因
+        c.beginPath();
+        
+        // 裂縫起點：不要全部擠在正中央，讓它們在中心附近隨機分佈
+        let px = cx + (random(seed++) - 0.5) * 60;
+        let py = cy + (random(seed++) - 0.5) * 40;
+        c.moveTo(px, py);
+
+        // 決定這條裂痕的大致生長方向
+        const baseAngle = random(seed++) * Math.PI * 2;
+        let currentAngle = baseAngle;
+        
+        // 產生 5~8 段的「隨機折線」，模擬真實破碎感
+        const segments = 5 + Math.floor(random(seed++) * 4);
+        let startX = px, startY = py;
+
+        for(let j = 0; j < segments; j++) {
+            // 每次的折角偏移 (讓線條產生閃電般的銳利轉折)
+            currentAngle += (random(seed++) - 0.5) * 1.5; 
+            const length = 15 + random(seed++) * 25; // 每段裂痕的長度不一
+            px += Math.cos(currentAngle) * length;
+            py += Math.sin(currentAngle) * length;
+            c.lineTo(px, py);
+        }
+
+        // 樣式設定
+        if(isHealed) {
+            // 金繼：黃金漸層光澤
+            const gradient = c.createLinearGradient(startX, startY, px, py);
+            gradient.addColorStop(0, '#C9A84C'); // 暗金
+            gradient.addColorStop(0.5, '#FDFCF8'); // 亮金反光
+            gradient.addColorStop(1, '#B38728'); // 深金
+            c.strokeStyle = gradient;
+            c.lineWidth = 2; // 線條不要太粗，會比較精緻
+            c.shadowBlur = 8;
+            c.shadowColor = 'rgba(201, 168, 76, 0.5)';
+        } else {
+            // 未修補的暗痕：隱隱約約的灰白細線
+            c.strokeStyle = 'rgba(255,255,255,0.08)'; 
+            c.lineWidth = 1;
+            c.shadowBlur = 0;
+        }
+        
+        // 讓線條的轉角變得「銳利(miter)」，這是看起來像破片的關鍵！
+        c.lineJoin = 'miter'; 
+        c.stroke();
+        c.shadowBlur = 0; // 畫完重置光暈
+    };
+
+    // 1. 先畫出所有「未修補」的暗色裂縫底圖
+    for(let i = 0; i < pTotalShards; i++) {
+        drawCrack(i, false);
     }
 
-    // 先畫出所有「未修補」的暗色裂縫
-    dynamicCracks.forEach(crack => { 
-        c.beginPath(); 
-        c.moveTo(crack.sx, crack.sy); 
-        c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); 
-        c.strokeStyle = 'rgba(201,168,76,0.15)'; 
-        c.lineWidth = 0.8; 
-        c.stroke(); 
-    }); 
-
-    // 再把「已修補」的數量疊加上閃耀的金繼！
+    // 2. 根據目前被治癒的數量 (pHealedTotal)，疊上閃耀的黃金修補線
     const goldLines = Math.min(pHealedTotal, pTotalShards); 
-    for(let i=0; i < goldLines; i++){ 
-        const crack = dynamicCracks[i]; 
-        c.beginPath(); 
-        c.moveTo(crack.sx, crack.sy); 
-        c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); 
-        
-        const gradient = c.createLinearGradient(crack.sx, crack.sy, crack.ex, crack.ey); 
-        gradient.addColorStop(0, '#BF953F'); 
-        gradient.addColorStop(0.5, '#FCF6BA'); 
-        gradient.addColorStop(1, '#B38728'); 
-        
-        c.strokeStyle = gradient; 
-        c.lineWidth = 2.5; 
-        c.shadowBlur = 10; 
-        c.shadowColor = 'rgba(252, 246, 186, 0.8)'; 
-        c.stroke(); 
-        c.shadowBlur = 0; // 重置光暈
+    for(let i = 0; i < goldLines; i++) {
+        drawCrack(i, true);
     } 
 }
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
