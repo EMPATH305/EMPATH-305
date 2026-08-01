@@ -1412,7 +1412,7 @@ window.drawKintsugiVessel = function(){
     // 核心：根據總碎片數(pTotalShards)自動算出裂縫座標！
     const dynamicCracks = [];
     for(let i=0; i < pTotalShards; i++) {
-        // 利用 137.5度(2.39996弧度)黃金角，讓裂縫自然散開，永遠不會重疊
+        // 利用 137.5度(2.39996弧度)黃金角，讓裂縫自然向外散開
         const angle = i * 2.39996; 
         const distOffset = (i % 3) * 15; // 讓裂痕有長有短，更自然
         const sx = cx + Math.cos(angle) * 20;
@@ -1434,7 +1434,7 @@ window.drawKintsugiVessel = function(){
         c.stroke(); 
     }); 
 
-    // 再把「已修補」的數量(pHealedTotal)疊加上閃耀的金繼！
+    // 再把「已修補」的數量疊加上閃耀的金繼！
     const goldLines = Math.min(pHealedTotal, pTotalShards); 
     for(let i=0; i < goldLines; i++){ 
         const crack = dynamicCracks[i]; 
@@ -1452,7 +1452,7 @@ window.drawKintsugiVessel = function(){
         c.shadowBlur = 10; 
         c.shadowColor = 'rgba(252, 246, 186, 0.8)'; 
         c.stroke(); 
-        c.shadowBlur = 0; // 重置光暈以免影響其他畫布
+        c.shadowBlur = 0; // 重置光暈
     } 
 }
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
