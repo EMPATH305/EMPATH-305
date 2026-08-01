@@ -231,6 +231,20 @@ nav{
 .e-warning{ font-size:13px; color:var(--amber); margin-bottom:16px; letter-spacing:1px; line-height:1.6; opacity: 0.95; }
 .e-anon-label{ font-size:12px;letter-spacing:3px;color:rgba(123,143,161,.8);margin-bottom:8px; font-weight:bold;}
 .e-char-count{font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:1px;}
+
+/* ===== E 房間：塗鴉模式專用樣式 ===== */
+.e-mode-toggle { display: flex; gap: 12px; margin-bottom: 16px; }
+.e-mode-btn { background: rgba(0,0,0,0.3); border: 1px solid rgba(123,143,161,0.3); color: rgba(123,143,161,0.6); padding: 10px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.3s; font-family: 'Noto Sans TC', sans-serif; letter-spacing: 1px; font-weight: bold;}
+.e-mode-btn.active { border-color: var(--e); color: var(--e); background: rgba(123,143,161,0.15); box-shadow: 0 0 10px rgba(123,143,161,0.2); }
+.e-mode-btn:hover { background: rgba(123,143,161,0.2); color: var(--fog); }
+
+#e-draw-wrap { display: none; width: 100%; max-width: 600px; position: relative; }
+#e-draw-canvas { width: 100%; height: 220px; background: rgba(0,0,0,0.45); border: 1px dashed rgba(123,143,161,0.5); border-radius: 6px; cursor: crosshair; touch-action: none; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
+.e-draw-tools { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 8px; }
+.e-tool-btn { background: rgba(8, 13, 18, 0.8); border: 1px solid rgba(123,143,161,0.4); color: rgba(123,143,161,0.9); padding: 6px 14px; font-size: 11px; border-radius: 4px; cursor: pointer; letter-spacing: 2px; transition: all 0.2s;}
+.e-tool-btn:hover { background: rgba(123,143,161,0.3); color: var(--white); }
+.e-msg-img { max-width: 100%; border-radius: 4px; margin-top: 12px; opacity: 0.85; filter: contrast(1.2); }
+
 .e-feed-container { position:relative; max-width:600px; margin-top:40px; }
 .e-feed{ display:flex;flex-direction:column;gap:16px; }
 .e-msg{ background:rgba(0,0,0,.3);padding:24px 28px;border-left:2px solid rgba(123,143,161,.5);border-radius:0 6px 6px 0;font-size:15px;line-height:2;color:var(--fog);animation:fadeSlideIn .5s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
@@ -606,7 +620,15 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   </div>
 
   <p class="e-warning" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦" data-en="∗ This place holds vulnerability, not malice. Please refrain from personal attacks or hate speech. ✦" data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。個人攻撃やヘイトスピーチはお控えください。 ✦" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia. Por favor abstente de ataques personales o discursos de odio. ✦" data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice. Veuillez vous abstenir d'attaques personnelles ou de discours de haine. ✦" data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit. Bitte verzichten Sie auf persönliche Angriffe oder Hassreden. ✦" data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论，让避难所维持纯净。 ✦">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論，讓避難所維持純淨。 ✦</p>
+  
   <p class="e-anon-label">ANONYMOUS — <span data-zh="完全匿名" data-en="Completely Anonymous" data-ja="完全匿名" data-es="Totalmente Anónimo" data-fr="Totalement Anonyme" data-de="Völlig Anonym" data-zh-cn="完全匿名">完全匿名</span></p>
+  
+  <!-- 新增：模式切換按鈕 -->
+  <div class="e-mode-toggle">
+      <button class="e-mode-btn active" id="btn-mode-text" onclick="window.setEMode('text')" data-zh="⌨️ 敲打文字" data-en="⌨️ Type Text" data-ja="⌨️ 文字を打つ" data-es="⌨️ Escribir Texto" data-zh-cn="⌨️ 敲打文字">⌨️ 敲打文字</button>
+      <button class="e-mode-btn" id="btn-mode-draw" onclick="window.setEMode('draw')" data-zh="✍️ 肌肉釋放 (塗鴉)" data-en="✍️ Draw / Release" data-ja="✍️ 描いて解放" data-es="✍️ Dibujar / Liberar" data-zh-cn="✍️ 肌肉释放 (涂鸦)">✍️ 肌肉釋放 (塗鴉)</button>
+  </div>
+
   <textarea class="input-area" id="e-input" rows="5" maxlength="500" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 500'"
     data-zh-ph="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。" 
     data-en-ph="Write down what you cannot say...&#10;Anger, grievance, sorrow, or any weight you want to let go of.&#10;No one knows it is you."
@@ -619,6 +641,15 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     data-pl-ph="Napisz to, czego nie możesz powiedzieć...&#10;Gniew, żal lub jakikolwiek ciężar.&#10;Nikt nie będzie wiedział, że to ty."
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 500</div>
+  
+  <!-- 新增：畫布輸入區塊 -->
+  <div id="e-draw-wrap">
+      <canvas id="e-draw-canvas"></canvas>
+      <div class="e-draw-tools">
+          <button class="e-tool-btn" onclick="window.clearEDraw()" data-zh="🗑️ 清除重畫" data-en="🗑️ Clear" data-ja="🗑️ クリア" data-es="🗑️ Borrar" data-zh-cn="🗑️ 清除重画">🗑️ 清除重畫</button>
+      </div>
+  </div>
+
   <br>
   <button class="send-btn" id="e-submit-btn" onclick="window.submitE()" data-zh="投入黑暗 →" data-en="Cast into Dark →" data-ja="闇に投じる →" data-es="Lanzar a la Oscuridad →" data-fr="Jeter dans l'obscurité →" data-de="In die Dunkelheit werfen →" data-zh-cn="投入黑暗 →">投入黑暗 →</button>
   
@@ -1055,6 +1086,99 @@ window.addEventListener('scroll', () => { const btt = document.getElementById('b
 function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) {} } }
 loadLocalJourney();
 
+// ==========================================
+// EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼
+// ==========================================
+let eMode = 'text';
+let eDrawCanvas = null;
+let eCtx = null;
+let isDrawing = false;
+let lastX = 0; let lastY = 0;
+
+window.setEMode = function(mode) {
+    eMode = mode;
+    document.getElementById('btn-mode-text').classList.toggle('active', mode === 'text');
+    document.getElementById('btn-mode-draw').classList.toggle('active', mode === 'draw');
+    document.getElementById('e-input').style.display = mode === 'text' ? 'block' : 'none';
+    document.getElementById('e-char').style.display = mode === 'text' ? 'block' : 'none';
+    document.getElementById('e-draw-wrap').style.display = mode === 'draw' ? 'block' : 'none';
+    
+    if(mode === 'draw' && !eCtx) {
+        initEDrawCanvas();
+    }
+}
+
+function initEDrawCanvas() {
+    eDrawCanvas = document.getElementById('e-draw-canvas');
+    eCtx = eDrawCanvas.getContext('2d');
+    
+    const resizeEDraw = () => {
+        const rect = eDrawCanvas.parentElement.getBoundingClientRect();
+        eDrawCanvas.width = rect.width;
+        eDrawCanvas.height = 220; 
+        eCtx.lineCap = 'round';
+        eCtx.lineJoin = 'round';
+    };
+    resizeEDraw();
+    window.addEventListener('resize', () => { if(eMode === 'draw') resizeEDraw(); });
+
+    // 支援觸控與滑鼠的現代 API
+    eDrawCanvas.addEventListener('pointerdown', (e) => {
+        isDrawing = true;
+        const pos = getPos(e);
+        lastX = pos.x; lastY = pos.y;
+        eCtx.beginPath();
+        eCtx.moveTo(lastX, lastY);
+        eDrawCanvas.setPointerCapture(e.pointerId); // 鎖定螢幕，防止手機滑動
+    });
+
+    eDrawCanvas.addEventListener('pointermove', (e) => {
+        if(!isDrawing) return;
+        const pos = getPos(e);
+        
+        // 情感流體筆刷：計算速度來決定粗細
+        const dx = pos.x - lastX;
+        const dy = pos.y - lastY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const lineWidth = Math.max(1.5, 5 - (dist * 0.1)); 
+
+        eCtx.lineWidth = lineWidth;
+        eCtx.strokeStyle = 'rgba(210, 220, 230, 0.85)';
+        eCtx.shadowBlur = 4;
+        eCtx.shadowColor = 'rgba(123, 143, 161, 0.6)'; // 帶有一點點微弱的冰冷藍暈
+
+        eCtx.lineTo(pos.x, pos.y);
+        eCtx.stroke();
+        eCtx.beginPath();
+        eCtx.moveTo(pos.x, pos.y);
+        lastX = pos.x; lastY = pos.y;
+    });
+
+    const stopDraw = (e) => {
+        isDrawing = false;
+        eCtx.beginPath();
+        eDrawCanvas.releasePointerCapture(e.pointerId);
+    };
+
+    eDrawCanvas.addEventListener('pointerup', stopDraw);
+    eDrawCanvas.addEventListener('pointercancel', stopDraw);
+}
+
+function getPos(e) {
+    const rect = eDrawCanvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+window.clearEDraw = function() {
+    if(eCtx) eCtx.clearRect(0, 0, eDrawCanvas.width, eDrawCanvas.height);
+}
+
+function isCanvasBlank(canvas) {
+    const blank = document.createElement('canvas');
+    blank.width = canvas.width; blank.height = canvas.height;
+    return canvas.toDataURL() === blank.toDataURL();
+}
+
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
 
 function subscribeAll() {
@@ -1099,10 +1223,84 @@ async function autoBackupToCloud() { const key = localStorage.getItem('empath_so
 function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex'; document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
 
 let allEmotions = []; let eFeedExpanded = false;
-window.renderEFeed = function() { const feed = document.getElementById('e-feed'); const fade = document.getElementById('e-feed-fade'); const btn = document.getElementById('e-expand-btn'); if(!feed) return; feed.innerHTML = ''; const limit = eFeedExpanded ? allEmotions.length : 3; allEmotions.slice(0, limit).forEach(data => { const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); const div = document.createElement('div'); div.className = 'e-msg'; div.innerHTML = `<div class="e-msg-anon">${t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS')}</div><div>${data.text}</div><div class="e-msg-time">${timeStr}</div>`; feed.appendChild(div); }); if(allEmotions.length > 3) { btn.style.display = 'inline-flex'; if(!eFeedExpanded) { fade.style.display = 'block'; btn.innerHTML = t('↓ 展開更多留言', '↓ Show More', '↓ もっと見る', '↓ Ver más', '↓ Voir plus', '↓ Mehr anzeigen', '↓ 展开更多留言'); } else { fade.style.display = 'none'; btn.innerHTML = t('↑ 收起留言', '↑ Collapse', '↑ 閉じる', '↑ Ocultar', '↑ Réduire', '↑ Einklappen', '↑ 收起留言'); } } else { btn.style.display = 'none'; fade.style.display = 'none'; } }
-window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
+// ==========================================
+// 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
+// ==========================================
+window.submitE = async function(){ 
+    if(!canSubmit()) return; 
+    
+    let text = "";
+    let imageData = null;
 
-window.submitE = async function(){ if(!canSubmit()) return; const input = document.getElementById('e-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('e-submit-btn').innerHTML; await addDoc(collection(db, "emotions"), { text, createdAt: serverTimestamp() }); input.value=''; document.getElementById('e-char').textContent = '0 / 500'; logJourney('e', text); playRitual('e-submit-btn', origText); window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); } catch(e){} }
+    if (eMode === 'text') {
+        const input = document.getElementById('e-input'); 
+        text = input.value.trim(); 
+        if(!text) return; 
+        text = cleanText(text); 
+        input.value = '';
+        document.getElementById('e-char').textContent = '0 / 500';
+    } else {
+        if(!eDrawCanvas || isCanvasBlank(eDrawCanvas)) return;
+        // 將畫布轉為極輕量級的 webp 格式 (約 10-20KB，絕對不會爆 Firebase 限制)
+        imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
+        window.clearEDraw();
+    }
+
+    try { 
+        const origText = document.getElementById('e-submit-btn').innerHTML; 
+        
+        const docData = { createdAt: serverTimestamp() };
+        if (text) docData.text = text;
+        if (imageData) docData.image = imageData;
+        
+        await addDoc(collection(db, "emotions"), docData); 
+        
+        logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]'); 
+        playRitual('e-submit-btn', origText); 
+        window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
+    } catch(e) { console.error(e); } 
+}
+
+window.renderEFeed = function() { 
+    const feed = document.getElementById('e-feed'); 
+    const fade = document.getElementById('e-feed-fade'); 
+    const btn = document.getElementById('e-expand-btn'); 
+    if(!feed) return; 
+    feed.innerHTML = ''; 
+    const limit = eFeedExpanded ? allEmotions.length : 3; 
+    
+    allEmotions.slice(0, limit).forEach(data => { 
+        const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); 
+        const div = document.createElement('div'); 
+        div.className = 'e-msg'; 
+        
+        // 判斷是文字還是塗鴉圖片
+        let contentHtml = '';
+        if (data.text) {
+            contentHtml = `<div>${data.text}</div>`;
+        } else if (data.image) {
+            contentHtml = `<img src="${data.image}" class="e-msg-img" alt="Emotional Scribble">`;
+        }
+
+        div.innerHTML = `<div class="e-msg-anon">${t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS')}</div>${contentHtml}<div class="e-msg-time">${timeStr}</div>`; 
+        feed.appendChild(div); 
+    }); 
+    
+    if(allEmotions.length > 3) { 
+        btn.style.display = 'inline-flex'; 
+        if(!eFeedExpanded) { 
+            fade.style.display = 'block'; 
+            btn.innerHTML = t('↓ 展開更多', '↓ Show More', '↓ もっと見る', '↓ Ver más', '↓ Voir plus', '↓ Mehr anzeigen', '↓ 展开更多'); 
+        } else { 
+            fade.style.display = 'none'; 
+            btn.innerHTML = t('↑ 收起', '↑ Collapse', '↑ 閉じる', '↑ Ocultar', '↑ Réduire', '↑ Einklappen', '↑ 收起'); 
+        } 
+    } else { 
+        btn.style.display = 'none'; fade.style.display = 'none'; 
+    } 
+}
+
+window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
 
 const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let starMessages = [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 window.resizeCanvas = function(){ const dpr = window.devicePixelRatio || 1; if(canvas && roomM) { const w = roomM.offsetWidth; const h = roomM.offsetHeight; canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); initBgStars(w, h); } const sCanvas = document.getElementById('sand-canvas'); const roomA = document.getElementById('room-a'); if(sCanvas && roomA) { const sw = roomA.offsetWidth; const sh = roomA.offsetHeight; sCanvas.width = sw * dpr; sCanvas.height = sh * dpr; sCanvas.style.width = sw + 'px'; sCanvas.style.height = sh + 'px'; sCanvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); initSandBg(sw, sh); } }
