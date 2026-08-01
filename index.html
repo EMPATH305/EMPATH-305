@@ -334,6 +334,32 @@ nav{
 .echo-heart{ font-size:36px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 20px var(--amber);}}
 .echo-label{ text-align:center;font-size:13px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
+/* ===== Room T 全螢幕共振漣漪特效 ===== */
+.ripple-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.echo-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(232, 168, 124, 0.8);
+  background: radial-gradient(circle, rgba(232, 168, 124, 0.25) 0%, rgba(232, 168, 124, 0) 70%);
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-expand 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) FORWARDS;
+}
+
+@keyframes ripple-expand {
+  0% {
+    width: 0px; height: 0px; opacity: 1;
+  }
+  100% {
+    width: 250vw; height: 250vw; opacity: 0;
+  }
+}
 
 /* ===== H ROOM ===== */
 #room-h{background: linear-gradient(180deg, #0D1B2A 0%, #0f0f1a 40%, #05050a 100%); border-top: 1px solid rgba(255,255,255,0.02);}
@@ -1417,13 +1443,24 @@ function subscribeAll() {
         updateCountersUI(); 
     }));
   
-    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div); }); updateCountersUI(); }));
-}
-
-function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
-
-let sandGlobalTimer = null;
-function startGlobalSandTimer() { 
+    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; 
+    div.querySelector('.echo-btn').addEventListener('click', async function(e){ 
+    if(this.classList.contains('pulsed')) return; 
+    this.classList.add('pulsed'); 
+    localStorage.setItem('echoed_'+id, 'true'); 
+    await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); 
+    window.showToast('✦ Echo Pulse Sent'); 
+    window.triggerHeartbeat(); 
+    
+    // 觸發全螢幕共振漣漪
+    if (typeof window.createEchoRipple === 'function') {
+        window.createEchoRipple(e);
+    }
+    // 如果有開啟聲音，同時觸發清脆的共鳴音效
+    if (typeof window.playChime === 'function') {
+        window.playChime();
+    }
+});                                                                                                                                                                                                                              
     if(sandGlobalTimer) clearInterval(sandGlobalTimer); 
     sandGlobalTimer = setInterval(() => { 
         if(document.hidden) return; 
@@ -1706,7 +1743,32 @@ window.submitA = async function(){
 }
 
 window.submitT = async function(){ if(!canSubmit()) return; const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('t-submit-btn').innerHTML; await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); }
+window.createEchoRipple = function(e) {
+    let rippleContainer = document.getElementById('ripple-overlay');
+    if (!rippleContainer) {
+        rippleContainer = document.createElement('div');
+        rippleContainer.id = 'ripple-overlay';
+        rippleContainer.className = 'ripple-overlay';
+        document.body.appendChild(rippleContainer);
+    }
 
+    const ripple = document.createElement('div');
+    ripple.className = 'echo-ripple';
+
+    // 抓取點擊位置（如果沒有傳入事件，預設從螢幕中央發散）
+    const x = e && e.clientX ? e.clientX : window.innerWidth / 2;
+    const y = e && e.clientY ? e.clientY : window.innerHeight / 2;
+
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+
+    rippleContainer.appendChild(ripple);
+
+    // 動畫結束後自動清理 DOM 節點
+    setTimeout(() => {
+        ripple.remove();
+    }, 1800);
+};
 window.addEventListener('load', async () => {
   subscribeAll(); startGlobalSandTimer();
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
