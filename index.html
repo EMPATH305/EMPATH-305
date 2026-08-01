@@ -1401,81 +1401,92 @@ window.drawKintsugiVessel = function(){
     const h = 300; 
     c.clearRect(0,0,w,h); 
     
-    // 畫出瓷器底座邊緣 (帶一點微微的光澤感)
-    c.strokeStyle = 'rgba(201,168,76,0.3)'; 
-    c.lineWidth = 1; 
-    c.beginPath(); 
-    const cx = w/2, cy = h/2, rx = w*0.3, ry = h*0.38; 
-    c.ellipse(cx, cy+10, rx, ry, 0, 0, Math.PI*2); 
-    c.stroke(); 
+    const cx = w/2;
+    const cy = h/2;
 
-    // 建立一個簡易的「偽隨機數生成器」：確保每次畫面重整，裂縫的形狀都不會亂跳
-    const random = (seed) => {
-        const x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    };
+    // 1. 畫出具備立體感的「日式茶碗 (Chawan)」取代原本死板的橢圓
+    c.beginPath();
+    // 碗口上緣
+    c.moveTo(cx - 130, cy - 30);
+    c.bezierCurveTo(cx - 60, cy - 50, cx + 60, cy - 50, cx + 130, cy - 30);
+    // 碗口下緣 (製造碗內的深度立體感)
+    c.bezierCurveTo(cx + 70, cy - 10, cx - 70, cy - 10, cx - 130, cy - 30);
+    // 碗身右側曲線往下
+    c.bezierCurveTo(cx + 130, cy + 60, cx + 80, cy + 100, cx + 45, cy + 110);
+    // 平坦的碗底
+    c.lineTo(cx - 45, cy + 110);
+    // 碗身左側曲線往上
+    c.bezierCurveTo(cx - 80, cy + 100, cx - 130, cy + 60, cx - 130, cy - 30);
+    
+    // 填上深邃的黑灰色，並畫上金色細邊
+    c.fillStyle = 'rgba(8, 12, 18, 0.7)';
+    c.fill();
+    c.strokeStyle = 'rgba(201,168,76,0.3)';
+    c.lineWidth = 1;
+    c.stroke();
 
-    // 核心：繪製單一條「鋸齒狀」裂痕的函數
+    // 2. 建立「大師級手工裂縫基因庫」：這些座標會畫出銳利、有力量的真實碎裂感
+    const crackTemplates = [
+        [{x:-130,y:-30}, {x:-90,y:10}, {x:-75,y:40}, {x:-30,y:60}], // 左側切入
+        [{x:130,y:-30}, {x:100,y:0}, {x:80,y:50}, {x:20,y:80}],     // 右側切入
+        [{x:-45,y:110}, {x:-20,y:70}, {x:15,y:50}, {x:40,y:10}],    // 底部往上
+        [{x:45,y:110}, {x:25,y:75}, {x:-10,y:45}, {x:-35,y:25}],    // 底部往左上
+        [{x:-80,y:-38}, {x:-50,y:-10}, {x:-20,y:20}, {x:10,y:40}],  // 碗口中間偏左
+        [{x:80,y:-38}, {x:45,y:-5}, {x:10,y:15}, {x:-15,y:50}],     // 碗口中間偏右
+        [{x:-110,y:15}, {x:-80,y:40}, {x:-40,y:70}, {x:0,y:95}],    // 左下腹部
+        [{x:110,y:15}, {x:70,y:35}, {x:35,y:65}, {x:10,y:100}]      // 右下腹部
+    ];
+
+    // 3. 繪製裂縫的引擎
     const drawCrack = (index, isHealed) => {
-        let seed = index * 999; // 每條裂縫有自己專屬的生長基因
+        // 依序取出美麗的裂縫範本，如果碎片超過 8 個，加上微小偏移量產生新裂痕
+        const template = crackTemplates[index % crackTemplates.length];
+        const offset = Math.floor(index / crackTemplates.length) * 8; 
+
         c.beginPath();
-        
-        // 裂縫起點：不要全部擠在正中央，讓它們在中心附近隨機分佈
-        let px = cx + (random(seed++) - 0.5) * 60;
-        let py = cy + (random(seed++) - 0.5) * 40;
-        c.moveTo(px, py);
+        template.forEach((pt, k) => {
+            // 加入正負交替的偏移，讓疊加的裂痕不會完全重合
+            const px = cx + pt.x + (k % 2 === 0 ? offset : -offset);
+            const py = cy + pt.y + (k % 2 === 0 ? -offset : offset);
+            if (k === 0) c.moveTo(px, py);
+            else c.lineTo(px, py);
+        });
 
-        // 決定這條裂痕的大致生長方向
-        const baseAngle = random(seed++) * Math.PI * 2;
-        let currentAngle = baseAngle;
-        
-        // 產生 5~8 段的「隨機折線」，模擬真實破碎感
-        const segments = 5 + Math.floor(random(seed++) * 4);
-        let startX = px, startY = py;
+        // 設定「銳利折角」，這是碎玻璃質感的靈魂
+        c.lineJoin = 'miter'; 
+        c.miterLimit = 2;
 
-        for(let j = 0; j < segments; j++) {
-            // 每次的折角偏移 (讓線條產生閃電般的銳利轉折)
-            currentAngle += (random(seed++) - 0.5) * 1.5; 
-            const length = 15 + random(seed++) * 25; // 每段裂痕的長度不一
-            px += Math.cos(currentAngle) * length;
-            py += Math.sin(currentAngle) * length;
-            c.lineTo(px, py);
-        }
-
-        // 樣式設定
-        if(isHealed) {
-            // 金繼：黃金漸層光澤
-            const gradient = c.createLinearGradient(startX, startY, px, py);
-            gradient.addColorStop(0, '#C9A84C'); // 暗金
-            gradient.addColorStop(0.5, '#FDFCF8'); // 亮金反光
-            gradient.addColorStop(1, '#B38728'); // 深金
+        if (isHealed) {
+            // 金繼亮起：使用漸層金與光暈
+            const gradient = c.createLinearGradient(cx - 50, cy - 50, cx + 50, cy + 50);
+            gradient.addColorStop(0, '#D4AF37');
+            gradient.addColorStop(0.5, '#FFF8DC');
+            gradient.addColorStop(1, '#B38728');
             c.strokeStyle = gradient;
-            c.lineWidth = 2; // 線條不要太粗，會比較精緻
-            c.shadowBlur = 8;
-            c.shadowColor = 'rgba(201, 168, 76, 0.5)';
+            c.lineWidth = 2.5;
+            c.shadowBlur = 12;
+            c.shadowColor = 'rgba(252, 246, 186, 0.6)';
         } else {
-            // 未修補的暗痕：隱隱約約的灰白細線
-            c.strokeStyle = 'rgba(255,255,255,0.08)'; 
+            // 未修補：隱約可見的灰白暗痕
+            c.strokeStyle = 'rgba(255, 255, 255, 0.12)';
             c.lineWidth = 1;
             c.shadowBlur = 0;
         }
         
-        // 讓線條的轉角變得「銳利(miter)」，這是看起來像破片的關鍵！
-        c.lineJoin = 'miter'; 
         c.stroke();
-        c.shadowBlur = 0; // 畫完重置光暈
+        c.shadowBlur = 0; // 重置光暈以免影響其他畫布
     };
 
-    // 1. 先畫出所有「未修補」的暗色裂縫底圖
+    // 先畫出所有碎片的「暗痕」
     for(let i = 0; i < pTotalShards; i++) {
         drawCrack(i, false);
     }
-
-    // 2. 根據目前被治癒的數量 (pHealedTotal)，疊上閃耀的黃金修補線
-    const goldLines = Math.min(pHealedTotal, pTotalShards); 
+    
+    // 再為已經被修復的碎片塗上「金繼」
+    const goldLines = Math.min(pHealedTotal, pTotalShards);
     for(let i = 0; i < goldLines; i++) {
         drawCrack(i, true);
-    } 
+    }
 }
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
