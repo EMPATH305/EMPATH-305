@@ -119,9 +119,6 @@ nav{
 .func-btn:hover { background: rgba(255,255,255,0.15); opacity: 1; border-color: rgba(255,255,255,0.5); }
 .hsp-toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; opacity: 1; }
 
-.audio-btn { transition: all 0.3s ease; }
-.audio-btn.active { background: rgba(255,255,255,0.15); border-color: var(--white); color: var(--white); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-
 .lang-dropdown-wrapper { position: relative; display: inline-block; }
 .lang-dropdown-list {
   position: absolute; right: 0; top: 48px; background: rgba(5,12,18,0.98);
@@ -160,7 +157,7 @@ nav{
 
 #hero{ min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 40px 80px;position:relative;overflow:hidden; }
 .hero-bg-text{ position:absolute;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap; }
-.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:16px;position:relative; }
+.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1margin-bottom:16px;position:relative; }
 .hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2.5vw,22px);color:var(--gold);letter-spacing:3px;margin-bottom:24px;position:relative; }
 
 .onboarding-box { 
@@ -487,9 +484,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
         <a class="nav-letter" data-l="H" href="#room-h" onclick="window.closeMobileNav()">H</a>
       </div>
       <div class="nav-controls">
-        <button class="func-btn audio-btn" id="audio-btn" onclick="window.toggleAudio()">
-          🔇<span class="audio-text" data-zh=" 聲音" data-en=" Audio" data-ja=" 音声" data-es=" Audio" data-fr=" Audio" data-de=" Audio" data-zh-cn=" 声音"> 聲音</span>
-        </button>
         <div class="hsp-tooltip-wrap">
           <button class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
           <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
@@ -1090,112 +1084,8 @@ window.addEventListener('scroll', () => { const btt = document.getElementById('b
 function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) {} } }
 loadLocalJourney();
 
-
 // ==========================================
-// 音訊引擎 (Generative Web Audio API)
-// ==========================================
-let audioCtx;
-let ambientGain;
-let brushGain;
-let isAudioEnabled = false;
-
-window.toggleAudio = function() {
-    const btn = document.getElementById('audio-btn');
-    if(!audioCtx) initAudio();
-    
-    isAudioEnabled = !isAudioEnabled;
-    
-    if(isAudioEnabled) {
-        audioCtx.resume();
-        btn.innerHTML = `🔊<span class="audio-text">${t(' 聲音', ' Audio', ' 音声', ' Audio', ' Audio', ' Audio', ' 声音')}</span>`;
-        btn.classList.add('active');
-        window.showToast(t('🔊 環境聲景已開啟', '🔊 Soundscape On', '🔊 環境音オン', '🔊 Sonido Activado', '🔊 Son Activé', '🔊 Ton An', '🔊 环境声景已开启'));
-    } else {
-        audioCtx.suspend();
-        btn.innerHTML = `🔇<span class="audio-text">${t(' 聲音', ' Audio', ' 音声', ' Audio', ' Audio', ' Audio', ' 声音')}</span>`;
-        btn.classList.remove('active');
-        window.showToast(t('🔇 聲音已關閉', '🔇 Audio Off', '🔇 音声オフ', '🔇 Sonido Desactivado', '🔇 Son Désactivé', '🔇 Ton Aus', '🔇 声音已关闭'));
-    }
-}
-
-function initAudio() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // 1. 深海呼吸底噪 (Ambient Drone)
-    const osc1 = audioCtx.createOscillator();
-    const osc2 = audioCtx.createOscillator();
-    ambientGain = audioCtx.createGain();
-    
-    osc1.type = 'sine'; osc1.frequency.value = 55; // 極低頻
-    osc2.type = 'triangle'; osc2.frequency.value = 55.5; // 產生些微的物理跳動 (Beating)
-    
-    osc1.connect(ambientGain);
-    osc2.connect(ambientGain);
-    ambientGain.connect(audioCtx.destination);
-    
-    ambientGain.gain.value = 0.03; // 非常微弱
-    osc1.start(); osc2.start();
-    
-    // 加上 LFO 讓底噪有呼吸感
-    const lfo = audioCtx.createOscillator();
-    const lfoGain = audioCtx.createGain();
-    lfo.type = 'sine'; lfo.frequency.value = 0.05; // 每 20 秒一次呼吸
-    lfo.connect(lfoGain);
-    lfoGain.connect(ambientGain.gain);
-    lfoGain.gain.value = 0.015;
-    lfo.start();
-
-    // 2. 炭筆塗鴉白噪音 (Brush Scratch)
-    const bufferSize = audioCtx.sampleRate * 2; 
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1; // 生成白噪音
-    }
-    const noiseSrc = audioCtx.createBufferSource();
-    noiseSrc.buffer = noiseBuffer;
-    noiseSrc.loop = true;
-    
-    const bandpass = audioCtx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.value = 800; // 濾出接近紙筆摩擦的頻段
-    
-    brushGain = audioCtx.createGain();
-    brushGain.gain.value = 0; // 預設靜音
-    
-    noiseSrc.connect(bandpass);
-    bandpass.connect(brushGain);
-    brushGain.connect(audioCtx.destination);
-    noiseSrc.start();
-}
-
-window.playChime = function() {
-    if(!isAudioEnabled || !audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800 + Math.random()*400, audioCtx.currentTime); // 隨機清脆高音
-    
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2); // 尾音慢慢消散
-    
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 2);
-}
-
-window.setBrushVolume = function(speed) {
-    if(!isAudioEnabled || !brushGain) return;
-    // 根據滑鼠速度動態調整摩擦聲大小
-    const targetVol = Math.min(speed * 0.003, 0.08); 
-    brushGain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.05);
-}
-
-
-// ==========================================
-// EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼
+// EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼 (強健修復版)
 // ==========================================
 let eMode = 'text';
 let eDrawCanvas = null;
@@ -1212,6 +1102,7 @@ window.setEMode = function(mode) {
     document.getElementById('e-char').style.display = mode === 'text' ? 'block' : 'none';
     document.getElementById('e-draw-wrap').style.display = mode === 'draw' ? 'block' : 'none';
     
+    // 確保 DOM 已經顯示出來後，再初始化畫布
     if(mode === 'draw' && !eCtx) {
         setTimeout(initEDrawCanvas, 50); 
     }
@@ -1223,6 +1114,7 @@ function initEDrawCanvas() {
     
     const resizeEDraw = () => {
         const wrap = document.getElementById('e-draw-wrap');
+        // 強制給定寬度，避免 display:none 造成抓不到寬度
         eDrawCanvas.width = wrap.clientWidth || 600;
         eDrawCanvas.height = 220; 
         eCtx.lineCap = 'round';
@@ -1233,7 +1125,7 @@ function initEDrawCanvas() {
 
     eDrawCanvas.addEventListener('pointerdown', (e) => {
         isDrawing = true;
-        eCanvasHasDrawn = true; 
+        eCanvasHasDrawn = true; // 標記：確定有畫東西了！
         const pos = getPos(e);
         lastX = pos.x; lastY = pos.y;
         eCtx.beginPath();
@@ -1260,17 +1152,12 @@ function initEDrawCanvas() {
         eCtx.beginPath();
         eCtx.moveTo(pos.x, pos.y);
         lastX = pos.x; lastY = pos.y;
-        
-        // 觸發畫筆聲音
-        if(typeof window.setBrushVolume === 'function') window.setBrushVolume(dist);
     });
 
     const stopDraw = (e) => {
         isDrawing = false;
         eCtx.beginPath();
         eDrawCanvas.releasePointerCapture(e.pointerId);
-        // 停止畫筆聲音
-        if(typeof window.setBrushVolume === 'function') window.setBrushVolume(0);
     };
 
     eDrawCanvas.addEventListener('pointerup', stopDraw);
@@ -1284,9 +1171,8 @@ function getPos(e) {
 
 window.clearEDraw = function() {
     if(eCtx) eCtx.clearRect(0, 0, eDrawCanvas.width, eDrawCanvas.height);
-    eCanvasHasDrawn = false; 
+    eCanvasHasDrawn = false; // 清除畫布時，重置標記
 }
-
 
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
 
@@ -1294,31 +1180,7 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
-    
-    // 金繼房間的監聽 (掛載音效觸發)
-    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { 
-      const board = document.getElementById('p-board'); if(!board) return; 
-      board.innerHTML = ''; pHealedTotal = 0; 
-      snapshot.forEach(docSnap => { 
-        const data = docSnap.data(); const id = docSnap.id; 
-        if(data.healed) pHealedTotal++; 
-        const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); 
-        div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; 
-        div.addEventListener('click', async () => { 
-          if(data.healed) return; 
-          await updateDoc(doc(db, "shards", id), { healed: true }); 
-          logJourney('p', data.text); 
-          // 觸發清脆的水晶音效
-          if(typeof window.playChime === 'function') window.playChime();
-          window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); 
-        }); 
-        board.appendChild(div); 
-      }); 
-      globalCounts.p = pHealedTotal; 
-      if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); 
-      updateDynamicTexts(); updateCountersUI(); 
-    }));
-    
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; feed.innerHTML = ''; const nowMs = Date.now(); snapshot.forEach(docSnap => { const data = docSnap.data(); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); const expiresAt = msgTime + (24 * 60 * 60 * 1000); const leftSecs = (expiresAt - nowMs) / 1000; if(leftSecs <= 0) return; const div = document.createElement('div'); div.className = 'sand-msg'; div.dataset.expires = expiresAt; const pct = (leftSecs / 86400) * 100; div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; feed.appendChild(div); }); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; div.querySelector('.echo-btn').addEventListener('click', async function(){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); }); feed.appendChild(div); }); updateCountersUI(); }));
 }
@@ -1330,31 +1192,7 @@ function startGlobalSandTimer() { if(sandGlobalTimer) clearInterval(sandGlobalTi
 
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
-window.toggleHSP = function() { 
-    const body = document.body; const btn = document.getElementById('hsp-btn'); 
-    body.classList.toggle('hsp-mode'); 
-    if(body.classList.contains('hsp-mode')) { 
-        btn.classList.add('active'); 
-        localStorage.setItem('empath_hsp_mode', 'true'); 
-        isAnimating = false; 
-        if(starsRafId) cancelAnimationFrame(starsRafId); 
-        if(sandRafId) cancelAnimationFrame(sandRafId); 
-        
-        // 進入降噪模式時，自動關閉聲音
-        if (audioCtx && isAudioEnabled) {
-            window.toggleAudio();
-        }
-
-        window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); 
-    } else { 
-        btn.classList.remove('active'); 
-        localStorage.setItem('empath_hsp_mode', 'false'); 
-        isAnimating = true; 
-        if(typeof window.drawStars === 'function') window.drawStars(); 
-        if(typeof window.drawSand === 'function') window.drawSand(); 
-        window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); 
-    } 
-}
+window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
 
 window.speakText = function(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); const langs = { 'zh': 'zh-TW', 'zh-cn': 'zh-CN', 'en': 'en-US', 'en-uk': 'en-GB', 'ja': 'ja-JP', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE' }; utterance.lang = langs[window.currentLang] || 'zh-TW'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance); window.showToast(t('🔉 語音導航朗讀中...', '🔉 Reading...', '🔉 読み上げ中...', '🔉 Leyendo...', '🔉 Lecture...', '🔉 Lesen...', '🔉 语音导航朗读中...')); } };
 window.triggerHeartbeat = function() { if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); } };
@@ -1381,6 +1219,9 @@ function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); i
 
 let allEmotions = []; let eFeedExpanded = false;
 
+// ==========================================
+// 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
+// ==========================================
 window.submitE = async function(){ 
     if(!canSubmit()) return; 
     
@@ -1395,6 +1236,7 @@ window.submitE = async function(){
         input.value = '';
         document.getElementById('e-char').textContent = '0 / 500';
     } else {
+        // 如果沒有畫任何東西，就拒絕送出
         if(!eDrawCanvas || !eCanvasHasDrawn) return;
         imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
         window.clearEDraw();
@@ -1471,4 +1313,30 @@ window.submitM = async function(){ if(!canSubmit()) return; const input = docume
 
 let pCanvas, pCtx, pHealedTotal = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
-window.drawKintsugiVessel = function(){ if(!pCtx) return; const c=pCtx; const w=pCanvas.offsetWidth||540; const h=300; c.clearRect(0,0,w,h); c.strokeStyle='rgba(201,168,76,0.3)'; c.lineWidth=1; c.beginPath(); const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke(); const predefinedCracks = [ {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80}, {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60}, {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20}, {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100}, {sx: cx-20, sy:由于程序代码的局限，我没法办到。
+window.drawKintsugiVessel = function(){ if(!pCtx) return; const c=pCtx; const w=pCanvas.offsetWidth||540; const h=300; c.clearRect(0,0,w,h); c.strokeStyle='rgba(201,168,76,0.3)'; c.lineWidth=1; c.beginPath(); const cx=w/2, cy=h/2, rx=w*0.3, ry=h*0.38; c.ellipse(cx,cy+10,rx,ry,0,0,Math.PI*2); c.stroke(); const predefinedCracks = [ {sx: cx-80, sy: cy-60, mx: cx-50, my: cy, ex: cx-20, ey: cy+80}, {sx: cx+60, sy: cy-80, mx: cx+30, my: cy-20, ex: cx+50, ey: cy+60}, {sx: cx-30, sy: cy-40, mx: cx+20, my: cy-10, ex: cx+60, ey: cy+20}, {sx: cx-60, sy: cy+20, mx: cx-10, my: cy+60, ex: cx+30, ey: cy+100}, {sx: cx-20, sy: cy-90, mx: cx-40, my: cy-50, ex: cx-80, ey: cy-60} ]; predefinedCracks.forEach(crack => { c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); c.strokeStyle='rgba(201,168,76,0.15)'; c.lineWidth=0.5; c.stroke(); }); const goldLines = Math.min(pHealedTotal, predefinedCracks.length); for(let i=0; i<goldLines; i++){ const crack = predefinedCracks[i]; c.beginPath(); c.moveTo(crack.sx, crack.sy); c.quadraticCurveTo(crack.mx, crack.my, crack.ex, crack.ey); const gradient = c.createLinearGradient(crack.sx, crack.sy, crack.ex, crack.ey); gradient.addColorStop(0, '#BF953F'); gradient.addColorStop(0.5, '#FCF6BA'); gradient.addColorStop(1, '#B38728'); c.strokeStyle = gradient; c.lineWidth = 2.5; c.shadowBlur = 10; c.shadowColor = 'rgba(252, 246, 186, 0.8)'; c.stroke(); c.shadowBlur = 0; } }
+window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
+
+let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
+function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
+window.drawSand = function() { const c = document.getElementById('sand-canvas'); if(!c || !c.width || !isAnimating) return; const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h); sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); }
+window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
+window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
+window.submitA = async function(){ if(!canSubmit()) return; const input = document.getElementById('a-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('a-submit-btn').innerHTML; await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), createdAt: serverTimestamp() }); input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); window.showToast(t('放入沙畫', 'Turned to sand', '砂絵になりました', 'Convertido en arena', 'Transformé en sable', 'Zu Sand geworden', '放入沙画')); }
+
+window.submitT = async function(){ if(!canSubmit()) return; const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('t-submit-btn').innerHTML; await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); }
+
+window.addEventListener('load', async () => {
+  subscribeAll(); startGlobalSandTimer();
+  const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
+  firestoreUnsubs.push(onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } }));
+  if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
+  if(!localStorage.getItem('empath_hsp_hint_shown')) { setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000); }
+  if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
+  initTimeline(); updateSyncUI(); 
+  const existingKey = localStorage.getItem('empath_soul_key');
+  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
+  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
+});
+</script>
+</body>
+</html>
