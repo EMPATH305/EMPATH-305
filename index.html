@@ -334,30 +334,36 @@ nav{
 .echo-heart{ font-size:36px;line-height:1;animation:echopulse 2s ease-in-out infinite; }
 @keyframes echopulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15); text-shadow: 0 0 20px var(--amber);}}
 .echo-label{ text-align:center;font-size:13px;letter-spacing:2px;color:rgba(232,168,124,.8);margin-bottom:20px; font-weight: bold;}
-/* ===== Room T 全螢幕共振漣漪特效 ===== */
+/* ===== Room T 全螢幕共振漣漪特效 (高強度修正版) ===== */
 .ripple-overlay {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   pointer-events: none;
-  z-index: 99999;
+  z-index: 999999; /* 提高層級，確保絕對在最上層 */
   overflow: hidden;
 }
 
 .echo-ripple {
   position: absolute;
   border-radius: 50%;
-  border: 2px solid rgba(232, 168, 124, 0.8);
-  background: radial-gradient(circle, rgba(232, 168, 124, 0.25) 0%, rgba(232, 168, 124, 0) 70%);
+  border: 4px solid rgba(232, 168, 124, 0.9); /* 加粗邊框與色彩 */
+  background: radial-gradient(circle, rgba(232, 168, 124, 0.4) 0%, rgba(232, 168, 124, 0) 70%); /* 增強內部發光 */
+  width: 200vmax; /* 固定極大尺寸，確保能覆蓋各種比例的手機螢幕 */
+  height: 200vmax;
   transform: translate(-50%, -50%) scale(0);
-  animation: ripple-expand 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) FORWARDS;
+  pointer-events: none;
+  /* 使用 scale 動畫效能最好，手機跑起來最滑順 */
+  animation: ripple-expand 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards; 
 }
 
 @keyframes ripple-expand {
   0% {
-    width: 0px; height: 0px; opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
   }
   100% {
-    width: 250vw; height: 250vw; opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
   }
 }
 
