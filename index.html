@@ -157,7 +157,7 @@ nav{
 
 #hero{ min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 40px 80px;position:relative;overflow:hidden; }
 .hero-bg-text{ position:absolute;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:600;color:rgba(255,255,255,.025);letter-spacing:-0.02em;pointer-events:none;user-select:none;line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap; }
-.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1;margin-bottom:16px;position:relative; }
+.hero-title{ font-family:'Cormorant Garamond',serif;font-size:clamp(60px,12vw,120px);font-weight:600;color:var(--white);letter-spacing:20px;line-height:1margin-bottom:16px;position:relative; }
 .hero-sub{ font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2.5vw,22px);color:var(--gold);letter-spacing:3px;margin-bottom:24px;position:relative; }
 
 .onboarding-box { 
@@ -623,7 +623,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   
   <p class="e-anon-label">ANONYMOUS — <span data-zh="完全匿名" data-en="Completely Anonymous" data-ja="完全匿名" data-es="Totalmente Anónimo" data-fr="Totalement Anonyme" data-de="Völlig Anonym" data-zh-cn="完全匿名">完全匿名</span></p>
   
-  <!-- 新增：模式切換按鈕 -->
   <div class="e-mode-toggle">
       <button class="e-mode-btn active" id="btn-mode-text" onclick="window.setEMode('text')" data-zh="⌨️ 敲打文字" data-en="⌨️ Type Text" data-ja="⌨️ 文字を打つ" data-es="⌨️ Escribir Texto" data-zh-cn="⌨️ 敲打文字">⌨️ 敲打文字</button>
       <button class="e-mode-btn" id="btn-mode-draw" onclick="window.setEMode('draw')" data-zh="✍️ 肌肉釋放 (塗鴉)" data-en="✍️ Draw / Release" data-ja="✍️ 描いて解放" data-es="✍️ Dibujar / Liberar" data-zh-cn="✍️ 肌肉释放 (涂鸦)">✍️ 肌肉釋放 (塗鴉)</button>
@@ -642,7 +641,6 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 500</div>
   
-  <!-- 新增：畫布輸入區塊 -->
   <div id="e-draw-wrap">
       <canvas id="e-draw-canvas"></canvas>
       <div class="e-draw-tools">
@@ -1087,12 +1085,13 @@ function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_
 loadLocalJourney();
 
 // ==========================================
-// EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼
+// EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼 (強健修復版)
 // ==========================================
 let eMode = 'text';
 let eDrawCanvas = null;
 let eCtx = null;
 let isDrawing = false;
+let eCanvasHasDrawn = false; 
 let lastX = 0; let lastY = 0;
 
 window.setEMode = function(mode) {
@@ -1103,8 +1102,9 @@ window.setEMode = function(mode) {
     document.getElementById('e-char').style.display = mode === 'text' ? 'block' : 'none';
     document.getElementById('e-draw-wrap').style.display = mode === 'draw' ? 'block' : 'none';
     
+    // 確保 DOM 已經顯示出來後，再初始化畫布
     if(mode === 'draw' && !eCtx) {
-        initEDrawCanvas();
+        setTimeout(initEDrawCanvas, 50); 
     }
 }
 
@@ -1113,8 +1113,9 @@ function initEDrawCanvas() {
     eCtx = eDrawCanvas.getContext('2d');
     
     const resizeEDraw = () => {
-        const rect = eDrawCanvas.parentElement.getBoundingClientRect();
-        eDrawCanvas.width = rect.width;
+        const wrap = document.getElementById('e-draw-wrap');
+        // 強制給定寬度，避免 display:none 造成抓不到寬度
+        eDrawCanvas.width = wrap.clientWidth || 600;
         eDrawCanvas.height = 220; 
         eCtx.lineCap = 'round';
         eCtx.lineJoin = 'round';
@@ -1122,21 +1123,20 @@ function initEDrawCanvas() {
     resizeEDraw();
     window.addEventListener('resize', () => { if(eMode === 'draw') resizeEDraw(); });
 
-    // 支援觸控與滑鼠的現代 API
     eDrawCanvas.addEventListener('pointerdown', (e) => {
         isDrawing = true;
+        eCanvasHasDrawn = true; // 標記：確定有畫東西了！
         const pos = getPos(e);
         lastX = pos.x; lastY = pos.y;
         eCtx.beginPath();
         eCtx.moveTo(lastX, lastY);
-        eDrawCanvas.setPointerCapture(e.pointerId); // 鎖定螢幕，防止手機滑動
+        eDrawCanvas.setPointerCapture(e.pointerId);
     });
 
     eDrawCanvas.addEventListener('pointermove', (e) => {
         if(!isDrawing) return;
         const pos = getPos(e);
         
-        // 情感流體筆刷：計算速度來決定粗細
         const dx = pos.x - lastX;
         const dy = pos.y - lastY;
         const dist = Math.sqrt(dx*dx + dy*dy);
@@ -1145,7 +1145,7 @@ function initEDrawCanvas() {
         eCtx.lineWidth = lineWidth;
         eCtx.strokeStyle = 'rgba(210, 220, 230, 0.85)';
         eCtx.shadowBlur = 4;
-        eCtx.shadowColor = 'rgba(123, 143, 161, 0.6)'; // 帶有一點點微弱的冰冷藍暈
+        eCtx.shadowColor = 'rgba(123, 143, 161, 0.6)';
 
         eCtx.lineTo(pos.x, pos.y);
         eCtx.stroke();
@@ -1171,12 +1171,7 @@ function getPos(e) {
 
 window.clearEDraw = function() {
     if(eCtx) eCtx.clearRect(0, 0, eDrawCanvas.width, eDrawCanvas.height);
-}
-
-function isCanvasBlank(canvas) {
-    const blank = document.createElement('canvas');
-    blank.width = canvas.width; blank.height = canvas.height;
-    return canvas.toDataURL() === blank.toDataURL();
+    eCanvasHasDrawn = false; // 清除畫布時，重置標記
 }
 
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
@@ -1223,6 +1218,7 @@ async function autoBackupToCloud() { const key = localStorage.getItem('empath_so
 function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex'; document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
 
 let allEmotions = []; let eFeedExpanded = false;
+
 // ==========================================
 // 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
 // ==========================================
@@ -1240,15 +1236,14 @@ window.submitE = async function(){
         input.value = '';
         document.getElementById('e-char').textContent = '0 / 500';
     } else {
-        if(!eDrawCanvas || isCanvasBlank(eDrawCanvas)) return;
-        // 將畫布轉為極輕量級的 webp 格式 (約 10-20KB，絕對不會爆 Firebase 限制)
+        // 如果沒有畫任何東西，就拒絕送出
+        if(!eDrawCanvas || !eCanvasHasDrawn) return;
         imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
         window.clearEDraw();
     }
 
     try { 
         const origText = document.getElementById('e-submit-btn').innerHTML; 
-        
         const docData = { createdAt: serverTimestamp() };
         if (text) docData.text = text;
         if (imageData) docData.image = imageData;
@@ -1258,7 +1253,10 @@ window.submitE = async function(){
         logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]'); 
         playRitual('e-submit-btn', origText); 
         window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
-    } catch(e) { console.error(e); } 
+    } catch(e) { 
+        console.error("Firestore 寫入失敗：", e); 
+        alert("寫入失敗！如果是 Permission Denied，請檢查 Firebase 的 Security Rules 是否阻擋了 image 欄位。");
+    } 
 }
 
 window.renderEFeed = function() { 
@@ -1274,7 +1272,6 @@ window.renderEFeed = function() {
         const div = document.createElement('div'); 
         div.className = 'e-msg'; 
         
-        // 判斷是文字還是塗鴉圖片
         let contentHtml = '';
         if (data.text) {
             contentHtml = `<div>${data.text}</div>`;
