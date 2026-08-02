@@ -474,6 +474,42 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 .footer-letters{ display:flex;gap:10px; }
 .footer-l{ font-family:'Cormorant Garamond',serif;font-size:16px;opacity:.6;letter-spacing:2px; }
 .footer-copy { width:100%; text-align:center; padding-top:28px; border-top:1px dashed rgba(255,255,255,0.15); font-size:12px; color:rgba(255,255,255,0.6); letter-spacing:2px; font-family:'Noto Sans TC',sans-serif;}
+/* ===== 幸運微光彩蛋特效 ===== */
+#fortune-spark {
+    position: fixed; bottom: 40px; left: 40px; z-index: 900;
+    color: var(--gold); font-size: 28px; cursor: pointer;
+    animation: pulse-spark 4s ease-in-out infinite; 
+    text-shadow: 0 0 15px rgba(201,168,76,0.8);
+    transition: all 0.4s ease; display: flex; align-items: center; justify-content: center;
+}
+#fortune-spark:hover { 
+    transform: scale(1.3) rotate(90deg); 
+    text-shadow: 0 0 25px rgba(201,168,76,1); 
+}
+@keyframes pulse-spark { 
+    0%, 100% { opacity: 0.4; transform: translateY(0); } 
+    50% { opacity: 1; transform: translateY(-5px); } 
+}
+
+.fortune-modal {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(5, 10, 15, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.8s ease;
+}
+.fortune-modal.show { opacity: 1; pointer-events: auto; cursor: pointer; }
+
+.fortune-text {
+    font-family: 'Noto Serif TC', serif; font-size: 20px; color: var(--dawn);
+    max-width: 80%; text-align: center; line-height: 2.2; letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+.fortune-text .f-quote { color: var(--gold); font-size: 24px; margin: 0 8px; }
+
+.fortune-hint {
+    margin-top: 40px; font-size: 12px; color: var(--muted); letter-spacing: 3px;
+    opacity: 0; animation: fadeSlideIn 1s ease forwards 1.5s; /* 延遲出現提示 */
+}
 
 @media(max-width:768px){
   nav { padding: 16px 20px; } .nav-logo { font-size: 22px; } .hamburger { display: flex; }
@@ -534,6 +570,14 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 <div class="toast" id="toast"></div>
 <div class="star-tooltip" id="star-tooltip"></div>
 <button id="btt-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
+<!-- 幸運微光彩蛋 (左下角) -->
+<div id="fortune-spark" onclick="window.crackFortune()" data-zh-title="點擊接收宇宙的低語" title="點擊接收宇宙的低語">✦</div>
+
+<!-- 微光展開後的顯示畫布 -->
+<div id="fortune-display" class="fortune-modal" onclick="this.classList.remove('show')">
+  <div class="fortune-text" id="fortune-text"></div>
+  <div class="fortune-hint" data-zh="點擊畫面任何一處關閉" data-en="Click anywhere to close">點擊畫面任何一處關閉</div>
+</div>
 
 <nav>
   <a href="#hero" class="nav-logo">EMPATH</a>
@@ -1415,6 +1459,44 @@ window.openNebula = function() {
     };
     drawNebula();
 };
+
+// ==========================================
+// EMPATH: 幸運微光 (隨機鼓勵彩蛋)
+// ==========================================
+window.crackFortune = function() {
+    // 這裡可以隨時擴充妳想對使用者說的話！
+    const fortunes = [
+        t('今天辛苦了，請為自己感到驕傲。', 'You worked hard today. Be proud of yourself.', '今日はお疲れ様。自分を誇りに思って。', 'Trabajaste duro hoy. Siéntete orgulloso.', 'Vous avez bien travaillé aujourd\'hui. Soyez fier.', 'Du hast heute hart gearbeitet. Sei stolz auf dich.', '今天辛苦了，请为自己感到骄傲。'),
+        t('你的存在，本身就是一件美好的事。', 'Your existence is a beautiful thing.', 'あなたの存在そのものが美しい。', 'Tu existencia es algo hermoso.', 'Votre existence est une belle chose.', 'Deine Existenz ist etwas Wunderschönes.', '你的存在，本身就是一件美好的事。'),
+        t('慢慢來，宇宙會接住你的每一次墜落。', 'Take your time. The universe will catch your every fall.', 'ゆっくりでいい。宇宙はあなたの落下を受け止めます。', 'Tómate tu tiempo. El universo atrapará cada caída.', 'Prenez votre temps. L\'univers rattrapera chaque chute.', 'Lass dir Zeit. Das Universum wird jeden Fall auffangen.', '慢慢来，宇宙会接住你的每一次坠落。'),
+        t('即使有裂痕，那也是光照進來的地方。', 'Even with cracks, that is where the light enters.', 'ひび割れがあっても、そこから光が差し込みます。', 'Incluso con grietas, ahí es por donde entra la luz.', 'Même avec des fissures, c\'est là que la lumière entre.', 'Selbst mit Rissen, dort kommt das Licht herein.', '即使有裂痕，那也是光照进来的地方。'),
+        t('允許自己今天什麼都不做，也是一種勇敢。', 'Allowing yourself to do nothing today is also brave.', '今日何もしないことを自分に許すのも、一つの勇気です。', 'Permitirte no hacer nada hoy también es valiente.', 'S\'autoriser à ne rien faire aujourd\'hui est aussi courageux.', 'Sich heute zu erlauben, nichts zu tun, ist auch mutig.', '允许自己今天什么都不做，也是一种勇敢。'),
+        t('你不需要變得更好，才值得被愛。', 'You don’t have to be better to be worthy of love.', '愛されるために、より良くなる必要はありません。', 'No tienes que ser mejor para ser digno de amor.', 'Vous n\'avez pas besoin d\'être meilleur pour être digne d\'amour.', 'Du musst nicht besser sein, um es wert zu sein, geliebt zu werden.', '你不需要变得更好，才值得被爱。')
+    ];
+    
+    const modal = document.getElementById('fortune-display');
+    const textEl = document.getElementById('fortune-text');
+    const spark = document.getElementById('fortune-spark');
+    
+    // 隨機抽取一句話
+    const randomMsg = fortunes[Math.floor(Math.random() * fortunes.length)];
+    textEl.innerHTML = `<span class="f-quote">「</span> ${randomMsg} <span class="f-quote">」</span>`;
+    
+    // 顯示全螢幕溫柔畫布
+    modal.classList.add('show');
+    
+    // 觸發音效與震動 (如果有的話)
+    if(typeof window.playChime === 'function') window.playChime();
+    if(typeof window.triggerHeartbeat === 'function') window.triggerHeartbeat();
+    
+    // 點過一次後讓左下角的微光暫時變暗，防止連點
+    spark.style.opacity = '0.1';
+    spark.style.pointerEvents = 'none';
+    setTimeout(() => { 
+        spark.style.opacity = ''; 
+        spark.style.pointerEvents = 'auto'; 
+    }, 10000); // 10秒後微光才會再次亮起
+}
 
 window.closeNebula = function() {
     const overlay = document.getElementById('nebula-overlay');
