@@ -1190,11 +1190,24 @@ function updateSoulWeather() {
     const body = document.body;
     body.classList.remove('weather-release', 'weather-warmth', 'weather-cosmic');
 
-    // 判斷當前氣象型態
+    // 🌟 神奇小幫手：同時更新畫面文字，並自動綁上所有語言的 data 屬性供切換
+    const setWeatherMsg = (zh, en, ja, es, fr, de, zh_cn) => {
+        badgeText.setAttribute('data-zh', zh);
+        badgeText.setAttribute('data-en', en);
+        badgeText.setAttribute('data-ja', ja);
+        badgeText.setAttribute('data-es', es);
+        badgeText.setAttribute('data-fr', fr);
+        badgeText.setAttribute('data-de', de);
+        badgeText.setAttribute('data-zh-cn', zh_cn);
+        // 立即顯示當前選擇的語言
+        badgeText.textContent = t(zh, en, ja, es, fr, de, zh_cn);
+    };
+
+    // 判斷當前氣象型態，並餵給神奇小幫手
     if (warmthPower >= releasePower && warmthPower >= cosmicPower && warmthPower > 0) {
         body.classList.add('weather-warmth');
         if (badgeDot) badgeDot.style.background = 'var(--gold)';
-        badgeText.textContent = t(
+        setWeatherMsg(
             '✦ 現正氣象：琥珀暖光 — 許多靈魂正在此處溫柔交會',
             '✦ Soul Weather: Amber Warmth — Souls intersecting warmly',
             '✦ 魂の気象：琥珀色の温もり — 多くの魂が優しく交わっています',
@@ -1206,7 +1219,7 @@ function updateSoulWeather() {
     } else if (releasePower > warmthPower && releasePower >= cosmicPower) {
         body.classList.add('weather-release');
         if (badgeDot) badgeDot.style.background = 'var(--e)';
-        badgeText.textContent = t(
+        setWeatherMsg(
             '🌧️ 現正氣象：深海靜雨 — 正在為這個世界接住破碎與重量',
             '🌧️ Soul Weather: Deep Ocean Rain — Holding weight for the world',
             '🌧️ 魂の気象：深海の静かな雨 — 世界の重みを受け止めています',
@@ -1218,7 +1231,7 @@ function updateSoulWeather() {
     } else {
         body.classList.add('weather-cosmic');
         if (badgeDot) badgeDot.style.background = 'var(--m)';
-        badgeText.textContent = t(
+        setWeatherMsg(
             '🌌 現正氣象：夜空微光 — 無數思念正在漫長的夜裡閃爍',
             '🌌 Soul Weather: Cosmic Starlight — Memories shimmering in the night',
             '🌌 魂の気象：夜空の微光 — 多くの思いが夜に輝いています',
