@@ -52,6 +52,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
+/* EMPATH 專屬優雅滾動條 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 168, 76, 0.6); } /* 懸浮時透出微光金 */
+/* 防止手機端點擊時出現藍色反白干擾 */
+body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+/* 允許使用者在輸入框打字，或複製引言 */
+textarea, input, .hero-quote, .a-feed, .t-feed { -webkit-user-select: text; user-select: text; }
 /* Behance 連結外層對齊 */
 .creator-portfolio { text-align: center; margin-top: 60px; margin-bottom: 40px; opacity: 0.8; }
 /* 懸浮按鈕的靜態美學與動畫綁定 */
