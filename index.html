@@ -1255,6 +1255,9 @@ function updateCountersUI() {
     ['g-v-count','g-e-count','g-m-count','g-p-count','g-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = globalCounts[id.split('-')[1]]; });
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
 
+    // 🌟 極速魔法：把最新數據存進瀏覽器的無意識快取裡
+    localStorage.setItem('empath_global_counts', JSON.stringify(globalCounts));
+
     // 靈魂氣象局：即時演算全網集體潛意識
     updateSoulWeather();
 }
@@ -2327,8 +2330,18 @@ firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
     }
 }));
 
-window.addEventListener('load', async () => {
+// 🌟 拔掉原本的 load 煞車，改用 DOMContentLoaded 讓它瞬間起跑
+document.addEventListener('DOMContentLoaded', async () => {
+  
+  // 🌟 瞬間視覺魔法：在 Firebase 還沒連上之前，先用快取數據填滿畫面！
+  const cached = localStorage.getItem('empath_global_counts');
+  if (cached) {
+      Object.assign(globalCounts, JSON.parse(cached));
+      updateCountersUI();
+  }
+
   subscribeAll(); startGlobalSandTimer();
+  
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
   firestoreUnsubs.push(onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } }));
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
