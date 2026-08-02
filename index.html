@@ -1155,48 +1155,68 @@ window.addEventListener('scroll', () => { const btt = document.getElementById('b
 
 function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) {} } }
 loadLocalJourney();
+
 // ==========================================
-// 音訊引擎 (Generative Web Audio API)
+// 音訊引擎 (療癒頻率 432Hz + 平滑漸變)
 // ==========================================
-let audioCtx; let ambientGain; let brushGain; let isAudioEnabled = false;
+let audioCtx; let masterGain; let ambientGain; let brushGain; let isAudioEnabled = false;
 
 window.toggleAudio = function() {
     const btn = document.getElementById('audio-btn');
     if(!audioCtx) initAudio();
+    
     isAudioEnabled = !isAudioEnabled;
+    const now = audioCtx.currentTime;
+    
     if(isAudioEnabled) {
         audioCtx.resume();
+        // 聲音漸入 (Fade-in)：花 2 秒鐘慢慢浮現，非常溫柔
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(0, now);
+        masterGain.gain.linearRampToValueAtTime(1, now + 2);
+        
         btn.innerHTML = `🔊<span class="audio-text">${t(' 聲音', ' Audio', ' 音声', ' Audio', ' Audio', ' Audio', ' 声音')}</span>`;
         btn.classList.add('active');
-        window.showToast(t('🔊 環境聲景已開啟', '🔊 Soundscape On', '🔊 環境音オン', '🔊 Sonido Activado', '🔊 Son Activé', '🔊 Ton An', '🔊 环境声景已开启'));
+        window.showToast(t('🔊 療癒聲景已開啟', '🔊 Soundscape On', '🔊 環境音オン', '🔊 Sonido Activado', '🔊 Son Activé', '🔊 Ton An', '🔊 环境声景已开启'));
     } else {
-        audioCtx.suspend();
+        // 聲音漸出 (Fade-out)：花 2 秒鐘像沉入海底般消失
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+        masterGain.gain.linearRampToValueAtTime(0, now + 2);
+        
+        setTimeout(() => { if(!isAudioEnabled) audioCtx.suspend(); }, 2100);
+        
         btn.innerHTML = `🔇<span class="audio-text">${t(' 聲音', ' Audio', ' 音声', ' Audio', ' Audio', ' Audio', ' 声音')}</span>`;
         btn.classList.remove('active');
-        window.showToast(t('🔇 聲音已關閉', '🔇 Audio Off', '🔇 音声オフ', '🔇 Sonido Desactivado', '🔇 Son Désactivé', '🔇 Ton Aus', '🔇 声音已关闭'));
+        window.showToast(t('🔇 聲音已緩緩關閉', '🔇 Audio Faded Out', '🔇 音声オフ', '🔇 Sonido Desactivado', '🔇 Son Désactivé', '🔇 Ton Aus', '🔇 声音已关闭'));
     }
 }
 
 function initAudio() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0; // 預設靜音，等待 fade-in
+    masterGain.connect(audioCtx.destination);
     
-    // 1. 深海呼吸底噪 (Ambient Drone)
+    // 1. 溫暖和弦底噪 (取代原本讓人頭暈的低頻)
+    // 使用 174Hz (減輕痛楚的頻率) 與 261Hz (溫暖的中頻)
     const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator();
     ambientGain = audioCtx.createGain();
-    osc1.type = 'sine'; osc1.frequency.value = 55; // 極低頻
-    osc2.type = 'triangle'; osc2.frequency.value = 55.5; // 產生些微的物理跳動
+    osc1.type = 'sine'; osc1.frequency.value = 174; 
+    osc2.type = 'sine'; osc2.frequency.value = 261; 
     osc1.connect(ambientGain); osc2.connect(ambientGain);
-    ambientGain.connect(audioCtx.destination);
-    ambientGain.gain.value = 0.03; // 非常微弱
+    ambientGain.connect(masterGain);
+    
+    ambientGain.gain.value = 0.015; // 聲音調得更微弱舒適
     osc1.start(); osc2.start();
     
-    // 加上 LFO 讓底噪有呼吸感
+    // 平緩的呼吸 LFO
     const lfo = audioCtx.createOscillator(); const lfoGain = audioCtx.createGain();
-    lfo.type = 'sine'; lfo.frequency.value = 0.05; // 每 20 秒一次呼吸
+    lfo.type = 'sine'; lfo.frequency.value = 0.03; // 非常慢的起伏
     lfo.connect(lfoGain); lfoGain.connect(ambientGain.gain);
-    lfoGain.gain.value = 0.015; lfo.start();
+    lfoGain.gain.value = 0.005; lfo.start();
 
-    // 2. 炭筆塗鴉白噪音 (Brush Scratch)
+    // 2. 塗鴉白噪音
     const bufferSize = audioCtx.sampleRate * 2; 
     const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -1205,27 +1225,26 @@ function initAudio() {
     noiseSrc.buffer = noiseBuffer; noiseSrc.loop = true;
     
     const bandpass = audioCtx.createBiquadFilter();
-    bandpass.type = 'bandpass'; bandpass.frequency.value = 800; // 濾出接近紙筆摩擦的頻段
-    
-    brushGain = audioCtx.createGain(); brushGain.gain.value = 0; // 預設靜音
+    bandpass.type = 'bandpass'; bandpass.frequency.value = 800; 
+    brushGain = audioCtx.createGain(); brushGain.gain.value = 0; 
     noiseSrc.connect(bandpass); bandpass.connect(brushGain);
-    brushGain.connect(audioCtx.destination); noiseSrc.start();
+    brushGain.connect(masterGain); noiseSrc.start();
 }
 
 window.playChime = function() {
     if(!isAudioEnabled || !audioCtx) return;
     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-    osc.type = 'sine'; osc.frequency.setValueAtTime(800 + Math.random()*400, audioCtx.currentTime); 
+    osc.type = 'sine'; osc.frequency.setValueAtTime(432 + Math.random()*200, audioCtx.currentTime); // 改為 432Hz 療癒頻率基準
     gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2); // 尾音消散
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime + 2);
+    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); 
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(); osc.stop(audioCtx.currentTime + 3);
 }
 
 window.setBrushVolume = function(speed) {
     if(!isAudioEnabled || !brushGain) return;
-    const targetVol = Math.min(speed * 0.003, 0.08); 
+    const targetVol = Math.min(speed * 0.002, 0.05); 
     brushGain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.05);
 }
 
@@ -1508,7 +1527,30 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) { isA
 
 window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
 
-window.speakText = function(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); const langs = { 'zh': 'zh-TW', 'zh-cn': 'zh-CN', 'en': 'en-US', 'en-uk': 'en-GB', 'ja': 'ja-JP', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE' }; utterance.lang = langs[window.currentLang] || 'zh-TW'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance); window.showToast(t('🔉 語音導航朗讀中...', '🔉 Reading...', '🔉 読み上げ中...', '🔉 Leyendo...', '🔉 Lecture...', '🔉 Lesen...', '🔉 语音导航朗读中...')); } };
+// 提早載入語音庫，避免第一次點擊沒聲音
+if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+
+window.speakText = function(text) { 
+    if ('speechSynthesis' in window) { 
+        window.speechSynthesis.cancel(); 
+        const utterance = new SpeechSynthesisUtterance(text); 
+        const langs = { 'zh': 'zh-TW', 'zh-cn': 'zh-CN', 'en': 'en-US', 'en-uk': 'en-GB', 'ja': 'ja-JP', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE' }; 
+        utterance.lang = langs[window.currentLang] || 'zh-TW'; 
+        
+        // 降低語速與音調，聽起來更有溫度
+        utterance.rate = 0.85; 
+        utterance.pitch = 0.95; 
+
+        // 強制尋找手機/電腦裡的高級(Premium)或自然人聲
+        const voices = window.speechSynthesis.getVoices();
+        const bestVoice = voices.find(v => v.lang.includes(utterance.lang) && (v.name.includes('Premium') || v.name.includes('Enhanced') || v.name.includes('Google') || v.name.includes('Mei-Jia')));
+        if (bestVoice) utterance.voice = bestVoice;
+
+        window.speechSynthesis.speak(utterance); 
+        window.showToast(t('🔉 語音導航朗讀中...', '🔉 Reading...', '🔉 読み上げ中...', '🔉 Leyendo...', '🔉 Lecture...', '🔉 Lesen...', '🔉 语音导航朗读中...')); 
+    } 
+};
+
 window.triggerHeartbeat = function() { if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); } };
 
 window.shareSite = function() { const total = state.eCount + state.mCount + state.pCount + state.aCount + state.tCount; let dynamicText = ''; if (total === 0) { dynamicText = t('我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', 'I found a beautiful emotional sanctuary. Come take a look:', '温かい場所を見つけました。ここで感情を休めてみませんか：', 'Encontré un hermoso santuario emocional. Ven a echar un vistazo:', 'J\'ai trouvé un magnifique sanctuaire émotionnel.', 'Ich habe ein wunderschönes emotionales Heiligtum gefunden.', '我发现了一个很温暖的地方，可以在数字时代安放情绪。来这里看看吧：'); } else { dynamicText = t(`我在 EMPATH 留下了 ${total} 個靈魂足跡。修補了 ${state.pCount} 道裂痕，點亮了 ${state.mCount} 顆星... 這是一個很溫暖的情緒避難所，來這裡看看吧：`, `I left ${total} soul footprints at EMPATH. Mended ${state.pCount} cracks, lit ${state.mCount} stars... It's a warm sanctuary, come see:`, `EMPATHで ${total} つの魂の足跡を残しました。${state.pCount} つの欠片を修復し、${state.mCount} 個の星を灯しました... 温かい避難所です：`, `Dejé ${total} huellas en EMPATH. Reparó ${state.pCount} grietas, encendió ${state.mCount} estrellas... Es un santuario cálido:`, `J'ai laissé ${total} empreintes à EMPATH. Réparé ${state.pCount} fissures, allumé ${state.mCount} étoiles... Venez voir :`, `Ich habe ${total} Seelenfußspuren bei EMPATH hinterlassen. ${state.pCount} Risse geflickt, ${state.mCount} Sterne erleuchtet... Ein warmer Ort:`, `我在 EMPATH 留下了 ${total} 个灵魂足迹。修补了 ${state.pCount} 道裂痕，点亮了 ${state.mCount} 颗星... 这是一个很温暖的情绪避难所，来这里看看吧：`); } if (navigator.share) { navigator.share({ title: 'EMPATH', text: dynamicText, url: window.location.href }).catch(console.error); } else { navigator.clipboard.writeText(dynamicText + " " + window.location.href); window.showToast(t('專屬足跡與網址已複製！快去貼給朋友吧 ✦', 'Journey & link copied!', '足跡とリンクをコピーしました！', '¡Viaje y enlace copiados!', 'Parcours et lien copiés !', 'Reise & Link kopiert!', '专属足迹与网址已复制！快去贴给朋友吧 ✦')); } }
@@ -1801,6 +1843,24 @@ window.addEventListener('load', async () => {
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
+  // 效能優化：視角偵測器 (Intersection Observer)
+  // 只在使用者滑到該房間時，才運算動畫；滑走就暫停，拯救手機電量！
+  const observer = new IntersectionObserver((entries) => {
+      if (document.body.classList.contains('hsp-mode')) return; // 降噪模式本來就全停，所以不介入
+      entries.forEach(entry => {
+          if (entry.target.id === 'room-m') {
+              if (entry.isIntersecting && !starsRafId && isAnimating) window.drawStars();
+              else if (!entry.isIntersecting && starsRafId) { cancelAnimationFrame(starsRafId); starsRafId = null; }
+          }
+          if (entry.target.id === 'room-a') {
+              if (entry.isIntersecting && !sandRafId && isAnimating) window.drawSand();
+              else if (!entry.isIntersecting && sandRafId) { cancelAnimationFrame(sandRafId); sandRafId = null; }
+          }
+      });
+  }, { threshold: 0.05 });
+
+  observer.observe(document.getElementById('room-m'));
+  observer.observe(document.getElementById('room-a'));
   setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
 });
 </script>
