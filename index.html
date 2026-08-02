@@ -373,6 +373,39 @@ nav{
   }
 }
 
+/* ===== 靈魂氣象局 (Global Emotional Weather) 專用樣式 ===== */
+body { transition: background 3s ease-in-out, color 1s ease; }
+
+/* 氣象 1：暴雨深海 (釋放與沉澱居多) */
+body.weather-release {
+  --bg: #07111A; --bg2: #0E1D2B;
+}
+/* 氣象 2：黃金晨曦 (溫暖與修補居多) */
+body.weather-warmth {
+  --bg: #14100A; --bg2: #241A10;
+}
+/* 氣象 3：浩瀚星穹 (思念與平靜居多) */
+body.weather-cosmic {
+  --bg: #0A0D1A; --bg2: #12182B;
+}
+
+.weather-badge-wrap {
+  display: flex; justify-content: center; margin-bottom: 24px;
+}
+.weather-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 20px; background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.18); border-radius: 20px;
+  font-size: 13px; color: var(--dawn); letter-spacing: 2px;
+  backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: all 0.6s ease;
+}
+.weather-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gold); box-shadow: 0 0 12px var(--gold);
+  animation: pulse-spark 3s ease-in-out infinite;
+}
+
 /* ===== H ROOM ===== */
 #room-h{background: linear-gradient(180deg, #0D1B2A 0%, #0f0f1a 40%, #05050a 100%); border-top: 1px solid rgba(255,255,255,0.02);}
 #room-h .room-letter{color:var(--h);} #room-h .room-tag{color:rgba(242,232,217,.6);}
@@ -1040,6 +1073,13 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 
   <div class="h-journey">
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;" data-zh="GLOBAL RESONANCE — 全網靈魂共鳴軌跡" data-en="GLOBAL RESONANCE — The World's Footprints" data-ja="GLOBAL RESONANCE — 全世界の魂の共鳴" data-es="GLOBAL RESONANCE — Huellas del Mundo" data-fr="RÉSONANCE MONDIALE — Empreintes du Monde" data-de="GLOBALE RESONANZ — Fußspuren der Welt" data-zh-cn="GLOBAL RESONANCE — 全网灵魂共鸣轨迹">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
+    <!-- 新增：靈魂氣象局動態標籤 -->
+<div class="weather-badge-wrap">
+  <div id="weather-badge" class="weather-badge">
+    <span class="weather-dot" id="weather-dot"></span>
+    <span id="weather-text">✦ 靈魂氣象感應中...</span>
+  </div>
+</div>
     <div class="global-summary" id="g-summary">
       <div class="g-card visitor-card"><span class="g-letter">✦</span><div class="g-num" id="g-v-count">0</div><div class="g-label" data-zh="總造訪靈魂" data-en="Total Souls" data-ja="全訪問者の魂" data-es="Total de Almas" data-fr="Âmes Totales" data-de="Gesamte Seelen" data-zh-cn="总造访灵魂">總造訪靈魂</div></div>
       <div class="g-card"><span class="g-letter">E</span><div class="g-num" id="g-e-count">0</div><div class="g-label" data-zh="全網釋放情緒" data-en="Emotions Released" data-ja="解放された感情" data-es="Emociones Liberadas" data-fr="Émotions Libérées" data-de="Emotionen Befreit" data-zh-cn="全网释放情绪">全網釋放情緒</div></div>
@@ -1132,6 +1172,62 @@ function playRitual(btnId, origText) { const btn = document.getElementById(btnId
 function updateCountersUI() {
     ['g-v-count','g-e-count','g-m-count','g-p-count','g-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = globalCounts[id.split('-')[1]]; });
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
+
+    // 靈魂氣象局：即時演算全網集體潛意識
+    updateSoulWeather();
+}
+
+function updateSoulWeather() {
+    const badgeText = document.getElementById('weather-text');
+    const badgeDot = document.getElementById('weather-dot');
+    if (!badgeText) return;
+
+    // 權重演算：釋放組 (E+A) vs 溫暖修補組 (T+P) vs 思念組 (M)
+    const releasePower = (globalCounts.e || 0) + (globalCounts.a || 0);
+    const warmthPower = (globalCounts.t || 0) + (globalCounts.p || 0);
+    const cosmicPower = (globalCounts.m || 0);
+
+    const body = document.body;
+    body.classList.remove('weather-release', 'weather-warmth', 'weather-cosmic');
+
+    // 判斷當前氣象型態
+    if (warmthPower >= releasePower && warmthPower >= cosmicPower && warmthPower > 0) {
+        body.classList.add('weather-warmth');
+        if (badgeDot) badgeDot.style.background = 'var(--gold)';
+        badgeText.textContent = t(
+            '✦ 現正氣象：琥珀暖光 — 許多靈魂正在此處溫柔交會',
+            '✦ Soul Weather: Amber Warmth — Souls intersecting warmly',
+            '✦ 魂の気象：琥珀色の温もり — 多くの魂が優しく交わっています',
+            '✦ Clima del Alma: Calidez Ámbar — Almas cruzándose cálidamente',
+            '✦ Météo de l\'Âme : Chaleur d\'Ambre — Les âmes se croisent chaleureusement',
+            '✦ Seelenwetter: Bernsteinwärme — Seelen überschneiden sich warm',
+            '✦ 現正气象：琥珀暖光 — 许多灵魂正在此处温柔交会'
+        );
+    } else if (releasePower > warmthPower && releasePower >= cosmicPower) {
+        body.classList.add('weather-release');
+        if (badgeDot) badgeDot.style.background = 'var(--e)';
+        badgeText.textContent = t(
+            '🌧️ 現正氣象：深海靜雨 — 正在為這個世界接住破碎與重量',
+            '🌧️ Soul Weather: Deep Ocean Rain — Holding weight for the world',
+            '🌧️ 魂の気象：深海の静かな雨 — 世界の重みを受け止めています',
+            '🌧️ Clima del Alma: Lluvia Profunda — Sosteniendo el peso del mundo',
+            '🌧️ Météo de l\'Âme : Pluie Profonde — Gardant le poids du monde',
+            '🌧️ Seelenwetter: Tiefseeregen — Das Gewicht der Welt haltend',
+            '🌧️ 現正气象：深海静雨 — 正在为这个世界接住破碎与重量'
+        );
+    } else {
+        body.classList.add('weather-cosmic');
+        if (badgeDot) badgeDot.style.background = 'var(--m)';
+        badgeText.textContent = t(
+            '🌌 現正氣象：夜空微光 — 無數思念正在漫長的夜裡閃爍',
+            '🌌 Soul Weather: Cosmic Starlight — Memories shimmering in the night',
+            '🌌 魂の気象：夜空の微光 — 多くの思いが夜に輝いています',
+            '🌌 Clima del Alma: Luz Cósmica — Recuerdos resplandeciendo en la noche',
+            '🌌 Météo de l\'Âme : Lumière Cosmique — Des souvenirs scintillant dans la nuit',
+            '🌌 Seelenwetter: Kosmisches Sternenlicht — Erinnerungen schimmern in der Nacht',
+            '🌌 現正气象：夜空微光 — 无数思念正在漫长的夜里闪烁'
+        );
+    }
 }
 
 window.currentLang = 'zh';
