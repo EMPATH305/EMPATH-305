@@ -1798,16 +1798,468 @@ window.clearEDraw = function() {
 
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
 
+function subscribeAll() {
+    if(firestoreUnsubs.length > 0) return;
+    
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); localStorage.setItem('empath_c_e', JSON.stringify(allEmotions.slice(0, 10))); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); localStorage.setItem('empath_c_m', JSON.stringify(starMessages)); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; const shardCache = []; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; shardCache.push({id, ...data}); const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; localStorage.setItem('empath_c_p', JSON.stringify({healed: pHealedTotal, total: pTotalShards, items: shardCache.slice(0, 20)})); if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; feed.innerHTML = ''; const nowMs = Date.now(); const sandCache = []; snapshot.forEach(docSnap => { const data = docSnap.data(); sandCache.push(data); const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000); const expiresAt = msgTime + lifespanMs; const leftSecs = (expiresAt - nowMs) / 1000; if(leftSecs <= 0) return; const div = document.createElement('div'); div.className = 'sand-msg'; div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs; const pct = (leftSecs / (lifespanMs / 1000)) * 100; div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; feed.appendChild(div); }); localStorage.setItem('empath_c_a', JSON.stringify(sandCache.slice(0,10))); updateCountersUI(); }));
+    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; feed.innerHTML = ''; const warmthCache = []; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; warmthCache.push({id, ...data}); const div = document.createElement('div'); div.className = 'warmth-item'; div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; div.querySelector('.echo-btn').addEventListener('click', async function(e){ if(this.classList.contains('pulsed')) return; this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e); if (typeof window.playChime === 'function') window.playChime(); }); feed.appendChild(div); }); localStorage.setItem('empath_c_t', JSON.stringify(warmthCache.slice(0,10))); updateCountersUI(); }));
+    
+    // 👻 關鍵修復：把微光共現放進連線大名單裡！
+    let presenceHideTimer;
+    firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
+        if(docSnap.exists()) {
+            const data = docSnap.data();
+            const sparkEl = document.getElementById('presence-spark');
+            if (data.by !== mySessionId && data.by !== 'none') {
+                sparkEl.classList.add('show');
+                clearTimeout(presenceHideTimer);
+                presenceHideTimer = setTimeout(() => { sparkEl.classList.remove('show'); }, 4000);
+            } else if (data.by === 'none') {
+                sparkEl.classList.remove('show');
+                clearTimeout(presenceHideTimer);
+            }
+        }
+    }));
+}
+
+function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
+
+let sandGlobalTimer = null;
+function startGlobalSandTimer() { 
+    if(sandGlobalTimer) clearInterval(sandGlobalTimer); 
+    sandGlobalTimer = setInterval(() => { 
+        if(document.hidden) return; 
+        const now = Date.now(); 
+        document.querySelectorAll('.sand-msg:not(.dissolving)').forEach(div => { 
+            const expiresAt = parseInt(div.dataset.expires); 
+            const lifespanMs = parseInt(div.dataset.lifespan) || (24 * 60 * 60 * 1000);
+            const leftSecs = (expiresAt - now) / 1000; 
+            
+            if(leftSecs <= 0) { 
+                div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; 
+            } 
+            const fill = div.querySelector('.sand-timer-fill'); 
+            const label = div.querySelector('.sand-time-left'); 
+            
+            if(fill) fill.style.width = ((leftSecs / (lifespanMs / 1000)) * 100) + '%'; 
+            if(label) label.textContent = formatTimeLeft(Math.floor(leftSecs)); 
+        }); 
+    }, 1000); 
+}
+  
+document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
+
+window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
+
+// 提早載入語音庫，避免第一次點擊沒聲音
+if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+
+window.speakText = function(text) { 
+    if ('speechSynthesis' in window) { 
+        window.speechSynthesis.cancel(); 
+        const utterance = new SpeechSynthesisUtterance(text); 
+        const langs = { 'zh': 'zh-TW', 'zh-cn': 'zh-CN', 'en': 'en-US', 'en-uk': 'en-GB', 'ja': 'ja-JP', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE' }; 
+        utterance.lang = langs[window.currentLang] || 'zh-TW'; 
+        
+        // 降低語速與音調，聽起來更有溫度
+        utterance.rate = 0.85; 
+        utterance.pitch = 0.95; 
+
+        // 強制尋找手機/電腦裡的高級(Premium)或自然人聲
+        const voices = window.speechSynthesis.getVoices();
+        const bestVoice = voices.find(v => v.lang.includes(utterance.lang) && (v.name.includes('Premium') || v.name.includes('Enhanced') || v.name.includes('Google') || v.name.includes('Mei-Jia')));
+        if (bestVoice) utterance.voice = bestVoice;
+
+        window.speechSynthesis.speak(utterance); 
+        window.showToast(t('🔉 語音導航朗讀中...', '🔉 Reading...', '🔉 読み上げ中...', '🔉 Leyendo...', '🔉 Lecture...', '🔉 Lesen...', '🔉 语音导航朗读中...')); 
+    } 
+};
+
+window.triggerHeartbeat = function() { if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); } };
+
+window.shareSite = function() { const total = state.eCount + state.mCount + state.pCount + state.aCount + state.tCount; let dynamicText = ''; if (total === 0) { dynamicText = t('我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', 'I found a beautiful emotional sanctuary. Come take a look:', '温かい場所を見つけました。ここで感情を休めてみませんか：', 'Encontré un hermoso santuario emocional. Ven a echar un vistazo:', 'J\'ai trouvé un magnifique sanctuaire émotionnel.', 'Ich habe ein wunderschönes emotionales Heiligtum gefunden.', '我发现了一个很温暖的地方，可以在数字时代安放情绪。来这里看看吧：'); } else { dynamicText = t(`我在 EMPATH 留下了 ${total} 個靈魂足跡。修補了 ${state.pCount} 道裂痕，點亮了 ${state.mCount} 顆星... 這是一個很溫暖的情緒避難所，來這裡看看吧：`, `I left ${total} soul footprints at EMPATH. Mended ${state.pCount} cracks, lit ${state.mCount} stars... It's a warm sanctuary, come see:`, `EMPATHで ${total} つの魂の足跡を残しました。${state.pCount} つの欠片を修復し、${state.mCount} 個の星を灯しました... 温かい避難所です：`, `Dejé ${total} huellas en EMPATH. Reparó ${state.pCount} grietas, encendió ${state.mCount} estrellas... Es un santuario cálido:`, `J'ai laissé ${total} empreintes à EMPATH. Réparé ${state.pCount} fissures, allumé ${state.mCount} étoiles... Venez voir :`, `Ich habe ${total} Seelenfußspuren bei EMPATH hinterlassen. ${state.pCount} Risse geflickt, ${state.mCount} Sterne erleuchtet... Ein warmer Ort:`, `我在 EMPATH 留下了 ${total} 个灵魂足迹。修补了 ${state.pCount} 道裂痕，点亮了 ${state.mCount} 颗星... 这是一个很温暖的情绪避难所，来这里看看吧：`); } if (navigator.share) { navigator.share({ title: 'EMPATH', text: dynamicText, url: window.location.href }).catch(console.error); } else { navigator.clipboard.writeText(dynamicText + " " + window.location.href); window.showToast(t('專屬足跡與網址已複製！快去貼給朋友吧 ✦', 'Journey & link copied!', '足跡とリンクをコピーしました！', '¡Viaje y enlace copiados!', 'Parcours et lien copiés !', 'Reise & Link kopiert!', '专属足迹与网址已复制！快去贴给朋友吧 ✦')); } }
+
+window.openShareCard = function() { document.getElementById('sc-e').textContent = state.eCount; document.getElementById('sc-m').textContent = state.mCount; document.getElementById('sc-p').textContent = state.pCount; document.getElementById('sc-a').textContent = state.aCount; document.getElementById('sc-t').textContent = state.tCount; document.getElementById('share-modal').classList.add('show'); }
+
+window.downloadShareCard = function() { if(typeof html2canvas === 'undefined') { window.showToast(t('圖片生成引擎載入中，請稍後再試 ✦','Loading image engine...','画像エンジンを読み込み中...','Cargando motor de imágenes...','Chargement du moteur d\'images...','Lade Bild-Engine...','图片生成引擎载入中，请稍后再试 ✦')); return; } const card = document.getElementById('wrapped-card-content'); const btn = document.getElementById('download-card-btn'); const originalText = btn.textContent; btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); html2canvas(card, { backgroundColor: '#0a111a', scale: 2 }).then(canvas => { const imgData = canvas.toDataURL('image/png'); card.style.display = 'none'; let existingImg = document.getElementById('generated-card-img'); if(existingImg) existingImg.remove(); const imgEl = document.createElement('img'); imgEl.src = imgData; imgEl.id = 'generated-card-img'; imgEl.style.width = '100%'; imgEl.style.maxWidth = '320px'; imgEl.style.borderRadius = '4px'; imgEl.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)'; card.parentNode.insertBefore(imgEl, document.querySelector('.share-modal-actions')); btn.style.display = 'none'; let hint = document.getElementById('save-hint'); if(!hint) { hint = document.createElement('p'); hint.id = 'save-hint'; hint.style.color = 'var(--gold)'; hint.style.fontSize = '12px'; hint.style.marginBottom = '16px'; document.querySelector('.share-modal-actions').prepend(hint); } hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享'); hint.style.display = 'block'; window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); }).catch(err => { btn.textContent = originalText; window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); }); }
+window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); setTimeout(() => { document.getElementById('wrapped-card-content').style.display = 'block'; const img = document.getElementById('generated-card-img'); if(img) img.remove(); document.getElementById('download-card-btn').style.display = 'inline-block'; document.getElementById('download-card-btn').textContent = t('⬇️ 下載為專屬圖片檔案', '⬇️ Download Exclusive Card', '⬇️ 専用画像としてダウンロード', '⬇️ Descargar Tarjeta Exclusiva', '⬇️ Télécharger la carte', '⬇️ Exklusive Karte herunterladen', '⬇️ 下载为专属图片档案'); const hint = document.getElementById('save-hint'); if(hint) hint.style.display = 'none'; }, 400); }
+window.showToast = function(msg, dur=2400){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), dur); }
+function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
+
+function logJourney(type, text){ const time = nowStr(); journeyData.counters[type] = (journeyData.counters[type] || 0) + 1; journeyData.events.push({ type, text, time }); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud(); updateCountersUI(); }
+function renderTimelineHTML(type, text, time){ const container = document.getElementById('h-events'); const div = document.createElement('div'); div.className = 'h-event ' + type + '-event'; const labels = { 'zh': {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'}, 'en': {e:'Exit', m:'Stars', p:'Mended', a:'Asylum', t:'Resonance'}, 'ja': {e:'出口', m:'星空', p:'修復', a:'避難所', t:'共鳴'}, 'es': {e:'Salida', m:'Estrellas', p:'Reparado', a:'Asilo', t:'Resonancia'}, 'fr': {e:'Sortie', m:'Étoiles', p:'Réparé', a:'Asile', t:'Résonance'}, 'de': {e:'Ausgang', m:'Sterne', p:'Geflickt', a:'Asyl', t:'Resenz'}, 'zh-cn': {e:'情绪出口', m:'思念映射', p:'碎片修补', a:'避难所', t:'能量共振'} }; const currentKey = window.currentLang === 'en-uk' ? 'en' : window.currentLang; div.innerHTML = `<div><div class="h-event-label">${labels[currentKey]?.[type]||''}</div><div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div><div class="h-event-time">${time}</div></div>`; container.appendChild(div); }
+function initTimeline(){ const container = document.getElementById('h-events'); container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:13px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`; journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time)); }
+
+window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙生成成功 ✦')); }
+window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
+window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) {} }
+window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
+async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }); } catch(err){} }
+function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex'; document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
+
+let allEmotions = []; let eFeedExpanded = false;
+
 // ==========================================
-// 魔法三：匿名的微同步共現 (Live Micro-Presence)
+// 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
+// ==========================================
+window.submitE = async function(){ 
+    if(!canSubmit()) return; 
+    
+    let text = "";
+    let imageData = null;
+
+    if (eMode === 'text') {
+        const input = document.getElementById('e-input'); 
+        text = input.value.trim(); 
+        if(!text) return; 
+        text = cleanText(text); 
+        input.value = '';
+        document.getElementById('e-char').textContent = '0 / 500';
+    } else {
+        // 如果沒有畫任何東西，就拒絕送出
+        if(!eDrawCanvas || !eCanvasHasDrawn) return;
+        imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
+        window.clearEDraw();
+    }
+
+    try { 
+        const origText = document.getElementById('e-submit-btn').innerHTML; 
+        const docData = { createdAt: serverTimestamp() };
+        if (text) docData.text = text;
+        if (imageData) docData.image = imageData;
+        
+        await addDoc(collection(db, "emotions"), docData); 
+        
+        logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]'); 
+        playRitual('e-submit-btn', origText); 
+        window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
+    } catch(e) { 
+        console.error("Firestore 寫入失敗：", e); 
+        alert("寫入失敗！如果是 Permission Denied，請檢查 Firebase 的 Security Rules 是否阻擋了 image 欄位。");
+    } 
+}
+
+window.renderEFeed = function() { 
+    const feed = document.getElementById('e-feed'); 
+    const fade = document.getElementById('e-feed-fade'); 
+    const btn = document.getElementById('e-expand-btn'); 
+    if(!feed) return; 
+    feed.innerHTML = ''; 
+    const limit = eFeedExpanded ? allEmotions.length : 3; 
+    
+    allEmotions.slice(0, limit).forEach(data => { 
+        const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); 
+        const div = document.createElement('div'); 
+        div.className = 'e-msg'; 
+        
+        let contentHtml = '';
+        if (data.text) {
+            contentHtml = `<div>${data.text}</div>`;
+        } else if (data.image) {
+            contentHtml = `<img src="${data.image}" class="e-msg-img" alt="Emotional Scribble">`;
+        }
+
+        div.innerHTML = `<div class="e-msg-anon">${t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS')}</div>${contentHtml}<div class="e-msg-time">${timeStr}</div>`; 
+        feed.appendChild(div); 
+    }); 
+    
+    if(allEmotions.length > 3) { 
+        btn.style.display = 'inline-flex'; 
+        if(!eFeedExpanded) { 
+            fade.style.display = 'block'; 
+            btn.innerHTML = t('↓ 展開更多', '↓ Show More', '↓ もっと見る', '↓ Ver más', '↓ Voir plus', '↓ Mehr anzeigen', '↓ 展开更多'); 
+        } else { 
+            fade.style.display = 'none'; 
+            btn.innerHTML = t('↑ 收起', '↑ Collapse', '↑ 閉じる', '↑ Ocultar', '↑ Réduire', '↑ Einklappen', '↑ 收起'); 
+        } 
+    } else { 
+        btn.style.display = 'none'; fade.style.display = 'none'; 
+    } 
+}
+
+window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
+
+const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let starMessages = [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
+window.resizeCanvas = function(){ const dpr = window.devicePixelRatio || 1; if(canvas && roomM) { const w = roomM.offsetWidth; const h = roomM.offsetHeight; canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); initBgStars(w, h); } const sCanvas = document.getElementById('sand-canvas'); const roomA = document.getElementById('room-a'); if(sCanvas && roomA) { const sw = roomA.offsetWidth; const sh = roomA.offsetHeight; sCanvas.width = sw * dpr; sCanvas.height = sh * dpr; sCanvas.style.width = sw + 'px'; sCanvas.style.height = sh + 'px'; sCanvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); initSandBg(sw, sh); } }
+window.addEventListener('resize', window.resizeCanvas);
+function initBgStars(w, h){ 
+    bgStars=[]; 
+    // 動態計算：電腦給 100 顆，手機寬度小於 768px 時只給 35 顆
+    const starCount = w < 768 ? 35 : 100;
+    for(let i=0; i<starCount; i++){ 
+        bgStars.push({
+            x: Math.random()*w, 
+            y: Math.random()*h, 
+            r: Math.random()*0.8+0.2, 
+            a: Math.random()*0.4+0.1, 
+            da: (Math.random()-.5)*0.003, 
+            c: STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)]
+        }); 
+    } 
+}
+window.updateMStats = function(){ if(!document.getElementById('m-count')) return; document.getElementById('m-count').textContent = starMessages.length; if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; } const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text; }
+function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
+window.drawStars = function(){ if(!canvas.width || !isAnimating) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h); bgStars.forEach(s => { s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } ctx.fill(); ctx.shadowBlur = 0; }); starMessages.forEach(s => { s.x = s.relX*w; s.y = s.relY*h; const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); }); starsRafId = requestAnimationFrame(window.drawStars); }
+
+function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
+roomM.addEventListener('click', async e => { 
+    if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; 
+    const rect = canvas.getBoundingClientRect(); 
+    const x = e.clientX-rect.left, y = e.clientY-rect.top; 
+    const star = getStarAt(x, y); 
+    
+    if(star){ 
+        if(activeStarId !== star.id) { 
+            activeStarId = star.id; 
+            tooltip.classList.add('active'); 
+            if(window.innerWidth > 768) { 
+                tooltip.style.transform = 'none'; 
+                let tx = e.clientX + 16; let ty = e.clientY - 16; 
+                if (tx + 260 > window.innerWidth) tx = e.clientX - 280; 
+                tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; 
+            } 
+            tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:10px;color:var(--gold);margin-top:10px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`; 
+        } else { 
+            try { 
+                await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); 
+                window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); 
+                window.triggerHeartbeat(); 
+                
+                // 🎧 觸發 3D 空間水晶音！計算星星在畫面的相對位置 (-1 到 1)
+                const panValue = (x / window.innerWidth) * 2 - 1;
+                if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
+                
+                tooltip.classList.remove('active'); 
+                activeStarId = null; 
+            } catch (err) {} 
+        } 
+    } else { 
+        tooltip.classList.remove('active'); activeStarId = null; 
+    } 
+});
+  
+window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} }
+
+let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
+window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
+window.drawKintsugiVessel = function(){ 
+    if(!pCtx) return; 
+    const c = pCtx; 
+    const w = pCanvas.offsetWidth || 540; 
+    const h = 300; 
+    c.clearRect(0,0,w,h); 
+    
+    const cx = w/2;
+    const cy = h/2;
+
+    // 1. 畫出具備立體感的「日式茶碗 (Chawan)」取代原本死板的橢圓
+    c.beginPath();
+    // 碗口上緣
+    c.moveTo(cx - 130, cy - 30);
+    c.bezierCurveTo(cx - 60, cy - 50, cx + 60, cy - 50, cx + 130, cy - 30);
+    // 碗口下緣 (製造碗內的深度立體感)
+    c.bezierCurveTo(cx + 70, cy - 10, cx - 70, cy - 10, cx - 130, cy - 30);
+    // 碗身右側曲線往下
+    c.bezierCurveTo(cx + 130, cy + 60, cx + 80, cy + 100, cx + 45, cy + 110);
+    // 平坦的碗底
+    c.lineTo(cx - 45, cy + 110);
+    // 碗身左側曲線往上
+    c.bezierCurveTo(cx - 80, cy + 100, cx - 130, cy + 60, cx - 130, cy - 30);
+    
+    // 填上深邃的黑灰色，並畫上金色細邊
+    c.fillStyle = 'rgba(8, 12, 18, 0.7)';
+    c.fill();
+    c.strokeStyle = 'rgba(201,168,76,0.3)';
+    c.lineWidth = 1;
+    c.stroke();
+
+    // 2. 建立「大師級手工裂縫基因庫」：這些座標會畫出銳利、有力量的真實碎裂感
+    const crackTemplates = [
+        [{x:-130,y:-30}, {x:-90,y:10}, {x:-75,y:40}, {x:-30,y:60}], // 左側切入
+        [{x:130,y:-30}, {x:100,y:0}, {x:80,y:50}, {x:20,y:80}],     // 右側切入
+        [{x:-45,y:110}, {x:-20,y:70}, {x:15,y:50}, {x:40,y:10}],    // 底部往上
+        [{x:45,y:110}, {x:25,y:75}, {x:-10,y:45}, {x:-35,y:25}],    // 底部往左上
+        [{x:-80,y:-38}, {x:-50,y:-10}, {x:-20,y:20}, {x:10,y:40}],  // 碗口中間偏左
+        [{x:80,y:-38}, {x:45,y:-5}, {x:10,y:15}, {x:-15,y:50}],     // 碗口中間偏右
+        [{x:-110,y:15}, {x:-80,y:40}, {x:-40,y:70}, {x:0,y:95}],    // 左下腹部
+        [{x:110,y:15}, {x:70,y:35}, {x:35,y:65}, {x:10,y:100}]      // 右下腹部
+    ];
+
+    // 3. 繪製裂縫的引擎
+    const drawCrack = (index, isHealed) => {
+        // 依序取出美麗的裂縫範本，如果碎片超過 8 個，加上微小偏移量產生新裂痕
+        const template = crackTemplates[index % crackTemplates.length];
+        const offset = Math.floor(index / crackTemplates.length) * 8; 
+
+        c.beginPath();
+        template.forEach((pt, k) => {
+            // 加入正負交替的偏移，讓疊加的裂痕不會完全重合
+            const px = cx + pt.x + (k % 2 === 0 ? offset : -offset);
+            const py = cy + pt.y + (k % 2 === 0 ? -offset : offset);
+            if (k === 0) c.moveTo(px, py);
+            else c.lineTo(px, py);
+        });
+
+        // 設定「銳利折角」，這是碎玻璃質感的靈魂
+        c.lineJoin = 'miter'; 
+        c.miterLimit = 2;
+
+        if (isHealed) {
+            // 金繼亮起：使用漸層金與光暈
+            const gradient = c.createLinearGradient(cx - 50, cy - 50, cx + 50, cy + 50);
+            gradient.addColorStop(0, '#D4AF37');
+            gradient.addColorStop(0.5, '#FFF8DC');
+            gradient.addColorStop(1, '#B38728');
+            c.strokeStyle = gradient;
+            c.lineWidth = 2.5;
+            c.shadowBlur = 12;
+            c.shadowColor = 'rgba(252, 246, 186, 0.6)';
+        } else {
+            // 未修補：隱約可見的灰白暗痕
+            c.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+            c.lineWidth = 1;
+            c.shadowBlur = 0;
+        }
+        
+        c.stroke();
+        c.shadowBlur = 0; // 重置光暈以免影響其他畫布
+    };
+
+    // 先畫出所有碎片的「暗痕」
+    for(let i = 0; i < pTotalShards; i++) {
+        drawCrack(i, false);
+    }
+    
+    // 再為已經被修復的碎片塗上「金繼」
+    const goldLines = Math.min(pHealedTotal, pTotalShards);
+    for(let i = 0; i < goldLines; i++) {
+        drawCrack(i, true);
+    }
+}
+window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
+
+let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
+function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
+
+// ==========================================
+// 魔法一：3D 空間環繞聲景 (Spatial Audio)
+// ==========================================
+window.playSpatialChime = function(panValue) {
+    if(!isAudioEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    let panner;
+    if (audioCtx.createStereoPanner) {
+        panner = audioCtx.createStereoPanner();
+        panner.pan.value = panValue;
+    } else {
+        panner = audioCtx.createGain(); 
+    }
+    osc.type = 'sine'; osc.frequency.setValueAtTime(432 + Math.random()*200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); 
+    osc.connect(gain); gain.connect(panner); panner.connect(masterGain);
+    osc.start(); osc.stop(audioCtx.currentTime + 3);
+}
+
+// ==========================================
+// 魔法二：手機物理重力感測 (Device Orientation)
+// ==========================================
+let tiltX = 0, tiltY = 0;
+window.enableGravity = async function() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceOrientationEvent.requestPermission();
+            if (permission === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+                document.getElementById('gravity-btn').style.display = 'none';
+                window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
+            }
+        } catch (error) { console.error(error); }
+    } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        document.getElementById('gravity-btn').style.display = 'none';
+        window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
+    }
+}
+
+function handleOrientation(event) {
+    tiltX = (event.gamma || 0) * 0.08; 
+    tiltY = (event.beta || 0) * 0.08;  
+}
+
+window.drawSand = function() { 
+    const c = document.getElementById('sand-canvas'); 
+    if(!c || !c.width || !isAnimating) return; 
+    const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
+    ctx.clearRect(0,0,w,h); 
+    sandParticles.forEach(p => { 
+        p.y += p.speedY + tiltY; 
+        p.swirlOffset += 0.02; 
+        const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; 
+        p.x += drift + tiltX; 
+
+        if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } 
+        if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } 
+        
+        ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; 
+        ctx.lineWidth = p.size; ctx.lineCap = 'round'; 
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); 
+        ctx.lineTo(p.x - drift * 2 - tiltX, p.y - p.speedY * 3 - tiltY); 
+        ctx.stroke(); 
+    }); 
+    ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); 
+}
+
+window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
+window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
+window.submitA = async function(){ 
+    if(!canSubmit()) return; 
+    const input = document.getElementById('a-input'); 
+    let text = input.value.trim(); 
+    if(!text) return; 
+    text = cleanText(text); 
+    const minutes = parseInt(document.getElementById('a-timer-select').value);
+    const lifespan = minutes * 60 * 1000;
+    const origText = document.getElementById('a-submit-btn').innerHTML; 
+    await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), lifespan: lifespan, createdAt: serverTimestamp() }); 
+    input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
+    window.showToast('放入沙畫 ✦'); 
+}
+
+window.submitT = async function(){ if(!canSubmit()) return; const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('t-submit-btn').innerHTML; await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); }
+window.createEchoRipple = function(e) {
+    let rippleContainer = document.getElementById('ripple-overlay');
+    if (!rippleContainer) {
+        rippleContainer = document.createElement('div');
+        rippleContainer.id = 'ripple-overlay';
+        rippleContainer.className = 'ripple-overlay';
+        document.body.appendChild(rippleContainer);
+    }
+    const ripple = document.createElement('div');
+    ripple.className = 'echo-ripple';
+    const x = e && e.clientX ? e.clientX : window.innerWidth / 2;
+    const y = e && e.clientY ? e.clientY : window.innerHeight / 2;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    rippleContainer.appendChild(ripple);
+    setTimeout(() => { ripple.remove(); }, 1800);
+};
+
+// ==========================================
+// 魔法三：匿名的微同步共現 (Live Micro-Presence 極速版)
 // ==========================================
 const mySessionId = Math.random().toString(36).substr(2, 9);
 const presenceRef = doc(db, 'presence', 'roomE');
 const eInputBox = document.getElementById('e-input');
 
 let typingTimer;
-let isTyping = false; // 節流閥：紀錄自己是否正在打字
-let presenceHideTimer; // 移到全域變數，確保清除計時器時不會找不到
+let isTyping = false; // 節流閥
+let presenceHideTimer; // 全域變數，確保清除計時器時找得到
 
 if(eInputBox) {
     eInputBox.addEventListener('input', () => {
@@ -1820,11 +2272,15 @@ if(eInputBox) {
         typingTimer = setTimeout(() => {
             isTyping = false; 
             setDoc(presenceRef, { by: 'none' }, { merge: true });
-        }, 3000); // 停下超過 3 秒，視為打完字
+        }, 3000); 
     });
 }
 
-// 🌟 重新連線時的大名單 (把所有房間和魔法都包進來)
+// ==========================================
+// 🌟 重新連線名單 & 0秒快取儲存引擎
+// ==========================================
+let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
+
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     
@@ -1928,7 +2384,7 @@ function subscribeAll() {
         updateCountersUI(); 
     }));
 
-    // 👻 微同步共現：正式加入連線大名單！(解決左右互搏切換視窗失效的問題)
+    // 👻 微同步共現：完美加入連線大名單
     firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
         if(docSnap.exists()) {
             const data = docSnap.data();
@@ -1988,11 +2444,11 @@ document.addEventListener("visibilitychange", () => {
 });
 
 // ==========================================
-// 🌟 極速秒開引擎：DOMContentLoaded (0秒載入)
+// 🌟 終極起跑線：0秒快取載入 + DOMContentLoaded
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     
-    // 1. 瞬間視覺魔法：用上次的記憶瞬間填滿畫面，消滅等待黑屏
+    // 瞬間視覺魔法：用上次的記憶瞬間填滿畫面
     try {
         const cachedCounts = localStorage.getItem('empath_global_counts');
         if (cachedCounts) { Object.assign(globalCounts, JSON.parse(cachedCounts)); updateCountersUI(); }
@@ -2032,7 +2488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch(e) {}
 
-    // 2. 啟動背景連線 Firebase 更新最新資料
+    // 背景連線 Firebase 更新最新資料
     subscribeAll(); 
     startGlobalSandTimer();
     
