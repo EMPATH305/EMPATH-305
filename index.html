@@ -1255,88 +1255,6 @@ function updateCountersUI() {
     ['g-v-count','g-e-count','g-m-count','g-p-count','g-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = globalCounts[id.split('-')[1]]; });
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
 
-// ==========================================
-// 魔法一：3D 空間環繞聲景 (Spatial Audio)
-// ==========================================
-window.playSpatialChime = function(panValue) {
-    if(!isAudioEnabled || !audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    // 建立 3D 左右聲道定位器
-    let panner;
-    if (audioCtx.createStereoPanner) {
-        panner = audioCtx.createStereoPanner();
-        panner.pan.value = panValue; // -1 (極左) 到 1 (極右)
-    } else {
-        panner = audioCtx.createGain(); 
-    }
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(432 + Math.random()*200, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); 
-
-    osc.connect(gain);
-    gain.connect(panner);
-    panner.connect(masterGain);
-
-    osc.start(); osc.stop(audioCtx.currentTime + 3);
-}
-
-// ==========================================
-// 魔法二：手機物理重力感測 (Device Orientation)
-// ==========================================
-let tiltX = 0, tiltY = 0;
-window.enableGravity = async function() {
-    // iOS 13+ 需要取得使用者授權才能讀取陀螺儀
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-            const permission = await DeviceOrientationEvent.requestPermission();
-            if (permission === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientation);
-                document.getElementById('gravity-btn').style.display = 'none';
-                window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
-            }
-        } catch (error) { console.error(error); }
-    } else {
-        window.addEventListener('deviceorientation', handleOrientation);
-        document.getElementById('gravity-btn').style.display = 'none';
-        window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
-    }
-}
-
-function handleOrientation(event) {
-    tiltX = (event.gamma || 0) * 0.08; // 左右傾斜
-    tiltY = (event.beta || 0) * 0.08;  // 前後傾斜
-}
-
-// 👉 覆寫原本的 drawSand (加入重力 tiltX 與 tiltY)
-window.drawSand = function() { 
-    const c = document.getElementById('sand-canvas'); 
-    if(!c || !c.width || !isAnimating) return; 
-    const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
-    ctx.clearRect(0,0,w,h); 
-    sandParticles.forEach(p => { 
-        // 加上物理重力感測的變數
-        p.y += p.speedY + tiltY; 
-        p.swirlOffset += 0.02; 
-        const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; 
-        p.x += drift + tiltX; 
-
-        if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } 
-        if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } 
-        
-        ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; 
-        ctx.lineWidth = p.size; ctx.lineCap = 'round'; 
-        ctx.beginPath(); ctx.moveTo(p.x, p.y); 
-        ctx.lineTo(p.x - drift * 2 - tiltX, p.y - p.speedY * 3 - tiltY); 
-        ctx.stroke(); 
-    }); 
-    ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); 
-}
-  
     // 靈魂氣象局：即時演算全網集體潛意識
     updateSoulWeather();
 }
@@ -2252,6 +2170,77 @@ window.submitP = async function(){ if(!canSubmit()) return; const input = docume
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
 
+// ==========================================
+// 魔法一：3D 空間環繞聲景 (Spatial Audio)
+// ==========================================
+window.playSpatialChime = function(panValue) {
+    if(!isAudioEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    let panner;
+    if (audioCtx.createStereoPanner) {
+        panner = audioCtx.createStereoPanner();
+        panner.pan.value = panValue;
+    } else {
+        panner = audioCtx.createGain(); 
+    }
+    osc.type = 'sine'; osc.frequency.setValueAtTime(432 + Math.random()*200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); 
+    osc.connect(gain); gain.connect(panner); panner.connect(masterGain);
+    osc.start(); osc.stop(audioCtx.currentTime + 3);
+}
+
+// ==========================================
+// 魔法二：手機物理重力感測 (Device Orientation)
+// ==========================================
+let tiltX = 0, tiltY = 0;
+window.enableGravity = async function() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceOrientationEvent.requestPermission();
+            if (permission === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+                document.getElementById('gravity-btn').style.display = 'none';
+                window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
+            }
+        } catch (error) { console.error(error); }
+    } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        document.getElementById('gravity-btn').style.display = 'none';
+        window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
+    }
+}
+
+function handleOrientation(event) {
+    tiltX = (event.gamma || 0) * 0.08; 
+    tiltY = (event.beta || 0) * 0.08;  
+}
+
+window.drawSand = function() { 
+    const c = document.getElementById('sand-canvas'); 
+    if(!c || !c.width || !isAnimating) return; 
+    const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
+    ctx.clearRect(0,0,w,h); 
+    sandParticles.forEach(p => { 
+        p.y += p.speedY + tiltY; 
+        p.swirlOffset += 0.02; 
+        const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; 
+        p.x += drift + tiltX; 
+
+        if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } 
+        if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } 
+        
+        ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; 
+        ctx.lineWidth = p.size; ctx.lineCap = 'round'; 
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); 
+        ctx.lineTo(p.x - drift * 2 - tiltX, p.y - p.speedY * 3 - tiltY); 
+        ctx.stroke(); 
+    }); 
+    ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); 
+}
+
 window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
 window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
 window.submitA = async function(){ 
@@ -2260,18 +2249,10 @@ window.submitA = async function(){
     let text = input.value.trim(); 
     if(!text) return; 
     text = cleanText(text); 
-    
-    // 抓取使用者選擇的分鐘數，轉換成毫秒 (Lifespan)
     const minutes = parseInt(document.getElementById('a-timer-select').value);
     const lifespan = minutes * 60 * 1000;
-
     const origText = document.getElementById('a-submit-btn').innerHTML; 
-    await addDoc(collection(db, "sand"), { 
-        text, 
-        absoluteTime: Date.now(), 
-        lifespan: lifespan, // 紀錄專屬壽命
-        createdAt: serverTimestamp() 
-    }); 
+    await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), lifespan: lifespan, createdAt: serverTimestamp() }); 
     input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
     window.showToast('放入沙畫 ✦'); 
 }
@@ -2285,24 +2266,49 @@ window.createEchoRipple = function(e) {
         rippleContainer.className = 'ripple-overlay';
         document.body.appendChild(rippleContainer);
     }
-
     const ripple = document.createElement('div');
     ripple.className = 'echo-ripple';
-
-    // 抓取點擊位置（如果沒有傳入事件，預設從螢幕中央發散）
     const x = e && e.clientX ? e.clientX : window.innerWidth / 2;
     const y = e && e.clientY ? e.clientY : window.innerHeight / 2;
-
     ripple.style.left = `${x}px`;
     ripple.style.top = `${y}px`;
-
     rippleContainer.appendChild(ripple);
-
-    // 動畫結束後自動清理 DOM 節點
-    setTimeout(() => {
-        ripple.remove();
-    }, 1800);
+    setTimeout(() => { ripple.remove(); }, 1800);
 };
+
+// ==========================================
+// 魔法三：匿名的微同步共現 (Live Micro-Presence)
+// ==========================================
+const mySessionId = Math.random().toString(36).substr(2, 9);
+const presenceRef = doc(db, 'presence', 'roomE');
+
+const eInputBox = document.getElementById('e-input');
+let typingTimer;
+
+if(eInputBox) {
+    eInputBox.addEventListener('input', () => {
+        setDoc(presenceRef, { lastTyping: serverTimestamp(), by: mySessionId }, { merge: true });
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            setDoc(presenceRef, { by: 'none' }, { merge: true });
+        }, 4000);
+    });
+}
+
+firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
+    if(docSnap.exists()) {
+        const data = docSnap.data();
+        const now = Date.now();
+        const lastTime = data.lastTyping ? data.lastTyping.seconds * 1000 : 0;
+        
+        if (data.by !== mySessionId && data.by !== 'none' && (now - lastTime < 5000)) {
+            document.getElementById('presence-spark').classList.add('show');
+        } else {
+            document.getElementById('presence-spark').classList.remove('show');
+        }
+    }
+}));
+
 window.addEventListener('load', async () => {
   subscribeAll(); startGlobalSandTimer();
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
@@ -2313,10 +2319,8 @@ window.addEventListener('load', async () => {
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
-  // 效能優化：視角偵測器 (Intersection Observer)
-  // 只在使用者滑到該房間時，才運算動畫；滑走就暫停，拯救手機電量！
   const observer = new IntersectionObserver((entries) => {
-      if (document.body.classList.contains('hsp-mode')) return; // 降噪模式本來就全停，所以不介入
+      if (document.body.classList.contains('hsp-mode')) return;
       entries.forEach(entry => {
           if (entry.target.id === 'room-m') {
               if (entry.isIntersecting && !starsRafId && isAnimating) window.drawStars();
@@ -2343,47 +2347,6 @@ window.addEventListener('load', async () => {
         .catch(err => console.log('啟動失敗', err));
     });
   }
-
-  // ==========================================
-// 魔法三：匿名的微同步共現 (Live Micro-Presence)
-// ==========================================
-import { setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-const mySessionId = Math.random().toString(36).substr(2, 9);
-const presenceRef = doc(db, 'presence', 'roomE');
-
-const eInputBox = document.getElementById('e-input');
-let typingTimer;
-
-if(eInputBox) {
-    eInputBox.addEventListener('input', () => {
-        // 當使用者打字時，將時間戳記與自己的 Session ID 寫入雲端
-        setDoc(presenceRef, { lastTyping: serverTimestamp(), by: mySessionId }, { merge: true });
-        
-        clearTimeout(typingTimer);
-        // 停下 4 秒沒打字，就當作離開
-        typingTimer = setTimeout(() => {
-            setDoc(presenceRef, { by: 'none' }, { merge: true });
-        }, 4000);
-    });
-}
-
-// 監聽是否有「其他人」正在打字
-firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
-    if(docSnap.exists()) {
-        const data = docSnap.data();
-        const now = Date.now();
-        const lastTime = data.lastTyping ? data.lastTyping.seconds * 1000 : 0;
-        
-        // 如果是別人 (ID 不同)，且是最近 5 秒內打的字
-        if (data.by !== mySessionId && data.by !== 'none' && (now - lastTime < 5000)) {
-            document.getElementById('presence-spark').classList.add('show');
-        } else {
-            document.getElementById('presence-spark').classList.remove('show');
-        }
-    }
-}));
-  
 </script>
-
 </body>
 </html>
