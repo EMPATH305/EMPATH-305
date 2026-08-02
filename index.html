@@ -544,6 +544,64 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     opacity: 0; animation: fadeSlideIn 1s ease forwards 1.5s; /* 延遲出現提示 */
 }
 
+/* ===== 提案一：靈魂跟隨 (光暈) ===== */
+#cursor-glow {
+    position: fixed; top: 0; left: 0; width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0) 60%);
+    border-radius: 50%; pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.8s ease;
+    mix-blend-mode: screen; /* 讓光暈疊加時有發光感 */
+}
+
+/* ===== 提案三：同步呼吸引導 ===== */
+#breathe-btn {
+    position: fixed; bottom: 100px; right: 46px; z-index: 900;
+    font-size: 22px; cursor: pointer; opacity: 0.5; transition: all 0.3s ease;
+    filter: grayscale(100%) brightness(1.5);
+}
+#breathe-btn:hover { opacity: 1; transform: scale(1.15) rotate(15deg); filter: grayscale(0%); }
+
+#breathe-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(5, 10, 15, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 1.2s ease;
+}
+#breathe-overlay.show { opacity: 1; pointer-events: auto; cursor: pointer; }
+
+.breathe-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(122,158,159,0.3) 0%, rgba(122,158,159,0.05) 70%);
+    box-shadow: 0 0 50px rgba(122,158,159,0.2);
+    animation: breathe-anim 10s ease-in-out infinite paused;
+}
+#breathe-overlay.show .breathe-circle { animation-play-state: running; }
+
+.breathe-text {
+    position: absolute; color: var(--dawn); font-family: 'Noto Serif TC', serif;
+    font-size: 22px; letter-spacing: 8px; font-weight: 300;
+    animation: breathe-text-anim 10s ease-in-out infinite paused;
+}
+#breathe-overlay.show .breathe-text { animation-play-state: running; }
+
+/* 完美呼吸頻率：4秒吸氣，6秒吐氣 (總共10秒) */
+@keyframes breathe-anim {
+    0% { transform: scale(1); opacity: 0.4; }
+    40% { transform: scale(3.5); opacity: 1; } /* 4秒到達擴張頂點 */
+    100% { transform: scale(1); opacity: 0.4; } /* 6秒緩慢縮回 */
+}
+@keyframes breathe-text-anim {
+    0% { opacity: 0.3; }
+    40% { opacity: 1; text-shadow: 0 0 20px rgba(255,255,255,0.6); }
+    100% { opacity: 0.3; }
+}
+
+/* 手機版隱藏游標跟隨與微調按鈕位置 */
+@media(max-width:768px){
+    #cursor-glow { display: none !important; }
+    #breathe-btn { bottom: 80px; right: 26px; }
+}
+
 @media(max-width:768px){
   nav { padding: 16px 20px; } .nav-logo { font-size: 22px; } .hamburger { display: flex; }
   .nav-menu { position: absolute; top: 100%; left: 0; right: 0; background: #03070a; flex-direction: column; padding: 24px; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.8); transform: translateY(-150%); opacity: 0; pointer-events: none; }
@@ -609,6 +667,17 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 <button id="btt-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
 <!-- 幸運微光彩蛋 (左下角) -->
 <div id="fortune-spark" onclick="window.crackFortune()" data-zh-title="點擊接收宇宙的低語" title="點擊接收宇宙的低語">✦</div>
+  
+<!-- 1. 靈魂跟隨 (游標專屬微光) -->
+<div id="cursor-glow"></div>
+
+<!-- 2. 同步呼吸引導 (右下角按鈕與全螢幕畫布) -->
+<div id="breathe-btn" onclick="window.startBreathe()" data-zh-title="深呼吸" title="深呼吸">🌀</div>
+<div id="breathe-overlay" onclick="window.stopBreathe()">
+    <div class="breathe-circle"></div>
+    <div class="breathe-text" id="breathe-text">吸氣...</div>
+    <div class="fortune-hint" style="opacity:1; margin-top:120px;" data-zh="點擊畫面任何一處結束" data-en="Click anywhere to close">點擊畫面任何一處結束</div>
+</div>
 
 <!-- 微光展開後的顯示畫布 -->
 <div id="fortune-display" class="fortune-modal" onclick="this.classList.remove('show')">
@@ -1242,6 +1311,76 @@ function updateSoulWeather() {
         );
     }
 }
+
+// ==========================================
+// 提案一：靈魂跟隨 (游標延遲光暈)
+// ==========================================
+const cursorGlow = document.getElementById('cursor-glow');
+let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+let glowX = mouseX, glowY = mouseY;
+
+document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    if(cursorGlow && (cursorGlow.style.opacity === '0' || cursorGlow.style.opacity === '')) {
+        cursorGlow.style.opacity = '1';
+    }
+});
+
+function animateGlow() {
+    // 降噪模式下暫停光暈
+    if(!document.body.classList.contains('hsp-mode') && window.innerWidth > 768) {
+        // 使用 Lerp (線性插值) 創造極其滑順的「延遲跟隨感」
+        glowX += (mouseX - glowX) * 0.08;
+        glowY += (mouseY - glowY) * 0.08;
+        if(cursorGlow) cursorGlow.style.transform = `translate(calc(${glowX}px - 50%), calc(${glowY}px - 50%))`;
+    } else {
+        if(cursorGlow) cursorGlow.style.opacity = '0';
+    }
+    requestAnimationFrame(animateGlow);
+}
+animateGlow();
+
+// ==========================================
+// 提案二：離站的詩意 (網頁標籤頁文字動態切換)
+// ==========================================
+let originalTitle = document.title;
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        document.title = t('🕯️ 宇宙會為你留一盞燈...', '🕯️ A light remains for you...', '🕯️ 宇宙はあなたのために灯りを残します...', '🕯️ Una luz permanece para ti...', '🕯️ Une lumière reste pour vous...', '🕯️ Ein Licht bleibt für dich...', '🕯️ 宇宙会为你留一盏灯...');
+    } else {
+        document.title = 'EMPATH — ' + t('歡迎回家', 'Welcome Home', 'おかえりなさい', 'Bienvenido a Casa', 'Bienvenue à la Maison', 'Willkommen Zuhause', '欢迎回家');
+        setTimeout(() => { document.title = originalTitle; }, 3500); // 3.5秒後變回原標題
+    }
+});
+
+// ==========================================
+// 提案三：同步呼吸引導 (432Hz 視覺療癒)
+// ==========================================
+let breatheInterval;
+window.startBreathe = function() {
+    const overlay = document.getElementById('breathe-overlay');
+    const textEl = document.getElementById('breathe-text');
+    overlay.classList.add('show');
+    
+    // 如果有開啟音頻，觸發一聲水晶音
+    if(typeof window.playChime === 'function') window.playChime();
+
+    const cycle = () => {
+        textEl.textContent = t('吸氣...', 'Inhale...', '吸って...', 'Inhala...', 'Inspirez...', 'Einatmen...', '吸气...');
+        setTimeout(() => {
+            textEl.textContent = t('吐氣...', 'Exhale...', '吐いて...', 'Exhala...', 'Expirez...', 'Ausatmen...', '吐气...');
+        }, 4000); // 4秒後字體變成吐氣
+    };
+    
+    cycle(); // 立刻執行第一次
+    breatheInterval = setInterval(cycle, 10000); // 之後每10秒精準循環
+};
+
+window.stopBreathe = function() {
+    const overlay = document.getElementById('breathe-overlay');
+    overlay.classList.remove('show');
+    clearInterval(breatheInterval);
+};
 
 window.currentLang = 'zh';
 function t(zh, en, ja, es, fr, de, zh_cn, uk, pl) { let target = window.currentLang; if(target === 'en-uk') target = 'en'; if (target === 'en') return en || zh; if (target === 'ja') return ja || en || zh; if (target === 'es') return es || en || zh; if (target === 'fr') return fr || en || zh; if (target === 'de') return de || en || zh; if (target === 'zh-cn') return zh_cn || zh; if (target === 'uk') return uk || en || zh; if (target === 'pl') return pl || en || zh; return zh; }
