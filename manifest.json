@@ -1,0 +1,17 @@
+{
+  "name": "EMPATH",
+  "short_name": "EMPATH",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0D1B2A",
+  "theme_color": "#03070a",
+  "description": "數位時代的情緒安放平台",
+  "icons": [
+    {
+      "src": "og-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
