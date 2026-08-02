@@ -1254,11 +1254,10 @@ function playRitual(btnId, origText) { const btn = document.getElementById(btnId
 function updateCountersUI() {
     ['g-v-count','g-e-count','g-m-count','g-p-count','g-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = globalCounts[id.split('-')[1]]; });
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
-
-    // 🌟 極速魔法：把最新數據存進瀏覽器的無意識快取裡
+    
+    // 🌟 讓大腦學會記憶，實現 0 秒載入的視覺魔術
     localStorage.setItem('empath_global_counts', JSON.stringify(globalCounts));
-
-    // 靈魂氣象局：即時演算全網集體潛意識
+    
     updateSoulWeather();
 }
 
@@ -2308,27 +2307,24 @@ if(eInputBox) {
 
 // 監聽是否有「其他人」正在打字
 let presenceHideTimer;
-firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
+// 🌟 拔除 firestoreUnsubs.push，讓微光獨立連線，永遠不斷線！
+onSnapshot(presenceRef, (docSnap) => {
     if(docSnap.exists()) {
         const data = docSnap.data();
         const sparkEl = document.getElementById('presence-spark');
         
         if (data.by !== mySessionId && data.by !== 'none') {
-            // 別人開始打字，立刻穩穩亮起！
             sparkEl.classList.add('show');
-            
-            // 保險機制：如果對方網頁突然關掉或斷線，我們自己過幾秒也會溫柔熄滅
             clearTimeout(presenceHideTimer);
             presenceHideTimer = setTimeout(() => {
                 sparkEl.classList.remove('show');
             }, 4000);
         } else if (data.by === 'none') {
-            // 對方停止打字，立刻熄滅
             sparkEl.classList.remove('show');
             clearTimeout(presenceHideTimer);
         }
     }
-}));
+});
 
 // 🌟 拔掉原本的 load 煞車，改用 DOMContentLoaded 讓它瞬間起跑
 document.addEventListener('DOMContentLoaded', async () => {
