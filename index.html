@@ -4,6 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>EMPATH — Every Moment As Truth Heals</title>
+<!-- PWA 核心連結與蘋果 iOS 專屬設定 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#03070a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EMPATH">
 <meta name="google-site-verification" content="jNGANllL3CmS6qAP8PgiMFN9ed-X7bf337PGiNulwJc" />
 <meta name="description" content="EMPATH 是一個沒有演算法、沒有評斷的數位情緒避難所。在六個房間裡，承認傷痛、安放秘密、修補遺憾、釋放重量、交換溫暖、找到歸宿。" />
 <meta name="author" content="EMPATH" />
@@ -1864,5 +1870,16 @@ window.addEventListener('load', async () => {
   setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
 });
 </script>
+<!-- 註冊 PWA Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('EMPATH App 守護者已啟動', reg))
+        .catch(err => console.log('啟動失敗', err));
+    });
+  }
+</script>
+
 </body>
 </html>
