@@ -596,6 +596,15 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     100% { opacity: 0.3; }
 }
 
+/* ===== 匿名的微同步共現 ===== */
+#presence-spark {
+    font-size: 14px; color: var(--e); letter-spacing: 2px;
+    margin-top: 12px; opacity: 0; transition: opacity 1.5s ease;
+    display: flex; align-items: center; gap: 8px; font-weight: bold;
+}
+#presence-spark.show { opacity: 0.8; animation: pulse-spark 3s infinite; }
+#presence-spark::after { content: attr(data-zh); font-size: 11px; font-weight: normal; letter-spacing: 1px; }
+  
 /* 手機版隱藏游標跟隨與微調按鈕位置 */
 @media(max-width:768px){
     #cursor-glow { display: none !important; }
@@ -860,6 +869,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     data-pl-ph="Napisz to, czego nie możesz powiedzieć...&#10;Gniew, żal lub jakikolwiek ciężar.&#10;Nikt nie będzie wiedział, że to ty."
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 500</div>
+  <!-- 匿名的微同步共現 (當有人也在打字時會亮起) -->
+<div id="presence-spark" data-zh="此刻，世界某處也有人正與你一起傾吐..." data-en="Someone else is typing right now...">✦</div>
   
   <div id="e-draw-wrap">
       <canvas id="e-draw-canvas"></canvas>
@@ -1035,6 +1046,8 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
             <option value="1440" selected>24 小時後消散</option>
         </select>
         <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" style="margin-top:0;" data-zh="放入沙畫 →">放入沙畫 →</button>
+      <!-- 物理陀螺儀感測開關 (因 Apple 隱私政策，必須由使用者點擊同意才能取得傾斜數據) -->
+<button class="send-btn" id="gravity-btn" onclick="window.enableGravity()" style="border-color:var(--a); color:var(--a); margin-top:12px; width:100%;" data-zh="開啟物理重力感測 📳">開啟物理重力感測 📳</button>
     </div>
     
     <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia." data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice." data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit." data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论。">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
@@ -1242,6 +1255,88 @@ function updateCountersUI() {
     ['g-v-count','g-e-count','g-m-count','g-p-count','g-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = globalCounts[id.split('-')[1]]; });
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
 
+// ==========================================
+// 魔法一：3D 空間環繞聲景 (Spatial Audio)
+// ==========================================
+window.playSpatialChime = function(panValue) {
+    if(!isAudioEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    // 建立 3D 左右聲道定位器
+    let panner;
+    if (audioCtx.createStereoPanner) {
+        panner = audioCtx.createStereoPanner();
+        panner.pan.value = panValue; // -1 (極左) 到 1 (極右)
+    } else {
+        panner = audioCtx.createGain(); 
+    }
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(432 + Math.random()*200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); 
+
+    osc.connect(gain);
+    gain.connect(panner);
+    panner.connect(masterGain);
+
+    osc.start(); osc.stop(audioCtx.currentTime + 3);
+}
+
+// ==========================================
+// 魔法二：手機物理重力感測 (Device Orientation)
+// ==========================================
+let tiltX = 0, tiltY = 0;
+window.enableGravity = async function() {
+    // iOS 13+ 需要取得使用者授權才能讀取陀螺儀
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceOrientationEvent.requestPermission();
+            if (permission === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+                document.getElementById('gravity-btn').style.display = 'none';
+                window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
+            }
+        } catch (error) { console.error(error); }
+    } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        document.getElementById('gravity-btn').style.display = 'none';
+        window.showToast(t('📳 重力已開啟，請輕輕傾斜手機', 'Gravity on. Tilt your phone.', '重力センサーをオンにしました', 'Gravedad activada', 'Gravité activée', 'Schwerkraft an', '📳 重力已开启'));
+    }
+}
+
+function handleOrientation(event) {
+    tiltX = (event.gamma || 0) * 0.08; // 左右傾斜
+    tiltY = (event.beta || 0) * 0.08;  // 前後傾斜
+}
+
+// 👉 覆寫原本的 drawSand (加入重力 tiltX 與 tiltY)
+window.drawSand = function() { 
+    const c = document.getElementById('sand-canvas'); 
+    if(!c || !c.width || !isAnimating) return; 
+    const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
+    ctx.clearRect(0,0,w,h); 
+    sandParticles.forEach(p => { 
+        // 加上物理重力感測的變數
+        p.y += p.speedY + tiltY; 
+        p.swirlOffset += 0.02; 
+        const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; 
+        p.x += drift + tiltX; 
+
+        if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } 
+        if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } 
+        
+        ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; 
+        ctx.lineWidth = p.size; ctx.lineCap = 'round'; 
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); 
+        ctx.lineTo(p.x - drift * 2 - tiltX, p.y - p.speedY * 3 - tiltY); 
+        ctx.stroke(); 
+    }); 
+    ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); 
+}
+  
     // 靈魂氣象局：即時演算全網集體潛意識
     updateSoulWeather();
 }
@@ -2018,7 +2113,42 @@ function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.transl
 window.drawStars = function(){ if(!canvas.width || !isAnimating) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h); bgStars.forEach(s => { s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } ctx.fill(); ctx.shadowBlur = 0; }); starMessages.forEach(s => { s.x = s.relX*w; s.y = s.relY*h; const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); }); starsRafId = requestAnimationFrame(window.drawStars); }
 
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
-roomM.addEventListener('click', async e => { if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; const star = getStarAt(x, y); if(star){ if(activeStarId !== star.id) { activeStarId = star.id; tooltip.classList.add('active'); if(window.innerWidth > 768) { tooltip.style.transform = 'none'; let tx = e.clientX + 16; let ty = e.clientY - 16; if (tx + 260 > window.innerWidth) tx = e.clientX - 280; tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; } tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:10px;color:var(--gold);margin-top:10px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`; } else { try { await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); window.triggerHeartbeat(); tooltip.classList.remove('active'); activeStarId = null; } catch (err) {} } } else { tooltip.classList.remove('active'); activeStarId = null; } });
+roomM.addEventListener('click', async e => { 
+    if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; 
+    const rect = canvas.getBoundingClientRect(); 
+    const x = e.clientX-rect.left, y = e.clientY-rect.top; 
+    const star = getStarAt(x, y); 
+    
+    if(star){ 
+        if(activeStarId !== star.id) { 
+            activeStarId = star.id; 
+            tooltip.classList.add('active'); 
+            if(window.innerWidth > 768) { 
+                tooltip.style.transform = 'none'; 
+                let tx = e.clientX + 16; let ty = e.clientY - 16; 
+                if (tx + 260 > window.innerWidth) tx = e.clientX - 280; 
+                tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; 
+            } 
+            tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:10px;color:var(--gold);margin-top:10px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`; 
+        } else { 
+            try { 
+                await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); 
+                window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); 
+                window.triggerHeartbeat(); 
+                
+                // 🎧 觸發 3D 空間水晶音！計算星星在畫面的相對位置 (-1 到 1)
+                const panValue = (x / window.innerWidth) * 2 - 1;
+                if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
+                
+                tooltip.classList.remove('active'); 
+                activeStarId = null; 
+            } catch (err) {} 
+        } 
+    } else { 
+        tooltip.classList.remove('active'); activeStarId = null; 
+    } 
+});
+  
 window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} }
 
 let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
@@ -2121,7 +2251,7 @@ window.submitP = async function(){ if(!canSubmit()) return; const input = docume
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
-window.drawSand = function() { const c = document.getElementById('sand-canvas'); if(!c || !c.width || !isAnimating) return; const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; ctx.clearRect(0,0,w,h); sandParticles.forEach(p => { p.y += p.speedY; p.swirlOffset += 0.02; const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; p.x += drift; if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - drift * 2, p.y - p.speedY * 3); ctx.stroke(); }); ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); }
+
 window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
 window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
 window.submitA = async function(){ 
@@ -2213,6 +2343,46 @@ window.addEventListener('load', async () => {
         .catch(err => console.log('啟動失敗', err));
     });
   }
+
+  // ==========================================
+// 魔法三：匿名的微同步共現 (Live Micro-Presence)
+// ==========================================
+import { setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+const mySessionId = Math.random().toString(36).substr(2, 9);
+const presenceRef = doc(db, 'presence', 'roomE');
+
+const eInputBox = document.getElementById('e-input');
+let typingTimer;
+
+if(eInputBox) {
+    eInputBox.addEventListener('input', () => {
+        // 當使用者打字時，將時間戳記與自己的 Session ID 寫入雲端
+        setDoc(presenceRef, { lastTyping: serverTimestamp(), by: mySessionId }, { merge: true });
+        
+        clearTimeout(typingTimer);
+        // 停下 4 秒沒打字，就當作離開
+        typingTimer = setTimeout(() => {
+            setDoc(presenceRef, { by: 'none' }, { merge: true });
+        }, 4000);
+    });
+}
+
+// 監聽是否有「其他人」正在打字
+firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
+    if(docSnap.exists()) {
+        const data = docSnap.data();
+        const now = Date.now();
+        const lastTime = data.lastTyping ? data.lastTyping.seconds * 1000 : 0;
+        
+        // 如果是別人 (ID 不同)，且是最近 5 秒內打的字
+        if (data.by !== mySessionId && data.by !== 'none' && (now - lastTime < 5000)) {
+            document.getElementById('presence-spark').classList.add('show');
+        } else {
+            document.getElementById('presence-spark').classList.remove('show');
+        }
+    }
+}));
+  
 </script>
 
 </body>
