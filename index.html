@@ -2277,34 +2277,52 @@ window.createEchoRipple = function(e) {
 };
 
 // ==========================================
-// 魔法三：匿名的微同步共現 (Live Micro-Presence)
+// 魔法三：匿名的微同步共現 (Live Micro-Presence 極速版)
 // ==========================================
 const mySessionId = Math.random().toString(36).substr(2, 9);
 const presenceRef = doc(db, 'presence', 'roomE');
-
 const eInputBox = document.getElementById('e-input');
+
 let typingTimer;
+let isTyping = false; // 節流閥：紀錄自己是否正在打字
 
 if(eInputBox) {
     eInputBox.addEventListener('input', () => {
-        setDoc(presenceRef, { lastTyping: serverTimestamp(), by: mySessionId }, { merge: true });
+        // 【極速關鍵】只有從「沒打字」變「開始打字」的那一瞬間，才發送一次訊號
+        if (!isTyping) {
+            isTyping = true;
+            setDoc(presenceRef, { by: mySessionId }, { merge: true });
+        }
+        
+        // 每次敲擊，就重置「3秒後熄滅」的倒數計時
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => {
+            isTyping = false; // 停下超過 3 秒，視為打完字了
             setDoc(presenceRef, { by: 'none' }, { merge: true });
-        }, 4000);
+        }, 3000);
     });
 }
 
+// 監聽是否有「其他人」正在打字
+let presenceHideTimer;
 firestoreUnsubs.push(onSnapshot(presenceRef, (docSnap) => {
     if(docSnap.exists()) {
         const data = docSnap.data();
-        const now = Date.now();
-        const lastTime = data.lastTyping ? data.lastTyping.seconds * 1000 : 0;
+        const sparkEl = document.getElementById('presence-spark');
         
-        if (data.by !== mySessionId && data.by !== 'none' && (now - lastTime < 5000)) {
-            document.getElementById('presence-spark').classList.add('show');
-        } else {
-            document.getElementById('presence-spark').classList.remove('show');
+        if (data.by !== mySessionId && data.by !== 'none') {
+            // 別人開始打字，立刻穩穩亮起！
+            sparkEl.classList.add('show');
+            
+            // 保險機制：如果對方網頁突然關掉或斷線，我們自己過幾秒也會溫柔熄滅
+            clearTimeout(presenceHideTimer);
+            presenceHideTimer = setTimeout(() => {
+                sparkEl.classList.remove('show');
+            }, 4000);
+        } else if (data.by === 'none') {
+            // 對方停止打字，立刻熄滅
+            sparkEl.classList.remove('show');
+            clearTimeout(presenceHideTimer);
         }
     }
 }));
