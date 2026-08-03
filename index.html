@@ -2045,17 +2045,27 @@ window.drawStars = function(){
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
 
-    // 🌟 空間扭曲力場：計算出輸入框的座標範圍，讓星星自動避開！
-    const roomRect = roomM.getBoundingClientRect();
-    const inputWrap = document.querySelector('.m-input-wrap');
-    let avoidTop = 0, avoidBottom = 0, avoidLeft = 0, avoidRight = 0;
-    if(inputWrap) {
-        const inputRect = inputWrap.getBoundingClientRect();
-        // 抓出輸入框周圍 40px 的「禁止進入區」
-        avoidTop = inputRect.top - roomRect.top - 40;
-        avoidBottom = inputRect.bottom - roomRect.top + 60; // 下方留多一點給星星統計數字
-        avoidLeft = inputRect.left - roomRect.left - 40;
-        avoidRight = inputRect.right - roomRect.left + 40;
+    // 🌟 空間扭曲力場：全自動避開所有 UI 元件 (效能優化版，每秒更新一次邊界不耗電)
+    const now = Date.now();
+    if (!window.starAvoidZones || now - (window.lastZoneCalc || 0) > 1000) {
+        window.lastZoneCalc = now;
+        window.starAvoidZones = [];
+        const roomRect = roomM.getBoundingClientRect();
+        
+        // 將標題、說明框、輸入框、數據統計 全部納入「星星禁區」
+        const avoidElements = ['.room-title-wrap', '.desc-wrap', '.m-input-wrap', '.m-stats'];
+        avoidElements.forEach(sel => {
+            const el = roomM.querySelector(sel);
+            if(el) {
+                const rect = el.getBoundingClientRect();
+                window.starAvoidZones.push({
+                    top: rect.top - roomRect.top - 25,     // 往外多抓 25px 安全距離
+                    bottom: rect.bottom - roomRect.top + 25,
+                    left: rect.left - roomRect.left - 25,
+                    right: rect.right - roomRect.left + 25
+                });
+            }
+        });
     }
 
     bgStars.forEach(s => { 
@@ -2070,19 +2080,21 @@ window.drawStars = function(){
         let sx = s.relX * w; 
         let sy = s.relY * h; 
 
-        // 🌟 核心防擋演算法：如果星星即將畫在輸入框內，強制把它往最近的邊緣推開！
-        if (inputWrap && sx > avoidLeft && sx < avoidRight && sy > avoidTop && sy < avoidBottom) {
-            const distTop = Math.abs(sy - avoidTop);
-            const distBottom = Math.abs(avoidBottom - sy);
-            const distLeft = Math.abs(sx - avoidLeft);
-            const distRight = Math.abs(avoidRight - sx);
-            const minDist = Math.min(distTop, distBottom, distLeft, distRight);
-            
-            if (minDist === distTop) sy = avoidTop;
-            else if (minDist === distBottom) sy = avoidBottom;
-            else if (minDist === distLeft) sx = avoidLeft;
-            else sx = avoidRight;
-        }
+        // 如果星星落入任何一個禁區，就像磁鐵一樣把它推到最近的邊緣
+        window.starAvoidZones.forEach(zone => {
+            if (sx > zone.left && sx < zone.right && sy > zone.top && sy < zone.bottom) {
+                const distTop = Math.abs(sy - zone.top);
+                const distBottom = Math.abs(zone.bottom - sy);
+                const distLeft = Math.abs(sx - zone.left);
+                const distRight = Math.abs(zone.right - sx);
+                const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+                
+                if (minDist === distTop) sy = zone.top;
+                else if (minDist === distBottom) sy = zone.bottom;
+                else if (minDist === distLeft) sx = zone.left;
+                else sx = zone.right;
+            }
+        });
 
         s.x = sx; 
         s.y = sy; 
