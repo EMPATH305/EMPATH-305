@@ -2873,7 +2873,7 @@ window.submitT = async function(){
         window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
     } catch(err) { console.error('Submit T error:', err); window.showToast(t('傳送失敗，請稍後再試 ✦', 'Failed to send, please try again ✦', '送信に失敗しました ✦', 'Error al enviar ✦', 'Échec de l\'envoi ✦', 'Senden fehlgeschlagen ✦', '传送失败，请稍后再试 ✦')); }
 }
-  
+
 window.createEchoRipple = function(e) {
     let rippleContainer = document.getElementById('ripple-overlay');
     if (!rippleContainer) {
@@ -2939,8 +2939,6 @@ function setupRoomPresence(roomKey, inputId) {
     }, (err) => console.error('Presence error:', err));
 }
 
-// 🌟 拔掉原本的 load 煞車，改用 DOMContentLoaded 讓它瞬間起跑
-
 // ==========================================
 // 🌌 魔法五：時間維度引擎 (時刻感知、月相、紀念日)
 // ==========================================
@@ -2956,7 +2954,6 @@ window.initTimeAndCosmic = function() {
         if(eInput) {
             eInput.setAttribute('data-zh-ph', '深夜了，是什麼讓你無法入睡？\n把這份重量放在這裡，沒有人知道是你。');
             eInput.setAttribute('data-en-ph', 'Late at night, what keeps you awake?\nLeave the weight here, no one knows it is you.');
-            // 強制更新當下 placeholder
             const targetLang = (window.currentLang === 'en-uk') ? 'en' : window.currentLang;
             eInput.setAttribute('placeholder', eInput.getAttribute('data-' + targetLang + '-ph') || eInput.getAttribute('data-zh-ph'));
         }
@@ -2964,14 +2961,12 @@ window.initTimeAndCosmic = function() {
         body.classList.add('dawn-mode');
     }
 
-    // 🌕 2. 月相感知 (純數學計算，無須 API)
-    // 週期約為 29.53 天 (轉換成秒數)，基準點為千禧年的一個已知新月
+    // 🌕 2. 月相感知
     const lunarPeriod = 2551443; 
     const newMoon1970 = 947182440;
     const currentUnix = now.getTime() / 1000;
     const phase = ((currentUnix - newMoon1970) % lunarPeriod) / lunarPeriod;
     
-    // 判斷是否為滿月 (月相落在 0.47 到 0.53 之間)
     window.isFullMoon = (phase > 0.47 && phase < 0.53);
     
     if (window.isFullMoon) {
@@ -2985,15 +2980,13 @@ window.initTimeAndCosmic = function() {
     }
 
     // 🎂 3. 週年紀念日感知
-    // 💡 我先幫妳設定為 8 月 3 日 (今天)，讓妳一打開就能測試！測試完可改成妳實際上線的日期
-    const launchMonth = 7; // JS的月份是 0-11，所以 7 代表 8 月
+    const launchMonth = 7; 
     const launchDay = 3;
     const launchYear = 2026;
     
     if (now.getMonth() === launchMonth && now.getDate() === launchDay) {
         body.classList.add('anniversary-mode');
         const years = now.getFullYear() - launchYear;
-        // 延遲 3 秒後，在左下角跳出隱藏的極美吐司提示
         setTimeout(() => {
             let msg = years === 0 ? '✦ EMPATH 誕生了，謝謝你成為第一批在這裡的靈魂 ✦' : `✦ EMPATH 今天 ${years} 歲了，謝謝你也在這裡 ✦`;
             window.showToast(msg, 6000);
@@ -3001,7 +2994,7 @@ window.initTimeAndCosmic = function() {
     }
 };
 
-  // ==========================================
+// ==========================================
 // 🌌 魔法七：情感閉環引擎 (時空信箱、溫暖回聲、延遲沙畫)
 // ==========================================
 
@@ -3010,7 +3003,7 @@ window.submitFutureLetter = async function() {
     const key = localStorage.getItem('empath_soul_key');
     const text = document.getElementById('future-letter-input').value.trim();
     if(!key || !text) return;
-    const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); // 預設 90 天後解鎖
+    const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); 
     try {
         const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
         const docRef = doc(db, "user_journeys", key);
@@ -3036,7 +3029,6 @@ window.checkFutureLetters = async function() {
             container.innerHTML = '';
             const now = Date.now();
             letters.forEach(l => {
-                // 如果時間到了，或開啟了穿越密技
                 if(now >= l.unlockDate || window.isTestingLetter) {
                     container.innerHTML += `<div style="padding:20px; background:rgba(255,255,255,0.03); border-left:2px solid var(--gold); border-radius:0 4px 4px 0; margin-bottom:16px; font-size:15px; color:var(--fog); line-height:2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
                         <span style="font-size:11px; color:var(--gold); display:block; margin-bottom:12px; letter-spacing:3px; font-weight:bold;">✉️ 來自 ${new Date(l.createdAt).toLocaleDateString()} 的信</span>
@@ -3053,7 +3045,6 @@ window.checkFutureLetters = async function() {
 // 2. Room A：24小時宇宙回聲
 window.checkRoomAEcho = async function() {
     const aSubmitTime = localStorage.getItem('empath_a_submit_time');
-    // 如果距離上次投遞超過 24 小時，或開啟了穿越密技
     if (aSubmitTime && (Date.now() - parseInt(aSubmitTime) > 24 * 60 * 60 * 1000 || window.isTestingEcho)) {
         try {
             const { getDocs, query, limit } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
@@ -3066,9 +3057,8 @@ window.checkRoomAEcho = async function() {
                 setTimeout(() => {
                     window.showToast(`✦ 來自宇宙的回聲 ✦\n「${randomMsg.slice(0, 30)}...」\n有人與你同時在這裡，留下了這句話。`, 8000);
                 }, 4000);
-                localStorage.removeItem('empath_a_submit_time'); // 聽過一次就清掉
+                localStorage.removeItem('empath_a_submit_time'); 
             }
-        }
         } catch(e) { 
             console.error("讀取宇宙回聲時發生錯誤:", e); 
         }
@@ -3085,11 +3075,9 @@ window.checkRoomTWarmth = function() {
                 const lastEchos = parseInt(localStorage.getItem('empath_my_warmth_echos') || '0');
                 if(echos > lastEchos) {
                     localStorage.setItem('empath_my_warmth_echos', echos);
-                    // 讓 Room T 門口微微發光
                     const tDoor = document.querySelector('.door-btn[data-d="T"]');
                     if(tDoor) { tDoor.style.boxShadow = '0 0 25px rgba(232,168,124,0.6)'; tDoor.style.borderColor = 'var(--amber)'; }
                     
-                    // 在面板內顯示靜靜的通知
                     let msgBox = document.getElementById('my-warmth-echo-msg');
                     if(!msgBox) {
                         msgBox = document.createElement('div');
