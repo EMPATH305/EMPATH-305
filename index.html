@@ -2043,6 +2043,21 @@ window.drawStars = function(){
     if(!canvas.width || !isAnimating) return; 
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight; 
+
+    // 🌟 空間魔術：如果是手機版，自動把房間「底部往下無限延伸 350px」
+    // 給星星一個絕對寬廣、專屬的夜空，再也不會擠在一起！
+    if (w <= 768 && !roomM.dataset.starSpace) {
+        roomM.style.paddingBottom = '350px';
+        roomM.dataset.starSpace = 'true';
+        if(typeof window.resizeCanvas === 'function') window.resizeCanvas(); // 畫布自動變大
+        return; // 等下一幀畫布變大了再畫
+    } else if (w > 768 && roomM.dataset.starSpace) {
+        roomM.style.paddingBottom = '';
+        roomM.dataset.starSpace = '';
+        if(typeof window.resizeCanvas === 'function') window.resizeCanvas();
+        return;
+    }
+
     ctx.clearRect(0,0,w,h); 
 
     // 1. 畫背景星星（維持滿版全螢幕，製造深邃感）
@@ -2054,30 +2069,40 @@ window.drawStars = function(){
         ctx.fill(); ctx.shadowBlur = 0; 
     }); 
 
-    // 2. 🌟 全新改版：劃分「留言星星的絕對安全區」
+    // 2. 動態計算「絕對安全區」
     let safeX = 0, safeY = 0, safeW = w, safeH = h;
     
     if (w > 768) {
         // 【電腦版】UI在左，星星專屬區在「右半部」
-        safeX = 580;            // 避開左邊 UI 的 580px
-        safeW = w - 620;        // 右邊留一點呼吸空間
+        safeX = 580;            
+        safeW = w - 620;        
         safeY = 120;
         safeH = h - 200;
     } else {
-        // 【手機版】UI在上，星星專屬區在「下半部」
-        safeX = 30;             // 左右留邊距
-        safeW = w - 60;
-        safeY = 480;            // 避開上方 UI 與輸入框的 480px
-        safeH = h - 560;        // 底部保留呼吸空間
+        // 【手機版】動態抓取 UI 的「真實絕對高度」
+        const contentEl = roomM.querySelector('.room-content');
+        let uiBottom = 480; // 備用預設值
+        if (contentEl) {
+            const cRect = contentEl.getBoundingClientRect();
+            const rRect = roomM.getBoundingClientRect();
+            uiBottom = cRect.bottom - rRect.top; // 精準抓到統計數字的最底端
+        }
+        
+        safeX = 20;             
+        safeW = w - 40;
+        // 🌟 星星從 UI 最底端往下推 40px 開始畫，絕對不可能擋到按鈕跟文字！
+        safeY = uiBottom + 40;            
+        // 因為我們剛剛拉長了 350px，這裡的高度絕對夠用，不會再有星星不見了
+        safeH = h - safeY - 20;        
+        
+        // 防呆保護
+        safeH = Math.max(safeH, 200);
     }
     
-    // 防呆：避免極端螢幕尺寸(如手機橫放)把範圍擠成負數
     safeW = Math.max(safeW, 100);
-    safeH = Math.max(safeH, 150);
 
-    // 3. 畫留言星星（精準投影在安全區內）
+    // 3. 畫留言星星（完美投影在安全區內）
     starMessages.forEach(s => { 
-        // 將星星原本的隨機座標，完美壓縮並限制在安全區內
         s.x = safeX + (s.relX * safeW); 
         s.y = safeY + (s.relY * safeH); 
 
