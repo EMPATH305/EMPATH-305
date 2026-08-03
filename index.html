@@ -1094,6 +1094,16 @@ body.anniversary-mode .sand-timer-fill {
       <div class="p-vessel">
         <canvas id="p-canvas" width="540" height="300"></canvas>
         <p class="p-canvas-hint" data-zh="點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦" data-en="Click the shards below to collaboratively mend the porcelain.<br>∗ Had a good day? Mend someone else's shard and light up a golden crack for the world. ✦" data-ja="下の欠片をクリックして、世界中で一緒に金継ぎを完成させましょう。<br>∗ 今日は良い一日でしたか？それなら誰かのカードをクリックして、世界に黄金のひび割れを灯してください。 ✦" data-es="Haz clic en los fragmentos a continuación para reparar juntos la porcelana.<br>∗ ¿Tuviste un buen día? Repara el fragmento de alguien más e ilumina una grieta dorada para el mundo. ✦" data-fr="Cliquez sur les éclats ci-dessous pour réparer ensemble la porcelaine.<br>∗ Vous avez passé une bonne journée ? Réparez l'éclat de quelqu'un d'autre et illuminez une fissure dorée pour le monde. ✦" data-de="Klicken Sie auf die Scherben unten, um das Porzellan gemeinsam zu flicken.<br>∗ Hattest du einen guten Tag? Flicke die Scherbe von jemand anderem und lass einen goldenen Riss für die Welt erstrahlen. ✦" data-zh-cn="点击下面的碎片，全网会共同为瓷器缝补上金色裂痕<br>∗ 你今天过得很好吗？那也很好。你可以直接往下点击别人的卡片，亲手帮全网点亮一条黄金裂痕。 ✦">點擊下面的碎片，全網會共同為瓷器縫補上金色裂痕<br>∗ 你今天過得很好嗎？那也很好。你可以直接往下點擊別人的卡片，親手幫全網點亮一條黃金裂痕。 ✦</p>
+        <!-- 全球修補率進度環 (優雅的 HTML 介面版) -->
+        <div style="margin-top: 36px; max-width: 320px; margin-left: auto; margin-right: auto;">
+            <div style="display: flex; justify-content: space-between; font-family:'Noto Serif TC',serif; font-size:11px; letter-spacing:3px; color:var(--gold); margin-bottom:12px; font-weight:bold;">
+                <span>GLOBAL HEALING</span>
+                <span id="global-healing-pct">0%</span>
+            </div>
+            <div style="width:100%; height:2px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);">
+                <div id="global-healing-bar" style="width:0%; height:100%; background:var(--gold); box-shadow:0 0 10px var(--gold); transition:width 1.5s cubic-bezier(0.2, 0.8, 0.3, 1);"></div>
+            </div>
+        </div>
       </div>
       
   <div class="kintsugi-board" id="p-board"></div>
@@ -1962,8 +1972,27 @@ function subscribeAll() {
             });
         });
     }));
-    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
-    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { 
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; 
+        if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); 
+        updateDynamicTexts(); 
+        updateCountersUI(); 
+
+        // 🌟 更新優雅的 HTML 修補進度條
+        const ratio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
+        const pct = Math.round(ratio * 100);
+        const bar = document.getElementById('global-healing-bar');
+        const pctText = document.getElementById('global-healing-pct');
+        if (bar) bar.style.width = pct + '%';
+        if (pctText) pctText.textContent = pct + '%';
+
+        // ✨ 史詩時刻：首次突破 50% 的慶祝
+        if (ratio >= 0.5 && !localStorage.getItem('empath_p_50_reached')) {
+            localStorage.setItem('empath_p_50_reached', 'true');
+            setTimeout(() => {
+                window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
+            }, 2000);
+        }
+    }));
         globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; 
         feed.innerHTML = ''; const nowMs = Date.now(); 
         snapshot.forEach(docSnap => { 
@@ -2457,48 +2486,6 @@ window.drawKintsugiVessel = function(){
         drawCrack(i, true);
     }
   
-   // 🌟 4. 全球修補率進度環 (Global Healing Rate)
-    // 計算比例：已修補 / 總碎片
-    const ratio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
-    const radius = 170; // 剛好包覆茶碗的半徑
-    const startAngle = 0.75 * Math.PI; // 從左下角開始
-    const endAngle = 2.25 * Math.PI; // 到右下角結束
-    const currentAngle = startAngle + (endAngle - startAngle) * ratio;
-
-    // 畫出底部的暗色軌道
-    c.beginPath();
-    c.arc(cx, cy - 10, radius, startAngle, endAngle);
-    c.strokeStyle = 'rgba(255,255,255,0.05)';
-    c.lineWidth = 2;
-    c.stroke();
-
-    // 畫出金色的進度條
-    if (ratio > 0) {
-        c.beginPath();
-        c.arc(cx, cy - 10, radius, startAngle, currentAngle);
-        c.strokeStyle = '#D4AF37';
-        c.lineWidth = 3;
-        c.shadowBlur = 10;
-        c.shadowColor = 'rgba(212, 175, 55, 0.6)';
-        c.stroke();
-        c.shadowBlur = 0;
-    }
-
-    // 寫上進度文字
-    c.fillStyle = 'rgba(169, 185, 199, 0.8)';
-    c.font = '12px "Noto Sans TC"';
-    c.textAlign = 'center';
-    c.letterSpacing = '3px';
-    c.fillText(`GLOBAL HEALING: ${Math.round(ratio * 100)}%`, cx, cy + 175);
-
-    // ✨ 史詩時刻：首次突破 50% 的慶祝
-    if (ratio >= 0.5 && !localStorage.getItem('empath_p_50_reached')) {
-        localStorage.setItem('empath_p_50_reached', 'true');
-        setTimeout(() => {
-            window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
-        }, 2000);
-    }
-}
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
