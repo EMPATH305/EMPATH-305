@@ -1466,8 +1466,6 @@ textarea:focus-visible, input:focus-visible {
 
 <script type="module">
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
 const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
@@ -2250,23 +2248,32 @@ window.shareSite = function() {
     if (navigator.share) { 
         navigator.share({ title: 'EMPATH', text: text, url: window.location.href }).catch(console.error); 
     } else { 
-        // 防禦性剪貼簿寫入，確保在任何環境都不會死當
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text + " " + window.location.href); 
-            } else {
-                // 古老且絕對安全的備用方案
+        // 防禦性剪貼簿寫入 (支援 Promise 的現代寫法)
+        const content = text + " " + window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(content).then(() => {
+                window.showToast(t('網址已複製！快去傳給需要的人吧 ✦', 'Link copied! Pass it to someone in need ✦', 'リンクをコピーしました！', '¡Enlace copiado!', 'Lien copié !', 'Link kopiert!', '网址已复制！快去传给需要的人吧 ✦')); 
+            }).catch(err => {
+                console.error("複製失敗", err);
+                fallbackCopy(content);
+            });
+        } else {
+            fallbackCopy(content);
+        }
+
+        // 古老且絕對安全的備用方案
+        function fallbackCopy(str) {
+            try {
                 const textArea = document.createElement("textarea");
-                textArea.value = text + " " + window.location.href;
+                textArea.value = str;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand("copy");
                 textArea.remove();
+                window.showToast(t('網址已複製！快去傳給需要的人吧 ✦', 'Link copied!', 'リンクをコピーしました！', '¡Enlace copiado!', 'Lien copié !', 'Link kopiert!', '网址已复制！')); 
+            } catch (e) {
+                window.showToast('複製失敗，請手動複製網址 ✦');
             }
-            window.showToast(t('網址已複製！快去傳給需要的人吧 ✦', 'Link copied! Pass it to someone in need ✦', 'リンクをコピーしました！', '¡Enlace copiado!', 'Lien copié !', 'Link kopiert!', '网址已复制！快去传给需要的人吧 ✦')); 
-        } catch (err) {
-            console.error("複製失敗", err);
-            window.showToast('複製失敗，請手動分享網址 ✦');
         }
     } 
 }
