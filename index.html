@@ -762,6 +762,12 @@ body.anniversary-mode .sand-timer-fill {
 }
   
 /* 📏 魔法八：全站 8px 網格系統對齊與極簡化覆寫 */
+
+/* Room A 防誤觸：手機版承接警告按鈕垂直排列並加高 */
+@media(max-width: 480px) {
+    #a-warning-mask > div { flex-direction: column; width: 100%; gap: 16px; }
+    #a-warning-mask .send-btn { width: 100%; min-height: 48px; }
+}
   
 /* 強制覆寫手機版舊有的方塊輸入框，保持底線極簡美學 */
 @media(max-width: 768px) {
@@ -1426,7 +1432,33 @@ const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 }; const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 }; let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 let lastSubmitTime = 0; const SUBMIT_COOLDOWN = 3000; 
 
-function canSubmit() { const now = Date.now(); if (now - lastSubmitTime < SUBMIT_COOLDOWN) { window.showToast(t('請稍候再送出...', 'Please wait...', '少しお待ちください...', 'Espera un momento...', 'Veuillez patienter...', 'Bitte warten...', '请稍候再送出...')); return false; } lastSubmitTime = now; return true; }
+function canSubmit() { 
+    // 🌍 阻截 Firebase 的離線無限等待：直接偵測裝置網路
+    if (!navigator.onLine) {
+        window.showToast(t('網路似乎有點不穩，請再試一次 ✦', 'Connection issue, please try again ✦', '通信環境が不安定です ✦', 'Problema de conexión ✦', 'Problème de connexion ✦', 'Verbindungsproblem ✦', '网络似乎有点不稳，请再试一次 ✦'));
+        return false;
+    }
+    const now = Date.now(); 
+    if (now - lastSubmitTime < SUBMIT_COOLDOWN) { 
+        window.showToast(t('請稍候再送出...', 'Please wait...', '少しお待ちください...', 'Espera un momento...', 'Veuillez patienter...', 'Bitte warten...', '请稍候再送出...')); 
+        return false; 
+    } 
+    lastSubmitTime = now; return true; 
+}
+
+// ✨ 放下的儀式感：延遲淡出並清空文字的專屬函數
+window.fadeOutAndClear = function(inputId, charId) {
+    const el = document.getElementById(inputId);
+    if(!el) return;
+    el.style.transition = 'opacity 0.3s ease';
+    el.style.opacity = '0';
+    setTimeout(() => {
+        el.value = '';
+        if(charId) document.getElementById(charId).textContent = '0 / 500';
+        el.style.opacity = '1';
+    }, 300);
+};
+  
 function playRitual(btnId, origText) { const btn = document.getElementById(btnId); if(!btn) return; btn.innerHTML = t('✨ 已接住', '✨ Caught', '✨ 受け止めました', '✨ Atrapado', '✨ Attrapé', '✨ Aufgefangen', '✨ 已接住'); btn.style.pointerEvents = 'none'; btn.style.opacity = '0.6'; setTimeout(() => { btn.innerHTML = origText; btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }, SUBMIT_COOLDOWN); }
 
 function updateCountersUI() {
@@ -2177,8 +2209,18 @@ function nowStr(){ const d = new Date(); return d.getHours().toString().padStart
 
 function logJourney(type, text){ const time = nowStr(); journeyData.counters[type] = (journeyData.counters[type] || 0) + 1; journeyData.events.push({ type, text, time }); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud(); updateCountersUI(); }
 function renderTimelineHTML(type, text, time){ const container = document.getElementById('h-events'); const div = document.createElement('div'); div.className = 'h-event ' + type + '-event'; const labels = { 'zh': {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'}, 'en': {e:'Exit', m:'Stars', p:'Mended', a:'Asylum', t:'Resonance'}, 'ja': {e:'出口', m:'星空', p:'修復', a:'避難所', t:'共鳴'}, 'es': {e:'Salida', m:'Estrellas', p:'Reparado', a:'Asilo', t:'Resonancia'}, 'fr': {e:'Sortie', m:'Étoiles', p:'Réparé', a:'Asile', t:'Résonance'}, 'de': {e:'Ausgang', m:'Sterne', p:'Geflickt', a:'Asyl', t:'Resenz'}, 'zh-cn': {e:'情绪出口', m:'思念映射', p:'碎片修补', a:'避难所', t:'能量共振'} }; const currentKey = window.currentLang === 'en-uk' ? 'en' : window.currentLang; div.innerHTML = `<div><div class="h-event-label">${labels[currentKey]?.[type]||''}</div><div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div><div class="h-event-time">${time}</div></div>`; container.appendChild(div); }
-function initTimeline(){ const container = document.getElementById('h-events'); container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:13px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`; journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time)); }
-
+function initTimeline(){ 
+    const container = document.getElementById('h-events'); 
+    container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:13px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`; 
+    
+    if (journeyData.events.length === 0) {
+        // 如果除了 START 以外什麼都沒有，就顯示溫柔的提示
+        container.innerHTML += `<div class="h-event" style="color:rgba(255,255,255,0.3);font-size:13px;padding-left:20px;border-left:1px dashed rgba(255,255,255,.1);"><div><div style="font-style:italic;">${t('你的旅程足跡會在這裡慢慢浮現...', 'Your journey footprints will slowly appear here...', 'あなたの旅の足跡がここに少しずつ現れます...', 'Tus huellas del viaje aparecerán lentamente aquí...', 'Vos empreintes de voyage apparaîtront lentement ici...', 'Deine Fußspuren werden hier langsam erscheinen...', '你的旅程足迹会在这里慢慢浮现...')}</div></div></div>`;
+    } else {
+        journeyData.events.forEach(ev => renderTimelineHTML(ev.type, ev.text, ev.time)); 
+    }
+}
+  
 window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙生成成功 ✦')); }
 window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
 window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) {} }
@@ -2203,8 +2245,7 @@ window.submitE = async function(){
         text = input.value.trim(); 
         if(!text) return; 
         text = cleanText(text); 
-        input.value = '';
-        document.getElementById('e-char').textContent = '0 / 500';
+        window.fadeOutAndClear('e-input', 'e-char');
     } else {
         // 如果沒有畫任何東西，就拒絕送出
         if(!eDrawCanvas || !eCanvasHasDrawn) return;
@@ -2485,7 +2526,7 @@ roomM.addEventListener('click', async e => {
     } 
 });
   
-window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} }
+window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); window.fadeOutAndClear('m-input', 'm-char'); logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} }
 
 let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
@@ -2573,7 +2614,7 @@ window.drawKintsugiVessel = function(){
     }
 }
   
-window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
+window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); window.fadeOutAndClear('p-input', 'p-char'); logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
@@ -2712,7 +2753,7 @@ window.submitA = async function(){
     // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
     localStorage.setItem('empath_a_submit_time', Date.now());
 
-    input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
+    window.fadeOutAndClear('a-input', 'a-char'); logJourney('a', text); playRitual('a-submit-btn', origText); 
     window.showToast('放入沙畫 ✦'); 
 }
 
@@ -2729,7 +2770,7 @@ window.submitT = async function(){
     localStorage.setItem('empath_my_warmth_id', docRef.id);
     localStorage.setItem('empath_my_warmth_echos', '0');
 
-    input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
+    window.fadeOutAndClear('t-input', 't-char'); logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
 }
   
 window.createEchoRipple = function(e) {
@@ -3045,21 +3086,33 @@ window.checkRoomTWarmth = function() {
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
   const observer = new IntersectionObserver((entries) => {
-      if (document.body.classList.contains('hsp-mode')) return;
       entries.forEach(entry => {
-          if (entry.target.id === 'room-m') {
-              if (entry.isIntersecting && !starsRafId && isAnimating) window.drawStars();
-              else if (!entry.isIntersecting && starsRafId) { cancelAnimationFrame(starsRafId); starsRafId = null; }
+          // 1. 背景動畫節能控制 (降噪模式下不執行動畫，但照樣更新標題)
+          if (!document.body.classList.contains('hsp-mode')) {
+              if (entry.target.id === 'room-m') {
+                  if (entry.isIntersecting && !starsRafId && isAnimating) window.drawStars();
+                  else if (!entry.isIntersecting && starsRafId) { cancelAnimationFrame(starsRafId); starsRafId = null; }
+              }
+              if (entry.target.id === 'room-a') {
+                  if (entry.isIntersecting && !sandRafId && isAnimating) window.drawSand();
+                  else if (!entry.isIntersecting && sandRafId) { cancelAnimationFrame(sandRafId); sandRafId = null; }
+              }
           }
-          if (entry.target.id === 'room-a') {
-              if (entry.isIntersecting && !sandRafId && isAnimating) window.drawSand();
-              else if (!entry.isIntersecting && sandRafId) { cancelAnimationFrame(sandRafId); sandRafId = null; }
+          
+          // 2. 🌍 分頁標題動態更新 (Page Title)
+          if (entry.isIntersecting) {
+              if (entry.target.id === 'hero') {
+                  document.title = 'EMPATH — Every Moment As Truth Heals';
+              } else {
+                  const roomLetter = entry.target.querySelector('.room-letter')?.textContent;
+                  if (roomLetter) document.title = `Room ${roomLetter} — EMPATH`;
+              }
           }
       });
-  }, { threshold: 0.05 });
+  }, { threshold: 0.15 });
 
-  observer.observe(document.getElementById('room-m'));
-  observer.observe(document.getElementById('room-a'));
+  // 綁定所有房間與首頁
+  document.querySelectorAll('.room, #hero').forEach(el => observer.observe(el));
   setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
 });
 </script>
