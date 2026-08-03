@@ -658,10 +658,40 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     .m-stat { font-size: 11px; letter-spacing: 1px; }
     .m-stat span { font-size: 16px; }
 }
+/* 🌍 隱藏 Google 預設的醜陋翻譯介面與頂部橫幅 */
+#google_translate_element { display: none !important; }
+.goog-te-banner-frame { display: none !important; }
+body { top: 0px !important; }
+
+/* 🌍 隱藏滑鼠停留在翻譯文字上時，出現的「破壞美感的黃色底色與原文氣泡」 */
+.goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+#goog-gt-tt { display: none !important; }
+
+/* 🌍 EMPATH 專屬的全站翻譯微光按鈕 (固定在畫面左上角) */
+#empath-lang-btn {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    z-index: 9999;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.4s ease;
+    user-select: none;
+}
+#empath-lang-btn:hover {
+    color: rgba(201, 168, 76, 1);
+    text-shadow: 0 0 10px rgba(201, 168, 76, 0.5);
+}
+@media(max-width: 768px) {
+    #empath-lang-btn { top: 20px; left: 20px; font-size: 12px; }
+}
 </style>
 </head>
 <body>
-
+<!-- 🌍 EMPATH 全站翻譯按鈕 -->
+<div id="empath-lang-btn" onclick="translateWholePage()">✦ Translate Site</div>
 <!-- 🏆 CSSLight 國際畫廊榮譽勳章 🏆 -->
 <a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(http://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
 
@@ -2489,6 +2519,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         .catch(err => console.log('啟動失敗', err));
     });
   }
+</script>
+<!-- 🌍 隱藏的 Google 翻譯引擎 -->
+<div id="google_translate_element"></div>
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'zh-TW', // 告訴大腦：這網站原本是繁體中文
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+// 🌍 我們專屬的觸發器：一鍵翻譯全站
+window.translateWholePage = function() {
+    // 找出地下室裡那個被我們隱藏起來的 Google 選單
+    const selectField = document.querySelector("#google_translate_element select");
+    if(!selectField) {
+        alert("翻譯星軌正在連線，請稍等一秒再試...");
+        return;
+    }
+
+    // 抓取這位使用者的「瀏覽器母語」 (例如日本是 'ja', 法國是 'fr')
+    let targetLang = (navigator.language || navigator.userLanguage).substring(0, 2);
+    
+    // 如果使用者本來就是中文語系(zh)，為了讓他能看見這個魔法，我們預設轉成英文(en)
+    if(targetLang === 'zh') targetLang = 'en'; 
+
+    // 改變按鈕外觀，製造科技感
+    const btn = document.getElementById('empath-lang-btn');
+    btn.innerText = '✦ Translating...';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+
+    // 暗中幫使用者切換語言，並觸發「開始翻譯」！
+    selectField.value = targetLang;
+    selectField.dispatchEvent(new Event('change'));
+
+    // 1 秒後，按鈕顯示對方所在的語言縮寫 (例如 ✦ EN)
+    setTimeout(() => {
+        btn.innerText = '✦ ' + targetLang.toUpperCase();
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+    }, 1000);
+}
 </script>
 </body>
 </html>
