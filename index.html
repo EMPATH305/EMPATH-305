@@ -658,14 +658,20 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     .m-stat { font-size: 11px; letter-spacing: 1px; }
     .m-stat span { font-size: 16px; }
 }
-/* 🌍 隱藏 Google 翻譯介面 (修復 display:none 導致引擎罷工的 Bug) */
+/* 🌍 徹底封殺 Google 翻譯的所有醜陋介面與白邊 */
 #google_translate_element { position: absolute; opacity: 0; z-index: -9999; pointer-events: none; }
-.goog-te-banner-frame { display: none !important; }
-body { top: 0px !important; }
 
-/* 🌍 隱藏滑鼠停留在翻譯文字上時，出現的「破壞美感的黃色底色與原文氣泡」 */
+/* 1. 封殺頂部白色橫幅 iframe */
+.goog-te-banner-frame.skiptranslate, 
+iframe.goog-te-banner-frame { display: none !important; visibility: hidden !important; }
+
+/* 2. 封殺破壞美感的黃色底色與原文提示氣泡 */
 .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
-#goog-gt-tt { display: none !important; }
+#goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip { display: none !important; }
+
+/* 3. 終極防護：阻止 Google 強制把網頁往下推的潛規則 */
+body { top: 0px !important; margin-top: 0px !important; }
+html { top: 0px !important; margin-top: 0px !important; height: auto !important; }
 
 #empath-lang-btn:hover {
     color: rgba(201, 168, 76, 1);
