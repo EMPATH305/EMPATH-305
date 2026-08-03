@@ -2039,7 +2039,61 @@ function initBgStars(w, h){
 }
 window.updateMStats = function(){ if(!document.getElementById('m-count')) return; document.getElementById('m-count').textContent = starMessages.length; if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; } const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text; }
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
-window.drawStars = function(){ if(!canvas.width || !isAnimating) return; const w = roomM.offsetWidth; const h = roomM.offsetHeight; ctx.clearRect(0,0,w,h); bgStars.forEach(s => { s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } ctx.fill(); ctx.shadowBlur = 0; }); starMessages.forEach(s => { s.x = s.relX*w; s.y = s.relY*h; const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); }); starsRafId = requestAnimationFrame(window.drawStars); }
+window.drawStars = function(){ 
+    if(!canvas.width || !isAnimating) return; 
+    const w = roomM.offsetWidth; 
+    const h = roomM.offsetHeight; 
+    ctx.clearRect(0,0,w,h); 
+
+    // 🌟 空間扭曲力場：計算出輸入框的座標範圍，讓星星自動避開！
+    const roomRect = roomM.getBoundingClientRect();
+    const inputWrap = document.querySelector('.m-input-wrap');
+    let avoidTop = 0, avoidBottom = 0, avoidLeft = 0, avoidRight = 0;
+    if(inputWrap) {
+        const inputRect = inputWrap.getBoundingClientRect();
+        // 抓出輸入框周圍 40px 的「禁止進入區」
+        avoidTop = inputRect.top - roomRect.top - 40;
+        avoidBottom = inputRect.bottom - roomRect.top + 60; // 下方留多一點給星星統計數字
+        avoidLeft = inputRect.left - roomRect.left - 40;
+        avoidRight = inputRect.right - roomRect.left + 40;
+    }
+
+    bgStars.forEach(s => { 
+        s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
+        ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; 
+        if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } 
+        ctx.fill(); ctx.shadowBlur = 0; 
+    }); 
+
+    starMessages.forEach(s => { 
+        let sx = s.relX * w; 
+        let sy = s.relY * h; 
+
+        // 🌟 核心防擋演算法：如果星星即將畫在輸入框內，強制把它往最近的邊緣推開！
+        if (inputWrap && sx > avoidLeft && sx < avoidRight && sy > avoidTop && sy < avoidBottom) {
+            const distTop = Math.abs(sy - avoidTop);
+            const distBottom = Math.abs(avoidBottom - sy);
+            const distLeft = Math.abs(sx - avoidLeft);
+            const distRight = Math.abs(avoidRight - sx);
+            const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+            
+            if (minDist === distTop) sy = avoidTop;
+            else if (minDist === distBottom) sy = avoidBottom;
+            else if (minDist === distLeft) sx = avoidLeft;
+            else sx = avoidRight;
+        }
+
+        s.x = sx; 
+        s.y = sy; 
+        const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; 
+        const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); 
+        grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
+        ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
+        drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
+    }); 
+    starsRafId = requestAnimationFrame(window.drawStars); 
+}
 
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
 roomM.addEventListener('click', async e => { 
