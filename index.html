@@ -1885,6 +1885,25 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
+    // 🌟 監聽全網的星系金線 (24小時內有效)
+    firestoreUnsubs.push(onSnapshot(collection(db, "constellations"), (snapshot) => {
+        const nowMs = Date.now();
+        window.activeConstellations = [];
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const createdAtMs = data.createdAt ? data.createdAt.seconds * 1000 : nowMs;
+            const ageHours = (nowMs - createdAtMs) / (1000 * 60 * 60);
+            
+            // 如果超過 24 小時，自動忽略不畫
+            if (ageHours > 24) return;
+            
+            window.activeConstellations.push({
+                s1Id: data.s1Id,
+                s2Id: data.s2Id,
+                createdAt: createdAtMs
+            });
+        });
+    }));
     firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); updateDynamicTexts(); updateCountersUI(); }));
     firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { 
         globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; 
@@ -2212,24 +2231,30 @@ window.drawStars = function(){
         drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
     }); 
 
-   // 5. 畫出星系連線 (Constellations)
-    window.activeConstellations = window.activeConstellations || [];
-    for(let i = window.activeConstellations.length - 1; i >= 0; i--) {
-        let c = window.activeConstellations[i];
-        c.life -= 0.005; // 金線生命週期慢慢減少 (約數秒後消散)
-        if(c.life <= 0) {
-            window.activeConstellations.splice(i, 1);
-            continue;
-        }
-        ctx.beginPath();
-        ctx.moveTo(c.s1.x, c.s1.y);
-        ctx.lineTo(c.s2.x, c.s2.y);
-        ctx.strokeStyle = `rgba(201, 168, 76, ${c.life * 0.7})`; // 透出金色微光
-        ctx.lineWidth = 0.8;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = `rgba(201, 168, 76, ${c.life})`;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+   // 5. 畫出全網 24 小時共振星系連線 (Constellations)
+    if (window.activeConstellations && window.activeConstellations.length > 0) {
+        const nowMs = Date.now();
+        window.activeConstellations.forEach(c => {
+            // 從星空陣列中找出這兩顆星當前的即時座標
+            const star1 = starMessages.find(s => s.id === c.s1Id);
+            const star2 = starMessages.find(s => s.id === c.s2Id);
+            
+            if (star1 && star2 && star1.x && star2.x) {
+                // 計算 24 小時內的透明度漸層 (越接近 24 小時會微微變淡，或整整 24 小時後消失)
+                const ageHours = (nowMs - c.createdAt) / (1000 * 60 * 60);
+                const alpha = Math.max(0.1, 0.75 - (ageHours / 24) * 0.4); // 保持優雅的微光
+                
+                ctx.beginPath();
+                ctx.moveTo(star1.x, star1.y);
+                ctx.lineTo(star2.x, star2.y);
+                ctx.strokeStyle = `rgba(201, 168, 76, ${alpha})`; 
+                ctx.lineWidth = 1;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = `rgba(201, 168, 76, ${alpha + 0.2})`;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+        });
     }
     starsRafId = requestAnimationFrame(window.drawStars); 
 }
@@ -2264,14 +2289,20 @@ roomM.addEventListener('click', async e => {
                 const panValue = (x / window.innerWidth) * 2 - 1;
                 if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
                 
-                // ✨ 觸發星系連線魔法 (尋找最近的兩顆星)
+                // ✨ 觸發全網星系連線魔法 (尋找最近的兩顆星，並寫入資料庫)
                 let distances = starMessages
                     .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
-                    .filter(s => s.star.id !== star.id && s.d < 250); // 尋找250px內的星星
+                    .filter(s => s.star.id !== star.id && s.d < 250); 
                 distances.sort((a,b) => a.d - b.d);
                 let nearest = distances.slice(0, 2).map(d => d.star);
-                nearest.forEach(n => {
-                    window.activeConstellations.push({ s1: star, s2: n, life: 1.0 });
+                
+                nearest.forEach(async n => {
+                    // 將這條金線同步到 Firebase，讓全網看見，並設定 24 小時後消失
+                    await addDoc(collection(db, "constellations"), {
+                        s1Id: star.id,
+                        s2Id: n.id,
+                        createdAt: serverTimestamp()
+                    });
                 });
                 
                 tooltip.classList.remove('active'); 
@@ -2490,8 +2521,10 @@ window.drawSand = function() {
         p.x += drift + tiltX + windX; 
         p.y += windY;
 
+        // 如果被吹到天上去或掉到底下，讓它溫柔地從另一端重新飄回來
         if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } 
-        if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } 
+        if(p.y < -20) { p.y = h + 20; p.x = Math.random() * w; } 
+        if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; }
         
         ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; 
         ctx.lineWidth = p.size; ctx.lineCap = 'round'; 
