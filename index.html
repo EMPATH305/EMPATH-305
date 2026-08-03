@@ -218,20 +218,31 @@ nav{
 
 .room{min-height:100vh; min-height:100dvh; padding:100px 40px 80px;position:relative;overflow:hidden;}
 .room-letter{ font-family:'Cormorant Garamond',serif;font-size:clamp(80px,15vw,160px);font-weight:600;line-height:1;opacity:.07;position:absolute;top:80px;right:40px;pointer-events:none; }
-.room-tag{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;text-transform:uppercase; font-weight:bold;}
+.room-tag{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:16px;text-transform:uppercase; font-weight:bold;}
 
-.room-title-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.room-title-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
 .room-title{ font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(24px,3.5vw,36px);color:var(--white); margin-bottom:0; }
 .room-title-icon { width: 24px; height: 24px; opacity: 0.8; }
 
-.desc-wrap { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 32px; max-width: 600px; }
+.desc-wrap { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 48px; max-width: 600px; }
 .room-desc{ font-size:16px;color:var(--muted);line-height:2; flex: 1; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 4px 4px 0;}
 .tts-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--muted); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; flex-shrink: 0; margin-top: 4px; }
 .tts-btn:hover { background: rgba(255,255,255,0.1); color: var(--dawn); border-color: var(--dawn); transform: scale(1.05); }
 
-.input-area{ width:100%;max-width:600px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,.25);border-radius: 6px;color:var(--white);font-family:'Noto Serif TC',serif;font-size:16px;padding:20px;line-height:2;resize:none;outline:none;transition:all .3s; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
-.input-area:focus{border-color:rgba(255,255,255,.6); box-shadow: inset 0 2px 15px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.15); background: rgba(0,0,0,0.5);} 
-.input-area::placeholder{color:rgba(255,255,255,.3);}
+.input-area { 
+    width: 100%; max-width: 600px; 
+    background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.25); 
+    border-radius: 0; color: var(--white); font-family: 'Noto Serif TC', serif; 
+    font-size: 16px; padding: 16px 8px; line-height: 2; resize: none; outline: none; 
+    transition: all 0.4s ease; box-shadow: none; 
+}
+.input-area:focus { 
+    border-color: var(--gold); background: rgba(255,255,255,0.02); 
+    box-shadow: 0 8px 15px -8px rgba(201,168,76,0.15); 
+}
+.input-area::placeholder { 
+    color: rgba(255,255,255,0.25); letter-spacing: 1.5px; 
+}
 
 .send-btn{ display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:14px 36px;background:rgba(255,255,255,0.04);border:1px solid; border-radius:4px; font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s; color:inherit; min-width: 160px;}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
@@ -748,6 +759,28 @@ body.anniversary-mode .sand-timer-fill {
 .silence-timer {
     margin-top: 32px; font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--muted);
     letter-spacing: 4px;
+}
+  
+/* 📏 魔法八：全站 8px 網格系統對齊與極簡化覆寫 */
+
+/* 統一按鈕與區塊的 Padding 為 8 的倍數 (8, 16, 24, 32, 48) */
+.door-btn { padding: 24px; }
+.room-desc { padding: 16px 24px; }
+.send-btn, .action-btn { padding: 16px 32px; }
+.ob-btn { padding: 16px 24px; }
+.e-msg, .sand-msg { padding: 24px 32px; }
+.warmth-item { padding: 24px; }
+.j-card, .g-card { padding: 24px 16px; }
+.home-quote { padding: 48px; }
+
+/* 讓靈魂鑰匙的輸入框也跟著一起極簡化 */
+.sync-input { 
+    background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.35); 
+    color: var(--white); padding: 8px 16px; font-size: 14px; outline: none; letter-spacing: 2px; 
+    border-radius: 0; transition: border-color 0.3s; 
+}
+.sync-input:focus { 
+    border-color: var(--gold); box-shadow: 0 8px 15px -8px rgba(201,168,76,0.15); 
 }
 </style>
 </head>
