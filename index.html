@@ -1951,9 +1951,14 @@ let isAnimating = true; let starsRafId = null; let sandRafId = null; let firesto
 
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
+    
+    // 1. 監聽情緒出口
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
+    
+    // 2. 監聽星星
     firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
-    // 🌟 監聽全網的星系金線 (24小時內有效)
+    
+    // 3. 監聽星系金線
     firestoreUnsubs.push(onSnapshot(collection(db, "constellations"), (snapshot) => {
         const nowMs = Date.now();
         window.activeConstellations = [];
@@ -1961,23 +1966,31 @@ function subscribeAll() {
             const data = docSnap.data();
             const createdAtMs = data.createdAt ? data.createdAt.seconds * 1000 : nowMs;
             const ageHours = (nowMs - createdAtMs) / (1000 * 60 * 60);
-            
-            // 如果超過 24 小時，自動忽略不畫
             if (ageHours > 24) return;
-            
-            window.activeConstellations.push({
-                s1Id: data.s1Id,
-                s2Id: data.s2Id,
-                createdAt: createdAtMs
-            });
+            window.activeConstellations.push({ s1Id: data.s1Id, s2Id: data.s2Id, createdAt: createdAtMs });
         });
     }));
-    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; snapshot.forEach(docSnap => { const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; div.addEventListener('click', async () => { if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); }); board.appendChild(div); }); globalCounts.p = pHealedTotal; 
+
+    // 4. 監聽碎片與金繼進度
+    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { 
+        const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; 
+        snapshot.forEach(docSnap => { 
+            const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; 
+            const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); 
+            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; 
+            div.addEventListener('click', async () => { 
+                if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); 
+                if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); 
+                window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦')); 
+            }); 
+            board.appendChild(div); 
+        }); 
+        globalCounts.p = pHealedTotal; 
         if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel(); 
         updateDynamicTexts(); 
         updateCountersUI(); 
 
-        // 🌟 更新優雅的 HTML 修補進度條
+        // 🌟 驅動優雅的 HTML 修補進度條
         const ratio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
         const pct = Math.round(ratio * 100);
         const bar = document.getElementById('global-healing-bar');
@@ -1993,47 +2006,40 @@ function subscribeAll() {
             }, 2000);
         }
     }));
+
+    // 5. 監聽沙畫 (剛剛不小心被切斷的大動脈！)
+    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { 
         globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; 
         feed.innerHTML = ''; const nowMs = Date.now(); 
         snapshot.forEach(docSnap => { 
             const data = docSnap.data(); 
             const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs); 
-            const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000); // 預設 24 小時
+            const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000); 
             const expiresAt = msgTime + lifespanMs; 
             const leftSecs = (expiresAt - nowMs) / 1000; 
-            
             if(leftSecs <= 0) return; 
             const div = document.createElement('div'); div.className = 'sand-msg'; 
-            div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs; // 存入 DOM 供計時器使用
-            
-            const pct = (leftSecs / (lifespanMs / 1000)) * 100; // 動態計算百分比
+            div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs; 
+            const pct = (leftSecs / (lifespanMs / 1000)) * 100; 
             div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap notranslate"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
             feed.appendChild(div); 
         }); 
         updateCountersUI(); 
     }));
   
+    // 6. 監聽溫暖共振
     firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { 
-        globalCounts.t = snapshot.size; 
-        const feed = document.getElementById('t-feed'); 
-        if(!feed) return; 
+        globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; 
         feed.innerHTML = ''; 
         snapshot.forEach(docSnap => { 
-            const data = docSnap.data(); 
-            const id = docSnap.id; 
-            const div = document.createElement('div'); 
-            div.className = 'warmth-item'; 
+            const data = docSnap.data(); const id = docSnap.id; 
+            const div = document.createElement('div'); div.className = 'warmth-item'; 
             div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`; 
-            
             div.querySelector('.echo-btn').addEventListener('click', async function(e){ 
                 if(this.classList.contains('pulsed')) return; 
-                this.classList.add('pulsed'); 
-                localStorage.setItem('echoed_'+id, 'true'); 
+                this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true'); 
                 await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 }); 
-                window.showToast('✦ Echo Pulse Sent'); 
-                window.triggerHeartbeat(); 
-                
-                // 觸發全螢幕共振漣漪與聲音
+                window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat(); 
                 if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
                 if (typeof window.playChime === 'function') window.playChime();
             }); 
@@ -2402,60 +2408,50 @@ window.drawKintsugiVessel = function(){
     const cx = w/2;
     const cy = h/2;
 
-    // 1. 畫出具備立體感的「日式茶碗 (Chawan)」取代原本死板的橢圓
+    // 1. 畫出具備立體感的「日式茶碗 (Chawan)」
     c.beginPath();
-    // 碗口上緣
     c.moveTo(cx - 130, cy - 30);
     c.bezierCurveTo(cx - 60, cy - 50, cx + 60, cy - 50, cx + 130, cy - 30);
-    // 碗口下緣 (製造碗內的深度立體感)
     c.bezierCurveTo(cx + 70, cy - 10, cx - 70, cy - 10, cx - 130, cy - 30);
-    // 碗身右側曲線往下
     c.bezierCurveTo(cx + 130, cy + 60, cx + 80, cy + 100, cx + 45, cy + 110);
-    // 平坦的碗底
     c.lineTo(cx - 45, cy + 110);
-    // 碗身左側曲線往上
     c.bezierCurveTo(cx - 80, cy + 100, cx - 130, cy + 60, cx - 130, cy - 30);
     
-    // 填上深邃的黑灰色，並畫上金色細邊
     c.fillStyle = 'rgba(8, 12, 18, 0.7)';
     c.fill();
     c.strokeStyle = 'rgba(201,168,76,0.3)';
     c.lineWidth = 1;
     c.stroke();
 
-    // 2. 建立「大師級手工裂縫基因庫」：這些座標會畫出銳利、有力量的真實碎裂感
+    // 2. 建立「大師級手工裂縫基因庫」
     const crackTemplates = [
-        [{x:-130,y:-30}, {x:-90,y:10}, {x:-75,y:40}, {x:-30,y:60}], // 左側切入
-        [{x:130,y:-30}, {x:100,y:0}, {x:80,y:50}, {x:20,y:80}],     // 右側切入
-        [{x:-45,y:110}, {x:-20,y:70}, {x:15,y:50}, {x:40,y:10}],    // 底部往上
-        [{x:45,y:110}, {x:25,y:75}, {x:-10,y:45}, {x:-35,y:25}],    // 底部往左上
-        [{x:-80,y:-38}, {x:-50,y:-10}, {x:-20,y:20}, {x:10,y:40}],  // 碗口中間偏左
-        [{x:80,y:-38}, {x:45,y:-5}, {x:10,y:15}, {x:-15,y:50}],     // 碗口中間偏右
-        [{x:-110,y:15}, {x:-80,y:40}, {x:-40,y:70}, {x:0,y:95}],    // 左下腹部
-        [{x:110,y:15}, {x:70,y:35}, {x:35,y:65}, {x:10,y:100}]      // 右下腹部
+        [{x:-130,y:-30}, {x:-90,y:10}, {x:-75,y:40}, {x:-30,y:60}], 
+        [{x:130,y:-30}, {x:100,y:0}, {x:80,y:50}, {x:20,y:80}],     
+        [{x:-45,y:110}, {x:-20,y:70}, {x:15,y:50}, {x:40,y:10}],    
+        [{x:45,y:110}, {x:25,y:75}, {x:-10,y:45}, {x:-35,y:25}],    
+        [{x:-80,y:-38}, {x:-50,y:-10}, {x:-20,y:20}, {x:10,y:40}],  
+        [{x:80,y:-38}, {x:45,y:-5}, {x:10,y:15}, {x:-15,y:50}],     
+        [{x:-110,y:15}, {x:-80,y:40}, {x:-40,y:70}, {x:0,y:95}],    
+        [{x:110,y:15}, {x:70,y:35}, {x:35,y:65}, {x:10,y:100}]      
     ];
 
     // 3. 繪製裂縫的引擎
     const drawCrack = (index, isHealed) => {
-        // 依序取出美麗的裂縫範本，如果碎片超過 8 個，加上微小偏移量產生新裂痕
         const template = crackTemplates[index % crackTemplates.length];
         const offset = Math.floor(index / crackTemplates.length) * 8; 
 
         c.beginPath();
         template.forEach((pt, k) => {
-            // 加入正負交替的偏移，讓疊加的裂痕不會完全重合
             const px = cx + pt.x + (k % 2 === 0 ? offset : -offset);
             const py = cy + pt.y + (k % 2 === 0 ? -offset : offset);
             if (k === 0) c.moveTo(px, py);
             else c.lineTo(px, py);
         });
 
-        // 設定「銳利折角」，這是碎玻璃質感的靈魂
         c.lineJoin = 'miter'; 
         c.miterLimit = 2;
 
         if (isHealed) {
-            // 金繼亮起：使用漸層金與光暈
             const gradient = c.createLinearGradient(cx - 50, cy - 50, cx + 50, cy + 50);
             gradient.addColorStop(0, '#D4AF37');
             gradient.addColorStop(0.5, '#FFF8DC');
@@ -2465,14 +2461,13 @@ window.drawKintsugiVessel = function(){
             c.shadowBlur = 12;
             c.shadowColor = 'rgba(252, 246, 186, 0.6)';
         } else {
-            // 未修補：隱約可見的灰白暗痕
             c.strokeStyle = 'rgba(255, 255, 255, 0.12)';
             c.lineWidth = 1;
             c.shadowBlur = 0;
         }
         
         c.stroke();
-        c.shadowBlur = 0; // 重置光暈以免影響其他畫布
+        c.shadowBlur = 0; 
     };
 
     // 先畫出所有碎片的「暗痕」
@@ -2485,6 +2480,7 @@ window.drawKintsugiVessel = function(){
     for(let i = 0; i < goldLines; i++) {
         drawCrack(i, true);
     }
+}
   
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
