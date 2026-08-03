@@ -2045,29 +2045,7 @@ window.drawStars = function(){
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
 
-    // 🌟 空間扭曲力場：全自動避開所有 UI 元件 (效能優化版，每秒更新一次邊界不耗電)
-    const now = Date.now();
-    if (!window.starAvoidZones || now - (window.lastZoneCalc || 0) > 1000) {
-        window.lastZoneCalc = now;
-        window.starAvoidZones = [];
-        const roomRect = roomM.getBoundingClientRect();
-        
-        // 將標題、說明框、輸入框、數據統計 全部納入「星星禁區」
-        const avoidElements = ['.room-title-wrap', '.desc-wrap', '.m-input-wrap', '.m-stats'];
-        avoidElements.forEach(sel => {
-            const el = roomM.querySelector(sel);
-            if(el) {
-                const rect = el.getBoundingClientRect();
-                window.starAvoidZones.push({
-                    top: rect.top - roomRect.top - 25,     // 往外多抓 25px 安全距離
-                    bottom: rect.bottom - roomRect.top + 25,
-                    left: rect.left - roomRect.left - 25,
-                    right: rect.right - roomRect.left + 25
-                });
-            }
-        });
-    }
-
+    // 1. 畫背景星星（維持滿版全螢幕，製造深邃感）
     bgStars.forEach(s => { 
         s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
         ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
@@ -2076,34 +2054,40 @@ window.drawStars = function(){
         ctx.fill(); ctx.shadowBlur = 0; 
     }); 
 
+    // 2. 🌟 全新改版：劃分「留言星星的絕對安全區」
+    let safeX = 0, safeY = 0, safeW = w, safeH = h;
+    
+    if (w > 768) {
+        // 【電腦版】UI在左，星星專屬區在「右半部」
+        safeX = 580;            // 避開左邊 UI 的 580px
+        safeW = w - 620;        // 右邊留一點呼吸空間
+        safeY = 120;
+        safeH = h - 200;
+    } else {
+        // 【手機版】UI在上，星星專屬區在「下半部」
+        safeX = 30;             // 左右留邊距
+        safeW = w - 60;
+        safeY = 480;            // 避開上方 UI 與輸入框的 480px
+        safeH = h - 560;        // 底部保留呼吸空間
+    }
+    
+    // 防呆：避免極端螢幕尺寸(如手機橫放)把範圍擠成負數
+    safeW = Math.max(safeW, 100);
+    safeH = Math.max(safeH, 150);
+
+    // 3. 畫留言星星（精準投影在安全區內）
     starMessages.forEach(s => { 
-        let sx = s.relX * w; 
-        let sy = s.relY * h; 
+        // 將星星原本的隨機座標，完美壓縮並限制在安全區內
+        s.x = safeX + (s.relX * safeW); 
+        s.y = safeY + (s.relY * safeH); 
 
-        // 如果星星落入任何一個禁區，就像磁鐵一樣把它推到最近的邊緣
-        window.starAvoidZones.forEach(zone => {
-            if (sx > zone.left && sx < zone.right && sy > zone.top && sy < zone.bottom) {
-                const distTop = Math.abs(sy - zone.top);
-                const distBottom = Math.abs(zone.bottom - sy);
-                const distLeft = Math.abs(sx - zone.left);
-                const distRight = Math.abs(zone.right - sx);
-                const minDist = Math.min(distTop, distBottom, distLeft, distRight);
-                
-                if (minDist === distTop) sy = zone.top;
-                else if (minDist === distBottom) sy = zone.bottom;
-                else if (minDist === distLeft) sx = zone.left;
-                else sx = zone.right;
-            }
-        });
-
-        s.x = sx; 
-        s.y = sy; 
         const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; 
         const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); 
         grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
         ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
         drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
     }); 
+    
     starsRafId = requestAnimationFrame(window.drawStars); 
 }
 
