@@ -717,6 +717,38 @@ body.anniversary-mode .sand-timer-fill {
     background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 2px, transparent 2px, transparent 4px) !important; 
 }
 
+/* 🌍 魔法六：全站情緒脈衝與集體靜默 */
+
+/* 1. 情緒脈衝的耀眼金光 */
+#global-pulse-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: radial-gradient(circle, rgba(201,168,76,0.2) 0%, transparent 80%);
+    z-index: 9999999; pointer-events: none; opacity: 0; transition: opacity 2s ease-in-out;
+    mix-blend-mode: screen; display: flex; align-items: center; justify-content: center;
+}
+.pulse-text {
+    font-family: 'Noto Serif TC', serif; color: var(--gold); font-size: 24px; letter-spacing: 4px;
+    text-shadow: 0 0 25px rgba(201,168,76,1); opacity: 0; transform: translateY(20px);
+    transition: all 2s ease; text-align: center; line-height: 2; font-weight: bold;
+}
+
+/* 2. 集體靜默的深海結界 */
+#silence-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(2, 4, 8, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    z-index: 9999999; display: flex; align-items: center; justify-content: center; flex-direction: column;
+    opacity: 0; pointer-events: none; transition: opacity 3s ease;
+}
+#silence-overlay.active { opacity: 1; pointer-events: auto; }
+.silence-text {
+    font-family: 'Noto Serif TC', serif; color: var(--dawn); font-size: 16px; letter-spacing: 5px;
+    text-shadow: 0 0 15px rgba(255,255,255,0.3); text-align: center; line-height: 2.5;
+    animation: breathe-text-anim 6s ease-in-out infinite;
+}
+.silence-timer {
+    margin-top: 32px; font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--muted);
+    letter-spacing: 4px;
+}
 </style>
 </head>
 <body>
@@ -1336,6 +1368,9 @@ function updateCountersUI() {
     localStorage.setItem('empath_global_counts', JSON.stringify(globalCounts));
     
     updateSoulWeather();
+    // 計算全站總留言數，並檢查是否觸發情緒脈衝
+    const totalMsgs = (globalCounts.e || 0) + (globalCounts.m || 0) + (globalCounts.p || 0) + (globalCounts.a || 0) + (globalCounts.t || 0);
+    if(typeof window.checkGlobalPulse === 'function') window.checkGlobalPulse(totalMsgs);
 }
 
 function updateSoulWeather() {
@@ -2421,6 +2456,48 @@ window.drawKintsugiVessel = function(){
     for(let i = 0; i < goldLines; i++) {
         drawCrack(i, true);
     }
+  
+   // 🌟 4. 全球修補率進度環 (Global Healing Rate)
+    // 計算比例：已修補 / 總碎片
+    const ratio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
+    const radius = 170; // 剛好包覆茶碗的半徑
+    const startAngle = 0.75 * Math.PI; // 從左下角開始
+    const endAngle = 2.25 * Math.PI; // 到右下角結束
+    const currentAngle = startAngle + (endAngle - startAngle) * ratio;
+
+    // 畫出底部的暗色軌道
+    c.beginPath();
+    c.arc(cx, cy - 10, radius, startAngle, endAngle);
+    c.strokeStyle = 'rgba(255,255,255,0.05)';
+    c.lineWidth = 2;
+    c.stroke();
+
+    // 畫出金色的進度條
+    if (ratio > 0) {
+        c.beginPath();
+        c.arc(cx, cy - 10, radius, startAngle, currentAngle);
+        c.strokeStyle = '#D4AF37';
+        c.lineWidth = 3;
+        c.shadowBlur = 10;
+        c.shadowColor = 'rgba(212, 175, 55, 0.6)';
+        c.stroke();
+        c.shadowBlur = 0;
+    }
+
+    // 寫上進度文字
+    c.fillStyle = 'rgba(169, 185, 199, 0.8)';
+    c.font = '12px "Noto Sans TC"';
+    c.textAlign = 'center';
+    c.letterSpacing = '3px';
+    c.fillText(`GLOBAL HEALING: ${Math.round(ratio * 100)}%`, cx, cy + 175);
+
+    // ✨ 史詩時刻：首次突破 50% 的慶祝
+    if (ratio >= 0.5 && !localStorage.getItem('empath_p_50_reached')) {
+        localStorage.setItem('empath_p_50_reached', 'true');
+        setTimeout(() => {
+            window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
+        }, 2000);
+    }
 }
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
@@ -2692,7 +2769,68 @@ window.initTimeAndCosmic = function() {
   document.addEventListener('DOMContentLoaded', async () => {
   // 啟動時間與宇宙感知
   window.initTimeAndCosmic();
+
+  // ==========================================
+  // 🌍 魔法六：全站情緒脈衝與集體靜默引擎
+  // ==========================================
   
+  // 動態生成 HTML 結構
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="global-pulse-overlay"><div class="pulse-text" id="pulse-text"></div></div>
+    <div id="silence-overlay">
+        <div class="silence-text" id="silence-text">此刻，世界某處的靈魂，正與你一起安靜。</div>
+        <div class="silence-timer" id="silence-timer">60</div>
+    </div>
+  `);
+
+  // 1. 全站情緒脈衝觸發器
+  window.checkGlobalPulse = function(totalMsgs) {
+      const currentThousand = Math.floor(totalMsgs / 1000) * 1000;
+      const lastPulse = parseInt(localStorage.getItem('empath_last_pulse') || '0');
+      
+      // 當跨越一個新的 1000 門檻時觸發 (例如從 999 變成 1000)
+      if (currentThousand > 0 && currentThousand > lastPulse) {
+          localStorage.setItem('empath_last_pulse', currentThousand);
+          
+          const overlay = document.getElementById('global-pulse-overlay');
+          const textEl = document.getElementById('pulse-text');
+          textEl.innerHTML = `✦<br>${t(`全世界第 ${currentThousand} 則傾訴，已被接住`, `The world's ${currentThousand}th message has been caught`, `世界で ${currentThousand} 番目の想いが受け止められました`, `El mensaje ${currentThousand} del mundo ha sido atrapado`, `Le ${currentThousand}ème message a été attrapé`, `Die ${currentThousand}. Nachricht wurde aufgefangen`, `全世界第 ${currentThousand} 则倾诉，已被接住`)}`;
+          
+          overlay.style.opacity = '1';
+          setTimeout(() => { textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)'; }, 500);
+          if(typeof window.playChime === 'function') window.playChime();
+          
+          setTimeout(() => {
+              textEl.style.opacity = '0';
+              textEl.style.transform = 'translateY(20px)';
+              overlay.style.opacity = '0';
+          }, 6000);
+      }
+  };
+
+  // 2. 集體靜默時刻系統 (每天 UTC 00:00 觸發 60 秒)
+  let silenceInterval = setInterval(() => {
+      const now = new Date();
+      // 判斷是否為 UTC 00:00 (台灣時間早上 8:00) 的前 60 秒內
+      const isSilenceMoment = (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && now.getUTCSeconds() < 60);
+      
+      // 開放一個手動測試開關 window.isTestingSilence
+      if (isSilenceMoment || window.isTestingSilence) {
+          if (!document.getElementById('silence-overlay').classList.contains('active')) {
+              document.getElementById('silence-overlay').classList.add('active');
+              if (typeof audioCtx !== 'undefined' && isAudioEnabled) audioCtx.suspend(); // 暫停所有音樂
+          }
+          // 倒數計時器
+          const left = 60 - now.getUTCSeconds();
+          document.getElementById('silence-timer').innerText = left > 0 ? left : '0';
+      } else {
+          if (document.getElementById('silence-overlay').classList.contains('active')) {
+              document.getElementById('silence-overlay').classList.remove('active');
+              if (typeof audioCtx !== 'undefined' && isAudioEnabled) audioCtx.resume(); // 恢復音樂
+          }
+      }
+  }, 1000);
+    
   // 🌟 瞬間視覺魔法：在 Firebase 還沒連上之前，先用快取數據填滿畫面！
   const cached = localStorage.getItem('empath_global_counts');
   if (cached) {
