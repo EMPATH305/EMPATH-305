@@ -2862,13 +2862,6 @@ window.submitA = async function(){
         window.showToast('放入沙畫 ✦'); 
     } catch(err) { console.error('Submit A error:', err); window.showToast(t('傳送失敗，請稍後再試 ✦', 'Failed to send, please try again ✦', '送信に失敗しました ✦', 'Error al enviar ✦', 'Échec de l\'envoi ✦', 'Senden fehlgeschlagen ✦', '传送失败，请稍后再试 ✦')); }
 }
-    
-    // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
-    localStorage.setItem('empath_a_submit_time', Date.now());
-
-    window.fadeOutAndClear('a-input', 'a-char'); logJourney('a', text); playRitual('a-submit-btn', origText); 
-    window.showToast('放入沙畫 ✦'); 
-}
 
 window.submitT = async function(){ 
     if(!canSubmit()) return; const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); 
@@ -2879,14 +2872,6 @@ window.submitT = async function(){
         window.fadeOutAndClear('t-input', 't-char'); logJourney('t', text); playRitual('t-submit-btn', origText); 
         window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
     } catch(err) { console.error('Submit T error:', err); window.showToast(t('傳送失敗，請稍後再試 ✦', 'Failed to send, please try again ✦', '送信に失敗しました ✦', 'Error al enviar ✦', 'Échec de l\'envoi ✦', 'Senden fehlgeschlagen ✦', '传送失败，请稍后再试 ✦')); }
-}
-    
-    // 🌟 取得這則溫暖的專屬 ID，用來監聽它未來的命運
-    const docRef = await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); 
-    localStorage.setItem('empath_my_warmth_id', docRef.id);
-    localStorage.setItem('empath_my_warmth_echos', '0');
-
-    window.fadeOutAndClear('t-input', 't-char'); logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
 }
   
 window.createEchoRipple = function(e) {
