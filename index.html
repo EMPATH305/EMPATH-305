@@ -36,6 +36,7 @@
   "description": "數位時代的情緒安放平台。承認、安放、修補、釋放、交換、回家。以文學敘事對抗視覺霸權的設計實踐。",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "Web",
+  "datePublished": "2026-08-03",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -45,8 +46,7 @@
 </script>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕯️</text></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕯️</text></svg>">
-
+<link rel="apple-touch-icon" href="og-image.png">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -762,6 +762,21 @@ body.anniversary-mode .sand-timer-fill {
 }
   
 /* 📏 魔法八：全站 8px 網格系統對齊與極簡化覆寫 */
+  
+/* 強制覆寫手機版舊有的方塊輸入框，保持底線極簡美學 */
+@media(max-width: 768px) {
+    .input-area, .sync-input { 
+        background: transparent !important; 
+        border: none !important; 
+        border-bottom: 1px solid rgba(255,255,255,0.35) !important; 
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    .input-area:focus, .sync-input:focus {
+        border-bottom-color: var(--gold) !important;
+        background: rgba(255,255,255,0.02) !important;
+    }
+}
 
 /* 統一按鈕與區塊的 Padding 為 8 的倍數 (8, 16, 24, 32, 48) */
 .door-btn { padding: 24px; }
@@ -2207,8 +2222,8 @@ window.submitE = async function(){
         window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
     } catch(e) { 
         console.error("Firestore 寫入失敗：", e); 
-        alert("寫入失敗！如果是 Permission Denied，請檢查 Firebase 的 Security Rules 是否阻擋了 image 欄位。");
-    } 
+        window.showToast(t('傳送失敗，請稍後再試 ✦', 'Failed to send, please try again ✦', '送信に失敗しました。後でもう一度お試しください ✦', 'Error al enviar, inténtalo de nuevo ✦', 'Échec de l\'envoi, veuillez réessayer ✦', 'Senden fehlgeschlagen, bitte versuche es erneut ✦', '传送失败，请稍后再试 ✦'));
+    }
 }
 
 window.renderEFeed = function() { 
