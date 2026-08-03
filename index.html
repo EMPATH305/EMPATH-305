@@ -651,6 +651,13 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
   .hero-title { font-size: 17vw; letter-spacing: 6px; } .doors-nav { gap: 10px; } .door-btn { padding: 16px 10px; min-width: 80px; }
   .door-btn .dl{ font-size: 28px; } .door-btn .dz{ font-size: 12px; } .step-wrapper { margin-bottom: 56px; }
 }
+/* 手機版 Room M 專屬星空與排版優化 */
+@media(max-width: 768px) {
+    #room-m { padding-bottom: 420px !important; } /* 強制在底下開拓 420px 的深邃星空 */
+    .m-stats { gap: 12px !important; justify-content: space-between; width: 100%; margin-top: 20px; } /* 縮小間距，確保文字在同一行 */
+    .m-stat { font-size: 11px; letter-spacing: 1px; }
+    .m-stat span { font-size: 16px; }
+}
 </style>
 </head>
 <body>
@@ -2043,24 +2050,9 @@ window.drawStars = function(){
     if(!canvas.width || !isAnimating) return; 
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight; 
-
-    // 🌟 空間魔術：如果是手機版，自動把房間「底部往下無限延伸 350px」
-    // 給星星一個絕對寬廣、專屬的夜空，再也不會擠在一起！
-    if (w <= 768 && !roomM.dataset.starSpace) {
-        roomM.style.paddingBottom = '350px';
-        roomM.dataset.starSpace = 'true';
-        if(typeof window.resizeCanvas === 'function') window.resizeCanvas(); // 畫布自動變大
-        return; // 等下一幀畫布變大了再畫
-    } else if (w > 768 && roomM.dataset.starSpace) {
-        roomM.style.paddingBottom = '';
-        roomM.dataset.starSpace = '';
-        if(typeof window.resizeCanvas === 'function') window.resizeCanvas();
-        return;
-    }
-
     ctx.clearRect(0,0,w,h); 
 
-    // 1. 畫背景星星（維持滿版全螢幕，製造深邃感）
+    // 1. 畫背景星星（維持滿版，製造深邃感）
     bgStars.forEach(s => { 
         s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
         ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
@@ -2069,7 +2061,7 @@ window.drawStars = function(){
         ctx.fill(); ctx.shadowBlur = 0; 
     }); 
 
-    // 2. 動態計算「絕對安全區」
+    // 2. 抓取絕對安全區
     let safeX = 0, safeY = 0, safeW = w, safeH = h;
     
     if (w > 768) {
@@ -2079,29 +2071,24 @@ window.drawStars = function(){
         safeY = 120;
         safeH = h - 200;
     } else {
-        // 【手機版】動態抓取 UI 的「真實絕對高度」
-        const contentEl = roomM.querySelector('.room-content');
-        let uiBottom = 480; // 備用預設值
-        if (contentEl) {
-            const cRect = contentEl.getBoundingClientRect();
+        // 【手機版】依靠剛才 CSS 開拓的 420px 專屬空地
+        const statsEl = roomM.querySelector('.m-stats');
+        let uiBottom = 500; 
+        if (statsEl) {
             const rRect = roomM.getBoundingClientRect();
-            uiBottom = cRect.bottom - rRect.top; // 精準抓到統計數字的最底端
+            uiBottom = statsEl.getBoundingClientRect().bottom - rRect.top;
         }
         
         safeX = 20;             
         safeW = w - 40;
-        // 🌟 星星從 UI 最底端往下推 40px 開始畫，絕對不可能擋到按鈕跟文字！
-        safeY = uiBottom + 40;            
-        // 因為我們剛剛拉長了 350px，這裡的高度絕對夠用，不會再有星星不見了
-        safeH = h - safeY - 20;        
-        
-        // 防呆保護
-        safeH = Math.max(safeH, 200);
+        safeY = uiBottom + 30;  // 從統計數字往下 30px 開始畫，絕對不重疊！
+        safeH = h - safeY - 20; // 剩下的高度全給留言星星
+        safeH = Math.max(safeH, 250); // 防呆，至少保留 250px
     }
     
     safeW = Math.max(safeW, 100);
 
-    // 3. 畫留言星星（完美投影在安全區內）
+    // 3. 畫留言星星
     starMessages.forEach(s => { 
         s.x = safeX + (s.relX * safeW); 
         s.y = safeY + (s.relY * safeH); 
