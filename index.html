@@ -2122,7 +2122,7 @@ function subscribeAll() {
         }
     }));
 
-    // 5. 監聽沙畫 (剛剛不小心被切斷的大動脈！)
+    // 5. 監聽沙畫 (修復大動脈！)
     firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { 
         globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; 
         feed.innerHTML = ''; const nowMs = Date.now(); 
