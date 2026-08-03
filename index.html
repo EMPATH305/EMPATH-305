@@ -1899,7 +1899,7 @@ function subscribeAll() {
             div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs; // 存入 DOM 供計時器使用
             
             const pct = (leftSecs / (lifespanMs / 1000)) * 100; // 動態計算百分比
-            div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`; 
+            div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap notranslate"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
             feed.appendChild(div); 
         }); 
         updateCountersUI(); 
