@@ -2222,39 +2222,38 @@ window.drawStars = function(){
         if(s1.y > safeY + safeH) s1.y -= (s1.y - (safeY + safeH)) * 0.2;
     }
 
-    // 4. 畫出留言星星
+    // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後，才不會被光暈吃掉)
+    if (window.activeConstellations && window.activeConstellations.length > 0) {
+        const nowMs = Date.now();
+        window.activeConstellations.forEach(c => {
+            const star1 = starMessages.find(s => s.id === c.s1Id);
+            const star2 = starMessages.find(s => s.id === c.s2Id);
+            
+            if (star1 && star2 && star1.x !== undefined && star2.x !== undefined) {
+                const ageHours = (nowMs - c.createdAt) / (1000 * 60 * 60);
+                const alpha = Math.max(0.1, 0.85 - (ageHours / 24) * 0.5); // 提高初始亮度到 0.85
+                
+                ctx.beginPath();
+                ctx.moveTo(star1.x, star1.y);
+                ctx.lineTo(star2.x, star2.y);
+                ctx.strokeStyle = `rgba(201, 168, 76, ${alpha})`; 
+                ctx.lineWidth = 1.5; // 線條稍微加粗一點點
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = `rgba(201, 168, 76, ${alpha})`;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+        });
+    }
+
+    // 5. 再畫出留言星星本體
     starMessages.forEach(s => { 
         const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; 
         const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); 
         grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
         ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
         drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
-    }); 
-
-   // 5. 畫出全網 24 小時共振星系連線 (Constellations)
-    if (window.activeConstellations && window.activeConstellations.length > 0) {
-        const nowMs = Date.now();
-        window.activeConstellations.forEach(c => {
-            // 從星空陣列中找出這兩顆星當前的即時座標
-            const star1 = starMessages.find(s => s.id === c.s1Id);
-            const star2 = starMessages.find(s => s.id === c.s2Id);
-            
-            if (star1 && star2 && star1.x && star2.x) {
-                // 計算 24 小時內的透明度漸層 (越接近 24 小時會微微變淡，或整整 24 小時後消失)
-                const ageHours = (nowMs - c.createdAt) / (1000 * 60 * 60);
-                const alpha = Math.max(0.1, 0.75 - (ageHours / 24) * 0.4); // 保持優雅的微光
-                
-                ctx.beginPath();
-                ctx.moveTo(star1.x, star1.y);
-                ctx.lineTo(star2.x, star2.y);
-                ctx.strokeStyle = `rgba(201, 168, 76, ${alpha})`; 
-                ctx.lineWidth = 1;
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = `rgba(201, 168, 76, ${alpha + 0.2})`;
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-            }
-        });
+    });
     }
     starsRafId = requestAnimationFrame(window.drawStars); 
 }
@@ -2289,10 +2288,10 @@ roomM.addEventListener('click', async e => {
                 const panValue = (x / window.innerWidth) * 2 - 1;
                 if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
                 
-                // ✨ 觸發全網星系連線魔法 (尋找最近的兩顆星，並寫入資料庫)
+                // ✨ 觸發全網星系連線魔法 (強制牽起最近的兩顆星，無視距離)
                 let distances = starMessages
                     .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
-                    .filter(s => s.star.id !== star.id && s.d < 250); 
+                    .filter(s => s.star.id !== star.id);
                 distances.sort((a,b) => a.d - b.d);
                 let nearest = distances.slice(0, 2).map(d => d.star);
                 
