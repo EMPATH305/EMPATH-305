@@ -2052,7 +2052,7 @@ window.drawStars = function(){
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
 
-    // 1. 畫背景星星（維持滿版，製造深邃感）
+    // 1. 畫背景星星（維持滿版深邃感）
     bgStars.forEach(s => { 
         s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
         ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
@@ -2065,34 +2065,76 @@ window.drawStars = function(){
     let safeX = 0, safeY = 0, safeW = w, safeH = h;
     
     if (w > 768) {
-        // 【電腦版】UI在左，星星專屬區在「右半部」
         safeX = 580;            
         safeW = w - 620;        
         safeY = 120;
         safeH = h - 200;
     } else {
-        // 【手機版】依靠剛才 CSS 開拓的 420px 專屬空地
         const statsEl = roomM.querySelector('.m-stats');
         let uiBottom = 500; 
         if (statsEl) {
             const rRect = roomM.getBoundingClientRect();
             uiBottom = statsEl.getBoundingClientRect().bottom - rRect.top;
         }
-        
         safeX = 20;             
         safeW = w - 40;
-        safeY = uiBottom + 30;  // 從統計數字往下 30px 開始畫，絕對不重疊！
-        safeH = h - safeY - 20; // 剩下的高度全給留言星星
-        safeH = Math.max(safeH, 250); // 防呆，至少保留 250px
+        safeY = uiBottom + 30;  
+        safeH = h - safeY - 20; 
+        safeH = Math.max(safeH, 250); 
     }
     
     safeW = Math.max(safeW, 100);
 
-    // 3. 畫留言星星
-    starMessages.forEach(s => { 
-        s.x = safeX + (s.relX * safeW); 
-        s.y = safeY + (s.relY * safeH); 
+    // 🌟 3. 物理引擎：細胞排斥力場 (讓星星自動保持安全距離)
+    const MIN_DIST = w > 768 ? 55 : 45; // 星星間的最小安全距離 (電腦55px，手機45px)
 
+    // 3.1 計算目標點，產生像彈簧一樣的拉力
+    starMessages.forEach(s => { 
+        let targetX = safeX + (s.relX * safeW); 
+        let targetY = safeY + (s.relY * safeH); 
+        
+        // 如果是剛載入的星星，直接就位；否則慢慢滑動過去
+        if (s.x === undefined || isNaN(s.x)) {
+            s.x = targetX; s.y = targetY;
+        } else {
+            s.x += (targetX - s.x) * 0.05; 
+            s.y += (targetY - s.y) * 0.05;
+        }
+    });
+
+    // 3.2 執行排斥力 (只要靠太近，就互相推開)
+    for(let i=0; i<starMessages.length; i++) {
+        for(let j=i+1; j<starMessages.length; j++) {
+            let s1 = starMessages[i];
+            let s2 = starMessages[j];
+            let dx = s2.x - s1.x;
+            let dy = s2.y - s1.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            
+            // 避免完全重疊導致數學計算為 0 (除以 0 會當機)
+            if (dist === 0) { dx = 1; dy = 1; dist = 1.414; }
+            
+            // 如果距離小於安全距離，溫柔地把它們往反方向推開
+            if (dist < MIN_DIST) {
+                let push = (MIN_DIST - dist) * 0.3; // 0.3 是推力強度，讓它看起來很柔和
+                let nx = dx / dist;
+                let ny = dy / dist;
+                s1.x -= nx * push;
+                s1.y -= ny * push;
+                s2.x += nx * push;
+                s2.y += ny * push;
+            }
+        }
+        // 3.3 確保推開後不會掉出邊界外
+        let s1 = starMessages[i];
+        if(s1.x < safeX) s1.x = safeX;
+        if(s1.x > safeX + safeW) s1.x = safeX + safeW;
+        if(s1.y < safeY) s1.y = safeY;
+        if(s1.y > safeY + safeH) s1.y = safeY + safeH;
+    }
+
+    // 4. 畫出留言星星
+    starMessages.forEach(s => { 
         const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; 
         const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); 
         grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
