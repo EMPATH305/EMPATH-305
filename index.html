@@ -1317,6 +1317,14 @@ body.anniversary-mode .sand-timer-fill {
       </div>
     </div>
 
+    <!-- 時空信箱 UI -->
+      <div id="future-letter-box" style="display:none; margin-top:32px; border-top:1px dashed rgba(255,255,255,0.2); padding-top:24px;">
+          <p style="font-family:'Noto Serif TC',serif; font-size:14px; color:var(--gold); margin-bottom:12px; font-weight:bold;">✉️ 給未來的自己</p>
+          <textarea id="future-letter-input" class="sync-input" style="width:100%; height:80px; resize:none; margin-bottom:12px;" placeholder="寫下現在的感受，留給三個月後的自己..."></textarea>
+          <button class="sync-btn-small" onclick="window.submitFutureLetter()" style="border-color:var(--h); color:var(--h);">封存信件 →</button>
+          <div id="unlocked-letters" style="margin-top:24px;"></div>
+      </div>
+
     <div class="home-quote">
       <p data-zh="我們雖然孤獨地存在，但我們可以溫暖地交會。" data-en="Though we exist in solitude, we can warmly intersect." data-ja="私たちは孤独に存在していますが、温かく交わることができます。" data-es="Aunque existimos en soledad, podemos cruzarnos cálidamente." data-fr="Bien que nous existions dans la solitude, nous pouvons nous croiser chaleureusement." data-de="Obwohl wir in Einsamkeit existieren, können wir uns warm überschneiden." data-zh-cn="我们虽然孤独地存在，但我们可以温暖地交会。">我們雖然孤獨地存在，但我們可以溫暖地交會。</p>
     </div>
@@ -2124,8 +2132,9 @@ window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().t
 window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
 window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) {} }
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
-async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }); } catch(err){} }
-function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex'; document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
+async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }, { merge: true }); } catch(err){} }
+function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex';
+const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
 
 let allEmotions = []; let eFeedExpanded = false;
 
@@ -2648,11 +2657,30 @@ window.submitA = async function(){
     const lifespan = minutes * 60 * 1000;
     const origText = document.getElementById('a-submit-btn').innerHTML; 
     await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), lifespan: lifespan, createdAt: serverTimestamp() }); 
+    
+    // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
+    localStorage.setItem('empath_a_submit_time', Date.now());
+
     input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
     window.showToast('放入沙畫 ✦'); 
 }
 
-window.submitT = async function(){ if(!canSubmit()) return; const input = document.getElementById('t-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('t-submit-btn').innerHTML; await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); }
+window.submitT = async function(){ 
+    if(!canSubmit()) return; 
+    const input = document.getElementById('t-input'); 
+    let text = input.value.trim(); 
+    if(!text) return; 
+    text = cleanText(text); 
+    const origText = document.getElementById('t-submit-btn').innerHTML; 
+    
+    // 🌟 取得這則溫暖的專屬 ID，用來監聽它未來的命運
+    const docRef = await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); 
+    localStorage.setItem('empath_my_warmth_id', docRef.id);
+    localStorage.setItem('empath_my_warmth_echos', '0');
+
+    input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
+}
+  
 window.createEchoRipple = function(e) {
     let rippleContainer = document.getElementById('ripple-overlay');
     if (!rippleContainer) {
@@ -2780,9 +2808,112 @@ window.initTimeAndCosmic = function() {
         }, 3000);
     }
 };
+
+  // ==========================================
+// 🌌 魔法七：情感閉環引擎 (時空信箱、溫暖回聲、延遲沙畫)
+// ==========================================
+
+// 1. Room H：給未來的自己
+window.submitFutureLetter = async function() {
+    const key = localStorage.getItem('empath_soul_key');
+    const text = document.getElementById('future-letter-input').value.trim();
+    if(!key || !text) return;
+    const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); // 預設 90 天後解鎖
+    try {
+        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+        const docRef = doc(db, "user_journeys", key);
+        const docSnap = await getDoc(docRef);
+        let letters = [];
+        if(docSnap.exists() && docSnap.data().letters) letters = docSnap.data().letters;
+        letters.push({ content: text, unlockDate: unlockDate, createdAt: Date.now() });
+        await updateDoc(docRef, { letters: letters });
+        document.getElementById('future-letter-input').value = '';
+        window.showToast('✉️ 信件已封存。三個月後，帶著鑰匙回來這裡。', 4000);
+    } catch(e) { console.error(e); }
+};
+
+window.checkFutureLetters = async function() {
+    const key = localStorage.getItem('empath_soul_key');
+    if(!key) return;
+    try {
+        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+        const docSnap = await getDoc(doc(db, "user_journeys", key));
+        if(docSnap.exists() && docSnap.data().letters) {
+            const letters = docSnap.data().letters;
+            const container = document.getElementById('unlocked-letters');
+            container.innerHTML = '';
+            const now = Date.now();
+            letters.forEach(l => {
+                // 如果時間到了，或開啟了穿越密技
+                if(now >= l.unlockDate || window.isTestingLetter) {
+                    container.innerHTML += `<div style="padding:20px; background:rgba(255,255,255,0.03); border-left:2px solid var(--gold); border-radius:0 4px 4px 0; margin-bottom:16px; font-size:15px; color:var(--fog); line-height:2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <span style="font-size:11px; color:var(--gold); display:block; margin-bottom:12px; letter-spacing:3px; font-weight:bold;">✉️ 來自 ${new Date(l.createdAt).toLocaleDateString()} 的信</span>
+                        ${l.content}
+                    </div>`;
+                }
+            });
+        }
+    } catch(e) {}
+};
+
+// 2. Room A：24小時宇宙回聲
+window.checkRoomAEcho = async function() {
+    const aSubmitTime = localStorage.getItem('empath_a_submit_time');
+    // 如果距離上次投遞超過 24 小時，或開啟了穿越密技
+    if (aSubmitTime && (Date.now() - parseInt(aSubmitTime) > 24 * 60 * 60 * 1000 || window.isTestingEcho)) {
+        try {
+            const { getDocs, query, limit } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+            const q = query(collection(db, "sand"), limit(10));
+            const querySnapshot = await getDocs(q);
+            const msgs = [];
+            querySnapshot.forEach((doc) => msgs.push(doc.data().text));
+            if(msgs.length > 0) {
+                const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+                setTimeout(() => {
+                    window.showToast(`✦ 來自宇宙的回聲 ✦\n「${randomMsg.slice(0, 30)}...」\n有人與你同時在這裡，留下了這句話。`, 8000);
+                }, 4000);
+                localStorage.removeItem('empath_a_submit_time'); // 聽過一次就清掉
+            }
+        } catch(e) {}
+    }
+};
+
+// 3. Room T：溫暖抵達了
+window.checkRoomTWarmth = function() {
+    const myWarmthId = localStorage.getItem('empath_my_warmth_id');
+    if(myWarmthId) {
+        onSnapshot(doc(db, "warmth", myWarmthId), (docSnap) => {
+            if(docSnap.exists()){
+                const echos = docSnap.data().echos || 0;
+                const lastEchos = parseInt(localStorage.getItem('empath_my_warmth_echos') || '0');
+                if(echos > lastEchos) {
+                    localStorage.setItem('empath_my_warmth_echos', echos);
+                    // 讓 Room T 門口微微發光
+                    const tDoor = document.querySelector('.door-btn[data-d="T"]');
+                    if(tDoor) { tDoor.style.boxShadow = '0 0 25px rgba(232,168,124,0.6)'; tDoor.style.borderColor = 'var(--amber)'; }
+                    
+                    // 在面板內顯示靜靜的通知
+                    let msgBox = document.getElementById('my-warmth-echo-msg');
+                    if(!msgBox) {
+                        msgBox = document.createElement('div');
+                        msgBox.id = 'my-warmth-echo-msg';
+                        msgBox.style.cssText = 'color:var(--amber); font-size:13px; margin-top:24px; text-align:center; font-weight:bold; letter-spacing:1px; border-top:1px dashed rgba(232,168,124,0.3); padding-top:16px; animation: pulse-spark 3s infinite;';
+                        document.querySelector('.t-send-panel').appendChild(msgBox);
+                    }
+                    msgBox.innerHTML = `✦ 宇宙回聲：你上次送出的溫暖，已被陌生人共鳴了 ${echos} 次。`;
+                }
+            }
+        });
+    }
+};
+  
   document.addEventListener('DOMContentLoaded', async () => {
   // 啟動時間與宇宙感知
   window.initTimeAndCosmic();
+
+  // 啟動情感閉環引擎
+  window.checkRoomAEcho();
+  window.checkRoomTWarmth();
 
   // ==========================================
   // 🌍 魔法六：全站情緒脈衝與集體靜默引擎
