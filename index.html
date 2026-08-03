@@ -1990,9 +1990,12 @@ function subscribeAll() {
         updateDynamicTexts(); 
         updateCountersUI(); 
 
-        // 🌟 驅動優雅的 HTML 修補進度條
-        const ratio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
-        const pct = Math.round(ratio * 100);
+        // 🌟 驅動優雅的 HTML 修補進度條 (加入歷史基準值與小數點精密運算)
+        const baseTotal = 300; // 世界歷史遺留的總破碎基準
+        const baseHealed = 142; // 世界歷史已修補的基準
+        const ratio = (pTotalShards + baseTotal) > 0 ? (pHealedTotal + baseHealed) / (pTotalShards + baseTotal) : 0;
+        const pct = (ratio * 100).toFixed(1); // 顯示到小數點第一位
+        
         const bar = document.getElementById('global-healing-bar');
         const pctText = document.getElementById('global-healing-pct');
         if (bar) bar.style.width = pct + '%';
@@ -2207,8 +2210,36 @@ window.renderEFeed = function() {
 window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
 
 const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let starMessages = [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
-window.resizeCanvas = function(){ const dpr = window.devicePixelRatio || 1; if(canvas && roomM) { const w = roomM.offsetWidth; const h = roomM.offsetHeight; canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); initBgStars(w, h); } const sCanvas = document.getElementById('sand-canvas'); const roomA = document.getElementById('room-a'); if(sCanvas && roomA) { const sw = roomA.offsetWidth; const sh = roomA.offsetHeight; sCanvas.width = sw * dpr; sCanvas.height = sh * dpr; sCanvas.style.width = sw + 'px'; sCanvas.style.height = sh + 'px'; sCanvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); initSandBg(sw, sh); } }
-window.addEventListener('resize', window.resizeCanvas);
+window.resizeCanvas = function(){ 
+    const dpr = window.devicePixelRatio || 1; 
+    
+    if(canvas && roomM) { 
+        const w = roomM.scrollWidth; 
+        const h = roomM.scrollHeight; // 改用 scrollHeight，確保抓到完整滾動深度
+        canvas.width = w * dpr; 
+        canvas.height = h * dpr; 
+        canvas.style.width = w + 'px'; 
+        canvas.style.height = h + 'px'; 
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); 
+        initBgStars(w, h); 
+    } 
+    
+    const sCanvas = document.getElementById('sand-canvas'); 
+    const roomA = document.getElementById('room-a'); 
+    if(sCanvas && roomA) { 
+        const sw = roomA.scrollWidth; 
+        const sh = roomA.scrollHeight; 
+        sCanvas.width = sw * dpr; 
+        sCanvas.height = sh * dpr; 
+        sCanvas.style.width = sw + 'px'; 
+        sCanvas.style.height = sh + 'px'; 
+        sCanvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); 
+        initSandBg(sw, sh); 
+    } 
+}
+// 加入 300 毫秒延遲，完美解決手機旋轉時瀏覽器排版還沒跟上的 Bug
+window.addEventListener('resize', () => setTimeout(window.resizeCanvas, 300));
+window.addEventListener('orientationchange', () => setTimeout(window.resizeCanvas, 300));
 function initBgStars(w, h){ 
     bgStars=[]; 
     // 動態計算：電腦給 100 顆，手機寬度小於 768px 時只給 35 顆
