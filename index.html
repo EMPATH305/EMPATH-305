@@ -1100,6 +1100,8 @@ html { top: 0px !important; position: static !important; }
         <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" style="margin-top:0;" data-zh="放入沙畫 →">放入沙畫 →</button>
       <!-- 物理陀螺儀感測開關 (因 Apple 隱私政策，必須由使用者點擊同意才能取得傾斜數據) -->
 <button class="send-btn" id="gravity-btn" onclick="window.enableGravity()" style="border-color:var(--a); color:var(--a); margin-top:12px; width:100%;" data-zh="開啟物理重力感測 📳">開啟物理重力感測 📳</button>
+      <!-- 物理吹息感測開關 -->
+      <button class="send-btn" id="blow-btn" onclick="window.enableBlow()" style="border-color:var(--a); color:var(--a); margin-top:12px; width:100%;" data-zh="開啟麥克風吹息 🌬️" data-en="Enable Breath Sensor 🌬️">開啟麥克風吹息 🌬️</button>
     </div>
     
     <p class="a-note" style="margin-top:16px; color:rgba(232,168,124,.6);" data-zh="∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。" data-en="∗ This place holds vulnerability, not malice. No personal attacks." data-ja="∗ ここは脆弱性を受け入れる場所であり、悪意を許容しません。" data-es="∗ Este lugar acoge la vulnerabilidad, no la malicia." data-fr="∗ Cet endroit accueille la vulnérabilité, pas la malice." data-de="∗ Dieser Ort birgt Verletzlichkeit, keine Bosheit." data-zh-cn="∗ 这里接住脆弱，但不容纳恶意。请勿投递人身攻击或仇恨言论。">∗ 這裡接住脆弱，但不容納惡意。請勿投遞人身攻擊或仇恨言論。</p>
@@ -2209,11 +2211,32 @@ window.drawStars = function(){
         ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
         drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
     }); 
-    
+
+   // 5. 畫出星系連線 (Constellations)
+    window.activeConstellations = window.activeConstellations || [];
+    for(let i = window.activeConstellations.length - 1; i >= 0; i--) {
+        let c = window.activeConstellations[i];
+        c.life -= 0.005; // 金線生命週期慢慢減少 (約數秒後消散)
+        if(c.life <= 0) {
+            window.activeConstellations.splice(i, 1);
+            continue;
+        }
+        ctx.beginPath();
+        ctx.moveTo(c.s1.x, c.s1.y);
+        ctx.lineTo(c.s2.x, c.s2.y);
+        ctx.strokeStyle = `rgba(201, 168, 76, ${c.life * 0.7})`; // 透出金色微光
+        ctx.lineWidth = 0.8;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = `rgba(201, 168, 76, ${c.life})`;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
     starsRafId = requestAnimationFrame(window.drawStars); 
 }
 
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
+window.activeConstellations = window.activeConstellations || [];
+
 roomM.addEventListener('click', async e => { 
     if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; 
     const rect = canvas.getBoundingClientRect(); 
@@ -2237,9 +2260,19 @@ roomM.addEventListener('click', async e => {
                 window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); 
                 window.triggerHeartbeat(); 
                 
-                // 🎧 觸發 3D 空間水晶音！計算星星在畫面的相對位置 (-1 到 1)
+                // 🎧 觸發 3D 空間水晶音
                 const panValue = (x / window.innerWidth) * 2 - 1;
                 if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
+                
+                // ✨ 觸發星系連線魔法 (尋找最近的兩顆星)
+                let distances = starMessages
+                    .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
+                    .filter(s => s.star.id !== star.id && s.d < 250); // 尋找250px內的星星
+                distances.sort((a,b) => a.d - b.d);
+                let nearest = distances.slice(0, 2).map(d => d.star);
+                nearest.forEach(n => {
+                    window.activeConstellations.push({ s1: star, s2: n, life: 1.0 });
+                });
                 
                 tooltip.classList.remove('active'); 
                 activeStarId = null; 
@@ -2401,16 +2434,61 @@ function handleOrientation(event) {
     tiltY = (event.beta || 0) * 0.08;  
 }
 
+// ==========================================
+// 魔法四：麥克風物理吹息 (Breath Sensor)
+// ==========================================
+let micAnalyser = null;
+let micDataArray = null;
+let blowForce = 0;
+
+window.enableBlow = async function() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        const source = audioCtx.createMediaStreamSource(stream);
+        micAnalyser = audioCtx.createAnalyser();
+        micAnalyser.fftSize = 256;
+        source.connect(micAnalyser);
+        micDataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+        
+        document.getElementById('blow-btn').style.display = 'none';
+        window.showToast(t('🌬️ 吹息感測已開啟，請對著麥克風輕輕吹氣', 'Breath sensor on. Blow gently.', '息を吹きかけてください', 'Sensor de soplo activado', 'Capteur de souffle activé', 'Blassensor an', '🌬️ 吹息感测已开启，请对著麦克风轻轻吹气'));
+    } catch (err) {
+        console.error(err);
+        window.showToast(t('無法取得麥克風權限', 'Microphone access denied', 'マイクの権限がありません', 'Permiso denegado', 'Accès refusé', 'Zugriff verweigert', '无法取得麦克风权限'));
+    }
+}
+
 window.drawSand = function() { 
     const c = document.getElementById('sand-canvas'); 
     if(!c || !c.width || !isAnimating) return; 
     const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
+
+    // 🌬️ 偵測麥克風音量 (風力)
+    if (micAnalyser) {
+        micAnalyser.getByteFrequencyData(micDataArray);
+        let sum = 0;
+        for(let i = 0; i < micDataArray.length; i++) sum += micDataArray[i];
+        let avg = sum / micDataArray.length;
+        if (avg > 30) {
+            blowForce += (avg - 30) * 0.03; // 累積風力
+        }
+    }
+    blowForce *= 0.85; // 風力自然衰減，創造滑順感
+
     sandParticles.forEach(p => { 
         p.y += p.speedY + tiltY; 
         p.swirlOffset += 0.02; 
         const drift = Math.sin(p.swirlOffset) * 0.6 + p.speedX; 
-        p.x += drift + tiltX; 
+        
+        // 套用吹氣物理學：將沙子往上、往外狂吹
+        let windX = (p.x - w/2) * blowForce * 0.015;
+        let windY = -blowForce * (1.5 + Math.random());
+        
+        p.x += drift + tiltX + windX; 
+        p.y += windY;
 
         if(p.y > h + 20) { p.y = -10; p.x = Math.random() * w; } 
         if(p.x > w + 20) { p.x = -10; } else if (p.x < -20) { p.x = w + 10; } 
@@ -2418,7 +2496,7 @@ window.drawSand = function() {
         ctx.globalAlpha = p.opacity; ctx.strokeStyle = p.color; 
         ctx.lineWidth = p.size; ctx.lineCap = 'round'; 
         ctx.beginPath(); ctx.moveTo(p.x, p.y); 
-        ctx.lineTo(p.x - drift * 2 - tiltX, p.y - p.speedY * 3 - tiltY); 
+        ctx.lineTo(p.x - drift * 2 - tiltX - windX, p.y - p.speedY * 3 - tiltY - windY); 
         ctx.stroke(); 
     }); 
     ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); 
