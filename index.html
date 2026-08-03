@@ -661,17 +661,16 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 /* 🌍 徹底封殺 Google 翻譯的所有醜陋介面與白邊 */
 #google_translate_element { position: absolute; opacity: 0; z-index: -9999; pointer-events: none; }
 
-/* 1. 封殺頂部白色橫幅 iframe */
-.goog-te-banner-frame.skiptranslate, 
-iframe.goog-te-banner-frame { display: none !important; visibility: hidden !important; }
+/* 1. 封殺頂部白色橫幅 iframe，並直接摧毀它的隱形外層容器 */
+.goog-te-banner-frame { display: none !important; visibility: hidden !important; }
+div.skiptranslate:has(.goog-te-banner-frame) { display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
 
 /* 2. 封殺破壞美感的黃色底色與原文提示氣泡 */
 .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
 #goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip { display: none !important; }
 
 /* 3. 終極防護：阻止 Google 強制把網頁往下推的潛規則 */
-body { top: 0px !important; margin-top: 0px !important; }
-html { top: 0px !important; margin-top: 0px !important; height: auto !important; }
+body, html { top: 0px !important; margin-top: 0px !important; padding-top: 0px !important; }
 
 #empath-lang-btn:hover {
     color: rgba(201, 168, 76, 1);
@@ -1479,13 +1478,21 @@ window.switchLang = function(lang) {
   const googleSelect = document.querySelector(".goog-te-combo");
   if (googleSelect) {
       let googleLang = lang;
-      // 將 EMPATH 的語系代碼，轉換成 Google 聽得懂的代碼
       if (lang === 'zh') googleLang = 'zh-TW';
       if (lang === 'zh-cn') googleLang = 'zh-CN';
       if (lang === 'en-uk') googleLang = 'en';
       
       googleSelect.value = googleLang;
       googleSelect.dispatchEvent(new Event('change'));
+
+      // 🧹 啟動「白邊清道夫」：連續 3 秒鐘強制摧毀 Google 偷偷加上的位移與橫幅
+      let cleanGarbage = setInterval(() => {
+          document.body.style.top = '0px';
+          document.documentElement.style.top = '0px';
+          const bannerWrap = document.querySelector('.goog-te-banner-frame');
+          if(bannerWrap && bannerWrap.parentNode) bannerWrap.parentNode.style.display = 'none';
+      }, 50);
+      setTimeout(() => clearInterval(cleanGarbage), 3000); // 3 秒後大局已定，自動關閉清道夫
   }
 
   window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦', 'Мову змінено ✦', 'Język zmieniony ✦'));
