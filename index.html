@@ -836,6 +836,24 @@ textarea:focus-visible, input:focus-visible {
   <canvas id="nebula-canvas" role="img" aria-label="靈魂星雲" data-zh-aria="靈魂星雲" data-en-aria="Soul nebula"></canvas>
   <div id="nebula-text"></div>
 </div>
+<!-- 隱私哲學 Modal -->
+<div id="privacy-modal" class="share-modal" onclick="if(event.target===this) window.closePrivacy()">
+  <div class="wrapped-card" style="max-width: 480px; text-align: left; padding: 40px 32px;">
+    <div class="wrapped-title" style="font-size:24px; margin-bottom:24px; text-align:center;">PRIVACY PHILOSOPHY</div>
+    <div style="font-family:'Noto Serif TC',serif; font-size:14px; line-height:2; color:var(--fog); letter-spacing:1.5px;">
+      <p style="color:var(--gold); font-weight:bold; margin-bottom:16px;" data-zh="你的脆弱，只屬於你自己。" data-en="Your vulnerability belongs only to you.">你的脆弱，只屬於你自己。</p>
+      <ul style="margin-left: 20px; margin-bottom: 24px; color:rgba(255,255,255,0.7);">
+        <li style="margin-bottom:12px;" data-zh="【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器（Google Cloud）徹底且永久刪除。" data-en="[Forgotten] Room A messages are permanently deleted from servers after 24 hours.">【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器（Google Cloud）徹底且永久刪除。</li>
+        <li style="margin-bottom:12px;" data-zh="【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。" data-en="[Anonymity] No accounts needed. Without a Soul Key, your footprints cannot be traced back to you.">【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。</li>
+        <li style="margin-bottom:12px;" data-zh="【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。" data-en="[Pure Sanctuary] We promise never to sell, analyze, or monetize your emotional data.">【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。</li>
+      </ul>
+      <p data-zh="這是一個安全的樹洞，請安心放下。" data-en="This is a safe treehole. Feel free to let go.">這是一個安全的樹洞，請安心放下。</p>
+    </div>
+    <div style="text-align:center; margin-top:32px;">
+      <button class="close-modal-btn" onclick="window.closePrivacy()" data-zh="我明白了" data-en="I understand">我明白了</button>
+    </div>
+  </div>
+</div>
 <div id="share-modal" class="share-modal">
   <div class="wrapped-card" id="wrapped-card-content">
     <div class="wrapped-title">EMPATH</div>
@@ -1070,7 +1088,7 @@ textarea:focus-visible, input:focus-visible {
   <button id="e-expand-btn" class="e-expand-btn" onclick="window.toggleEFeed()"></button>
 
   <div class="crisis-support">
-    <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
   </div>
 </section>
 
@@ -1186,8 +1204,8 @@ textarea:focus-visible, input:focus-visible {
   <p class="p-healed-count" id="p-healed-count"></p>
     
   <div class="crisis-support">
-    <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
-</div>
+    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+  </div>
     
 </div>
 </section>
@@ -1259,8 +1277,9 @@ textarea:focus-visible, input:focus-visible {
     </div>
 
     <div class="crisis-support">
-      <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
-    </div>
+    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+  </div>
+    
   </div>
 </section>
 
@@ -1424,21 +1443,24 @@ textarea:focus-visible, input:focus-visible {
       <button class="action-btn" onclick="window.openShareCard()" style="border-color: var(--gold); color: var(--gold);">
         <span data-zh="✦ 生成我的靈魂足跡卡 ✦" data-en="✦ Generate My Soul Card ✦" data-ja="✦ 私の魂のカードを生成する ✦" data-es="✦ Generar Mi Tarjeta del Alma ✦" data-fr="✦ Générer ma carte ✦" data-de="✦ Meine Seelenkarte generieren ✦" data-zh-cn="✦ 生成我的灵魂足迹卡 ✦">✦ 生成我的靈魂足跡卡 ✦</span>
       </button>
-      <button class="action-btn" onclick="window.shareSite()" data-zh="分享這座避難所連結" data-en="Share This Sanctuary" data-ja="この避難所をシェアする" data-es="Compartir Este Santuario" data-fr="Partager ce Sanctuaire" data-de="Dieses Heiligtum teilen" data-zh-cn="分享这座避难所连结">分享這座避難所連結</button>
+      <button class="action-btn" onclick="window.shareSite()" data-zh="把這個空間傳給需要的人" data-en="Pass this space to someone in need" data-ja="この空間を必要としている人に伝える" data-es="Pasa este espacio a alguien que lo necesite" data-fr="Transmettre cet espace à quelqu'un dans le besoin" data-de="Diesen Raum an jemanden in Not weitergeben" data-zh-cn="把这个空间传给需要的人">把這個空間傳給需要的人</button>
     </div>
   </div>
 </section>
 
-<div class="creator-portfolio">
-  <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" class="behance-float">✦ Design Case Study on Behance</a>
-</div>
-  
 <footer>
   <div class="footer-main">
     <div class="footer-left" data-zh="Every Moment As Truth Heals" data-en="Every Moment As Truth Heals" data-ja="Every Moment As Truth Heals" data-es="Every Moment As Truth Heals" data-fr="Every Moment As Truth Heals" data-de="Every Moment As Truth Heals" data-zh-cn="Every Moment As Truth Heals">Every Moment As Truth Heals</div>
     <div class="footer-letters"><span class="footer-l">E</span><span class="footer-l">M</span><span class="footer-l">P</span><span class="footer-l">A</span><span class="footer-l">T</span><span class="footer-l">H</span></div>
     <div class="footer-right" data-zh="數位時代的情緒安放平台" data-en="An emotional sanctuary for the digital age" data-ja="デジタル時代の感情のサンクチュアリ" data-es="Un santuario emocional para la era digital" data-fr="Un sanctuaire émotionnel pour l'ère numérique" data-de="Ein emotionales Heiligtum für das digitale Zeitalter" data-zh-cn="数字时代的情绪安放平台">數位時代的情緒安放平台</div>
   </div>
+  
+  <!-- 新增：About 與 Privacy 連結 -->
+  <div style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom: 24px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; flex-wrap:wrap; justify-content:center;">
+      <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">About EMPATH (Behance)</a>
+      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" onclick="window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</span>
+  </div>
+
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
@@ -1671,6 +1693,12 @@ window.switchLang = function(lang) {
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") { for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } } }
   updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); if(typeof window.renderEFeed === 'function') window.renderEFeed();
+  // 🌍 危機熱線在地化動態切換
+  let crisisTel = '1925';
+  if (lang === 'uk') crisisTel = '7333';
+  else if (lang === 'pl') crisisTel = '116123';
+  document.querySelectorAll('.crisis-link').forEach(el => { el.href = 'tel:' + crisisTel; });
+  
   // 🌍 【核彈級連動】觸發地下室的 Google 翻譯引擎，翻譯全部使用者留言！
   const googleSelect = document.querySelector(".goog-te-combo");
   if (googleSelect) {
@@ -2219,8 +2247,25 @@ window.speakText = function(text) {
 
 window.triggerHeartbeat = function() { if ('vibrate' in navigator) { navigator.vibrate([40, 120, 40]); } };
 
-window.shareSite = function() { const total = state.eCount + state.mCount + state.pCount + state.aCount + state.tCount; let dynamicText = ''; if (total === 0) { dynamicText = t('我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', 'I found a beautiful emotional sanctuary. Come take a look:', '温かい場所を見つけました。ここで感情を休めてみませんか：', 'Encontré un hermoso santuario emocional. Ven a echar un vistazo:', 'J\'ai trouvé un magnifique sanctuaire émotionnel.', 'Ich habe ein wunderschönes emotionales Heiligtum gefunden.', '我发现了一个很温暖的地方，可以在数字时代安放情绪。来这里看看吧：'); } else { dynamicText = t(`我在 EMPATH 留下了 ${total} 個靈魂足跡。修補了 ${state.pCount} 道裂痕，點亮了 ${state.mCount} 顆星... 這是一個很溫暖的情緒避難所，來這裡看看吧：`, `I left ${total} soul footprints at EMPATH. Mended ${state.pCount} cracks, lit ${state.mCount} stars... It's a warm sanctuary, come see:`, `EMPATHで ${total} つの魂の足跡を残しました。${state.pCount} つの欠片を修復し、${state.mCount} 個の星を灯しました... 温かい避難所です：`, `Dejé ${total} huellas en EMPATH. Reparó ${state.pCount} grietas, encendió ${state.mCount} estrellas... Es un santuario cálido:`, `J'ai laissé ${total} empreintes à EMPATH. Réparé ${state.pCount} fissures, allumé ${state.mCount} étoiles... Venez voir :`, `Ich habe ${total} Seelenfußspuren bei EMPATH hinterlassen. ${state.pCount} Risse geflickt, ${state.mCount} Sterne erleuchtet... Ein warmer Ort:`, `我在 EMPATH 留下了 ${total} 个灵魂足迹。修补了 ${state.pCount} 道裂痕，点亮了 ${state.mCount} 颗星... 这是一个很温暖的情绪避难所，来这里看看吧：`); } if (navigator.share) { navigator.share({ title: 'EMPATH', text: dynamicText, url: window.location.href }).catch(console.error); } else { navigator.clipboard.writeText(dynamicText + " " + window.location.href); window.showToast(t('專屬足跡與網址已複製！快去貼給朋友吧 ✦', 'Journey & link copied!', '足跡とリンクをコピーしました！', '¡Viaje y enlace copiados!', 'Parcours et lien copiés !', 'Reise & Link kopiert!', '专属足迹与网址已复制！快去贴给朋友吧 ✦')); } }
-
+window.shareSite = function() { 
+    const text = t(
+        '我發現了一個很溫暖的地方，可以在數位時代安放情緒。來這裡看看吧：', 
+        'I found a beautiful emotional sanctuary. Come take a look:', 
+        '温かい場所を見つけました。ここで感情を休めてみませんか：', 
+        'Encontré un hermoso santuario emocional. Ven a echar un vistazo:', 
+        'J\'ai trouvé un magnifique sanctuaire émotionnel.', 
+        'Ich habe ein wunderschönes emotionales Heiligtum gefunden.', 
+        '我发现了一个很温暖的地方，可以在数字时代安放情绪。来这里看看吧：'
+    ); 
+    
+    if (navigator.share) { 
+        navigator.share({ title: 'EMPATH', text: text, url: window.location.href }).catch(console.error); 
+    } else { 
+        navigator.clipboard.writeText(text + " " + window.location.href); 
+        window.showToast(t('網址已複製！快去傳給需要的人吧 ✦', 'Link copied! Pass it to someone in need ✦', 'リンクをコピーしました！', '¡Enlace copiado!', 'Lien copié !', 'Link kopiert!', '网址已复制！快去传给需要的人吧 ✦')); 
+    } 
+}
+  
 window.openShareCard = function() { 
     window.lastFocusBeforeModal = document.activeElement; // 記錄剛剛的焦點
     document.getElementById('sc-e').textContent = state.eCount; 
@@ -2299,7 +2344,9 @@ window.closeShareModal = function() {
         if(window.lastFocusBeforeModal) window.lastFocusBeforeModal.focus();
     }, 400); 
 }
-  
+
+window.openPrivacy = function() { document.getElementById('privacy-modal').classList.add('show'); }
+window.closePrivacy = function() { document.getElementById('privacy-modal').classList.remove('show'); }
 window.showToast = function(msg, dur=2400){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), dur); }
 function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 
