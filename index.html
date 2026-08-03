@@ -2150,12 +2150,8 @@ window.drawStars = function(){
 
     // 2. 抓取安全區
     let safeX = 0, safeY = 0, safeW = w, safeH = h;
-    
     if (w > 768) {
-        safeX = 580;            
-        safeW = w - 620;        
-        safeY = 120;
-        safeH = h - 200;
+        safeX = 580; safeW = w - 620; safeY = 120; safeH = h - 200;
     } else {
         const statsEl = roomM.querySelector('.m-stats');
         let uiBottom = 500; 
@@ -2163,58 +2159,39 @@ window.drawStars = function(){
             const rRect = roomM.getBoundingClientRect();
             uiBottom = statsEl.getBoundingClientRect().bottom - rRect.top;
         }
-        safeX = 15;             // 左右留一點縫隙
-        safeW = w - 30;
-        safeY = uiBottom + 40;  // 確保絕對不會碰到文字
-        safeH = h - safeY - 10; 
-        safeH = Math.max(safeH, 250); 
+        safeX = 15; safeW = w - 30; safeY = uiBottom + 40; 
+        safeH = Math.max(h - safeY - 10, 250); 
     }
-    
     safeW = Math.max(safeW, 100);
-
-    // 🌟 3. 升級版物理引擎：更寬的距離、更強的推力、橡皮筋邊界
-    // 【修改點】手機距離從 45 拉大到 65px；電腦從 55 拉大到 85px！
-    const MIN_DIST = w > 768 ? 85 : 65; 
 
     // 3.1 彈簧拉力
     starMessages.forEach(s => { 
         let targetX = safeX + (s.relX * safeW); 
         let targetY = safeY + (s.relY * safeH); 
-        
         if (s.x === undefined || isNaN(s.x)) {
             s.x = targetX; s.y = targetY;
         } else {
-            // 放慢拉回本位的力量，讓星星有更多時間互推
             s.x += (targetX - s.x) * 0.04; 
             s.y += (targetY - s.y) * 0.04;
         }
     });
 
-    // 3.2 排斥力 (只要靠太近，就互相推開)
+    // 3.2 排斥力 & 橡皮筋軟邊界
     for(let i=0; i<starMessages.length; i++) {
         for(let j=i+1; j<starMessages.length; j++) {
             let s1 = starMessages[i];
             let s2 = starMessages[j];
-            let dx = s2.x - s1.x;
-            let dy = s2.y - s1.y;
+            let dx = s2.x - s1.x; let dy = s2.y - s1.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
-            
             if (dist === 0) { dx = 1; dy = 1; dist = 1.414; }
-            
+            const MIN_DIST = w > 768 ? 85 : 65; 
             if (dist < MIN_DIST) {
-                // 【修改點】推力從 0.3 加強到 0.5，絕對不讓它們黏在一起
                 let push = (MIN_DIST - dist) * 0.5; 
-                let nx = dx / dist;
-                let ny = dy / dist;
-                s1.x -= nx * push;
-                s1.y -= ny * push;
-                s2.x += nx * push;
-                s2.y += ny * push;
+                let nx = dx / dist; let ny = dy / dist;
+                s1.x -= nx * push; s1.y -= ny * push;
+                s2.x += nx * push; s2.y += ny * push;
             }
         }
-        
-        // 🌟 3.3 【修改點】橡皮筋軟邊界 (Soft Boundaries)
-        // 以前是「死死卡在牆上」，現在如果被擠出去，會像被橡皮筋拉住一樣，慢慢彈回來
         let s1 = starMessages[i];
         if(s1.x < safeX) s1.x += (safeX - s1.x) * 0.2;
         if(s1.x > safeX + safeW) s1.x -= (s1.x - (safeX + safeW)) * 0.2;
@@ -2222,22 +2199,20 @@ window.drawStars = function(){
         if(s1.y > safeY + safeH) s1.y -= (s1.y - (safeY + safeH)) * 0.2;
     }
 
-    // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後，才不會被光暈吃掉)
+    // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後)
     if (window.activeConstellations && window.activeConstellations.length > 0) {
         const nowMs = Date.now();
         window.activeConstellations.forEach(c => {
             const star1 = starMessages.find(s => s.id === c.s1Id);
             const star2 = starMessages.find(s => s.id === c.s2Id);
-            
             if (star1 && star2 && star1.x !== undefined && star2.x !== undefined) {
                 const ageHours = (nowMs - c.createdAt) / (1000 * 60 * 60);
-                const alpha = Math.max(0.1, 0.85 - (ageHours / 24) * 0.5); // 提高初始亮度到 0.85
-                
+                const alpha = Math.max(0.1, 0.85 - (ageHours / 24) * 0.5); 
                 ctx.beginPath();
                 ctx.moveTo(star1.x, star1.y);
                 ctx.lineTo(star2.x, star2.y);
                 ctx.strokeStyle = `rgba(201, 168, 76, ${alpha})`; 
-                ctx.lineWidth = 1.5; // 線條稍微加粗一點點
+                ctx.lineWidth = 1.5; 
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = `rgba(201, 168, 76, ${alpha})`;
                 ctx.stroke();
@@ -2253,8 +2228,8 @@ window.drawStars = function(){
         grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
         ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
         drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
-    });
-    }
+    }); 
+
     starsRafId = requestAnimationFrame(window.drawStars); 
 }
 
