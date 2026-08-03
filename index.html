@@ -694,6 +694,29 @@ html { top: 0px !important; position: static !important; }
 @media(max-width: 768px) {
     #empath-lang-btn { top: 20px; left: 20px; font-size: 12px; }
 }
+/* 🌙 1. 時刻感知：深夜模式 (00:00 - 04:00) */
+body.night-mode {
+    --bg: #020305 !important; 
+    --bg2: #05070a !important;
+}
+body.night-mode .hero-bg-text { opacity: 0.01; } /* 深夜的字更暗 */
+
+/* 🌅 1. 時刻感知：破曉晨光 (05:00 - 08:00) */
+body.dawn-mode {
+    --bg: #14161a !important; 
+    --bg2: #1e1b18 !important;
+}
+
+/* 🎂 3. 週年紀念日專屬特效 */
+body.anniversary-mode #room-h .g-num { 
+    color: #fff !important; 
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important; 
+}
+body.anniversary-mode .sand-timer-fill { 
+    /* 沙畫的消散條在生日這天變成閃耀的金色 */
+    background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 2px, transparent 2px, transparent 4px) !important; 
+}
+
 </style>
 </head>
 <body>
@@ -2148,6 +2171,19 @@ window.drawStars = function(){
         ctx.fill(); ctx.shadowBlur = 0; 
     }); 
 
+    // 🌕 1.5 滿月夜專屬：渲染真實滿月
+    if (window.isFullMoon) {
+        ctx.beginPath();
+        // 將滿月掛在右上方
+        ctx.arc(w > 768 ? w - 200 : w - 80, 150, w > 768 ? 45 : 30, 0, Math.PI * 2);
+        // 月亮的微黃光暈
+        ctx.fillStyle = 'rgba(255, 252, 230, 0.9)';
+        ctx.shadowBlur = 80;
+        ctx.shadowColor = 'rgba(255, 252, 230, 0.7)';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+  
     // 2. 抓取安全區
     let safeX = 0, safeY = 0, safeW = w, safeH = h;
     if (w > 768) {
@@ -2593,7 +2629,69 @@ onSnapshot(presenceRef, (docSnap) => {
 });
 
 // 🌟 拔掉原本的 load 煞車，改用 DOMContentLoaded 讓它瞬間起跑
-document.addEventListener('DOMContentLoaded', async () => {
+
+// ==========================================
+// 🌌 魔法五：時間維度引擎 (時刻感知、月相、紀念日)
+// ==========================================
+window.initTimeAndCosmic = function() {
+    const now = new Date();
+    const hour = now.getHours();
+    
+    // 🌙 1. 深夜與破曉感知
+    const body = document.body;
+    const eInput = document.getElementById('e-input');
+    if (hour >= 0 && hour <= 4) {
+        body.classList.add('night-mode');
+        if(eInput) {
+            eInput.setAttribute('data-zh-ph', '深夜了，是什麼讓你無法入睡？\n把這份重量放在這裡，沒有人知道是你。');
+            eInput.setAttribute('data-en-ph', 'Late at night, what keeps you awake?\nLeave the weight here, no one knows it is you.');
+            // 強制更新當下 placeholder
+            const targetLang = (window.currentLang === 'en-uk') ? 'en' : window.currentLang;
+            eInput.setAttribute('placeholder', eInput.getAttribute('data-' + targetLang + '-ph') || eInput.getAttribute('data-zh-ph'));
+        }
+    } else if (hour >= 5 && hour <= 8) {
+        body.classList.add('dawn-mode');
+    }
+
+    // 🌕 2. 月相感知 (純數學計算，無須 API)
+    // 週期約為 29.53 天 (轉換成秒數)，基準點為千禧年的一個已知新月
+    const lunarPeriod = 2551443; 
+    const newMoon1970 = 947182440;
+    const currentUnix = now.getTime() / 1000;
+    const phase = ((currentUnix - newMoon1970) % lunarPeriod) / lunarPeriod;
+    
+    // 判斷是否為滿月 (月相落在 0.47 到 0.53 之間)
+    window.isFullMoon = (phase > 0.47 && phase < 0.53);
+    
+    if (window.isFullMoon) {
+        const mDesc = document.querySelector('#room-m .room-desc');
+        if (mDesc) {
+            mDesc.setAttribute('data-zh', '今夜是滿月，思念傳得更遠。<br>點亮一顆星星，聽見別人藏在夜空裡的心事。');
+            mDesc.setAttribute('data-en', 'Tonight is a full moon. Memories travel further.<br>Click a star to hear the night\'s secrets.');
+            const targetLang = (window.currentLang === 'en-uk') ? 'en' : window.currentLang;
+            mDesc.innerHTML = mDesc.getAttribute('data-' + targetLang) || mDesc.getAttribute('data-zh');
+        }
+    }
+
+    // 🎂 3. 週年紀念日感知
+    // 💡 我先幫妳設定為 8 月 3 日 (今天)，讓妳一打開就能測試！測試完可改成妳實際上線的日期
+    const launchMonth = 7; // JS的月份是 0-11，所以 7 代表 8 月
+    const launchDay = 3;
+    const launchYear = 2026;
+    
+    if (now.getMonth() === launchMonth && now.getDate() === launchDay) {
+        body.classList.add('anniversary-mode');
+        const years = now.getFullYear() - launchYear;
+        // 延遲 3 秒後，在左下角跳出隱藏的極美吐司提示
+        setTimeout(() => {
+            let msg = years === 0 ? '✦ EMPATH 誕生了，謝謝你成為第一批在這裡的靈魂 ✦' : `✦ EMPATH 今天 ${years} 歲了，謝謝你也在這裡 ✦`;
+            window.showToast(msg, 6000);
+        }, 3000);
+    }
+};
+  document.addEventListener('DOMContentLoaded', async () => {
+  // 啟動時間與宇宙感知
+  window.initTimeAndCosmic();
   
   // 🌟 瞬間視覺魔法：在 Firebase 還沒連上之前，先用快取數據填滿畫面！
   const cached = localStorage.getItem('empath_global_counts');
