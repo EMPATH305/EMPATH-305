@@ -1075,7 +1075,7 @@ body.anniversary-mode .sand-timer-fill {
     </div>
     
     <div class="m-input-wrap">
-      <textarea class="input-area" id="m-input" rows="4" maxlength="500"
+      <textarea class="input-area" id="m-input" rows="4" maxlength="500" oninput="document.getElementById('m-char').textContent = this.value.length + ' / 500'"
         data-zh-ph="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"
         data-en-ph="Who came to your mind tonight?&#10;Write their initials, or continue:&#10;'I miss the days when...'&#10;'I wonder how you are doing now...'"
         data-ja-ph="今夜、誰を思い出しましたか？&#10;イニシャルを書くか、こう続けてみてください：&#10;『あの時のことを想うと...』&#10;『今、どうしているのかな...』"
@@ -1086,6 +1086,7 @@ body.anniversary-mode .sand-timer-fill {
         data-uk-ph="Про кого ви згадали сьогодні?&#10;Напишіть ініціали або продовжте:&#10;'Я сумую за тими днями...'"
         data-pl-ph="O kim dzisiaj pomyślałeś?&#10;Napisz inicjały lub kontynuuj:&#10;'Tęsknię za dniami, kiedy...'"
         placeholder="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"></textarea>
+      <div class="e-char-count" id="m-char">0 / 500</div>
       <br>
       <button class="send-btn" id="m-submit-btn" onclick="window.submitM()" data-zh="放上星空 →" data-en="Place in Sky →" data-ja="夜空に放つ →" data-es="Colocar en el Cielo →" data-fr="Placer dans le ciel →" data-de="In den Himmel setzen →" data-zh-cn="放上星空 →">放上星空 →</button>
     </div>
@@ -1122,7 +1123,7 @@ body.anniversary-mode .sand-timer-fill {
 
   <div class="step-wrapper">
       <div class="p-step-label" data-zh="STEP 1. 交付破碎" data-en="STEP 1. Cast Brokenness" data-ja="STEP 1. 欠片を預ける" data-es="PASO 1. Entregar Ruptura" data-fr="ÉTAPE 1. Jeter la Brisure" data-de="SCHRITT 1. Zerbrochenheit abgeben" data-zh-cn="STEP 1. 交付破碎">STEP 1. 交付破碎</div>
-      <textarea class="input-area" id="p-input" rows="3" maxlength="500"
+      <textarea class="input-area" id="p-input" rows="3" maxlength="500" oninput="document.getElementById('p-char').textContent = this.value.length + ' / 500'"
         data-zh-ph="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"
         data-en-ph="Write down a piece of your shattered heart—a pain, a regret, a loss..."
         data-ja-ph="心の欠片を書き残してください — 痛み、後悔、あるいは喪失..."
@@ -1133,6 +1134,7 @@ body.anniversary-mode .sand-timer-fill {
         data-uk-ph="Напишіть про уламок вашого серця — біль, жаль, втрату..."
         data-pl-ph="Napisz o kawałku swojego serca — ból, żal, strata..."
         placeholder="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"></textarea>
+     <div class="e-char-count" id="p-char">0 / 500</div>
       <br>
       <button class="send-btn" id="p-submit-btn" onclick="window.submitP()" data-zh="放入瓷器 →" data-en="Place in Vessel →" data-ja="器に入れる →" data-es="Colocar en la Vasija →" data-fr="Placer dans le récipient →" data-de="In das Gefäß setzen →" data-zh-cn="放入瓷器 →">放入瓷器 →</button>
   </div>
@@ -1192,7 +1194,7 @@ body.anniversary-mode .sand-timer-fill {
 
     <p class="a-fade-hint" data-zh="你的話語將在 24 小時後消失於風中。" data-en="Your words will disappear in the wind after 24 hours." data-ja="あなたの言葉は24時間後に風に消えていきます。" data-es="Tus palabras desaparecerán en el viento después de 24 horas." data-fr="Tes mots disparaîtront dans le vent après 24 heures." data-de="Deine Worte werden nach 24 Stunden im Wind verblassen." data-zh-cn="你的话语将在 24 小时后消失于风中。">你的話語將在 24 小時後消失於風中。</p>
     
-    <textarea class="input-area" id="a-input" rows="4" maxlength="500"
+    <textarea class="input-area" id="a-input" rows="4" maxlength="500" oninput="document.getElementById('a-char').textContent = this.value.length + ' / 500'"
       data-zh-ph="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"
       data-en-ph="Whisper your deepest pain or secret here...&#10;After 24 hours, these words will fade away.&#10;Nothing is forever, only the feeling of being caught in this moment."
       data-ja-ph="今日の深い苦しみや秘密をここで吐き出してください...&#10;24時間後、このテキストは完全に消滅します。&#10;永遠はありません。ただ今、受け止められているという感覚だけです。"
@@ -1203,7 +1205,7 @@ body.anniversary-mode .sand-timer-fill {
       data-uk-ph="Прошепотіть свій найглибший біль тут...&#10;Через 24 години ці слова зникнуть."
       data-pl-ph="Wyszeptaj swój najgłębszy ból tutaj...&#10;Po 24 godzinach te słowa znikną."
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
-    
+    <div class="e-char-count" id="a-char">0 / 500</div>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; max-width:600px; flex-wrap: wrap; gap: 12px;">
         <select id="a-timer-select" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(122,158,159,0.5); color: var(--a); padding: 10px 16px; border-radius: 4px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; outline:none; cursor:pointer;">
             <option value="1">1 分鐘後消散</option>
@@ -1271,7 +1273,7 @@ body.anniversary-mode .sand-timer-fill {
     <div style="display:flex;flex-direction:column;gap:24px;">
       <div class="t-send-panel">
         <p class="t-panel-title" data-zh="傳送你的溫暖" data-en="Send Your Warmth" data-ja="温もりを送る" data-es="Envía tu Calidez" data-fr="Envoyez votre Chaleur" data-de="Sende deine Wärme" data-zh-cn="传送你的温暖">傳送你的溫暖</p>
-        <textarea class="input-area" id="t-input" rows="4" maxlength="500"
+        <textarea class="input-area" id="t-input" rows="4" maxlength="500" oninput="document.getElementById('t-char').textContent = this.value.length + ' / 500'"
           data-zh-ph="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"
           data-en-ph="Write a warm word, an encouragement, a virtual hug...&#10;It will float to someone who needs it."
           data-ja-ph="温かい言葉、励まし、または抱擁の言葉を書き残してください...&#10;それは、必要としている誰かのもとへ漂っていきます。"
@@ -1282,6 +1284,7 @@ body.anniversary-mode .sand-timer-fill {
           data-uk-ph="Напишіть тепле слово, підбадьорення...&#10;Воно прилетить до того, хто цього потребує."
           data-pl-ph="Napisz ciepłe słowo, wsparcie...&#10;Trafi do kogoś, kto tego potrzebuje."
           placeholder="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"></textarea>
+        <div class="e-char-count" id="t-char">0 / 500</div>
         <br>
         <button class="send-btn" id="t-submit-btn" onclick="window.submitT()" data-zh="傳出去 →" data-en="Send it Out →" data-ja="送る →" data-es="Enviar →" data-fr="Envoyer →" data-de="Senden →" data-zh-cn="传出去 →">傳出去 →</button>
       </div>
