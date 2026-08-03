@@ -2052,7 +2052,7 @@ window.drawStars = function(){
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
 
-    // 1. 畫背景星星（維持滿版深邃感）
+    // 1. 畫背景星星
     bgStars.forEach(s => { 
         s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
         ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
@@ -2061,7 +2061,7 @@ window.drawStars = function(){
         ctx.fill(); ctx.shadowBlur = 0; 
     }); 
 
-    // 2. 抓取絕對安全區
+    // 2. 抓取安全區
     let safeX = 0, safeY = 0, safeW = w, safeH = h;
     
     if (w > 768) {
@@ -2076,33 +2076,34 @@ window.drawStars = function(){
             const rRect = roomM.getBoundingClientRect();
             uiBottom = statsEl.getBoundingClientRect().bottom - rRect.top;
         }
-        safeX = 20;             
-        safeW = w - 40;
-        safeY = uiBottom + 30;  
-        safeH = h - safeY - 20; 
+        safeX = 15;             // 左右留一點縫隙
+        safeW = w - 30;
+        safeY = uiBottom + 40;  // 確保絕對不會碰到文字
+        safeH = h - safeY - 10; 
         safeH = Math.max(safeH, 250); 
     }
     
     safeW = Math.max(safeW, 100);
 
-    // 🌟 3. 物理引擎：細胞排斥力場 (讓星星自動保持安全距離)
-    const MIN_DIST = w > 768 ? 55 : 45; // 星星間的最小安全距離 (電腦55px，手機45px)
+    // 🌟 3. 升級版物理引擎：更寬的距離、更強的推力、橡皮筋邊界
+    // 【修改點】手機距離從 45 拉大到 65px；電腦從 55 拉大到 85px！
+    const MIN_DIST = w > 768 ? 85 : 65; 
 
-    // 3.1 計算目標點，產生像彈簧一樣的拉力
+    // 3.1 彈簧拉力
     starMessages.forEach(s => { 
         let targetX = safeX + (s.relX * safeW); 
         let targetY = safeY + (s.relY * safeH); 
         
-        // 如果是剛載入的星星，直接就位；否則慢慢滑動過去
         if (s.x === undefined || isNaN(s.x)) {
             s.x = targetX; s.y = targetY;
         } else {
-            s.x += (targetX - s.x) * 0.05; 
-            s.y += (targetY - s.y) * 0.05;
+            // 放慢拉回本位的力量，讓星星有更多時間互推
+            s.x += (targetX - s.x) * 0.04; 
+            s.y += (targetY - s.y) * 0.04;
         }
     });
 
-    // 3.2 執行排斥力 (只要靠太近，就互相推開)
+    // 3.2 排斥力 (只要靠太近，就互相推開)
     for(let i=0; i<starMessages.length; i++) {
         for(let j=i+1; j<starMessages.length; j++) {
             let s1 = starMessages[i];
@@ -2111,12 +2112,11 @@ window.drawStars = function(){
             let dy = s2.y - s1.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
             
-            // 避免完全重疊導致數學計算為 0 (除以 0 會當機)
             if (dist === 0) { dx = 1; dy = 1; dist = 1.414; }
             
-            // 如果距離小於安全距離，溫柔地把它們往反方向推開
             if (dist < MIN_DIST) {
-                let push = (MIN_DIST - dist) * 0.3; // 0.3 是推力強度，讓它看起來很柔和
+                // 【修改點】推力從 0.3 加強到 0.5，絕對不讓它們黏在一起
+                let push = (MIN_DIST - dist) * 0.5; 
                 let nx = dx / dist;
                 let ny = dy / dist;
                 s1.x -= nx * push;
@@ -2125,12 +2125,14 @@ window.drawStars = function(){
                 s2.y += ny * push;
             }
         }
-        // 3.3 確保推開後不會掉出邊界外
+        
+        // 🌟 3.3 【修改點】橡皮筋軟邊界 (Soft Boundaries)
+        // 以前是「死死卡在牆上」，現在如果被擠出去，會像被橡皮筋拉住一樣，慢慢彈回來
         let s1 = starMessages[i];
-        if(s1.x < safeX) s1.x = safeX;
-        if(s1.x > safeX + safeW) s1.x = safeX + safeW;
-        if(s1.y < safeY) s1.y = safeY;
-        if(s1.y > safeY + safeH) s1.y = safeY + safeH;
+        if(s1.x < safeX) s1.x += (safeX - s1.x) * 0.2;
+        if(s1.x > safeX + safeW) s1.x -= (s1.x - (safeX + safeW)) * 0.2;
+        if(s1.y < safeY) s1.y += (safeY - s1.y) * 0.2;
+        if(s1.y > safeY + safeH) s1.y -= (s1.y - (safeY + safeH)) * 0.2;
     }
 
     // 4. 畫出留言星星
