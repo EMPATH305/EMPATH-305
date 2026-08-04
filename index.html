@@ -804,7 +804,7 @@ body.anniversary-mode .sand-timer-fill {
     #a-warning-mask .send-btn { width: 100%; min-height: 48px; }
 }
 
-/* 系統層級減少動態效果 (Prefers Reduced Motion) */
+/* ♿ 系統層級減少動態效果與鍵盤對焦 */
 @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after {
         animation-duration: 0.01ms !important;
@@ -813,8 +813,6 @@ body.anniversary-mode .sand-timer-fill {
         scroll-behavior: auto !important;
     }
 }
-
-/* 鍵盤導航友善：當使用者用 Tab 鍵切換時，給予清晰的金色外框 */
 :focus-visible { outline: 2px solid var(--gold) !important; outline-offset: 4px; border-radius: 4px; }
 textarea:focus-visible, input:focus-visible { outline: none !important; }
   
@@ -869,13 +867,13 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 <div class="star-tooltip" id="star-tooltip"></div>
 <button id="btt-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
 <!-- 幸運微光彩蛋 (左下角) -->
-<div id="fortune-spark" onclick="window.crackFortune()" data-zh-title="點擊接收宇宙的低語" title="點擊接收宇宙的低語">✦</div>
+<div id="fortune-spark" tabindex="0" onclick="window.crackFortune()" onkeydown="if(event.key==='Enter') window.crackFortune()" title="點擊接收宇宙的低語">✦</div>
   
 <!-- 1. 靈魂跟隨 (游標專屬微光) -->
 <div id="cursor-glow"></div>
 
 <!-- 2. 同步呼吸引導 (右下角按鈕與全螢幕畫布) -->
-<div id="breathe-btn" onclick="window.startBreathe()" data-zh-title="深呼吸" title="深呼吸">🌀</div>
+<div id="breathe-btn" tabindex="0" onclick="window.startBreathe()" onkeydown="if(event.key==='Enter') window.startBreathe()" title="深呼吸">🌀</div>
 <div id="breathe-overlay" onclick="window.stopBreathe()">
     <div class="breathe-circle"></div>
     <div class="breathe-text" id="breathe-text">吸氣...</div>
@@ -1429,7 +1427,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     </div>
     
     <div class="lighthouse">
-      <span class="lighthouse-flame" onclick="window.openNebula()" data-zh-title="點擊火焰..." title="點擊火焰...">🕯️</span>
+      <span class="lighthouse-flame" tabindex="0" onclick="window.openNebula()" onkeydown="if(event.key==='Enter') window.openNebula()" title="點擊火焰...">🕯️</span>
       <p data-zh="Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。" data-en="Holocene<br><br>Every pain is proof of your existence.<br>You don't have to be better to be worthy of acceptance." data-ja="Holocene — 完新世<br><br>すべての痛みは、あなたがそこにいた証明です。<br>受け入れられるために、完璧になる必要はありません。" data-es="Holocene<br><br>Cada dolor es prueba de tu existencia.<br>No tienes que ser mejor para ser digno de aceptación." data-fr="Holocène<br><br>Chaque douleur est la preuve de votre existence.<br>Vous n'avez pas besoin d'être meilleur pour être digne d'être accepté." data-de="Holozän<br><br>Jeder Schmerz ist ein Beweis für deine Existenz.<br>Du musst nicht besser sein, um Akzeptanz zu verdienen." data-zh-cn="Holocene — 全新世<br><br>每一次伤痛，都是你存在过的证明。<br>你不需要变得更好，才值得被接纳。">Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。</p>
     </div>
 
@@ -1452,7 +1450,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   <!-- 新增：About 與 Privacy 連結 -->
   <div style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom: 24px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; flex-wrap:wrap; justify-content:center;">
       <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">About EMPATH (Behance)</a>
-      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" onclick="window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</span>
+      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" tabindex="0" onclick="window.openPrivacy()" onkeydown="if(event.key==='Enter') window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</span>
   </div>
 
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
@@ -2082,7 +2080,9 @@ function subscribeAll() {
         snapshot.forEach(docSnap => { 
             const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; 
             const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : ''); 
-            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`; 
+            if(!data.healed) { div.tabIndex = 0; div.addEventListener('keydown', e => { if(e.key === 'Enter') div.click(); }); }
+            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`;
+            
             div.addEventListener('click', async () => { 
                 if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true }); 
                 if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text); 
