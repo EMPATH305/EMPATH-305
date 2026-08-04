@@ -837,7 +837,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     <div style="font-family:'Noto Serif TC',serif; font-size:14px; line-height:2; color:var(--fog); letter-spacing:1.5px;">
       <p style="color:var(--gold); font-weight:bold; margin-bottom:16px;" data-zh="你的脆弱，只屬於你自己。" data-en="Your vulnerability belongs only to you.">你的脆弱，只屬於你自己。</p>
       <ul style="margin-left: 20px; margin-bottom: 24px; color:rgba(255,255,255,0.7);">
-        <li style="margin-bottom:12px;" data-zh="【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器徹底且永久刪除。" data-en="[Forgotten] Room A messages are permanently deleted from servers after 24 hours.">【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器徹底且永久刪除。</li>
+        <li style="margin-bottom:12px;" data-zh="【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器（Google Cloud）徹底且永久刪除。" data-en="[Forgotten] Room A messages are permanently deleted from servers after 24 hours.">【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器（Google Cloud）徹底且永久刪除。</li>
         <li style="margin-bottom:12px;" data-zh="【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。" data-en="[Anonymity] No accounts needed. Without a Soul Key, your footprints cannot be traced back to you.">【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。</li>
         <li style="margin-bottom:12px;" data-zh="【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。" data-en="[Pure Sanctuary] We promise never to sell, analyze, or monetize your emotional data.">【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。</li>
       </ul>
@@ -1442,20 +1442,19 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   </div>
 </section>
 
-<div class="creator-portfolio">
-  <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" class="behance-float">✦ Design Case Study on Behance</a>
-</div>
-  
 <footer>
   <div class="footer-main">
     <div class="footer-left" data-zh="Every Moment As Truth Heals" data-en="Every Moment As Truth Heals" data-ja="Every Moment As Truth Heals" data-es="Every Moment As Truth Heals" data-fr="Every Moment As Truth Heals" data-de="Every Moment As Truth Heals" data-zh-cn="Every Moment As Truth Heals">Every Moment As Truth Heals</div>
     <div class="footer-letters"><span class="footer-l">E</span><span class="footer-l">M</span><span class="footer-l">P</span><span class="footer-l">A</span><span class="footer-l">T</span><span class="footer-l">H</span></div>
     <div class="footer-right" data-zh="數位時代的情緒安放平台" data-en="An emotional sanctuary for the digital age" data-ja="デジタル時代の感情のサンクチュアリ" data-es="Un santuario emocional para la era digital" data-fr="Un sanctuaire émotionnel pour l'ère numérique" data-de="Ein emotionales Heiligtum für das digitale Zeitalter" data-zh-cn="数字时代的情绪安放平台">數位時代的情緒安放平台</div>
   </div>
-  <div class="footer-links" style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:16px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; justify-content:center;">
-      <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">關於 EMPATH / About →</a>
-      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" onclick="window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">隱私哲學 / Privacy →</span>
+  
+  <!-- 新增：About 與 Privacy 連結 -->
+  <div style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom: 24px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; flex-wrap:wrap; justify-content:center;">
+      <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">About EMPATH (Behance)</a>
+      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" onclick="window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</span>
   </div>
+
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
