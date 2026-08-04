@@ -1061,8 +1061,6 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     data-pl-ph="Napisz to, czego nie możesz powiedzieć...&#10;Gniew, żal lub jakikolwiek ciężar.&#10;Nikt nie będzie wiedział, że to ty."
     placeholder="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。"></textarea>
   <div class="e-char-count" id="e-char">0 / 500</div>
-  <!-- 匿名的微同步共現 (當有人也在打字時會亮起) -->
-<div id="presence-spark" data-zh="此刻，世界某處也有人正與你一起傾吐..." data-en="Someone else is typing right now...">✦</div>
   
   <div id="e-draw-wrap">
       <canvas id="e-draw-canvas" role="img" aria-label="情緒塗鴉畫布" data-zh-aria="情緒塗鴉畫布" data-en-aria="Emotional doodle canvas"></canvas>
@@ -2242,8 +2240,65 @@ window.shareSite = function() {
 };
   
 window.openShareCard = function() { document.getElementById('sc-e').textContent = state.eCount; document.getElementById('sc-m').textContent = state.mCount; document.getElementById('sc-p').textContent = state.pCount; document.getElementById('sc-a').textContent = state.aCount; document.getElementById('sc-t').textContent = state.tCount; document.getElementById('share-modal').classList.add('show'); }
+window.downloadShareCard = async function() { 
+    const btn = document.getElementById('download-card-btn'); 
+    const originalText = btn.textContent; 
+    btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); 
 
-window.downloadShareCard = function() { if(typeof html2canvas === 'undefined') { window.showToast(t('圖片生成引擎載入中，請稍後再試 ✦','Loading image engine...','画像エンジンを読み込み中...','Cargando motor de imágenes...','Chargement du moteur d\'images...','Lade Bild-Engine...','图片生成引擎载入中，请稍后再试 ✦')); return; } const card = document.getElementById('wrapped-card-content'); const btn = document.getElementById('download-card-btn'); const originalText = btn.textContent; btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); html2canvas(card, { backgroundColor: '#0a111a', scale: 2 }).then(canvas => { const imgData = canvas.toDataURL('image/png'); card.style.display = 'none'; let existingImg = document.getElementById('generated-card-img'); if(existingImg) existingImg.remove(); const imgEl = document.createElement('img'); imgEl.src = imgData; imgEl.id = 'generated-card-img'; imgEl.style.width = '100%'; imgEl.style.maxWidth = '320px'; imgEl.style.borderRadius = '4px'; imgEl.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)'; card.parentNode.insertBefore(imgEl, document.querySelector('.share-modal-actions')); btn.style.display = 'none'; let hint = document.getElementById('save-hint'); if(!hint) { hint = document.createElement('p'); hint.id = 'save-hint'; hint.style.color = 'var(--gold)'; hint.style.fontSize = '12px'; hint.style.marginBottom = '16px'; document.querySelector('.share-modal-actions').prepend(hint); } hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享'); hint.style.display = 'block'; window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); }).catch(err => { btn.textContent = originalText; window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); }); }
+    // ✨ 按需動態載入：如果還沒載入引擎，現在才抓取
+    if (typeof window.html2canvas === 'undefined') { 
+        window.showToast(t('圖片生成引擎載入中... ✦','Loading image engine...','画像エンジンを読み込み中...','Cargando motor de imágenes...','Chargement du moteur d\'images...','Lade Bild-Engine...','图片生成引擎载入中... ✦'));
+        try {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                script.onload = resolve;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            });
+        } catch (err) {
+            console.error("html2canvas 載入失敗:", err);
+            btn.textContent = originalText;
+            window.showToast(t('引擎載入失敗，請檢查網路 ✦', 'Failed to load engine', 'エンジンの読み込みに失敗しました', 'Error al cargar motor', 'Échec du chargement', 'Laden fehlgeschlagen', '引擎载入失败，请检查网络 ✦'));
+            return;
+        }
+    } 
+
+    // 開始生成圖片
+    const card = document.getElementById('wrapped-card-content'); 
+    try {
+        const canvas = await window.html2canvas(card, { backgroundColor: '#0a111a', scale: 2 });
+        const imgData = canvas.toDataURL('image/png'); 
+        card.style.display = 'none'; 
+        
+        let existingImg = document.getElementById('generated-card-img'); 
+        if(existingImg) existingImg.remove(); 
+        
+        const imgEl = document.createElement('img'); 
+        imgEl.src = imgData; 
+        imgEl.id = 'generated-card-img'; 
+        imgEl.style.cssText = 'width:100%; max-width:320px; border-radius:4px; box-shadow:0 10px 40px rgba(0,0,0,0.8);'; 
+        card.parentNode.insertBefore(imgEl, document.querySelector('.share-modal-actions')); 
+        btn.style.display = 'none'; 
+        
+        let hint = document.getElementById('save-hint'); 
+        if(!hint) { 
+            hint = document.createElement('p'); 
+            hint.id = 'save-hint'; 
+            hint.style.cssText = 'color:var(--gold); font-size:12px; margin-bottom:16px; font-weight:bold;'; 
+            document.querySelector('.share-modal-actions').prepend(hint); 
+        } 
+        hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享'); 
+        hint.style.display = 'block'; 
+        window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); 
+        
+    } catch(err) { 
+        console.error("Canvas 生成錯誤:", err);
+        btn.textContent = originalText; 
+        window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); 
+    } 
+}
+  
 window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); setTimeout(() => { document.getElementById('wrapped-card-content').style.display = 'block'; const img = document.getElementById('generated-card-img'); if(img) img.remove(); document.getElementById('download-card-btn').style.display = 'inline-block'; document.getElementById('download-card-btn').textContent = t('⬇️ 下載為專屬圖片檔案', '⬇️ Download Exclusive Card', '⬇️ 専用画像としてダウンロード', '⬇️ Descargar Tarjeta Exclusiva', '⬇️ Télécharger la carte', '⬇️ Exklusive Karte herunterladen', '⬇️ 下载为专属图片档案'); const hint = document.getElementById('save-hint'); if(hint) hint.style.display = 'none'; }, 400); }
 window.openPrivacy = function() { 
     window.lastFocusBeforePrivacy = document.activeElement; // 記錄點開前的按鈕
