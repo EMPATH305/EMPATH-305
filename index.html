@@ -1727,7 +1727,7 @@ window.toggleHeroQuotes = function() { const el = document.getElementById('hero-
 
 window.addEventListener('scroll', () => { const btt = document.getElementById('btt-btn'); if(window.scrollY > 500) { btt.style.display = 'flex'; } else { btt.style.display = 'none'; } });
 
-function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) {} } }
+function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) { console.error("發生錯誤:", err); } } }
 loadLocalJourney();
 
 // ==========================================
@@ -2278,9 +2278,9 @@ function initTimeline(){ const container = document.getElementById('h-events'); 
 
 window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙生成成功 ✦')); }
 window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
-window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) {} }
+window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) { console.error("發生錯誤:", err); } }
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
-async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }, { merge: true }); } catch(err){} }
+async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }, { merge: true }); } catch(err) { console.error("發生錯誤:", err); } }
 function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex';
 const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
 
@@ -2582,7 +2582,7 @@ roomM.addEventListener('click', async e => {
     } 
 });
   
-window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err){} }
+window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); } }
 
 let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
@@ -3135,26 +3135,38 @@ window.checkRoomTWarmth = function() {
   
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
   firestoreUnsubs.push(onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } }));
-  if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e){} }
+  if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e) { console.error("發生錯誤:", e); } }
   if(!localStorage.getItem('empath_hsp_hint_shown')) { setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000); }
   if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) {} }
+  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
   const observer = new IntersectionObserver((entries) => {
-      if (document.body.classList.contains('hsp-mode')) return;
       entries.forEach(entry => {
-          if (entry.target.id === 'room-m') {
-              if (entry.isIntersecting && !starsRafId && isAnimating) window.drawStars();
-              else if (!entry.isIntersecting && starsRafId) { cancelAnimationFrame(starsRafId); starsRafId = null; }
+          if (!document.body.classList.contains('hsp-mode')) {
+              if (entry.target.id === 'room-m') { 
+                  if (entry.isIntersecting && isAnimating) { 
+                      if (!starsRafId) window.drawStars(); 
+                  } else if (!entry.isIntersecting) { 
+                      if (starsRafId) { cancelAnimationFrame(starsRafId); starsRafId = null; } 
+                  } 
+              }
+              if (entry.target.id === 'room-a') { 
+                  if (entry.isIntersecting && isAnimating) { 
+                      if (!sandRafId) window.drawSand(); 
+                  } else if (!entry.isIntersecting) { 
+                      if (sandRafId) { cancelAnimationFrame(sandRafId); sandRafId = null; } 
+                  } 
+              }
           }
-          if (entry.target.id === 'room-a') {
-              if (entry.isIntersecting && !sandRafId && isAnimating) window.drawSand();
-              else if (!entry.isIntersecting && sandRafId) { cancelAnimationFrame(sandRafId); sandRafId = null; }
+          if (entry.isIntersecting) { 
+              if (entry.target.id === 'hero') { document.title = 'EMPATH — Every Moment As Truth Heals'; } 
+              else { const roomLetter = entry.target.querySelector('.room-letter')?.textContent; if (roomLetter) document.title = `Room ${roomLetter} — EMPATH`; } 
           }
       });
-  }, { threshold: 0.05 });
+  }, { threshold: 0.15 });
 
+  document.querySelectorAll('.room, #hero').forEach(el => observer.observe(el));
   observer.observe(document.getElementById('room-m'));
   observer.observe(document.getElementById('room-a'));
   setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
