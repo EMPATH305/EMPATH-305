@@ -1518,13 +1518,16 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-// 👇 1. 新增載入 Analytics 分析模組
+// 🌟 新增載入 GA4 引擎
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
 
-const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
+// ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
+const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-MW5GYM0H77" };
+
 const app = initializeApp(firebaseConfig); 
 const db = getFirestore(app);
-// 👇 2. 啟動 GA4 分析引擎
+
+// 🌟 啟動全域追蹤功能
 window.empathAnalytics = getAnalytics(app);
 window.empathLogEvent = logEvent;
 
@@ -2051,8 +2054,9 @@ window.openNebula = function() {
 // EMPATH: 幸運微光 (隨機鼓勵彩蛋)
 // ==========================================
 window.crackFortune = function() {
-    // 這裡可以隨時擴充妳想對使用者說的話！
     if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'easter_egg_opened');
+  
+    // 這裡可以隨時擴充妳想對使用者說的話！
     const fortunes = [
         t('今天辛苦了，請為自己感到驕傲。', 'You worked hard today. Be proud of yourself.', '今日はお疲れ様。自分を誇りに思って。', 'Trabajaste duro hoy. Siéntete orgulloso.', 'Vous avez bien travaillé aujourd\'hui. Soyez fier.', 'Du hast heute hart gearbeitet. Sei stolz auf dich.', '今天辛苦了，请为自己感到骄傲。'),
         t('你的存在，本身就是一件美好的事。', 'Your existence is a beautiful thing.', 'あなたの存在そのものが美しい。', 'Tu existencia es algo hermoso.', 'Votre existence est une belle chose.', 'Deine Existenz ist etwas Wunderschönes.', '你的存在，本身就是一件美好的事。'),
@@ -2319,8 +2323,8 @@ window.shareSite = function() {
 };
   
 window.openShareCard = function() { document.getElementById('sc-e').textContent = state.eCount; document.getElementById('sc-m').textContent = state.mCount; document.getElementById('sc-p').textContent = state.pCount; document.getElementById('sc-a').textContent = state.aCount; document.getElementById('sc-t').textContent = state.tCount; document.getElementById('share-modal').classList.add('show'); }
-   if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'generate_soul_card');
   window.downloadShareCard = async function() { 
+       if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'generate_soul_card');
   const btn = document.getElementById('download-card-btn'); 
     const originalText = btn.textContent; 
     btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); 
