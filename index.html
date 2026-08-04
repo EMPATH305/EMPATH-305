@@ -831,13 +831,26 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 
 <div id="creator-modal" class="share-modal" onclick="if(event.target===this) window.closeCreator()">
   <div class="wrapped-card" style="max-width: 500px; text-align: left; padding: 40px 32px;">
-    <div class="wrapped-title" style="font-size:20px; margin-bottom:24px; text-align:center;">FROM THE CREATOR</div>
-    <div style="font-family:'Noto Serif TC',serif; font-size:15px; line-height:2.2; color:var(--fog); letter-spacing:1.5px; max-height: 400px; overflow-y: auto;">
-      <p style="color:var(--gold); font-weight:bold; margin-bottom:16px;">致 來到這裡的兩千個靈魂：</p>
-      <p>謝謝你們，讓這裡充滿了光。<br><br>我們目前正在進行伺服器的效能升級，如果你偶爾遇到網頁卡頓，請給它一點時間修復自己。<br><br>所有的悲傷與思念，依然會被這裡安全地接住。</p>
+    <div class="wrapped-title" style="font-size:20px; margin-bottom:24px; text-align:center; letter-spacing: 4px;">✉️ 創作者公告</div>
+    
+    <div style="font-family:'Noto Serif TC',serif; font-size:15px; line-height:2.2; color:var(--fog); letter-spacing:1.5px; max-height: 400px; overflow-y: auto; padding-right: 8px;">
+      
+      <!-- 📝 妳可以在這裡隨時新增或修改公告 -->
+      <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed rgba(255,255,255,0.15);">
+          <p style="font-size:12px; color:var(--gold); margin-bottom:8px; font-weight:bold; letter-spacing: 2px;">2026.08.04</p>
+          <p>致 來到這裡的兩千個靈魂：<br>謝謝你們，讓這裡充滿了光。所有的悲傷與思念，依然會被這裡安全地接住。</p>
+      </div>
+
+      <!-- 📝 第二則公告範例 (未來妳只要複製上面那一塊，貼在下面就能一直新增) -->
+      <div style="margin-bottom: 24px;">
+          <p style="font-size:12px; color:var(--gold); margin-bottom:8px; font-weight:bold; letter-spacing: 2px;">2026.08.01</p>
+          <p>EMPATH 數位避難所正式開啟。願每一顆受傷的心，都能在這裡找到平靜。</p>
+      </div>
+
     </div>
+    
     <div style="text-align:center; margin-top:32px;">
-      <button class="close-modal-btn" onclick="window.closeCreator()">關閉信件</button>
+      <button class="close-modal-btn" onclick="window.closeCreator()">合上信件</button>
     </div>
   </div>
 </div>
@@ -2738,14 +2751,24 @@ window.drawKintsugiVessel = function(){
     c.fillStyle = 'rgba(8, 12, 18, 0.7)'; c.fill();
     c.strokeStyle = 'rgba(201,168,76,0.15)'; c.lineWidth = 1; c.stroke();
 
-    // 2. 美學重塑：流線型的日式主副脈絡
+    // 2. 美學重塑：更密集、如樹枝般交織蔓延的日式主副脈絡
     const kintsugiVeins = [
         [{x:-110, y:-10}, {cx:-90, cy:30, x:-50, y:50}, {cx:-10, cy:70, x:20, y:95}],
         [{x:110, y:10}, {cx:80, cy:40, x:40, y:45}, {cx:10, cy:50, x:-20, y:80}],
         [{x:-50, y:50}, {cx:-30, cy:10, x:0, y:0}],
         [{x:40, y:45}, {cx:60, cy:80, x:30, y:105}],
         [{x:0, y:0}, {cx:30, cy:-20, x:80, y:-25}],
-        [{x:-70, y:-25}, {cx:-40, cy:5, x:-10, y:20}]
+        [{x:-70, y:-25}, {cx:-40, cy:5, x:-10, y:20}],
+        // 增強細節的交錯分支，讓它看起來更自然
+        [{x:-130, y:-30}, {cx:-100, cy:-10, x:-70, y:-25}],
+        [{x:130, y:-30}, {cx:100, cy:-15, x:80, y:-25}],
+        [{x:-20, y:80}, {cx:-40, cy:100, x:-45, y:110}],
+        [{x:20, y:95}, {cx:30, cy:110, x:45, y:110}],
+        [{x:0, y:0}, {cx:-20, cy:25, x:-50, y:50}],
+        [{x:80, y:-25}, {cx:60, cy:10, x:40, y:45}],
+        [{x:-10, y:20}, {cx:10, cy:10, x:40, y:45}],
+        [{x:-50, y:50}, {cx:-70, cy:60, x:-90, y:80}],
+        [{x:40, y:45}, {cx:60, cy:30, x:90, y:20}]
     ];
 
     const drawVein = (index, isHealed) => {
