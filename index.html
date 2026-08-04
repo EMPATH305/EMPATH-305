@@ -844,7 +844,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
       <p data-zh="這是一個安全的樹洞，請安心放下。" data-en="This is a safe treehole. Feel free to let go.">這是一個安全的樹洞，請安心放下。</p>
     </div>
     <div style="text-align:center; margin-top:32px;">
-      <button class="close-modal-btn" onclick="window.closePrivacy()" data-zh="我明白了" data-en="I understand">我明白了</button>
+      <button id="privacy-close-btn" class="close-modal-btn" onclick="window.closePrivacy()" data-zh="我明白了" data-en="I understand">我明白了</button>
     </div>
   </div>
 </div>
@@ -2245,8 +2245,30 @@ window.openShareCard = function() { document.getElementById('sc-e').textContent 
 
 window.downloadShareCard = function() { if(typeof html2canvas === 'undefined') { window.showToast(t('圖片生成引擎載入中，請稍後再試 ✦','Loading image engine...','画像エンジンを読み込み中...','Cargando motor de imágenes...','Chargement du moteur d\'images...','Lade Bild-Engine...','图片生成引擎载入中，请稍后再试 ✦')); return; } const card = document.getElementById('wrapped-card-content'); const btn = document.getElementById('download-card-btn'); const originalText = btn.textContent; btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); html2canvas(card, { backgroundColor: '#0a111a', scale: 2 }).then(canvas => { const imgData = canvas.toDataURL('image/png'); card.style.display = 'none'; let existingImg = document.getElementById('generated-card-img'); if(existingImg) existingImg.remove(); const imgEl = document.createElement('img'); imgEl.src = imgData; imgEl.id = 'generated-card-img'; imgEl.style.width = '100%'; imgEl.style.maxWidth = '320px'; imgEl.style.borderRadius = '4px'; imgEl.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)'; card.parentNode.insertBefore(imgEl, document.querySelector('.share-modal-actions')); btn.style.display = 'none'; let hint = document.getElementById('save-hint'); if(!hint) { hint = document.createElement('p'); hint.id = 'save-hint'; hint.style.color = 'var(--gold)'; hint.style.fontSize = '12px'; hint.style.marginBottom = '16px'; document.querySelector('.share-modal-actions').prepend(hint); } hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享'); hint.style.display = 'block'; window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); }).catch(err => { btn.textContent = originalText; window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); }); }
 window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); setTimeout(() => { document.getElementById('wrapped-card-content').style.display = 'block'; const img = document.getElementById('generated-card-img'); if(img) img.remove(); document.getElementById('download-card-btn').style.display = 'inline-block'; document.getElementById('download-card-btn').textContent = t('⬇️ 下載為專屬圖片檔案', '⬇️ Download Exclusive Card', '⬇️ 専用画像としてダウンロード', '⬇️ Descargar Tarjeta Exclusiva', '⬇️ Télécharger la carte', '⬇️ Exklusive Karte herunterladen', '⬇️ 下载为专属图片档案'); const hint = document.getElementById('save-hint'); if(hint) hint.style.display = 'none'; }, 400); }
-window.openPrivacy = function() { document.getElementById('privacy-modal').classList.add('show'); }
-window.closePrivacy = function() { document.getElementById('privacy-modal').classList.remove('show'); }
+window.openPrivacy = function() { 
+    window.lastFocusBeforePrivacy = document.activeElement; // 記錄點開前的按鈕
+    document.getElementById('privacy-modal').classList.add('show'); 
+    // 延遲一點點，將焦點移入「我明白了」按鈕
+    setTimeout(() => { const btn = document.getElementById('privacy-close-btn'); if(btn) btn.focus(); }, 100); 
+}
+window.closePrivacy = function() { 
+    document.getElementById('privacy-modal').classList.remove('show'); 
+    // 關閉時，把焦點還給頁尾的隱私連結
+    if(window.lastFocusBeforePrivacy) window.lastFocusBeforePrivacy.focus(); 
+}
+
+// ♿ 無障礙最高境界：全局監聽 ESC 鍵，一鍵關閉所有彈窗
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (document.getElementById('privacy-modal')?.classList.contains('show')) window.closePrivacy();
+        if (document.getElementById('share-modal')?.classList.contains('show')) window.closeShareModal();
+        if (document.getElementById('breathe-overlay')?.classList.contains('show')) window.stopBreathe();
+        if (document.getElementById('nebula-overlay')?.classList.contains('show')) window.closeNebula();
+        const fortune = document.getElementById('fortune-display');
+        if (fortune?.classList.contains('show')) fortune.classList.remove('show');
+    }
+});
+  
 window.showToast = function(msg, dur=2400){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), dur); }
 function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 
