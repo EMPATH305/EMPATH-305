@@ -815,11 +815,33 @@ body.anniversary-mode .sand-timer-fill {
 }
 :focus-visible { outline: 2px solid var(--gold) !important; outline-offset: 4px; border-radius: 4px; }
 textarea:focus-visible, input:focus-visible { outline: none !important; }
+
+/* 放大 Room M 星空版面 */
+#room-m { min-height: 120vh !important; padding-bottom: 200px; }
+@media(max-width: 768px) {
+    #room-m { min-height: 140vh !important; padding-bottom: 600px !important; }
+}
   
 </style>
 </head>
 <body>
 
+<!-- 創作者公告按鈕與 Modal -->
+<div id="creator-btn" tabindex="0" onclick="window.openCreator()" onkeydown="if(event.key==='Enter') window.openCreator()" style="position:fixed; bottom:90px; left:40px; z-index:900; font-size:24px; cursor:pointer; opacity:0.6; transition:all 0.3s; filter:grayscale(100%);">✉️</div>
+
+<div id="creator-modal" class="share-modal" onclick="if(event.target===this) window.closeCreator()">
+  <div class="wrapped-card" style="max-width: 500px; text-align: left; padding: 40px 32px;">
+    <div class="wrapped-title" style="font-size:20px; margin-bottom:24px; text-align:center;">FROM THE CREATOR</div>
+    <div style="font-family:'Noto Serif TC',serif; font-size:15px; line-height:2.2; color:var(--fog); letter-spacing:1.5px; max-height: 400px; overflow-y: auto;">
+      <p style="color:var(--gold); font-weight:bold; margin-bottom:16px;">致 來到這裡的兩千個靈魂：</p>
+      <p>謝謝你們，讓這裡充滿了光。<br><br>我們目前正在進行伺服器的效能升級，如果你偶爾遇到網頁卡頓，請給它一點時間修復自己。<br><br>所有的悲傷與思念，依然會被這裡安全地接住。</p>
+    </div>
+    <div style="text-align:center; margin-top:32px;">
+      <button class="close-modal-btn" onclick="window.closeCreator()">關閉信件</button>
+    </div>
+  </div>
+</div>
+  
 <!-- 🚨 終極安全網：如果 JavaScript 崩潰，就會顯示這個畫面 -->
 <div id="empath-safe-mode" style="display:none; position:fixed; inset:0; background:#0D1B2A; z-index:9999999; color:var(--gold); flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:'Noto Serif TC', serif; padding:20px;">
     <h1 style="font-size:24px; letter-spacing:6px; margin-bottom:16px;">EMPATH IS HEALING</h1>
@@ -2076,8 +2098,16 @@ function subscribeAll() {
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
     
     // 2. 監聽星星
-    firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { globalCounts.m = snapshot.size; starMessages = []; snapshot.forEach((docSnap) => { const data = docSnap.data(); starMessages.push({ id: docSnap.id, ...data }); }); if(typeof window.updateMStats === 'function') window.updateMStats(); updateCountersUI(); }));
-    
+    firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { 
+        globalCounts.m = snapshot.size; 
+        let tempStars = []; 
+        snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); }); 
+        // 🌟 效能救星：只抓最亮的前 80 顆進行物理運算，徹底消除卡頓！
+        starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80); 
+        if(typeof window.updateMStats === 'function') window.updateMStats(); 
+        updateCountersUI(); 
+    }));
+  
     // 3. 監聽星系金線
     firestoreUnsubs.push(onSnapshot(collection(db, "constellations"), (snapshot) => {
         const nowMs = Date.now();
@@ -2333,6 +2363,9 @@ window.closePrivacy = function() {
     if(window.lastFocusBeforePrivacy) window.lastFocusBeforePrivacy.focus(); 
 }
 
+window.openCreator = function() { document.getElementById('creator-modal').classList.add('show'); }
+window.closeCreator = function() { document.getElementById('creator-modal').classList.remove('show'); }
+
 // ♿ 無障礙最高境界：全局監聽 ESC 鍵，一鍵關閉所有彈窗
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -2340,6 +2373,7 @@ document.addEventListener('keydown', (e) => {
         if (document.getElementById('share-modal')?.classList.contains('show')) window.closeShareModal();
         if (document.getElementById('breathe-overlay')?.classList.contains('show')) window.stopBreathe();
         if (document.getElementById('nebula-overlay')?.classList.contains('show')) window.closeNebula();
+        if (document.getElementById('creator-modal')?.classList.contains('show')) window.closeCreator(); // 👈 這裡就是新增的 ESC 關閉公告
         const fortune = document.getElementById('fortune-display');
         if (fortune?.classList.contains('show')) fortune.classList.remove('show');
     }
@@ -2498,7 +2532,8 @@ function initBgStars(w, h){
         }); 
     } 
 }
-window.updateMStats = function(){ if(!document.getElementById('m-count')) return; document.getElementById('m-count').textContent = starMessages.length; if(starMessages.length === 0) { document.getElementById('m-brightest').textContent = '—'; return; } const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text; }
+
+window.updateMStats = function(){ if(!document.getElementById('m-count')) return; document.getElementById('m-count').textContent = globalCounts.m || starMessages.length;
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ 
     if(!canvas.width || !isAnimating) return; 
@@ -2678,11 +2713,9 @@ window.drawKintsugiVessel = function(){
     const w = pCanvas.offsetWidth || 540; 
     const h = 300; 
     c.clearRect(0,0,w,h); 
-    
-    const cx = w/2;
-    const cy = h/2;
+    const cx = w/2; const cy = h/2;
 
-    // 1. 畫出具備立體感的「日式茶碗 (Chawan)」
+    // 1. 畫出具備立體感的日式茶碗
     c.beginPath();
     c.moveTo(cx - 130, cy - 30);
     c.bezierCurveTo(cx - 60, cy - 50, cx + 60, cy - 50, cx + 130, cy - 30);
@@ -2690,40 +2723,26 @@ window.drawKintsugiVessel = function(){
     c.bezierCurveTo(cx + 130, cy + 60, cx + 80, cy + 100, cx + 45, cy + 110);
     c.lineTo(cx - 45, cy + 110);
     c.bezierCurveTo(cx - 80, cy + 100, cx - 130, cy + 60, cx - 130, cy - 30);
-    
-    c.fillStyle = 'rgba(8, 12, 18, 0.7)';
-    c.fill();
-    c.strokeStyle = 'rgba(201,168,76,0.3)';
-    c.lineWidth = 1;
-    c.stroke();
+    c.fillStyle = 'rgba(8, 12, 18, 0.7)'; c.fill();
+    c.strokeStyle = 'rgba(201,168,76,0.15)'; c.lineWidth = 1; c.stroke();
 
-    // 2. 建立「大師級手工裂縫基因庫」
-    const crackTemplates = [
-        [{x:-130,y:-30}, {x:-90,y:10}, {x:-75,y:40}, {x:-30,y:60}], 
-        [{x:130,y:-30}, {x:100,y:0}, {x:80,y:50}, {x:20,y:80}],     
-        [{x:-45,y:110}, {x:-20,y:70}, {x:15,y:50}, {x:40,y:10}],    
-        [{x:45,y:110}, {x:25,y:75}, {x:-10,y:45}, {x:-35,y:25}],    
-        [{x:-80,y:-38}, {x:-50,y:-10}, {x:-20,y:20}, {x:10,y:40}],  
-        [{x:80,y:-38}, {x:45,y:-5}, {x:10,y:15}, {x:-15,y:50}],     
-        [{x:-110,y:15}, {x:-80,y:40}, {x:-40,y:70}, {x:0,y:95}],    
-        [{x:110,y:15}, {x:70,y:35}, {x:35,y:65}, {x:10,y:100}]      
+    // 2. 美學重塑：流線型的日式主副脈絡
+    const kintsugiVeins = [
+        [{x:-110, y:-10}, {cx:-90, cy:30, x:-50, y:50}, {cx:-10, cy:70, x:20, y:95}],
+        [{x:110, y:10}, {cx:80, cy:40, x:40, y:45}, {cx:10, cy:50, x:-20, y:80}],
+        [{x:-50, y:50}, {cx:-30, cy:10, x:0, y:0}],
+        [{x:40, y:45}, {cx:60, cy:80, x:30, y:105}],
+        [{x:0, y:0}, {cx:30, cy:-20, x:80, y:-25}],
+        [{x:-70, y:-25}, {cx:-40, cy:5, x:-10, y:20}]
     ];
 
-    // 3. 繪製裂縫的引擎
-    const drawCrack = (index, isHealed) => {
-        const template = crackTemplates[index % crackTemplates.length];
-        const offset = Math.floor(index / crackTemplates.length) * 8; 
-
+    const drawVein = (index, isHealed) => {
+        const vein = kintsugiVeins[index % kintsugiVeins.length];
         c.beginPath();
-        template.forEach((pt, k) => {
-            const px = cx + pt.x + (k % 2 === 0 ? offset : -offset);
-            const py = cy + pt.y + (k % 2 === 0 ? -offset : offset);
-            if (k === 0) c.moveTo(px, py);
-            else c.lineTo(px, py);
+        vein.forEach((pt, k) => {
+            if (k === 0) c.moveTo(cx + pt.x, cy + pt.y);
+            else c.quadraticCurveTo(cx + pt.cx, cy + pt.cy, cx + pt.x, cy + pt.y);
         });
-
-        c.lineJoin = 'miter'; 
-        c.miterLimit = 2;
 
         if (isHealed) {
             const gradient = c.createLinearGradient(cx - 50, cy - 50, cx + 50, cy + 50);
@@ -2731,29 +2750,22 @@ window.drawKintsugiVessel = function(){
             gradient.addColorStop(0.5, '#FFF8DC');
             gradient.addColorStop(1, '#B38728');
             c.strokeStyle = gradient;
-            c.lineWidth = 2.5;
-            c.shadowBlur = 12;
-            c.shadowColor = 'rgba(252, 246, 186, 0.6)';
+            c.lineWidth = 2.0; 
+            c.shadowBlur = 8;
+            c.shadowColor = 'rgba(212, 175, 55, 0.5)';
         } else {
-            c.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-            c.lineWidth = 1;
-            c.shadowBlur = 0;
+            c.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            c.lineWidth = 1; c.shadowBlur = 0;
         }
-        
-        c.stroke();
-        c.shadowBlur = 0; 
+        c.stroke(); c.shadowBlur = 0; 
     };
 
-    // 先畫出所有碎片的「暗痕」
-    for(let i = 0; i < pTotalShards; i++) {
-        drawCrack(i, false);
-    }
-    
-    // 再為已經被修復的碎片塗上「金繼」
-    const goldLines = Math.min(pHealedTotal, pTotalShards);
-    for(let i = 0; i < goldLines; i++) {
-        drawCrack(i, true);
-    }
+    // 效能救星 2：把 2000 個碎片轉換成「比例」，映射到 6 條精緻主線上
+    const healedRatio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
+    const linesToHeal = Math.ceil(healedRatio * kintsugiVeins.length);
+
+    for(let i = 0; i < kintsugiVeins.length; i++) drawVein(i, false);
+    for(let i = 0; i < linesToHeal; i++) drawVein(i, true);
 }
   
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
