@@ -1518,9 +1518,15 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// 👇 1. 新增載入 Analytics 分析模組
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
 
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
-const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+const app = initializeApp(firebaseConfig); 
+const db = getFirestore(app);
+// 👇 2. 啟動 GA4 分析引擎
+window.empathAnalytics = getAnalytics(app);
+window.empathLogEvent = logEvent;
 
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 }; const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 }; let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
 let lastSubmitTime = 0; const SUBMIT_COOLDOWN = 3000; 
@@ -2046,6 +2052,7 @@ window.openNebula = function() {
 // ==========================================
 window.crackFortune = function() {
     // 這裡可以隨時擴充妳想對使用者說的話！
+    if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'easter_egg_opened');
     const fortunes = [
         t('今天辛苦了，請為自己感到驕傲。', 'You worked hard today. Be proud of yourself.', '今日はお疲れ様。自分を誇りに思って。', 'Trabajaste duro hoy. Siéntete orgulloso.', 'Vous avez bien travaillé aujourd\'hui. Soyez fier.', 'Du hast heute hart gearbeitet. Sei stolz auf dich.', '今天辛苦了，请为自己感到骄傲。'),
         t('你的存在，本身就是一件美好的事。', 'Your existence is a beautiful thing.', 'あなたの存在そのものが美しい。', 'Tu existencia es algo hermoso.', 'Votre existence est une belle chose.', 'Deine Existenz ist etwas Wunderschönes.', '你的存在，本身就是一件美好的事。'),
@@ -2312,8 +2319,9 @@ window.shareSite = function() {
 };
   
 window.openShareCard = function() { document.getElementById('sc-e').textContent = state.eCount; document.getElementById('sc-m').textContent = state.mCount; document.getElementById('sc-p').textContent = state.pCount; document.getElementById('sc-a').textContent = state.aCount; document.getElementById('sc-t').textContent = state.tCount; document.getElementById('share-modal').classList.add('show'); }
-window.downloadShareCard = async function() { 
-    const btn = document.getElementById('download-card-btn'); 
+   if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'generate_soul_card');
+  window.downloadShareCard = async function() { 
+  const btn = document.getElementById('download-card-btn'); 
     const originalText = btn.textContent; 
     btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); 
 
@@ -2456,6 +2464,7 @@ window.submitE = async function(){
         if (imageData) docData.image = imageData;
         
         await addDoc(collection(db, "emotions"), docData); 
+        if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_submit');
         
         logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]'); 
         playRitual('e-submit-btn', origText); 
