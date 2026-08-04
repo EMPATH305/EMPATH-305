@@ -820,6 +820,19 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 </head>
 <body>
 
+<!-- 🚨 終極安全網：如果 JavaScript 崩潰，就會顯示這個畫面 -->
+<div id="empath-safe-mode" style="display:none; position:fixed; inset:0; background:#0D1B2A; z-index:9999999; color:var(--gold); flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:'Noto Serif TC', serif; padding:20px;">
+    <h1 style="font-size:24px; letter-spacing:6px; margin-bottom:16px;">EMPATH IS HEALING</h1>
+    <p style="font-size:14px; color:var(--muted); line-height:2.2; letter-spacing:2px; margin-bottom: 32px;">這座數位避難所的引擎正在進行修補與升級<br>請稍後再回來，我們馬上就好 ✦</p>
+    <button onclick="location.reload()" style="padding:12px 24px; background:transparent; border:1px solid var(--gold); color:var(--gold); border-radius:4px; cursor:pointer; font-family:inherit; letter-spacing:2px;">嘗試重新連線</button>
+</div>
+<script>
+    // 只要網頁發生無法挽回的 JS 語法錯誤，立刻彈出安全網
+    window.addEventListener('error', function(e) {
+        document.getElementById('empath-safe-mode').style.display = 'flex';
+    });
+</script>
+
 <!-- 🏆 CSSLight 國際畫廊榮譽勳章 🏆 -->
 <a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(http://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
 
@@ -1406,7 +1419,13 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     <!-- 時空信箱 UI -->
       <div id="future-letter-box" style="display:none; margin-top:32px; border-top:1px dashed rgba(255,255,255,0.2); padding-top:24px;">
           <p style="font-family:'Noto Serif TC',serif; font-size:14px; color:var(--gold); margin-bottom:12px; font-weight:bold;">✉️ 給未來的自己</p>
-          <textarea id="future-letter-input" class="sync-input" style="width:100%; height:80px; resize:none; margin-bottom:12px;" placeholder="寫下現在的感受，留給三個月後的自己..."></textarea>
+          <textarea id="future-letter-input" class="sync-input" style="width:100%; height:80px; resize:none; margin-bottom:12px;" 
+            data-zh-ph="寫下現在的感受，留給三個月後的自己..." 
+            data-en-ph="Write down your feelings now, for your future self..." 
+            data-ja-ph="今の気持ちを書いて、3ヶ月後の自分へ..." 
+            data-es-ph="Escribe tus sentimientos ahora, para tu yo del futuro..." 
+            data-zh-cn-ph="写下现在的感受，留给三个月后的自己..."
+            placeholder="寫下現在的感受，留給三個月後的自己..."></textarea>
           <button class="sync-btn-small" onclick="window.submitFutureLetter()" style="border-color:var(--h); color:var(--h);">封存信件 →</button>
           <div id="unlocked-letters" style="margin-top:24px;"></div>
       </div>
@@ -2065,9 +2084,12 @@ function subscribeAll() {
         window.activeConstellations = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
-            const createdAtMs = data.createdAt ? data.createdAt.seconds * 1000 : nowMs;
-            const ageHours = (nowMs - createdAtMs) / (1000 * 60 * 60);
-            if (ageHours > 24) return;
+            const createdAtMs = data.createdAt ? data.createdAt.seconds * 1000 : Date.now();
+            const createdDate = new Date(createdAtMs);
+            const today = new Date();
+            // ✨ 只要金線的「建立日期」不是「今天」，就自動過濾掉不顯示
+            if (createdDate.toDateString() !== today.toDateString()) return;
+            
             window.activeConstellations.push({ s1Id: data.s1Id, s2Id: data.s2Id, createdAt: createdAtMs });
         });
     }));
