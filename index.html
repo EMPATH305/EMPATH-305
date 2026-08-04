@@ -2245,9 +2245,9 @@ window.downloadShareCard = async function() {
     const originalText = btn.textContent; 
     btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); 
 
-    // ✨ 按需動態載入：如果還沒載入引擎，現在才抓取
+    // ✨ 動態載入 html2canvas
     if (typeof window.html2canvas === 'undefined') { 
-        window.showToast(t('圖片生成引擎載入中... ✦','Loading image engine...','画像エンジンを読み込み中...','Cargando motor de imágenes...','Chargement du moteur d\'images...','Lade Bild-Engine...','图片生成引擎载入中... ✦'));
+        window.showToast(t('圖片生成引擎載入中... ✦','Loading engine...','エンジンを読み込み中...','Cargando motor...','Chargement du moteur...','Lade Engine...','图片生成引擎载入中... ✦'));
         try {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -2259,12 +2259,11 @@ window.downloadShareCard = async function() {
         } catch (err) {
             console.error("html2canvas 載入失敗:", err);
             btn.textContent = originalText;
-            window.showToast(t('引擎載入失敗，請檢查網路 ✦', 'Failed to load engine', 'エンジンの読み込みに失敗しました', 'Error al cargar motor', 'Échec du chargement', 'Laden fehlgeschlagen', '引擎载入失败，请检查网络 ✦'));
+            window.showToast(t('載入失敗 ✦', 'Load failed', '失敗しました', 'Fallo al cargar', 'Échec', 'Fehlgeschlagen', '载入失败 ✦'));
             return;
         }
     } 
 
-    // 開始生成圖片
     const card = document.getElementById('wrapped-card-content'); 
     try {
         const canvas = await window.html2canvas(card, { backgroundColor: '#0a111a', scale: 2 });
@@ -2290,12 +2289,12 @@ window.downloadShareCard = async function() {
         } 
         hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享'); 
         hint.style.display = 'block'; 
-        window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); 
+        window.showToast(t('圖片已生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); 
         
     } catch(err) { 
-        console.error("Canvas 生成錯誤:", err);
+        console.error("生成錯誤:", err);
         btn.textContent = originalText; 
-        window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); 
+        window.showToast('生成失敗'); 
     } 
 }
   
@@ -2903,52 +2902,52 @@ window.createEchoRipple = function(e) {
 };
 
 // ==========================================
-// 魔法三：匿名的微同步共現 (Live Micro-Presence 極速版)
+// 魔法三：匿名的微同步共現 (Live Micro-Presence 通用版)
 // ==========================================
 const mySessionId = Math.random().toString(36).substr(2, 9);
-const presenceRef = doc(db, 'presence', 'roomE');
-const eInputBox = document.getElementById('e-input');
 
-let typingTimer;
-let isTyping = false; // 節流閥：紀錄自己是否正在打字
+function setupRoomPresence(roomKey, inputId) {
+    const inputBox = document.getElementById(inputId); 
+    if (!inputBox) return;
+    
+    // 動態插入微光標籤
+    let sparkEl = document.createElement('div'); 
+    sparkEl.className = 'presence-spark'; 
+    sparkEl.innerHTML = `✦`;
+    sparkEl.setAttribute('data-zh', '此刻，世界某處也有人正與你一起傾吐...');
+    inputBox.parentNode.insertBefore(sparkEl, inputBox.nextSibling);
 
-if(eInputBox) {
-    eInputBox.addEventListener('input', () => {
-        // 【極速關鍵】只有從「沒打字」變「開始打字」的那一瞬間，才發送一次訊號
-        if (!isTyping) {
-            isTyping = true;
-            setDoc(presenceRef, { by: mySessionId }, { merge: true });
+    const presenceRef = doc(db, 'presence', roomKey); 
+    let typingTimer; 
+    let isTyping = false;
+
+    inputBox.addEventListener('input', () => {
+        if (!isTyping) { 
+            isTyping = true; 
+            setDoc(presenceRef, { by: mySessionId }, { merge: true }).catch(e=>{}); 
         }
-        
-        // 每次敲擊，就重置「3秒後熄滅」的倒數計時
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            isTyping = false; // 停下超過 3 秒，視為打完字了
-            setDoc(presenceRef, { by: 'none' }, { merge: true });
+        clearTimeout(typingTimer); 
+        typingTimer = setTimeout(() => { 
+            isTyping = false; 
+            setDoc(presenceRef, { by: 'none' }, { merge: true }).catch(e=>{}); 
         }, 3000);
     });
-}
 
-// 監聽是否有「其他人」正在打字
-let presenceHideTimer;
-// 🌟 拔除 firestoreUnsubs.push，讓微光獨立連線，永遠不斷線！
-onSnapshot(presenceRef, (docSnap) => {
-    if(docSnap.exists()) {
-        const data = docSnap.data();
-        const sparkEl = document.getElementById('presence-spark');
-        
-        if (data.by !== mySessionId && data.by !== 'none') {
-            sparkEl.classList.add('show');
-            clearTimeout(presenceHideTimer);
-            presenceHideTimer = setTimeout(() => {
-                sparkEl.classList.remove('show');
-            }, 4000);
-        } else if (data.by === 'none') {
-            sparkEl.classList.remove('show');
-            clearTimeout(presenceHideTimer);
+    let presenceHideTimer;
+    onSnapshot(presenceRef, (docSnap) => {
+        if(docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.by !== mySessionId && data.by !== 'none') { 
+                sparkEl.classList.add('show'); 
+                clearTimeout(presenceHideTimer); 
+                presenceHideTimer = setTimeout(() => { sparkEl.classList.remove('show'); }, 4000); 
+            } else if (data.by === 'none') { 
+                sparkEl.classList.remove('show'); 
+                clearTimeout(presenceHideTimer); 
+            }
         }
-    }
-});
+    });
+}
 
 // 🌟 拔掉原本的 load 煞車，改用 DOMContentLoaded 讓它瞬間起跑
 
@@ -3111,6 +3110,12 @@ window.checkRoomTWarmth = function() {
 };
   
   document.addEventListener('DOMContentLoaded', async () => {
+  setupRoomPresence('roomE', 'e-input');
+  setupRoomPresence('roomM', 'm-input');
+  setupRoomPresence('roomP', 'p-input');
+  setupRoomPresence('roomA', 'a-input');
+  setupRoomPresence('roomT', 't-input');
+    
   // 啟動時間與宇宙感知
   window.initTimeAndCosmic();
 
