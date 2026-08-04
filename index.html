@@ -616,13 +616,13 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 }
 
 /* ===== 匿名的微同步共現 ===== */
-#presence-spark {
-    font-size: 14px; color: var(--e); letter-spacing: 2px;
+.presence-spark {
+    font-size: 11px; color: var(--gold); letter-spacing: 1px;
     margin-top: 12px; opacity: 0; transition: opacity 1.5s ease;
-    display: flex; align-items: center; gap: 8px; font-weight: bold;
+    display: flex; align-items: center; gap: 8px; font-weight: normal; pointer-events: none;
 }
-#presence-spark.show { opacity: 0.8; animation: pulse-spark 3s infinite; }
-#presence-spark::after { content: attr(data-zh); font-size: 11px; font-weight: normal; letter-spacing: 1px; }
+.presence-spark.show { opacity: 0.8; animation: pulse-spark 3s infinite; }
+.presence-spark .spark-icon { font-size: 14px; font-weight: bold; }
   
 /* 手機版隱藏游標跟隨與微調按鈕位置 */
 @media(max-width:768px){
@@ -2913,8 +2913,7 @@ function setupRoomPresence(roomKey, inputId) {
     // 動態插入微光標籤
     let sparkEl = document.createElement('div'); 
     sparkEl.className = 'presence-spark'; 
-    sparkEl.innerHTML = `✦`;
-    sparkEl.setAttribute('data-zh', '此刻，世界某處也有人正與你一起傾吐...');
+    sparkEl.innerHTML = `<span class="spark-icon">✦</span><span data-zh="此刻，世界某處也有人正與你一起傾吐..." data-en="Someone else is typing right now..." data-ja="誰かが今、入力をしています..." data-es="Alguien más está escribiendo ahora..." data-fr="Quelqu'un d'autre écrit en ce moment..." data-de="Jemand anderes tippt gerade..." data-zh-cn="此刻，世界某处也有人正与你一起倾吐...">此刻，世界某處也有人正與你一起傾吐...</span>`;
     inputBox.parentNode.insertBefore(sparkEl, inputBox.nextSibling);
 
     const presenceRef = doc(db, 'presence', roomKey); 
