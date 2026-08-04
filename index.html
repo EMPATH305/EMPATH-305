@@ -47,7 +47,6 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕯️</text></svg>">
 <link rel="apple-touch-icon" href="og-image.png">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
@@ -797,6 +796,28 @@ body.anniversary-mode .sand-timer-fill {
 .sync-input:focus { 
     border-color: var(--gold); box-shadow: 0 8px 15px -8px rgba(201,168,76,0.15); 
 }
+
+/* ===== ♿ 無障礙與行動端防護網 ===== */
+/* Room A 手機版按鈕垂直排列，加高觸控面積防誤觸 */
+@media(max-width: 480px) {
+    #a-warning-mask > div { flex-direction: column; width: 100%; gap: 16px; }
+    #a-warning-mask .send-btn { width: 100%; min-height: 48px; }
+}
+
+/* 系統層級減少動態效果 (Prefers Reduced Motion) */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* 鍵盤導航友善：當使用者用 Tab 鍵切換時，給予清晰的金色外框 */
+:focus-visible { outline: 2px solid var(--gold) !important; outline-offset: 4px; border-radius: 4px; }
+textarea:focus-visible, input:focus-visible { outline: none !important; }
+  
 </style>
 </head>
 <body>
