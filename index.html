@@ -830,6 +830,24 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   <canvas id="nebula-canvas"></canvas>
   <div id="nebula-text"></div>
 </div>
+<!-- 隱私哲學 Modal -->
+<div id="privacy-modal" class="share-modal" onclick="if(event.target===this) window.closePrivacy()">
+  <div class="wrapped-card" style="max-width: 480px; text-align: left; padding: 40px 32px;">
+    <div class="wrapped-title" style="font-size:24px; margin-bottom:24px; text-align:center;">PRIVACY PHILOSOPHY</div>
+    <div style="font-family:'Noto Serif TC',serif; font-size:14px; line-height:2; color:var(--fog); letter-spacing:1.5px;">
+      <p style="color:var(--gold); font-weight:bold; margin-bottom:16px;" data-zh="你的脆弱，只屬於你自己。" data-en="Your vulnerability belongs only to you.">你的脆弱，只屬於你自己。</p>
+      <ul style="margin-left: 20px; margin-bottom: 24px; color:rgba(255,255,255,0.7);">
+        <li style="margin-bottom:12px;" data-zh="【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器徹底且永久刪除。" data-en="[Forgotten] Room A messages are permanently deleted from servers after 24 hours.">【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器徹底且永久刪除。</li>
+        <li style="margin-bottom:12px;" data-zh="【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。" data-en="[Anonymity] No accounts needed. Without a Soul Key, your footprints cannot be traced back to you.">【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。</li>
+        <li style="margin-bottom:12px;" data-zh="【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。" data-en="[Pure Sanctuary] We promise never to sell, analyze, or monetize your emotional data.">【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。</li>
+      </ul>
+      <p data-zh="這是一個安全的樹洞，請安心放下。" data-en="This is a safe treehole. Feel free to let go.">這是一個安全的樹洞，請安心放下。</p>
+    </div>
+    <div style="text-align:center; margin-top:32px;">
+      <button class="close-modal-btn" onclick="window.closePrivacy()" data-zh="我明白了" data-en="I understand">我明白了</button>
+    </div>
+  </div>
+</div>
 <div id="share-modal" class="share-modal">
   <div class="wrapped-card" id="wrapped-card-content">
     <div class="wrapped-title">EMPATH</div>
@@ -1065,7 +1083,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   <button id="e-expand-btn" class="e-expand-btn" onclick="window.toggleEFeed()"></button>
 
   <div class="crisis-support">
-    <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
   </div>
 </section>
 
@@ -1181,8 +1199,8 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   <p class="p-healed-count" id="p-healed-count"></p>
     
   <div class="crisis-support">
-    <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
-</div>
+    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+  </div>
     
 </div>
 </section>
@@ -1254,7 +1272,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     </div>
 
     <div class="crisis-support">
-      <a href="tel:1925" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+      <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
     </div>
   </div>
 </section>
@@ -1433,6 +1451,10 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     <div class="footer-left" data-zh="Every Moment As Truth Heals" data-en="Every Moment As Truth Heals" data-ja="Every Moment As Truth Heals" data-es="Every Moment As Truth Heals" data-fr="Every Moment As Truth Heals" data-de="Every Moment As Truth Heals" data-zh-cn="Every Moment As Truth Heals">Every Moment As Truth Heals</div>
     <div class="footer-letters"><span class="footer-l">E</span><span class="footer-l">M</span><span class="footer-l">P</span><span class="footer-l">A</span><span class="footer-l">T</span><span class="footer-l">H</span></div>
     <div class="footer-right" data-zh="數位時代的情緒安放平台" data-en="An emotional sanctuary for the digital age" data-ja="デジタル時代の感情のサンクチュアリ" data-es="Un santuario emocional para la era digital" data-fr="Un sanctuaire émotionnel pour l'ère numérique" data-de="Ein emotionales Heiligtum für das digitale Zeitalter" data-zh-cn="数字时代的情绪安放平台">數位時代的情緒安放平台</div>
+  </div>
+  <div class="footer-links" style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:16px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; justify-content:center;">
+      <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">關於 EMPATH / About →</a>
+      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" onclick="window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">隱私哲學 / Privacy →</span>
   </div>
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
@@ -1639,6 +1661,10 @@ window.switchLang = function(lang) {
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") { for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } } }
   updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); if(typeof window.renderEFeed === 'function') window.renderEFeed();
+  let crisisTel = '1925';
+  if (lang === 'uk') crisisTel = '7333';
+  else if (lang === 'pl') crisisTel = '116123';
+  document.querySelectorAll('.crisis-link').forEach(el => { el.href = 'tel:' + crisisTel; });
   // 🌍 【核彈級連動】觸發地下室的 Google 翻譯引擎，翻譯全部使用者留言！
   const googleSelect = document.querySelector(".goog-te-combo");
   if (googleSelect) {
@@ -2193,6 +2219,8 @@ window.openShareCard = function() { document.getElementById('sc-e').textContent 
 
 window.downloadShareCard = function() { if(typeof html2canvas === 'undefined') { window.showToast(t('圖片生成引擎載入中，請稍後再試 ✦','Loading image engine...','画像エンジンを読み込み中...','Cargando motor de imágenes...','Chargement du moteur d\'images...','Lade Bild-Engine...','图片生成引擎载入中，请稍后再试 ✦')); return; } const card = document.getElementById('wrapped-card-content'); const btn = document.getElementById('download-card-btn'); const originalText = btn.textContent; btn.textContent = t('圖片生成中 ⏳','Generating... ⏳','生成中 ⏳','Generando... ⏳','Génération... ⏳','Wird generiert... ⏳','图片生成中 ⏳'); html2canvas(card, { backgroundColor: '#0a111a', scale: 2 }).then(canvas => { const imgData = canvas.toDataURL('image/png'); card.style.display = 'none'; let existingImg = document.getElementById('generated-card-img'); if(existingImg) existingImg.remove(); const imgEl = document.createElement('img'); imgEl.src = imgData; imgEl.id = 'generated-card-img'; imgEl.style.width = '100%'; imgEl.style.maxWidth = '320px'; imgEl.style.borderRadius = '4px'; imgEl.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)'; card.parentNode.insertBefore(imgEl, document.querySelector('.share-modal-actions')); btn.style.display = 'none'; let hint = document.getElementById('save-hint'); if(!hint) { hint = document.createElement('p'); hint.id = 'save-hint'; hint.style.color = 'var(--gold)'; hint.style.fontSize = '12px'; hint.style.marginBottom = '16px'; document.querySelector('.share-modal-actions').prepend(hint); } hint.textContent = t('✨ 圖片已洗出！請「長按上方圖片」儲存或分享', '✨ Image generated! Long press to save.', '✨ 画像が生成されました！長押しで保存', '✨ ¡Imagen generada! Mantén presionado para guardar.', '✨ Image générée ! Appui long pour enregistrer.', '✨ Bild generiert! Langes Drücken zum Speichern.', '✨ 图片已洗出！请「长按上方图片」储存或分享'); hint.style.display = 'block'; window.showToast(t('圖片已成功生成！請長按儲存 ✦', 'Success! Long press to save', '成功しました！', '¡Éxito!', 'Succès !', 'Erfolg!', '图片已成功生成！请长按储存 ✦')); }).catch(err => { btn.textContent = originalText; window.showToast(t('生成失敗', 'Failed', '生成に失敗しました', 'Fallo al generar', 'Échoué', 'Fehlgeschlagen', '生成失败')); }); }
 window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); setTimeout(() => { document.getElementById('wrapped-card-content').style.display = 'block'; const img = document.getElementById('generated-card-img'); if(img) img.remove(); document.getElementById('download-card-btn').style.display = 'inline-block'; document.getElementById('download-card-btn').textContent = t('⬇️ 下載為專屬圖片檔案', '⬇️ Download Exclusive Card', '⬇️ 専用画像としてダウンロード', '⬇️ Descargar Tarjeta Exclusiva', '⬇️ Télécharger la carte', '⬇️ Exklusive Karte herunterladen', '⬇️ 下载为专属图片档案'); const hint = document.getElementById('save-hint'); if(hint) hint.style.display = 'none'; }, 400); }
+window.openPrivacy = function() { document.getElementById('privacy-modal').classList.add('show'); }
+window.closePrivacy = function() { document.getElementById('privacy-modal').classList.remove('show'); }
 window.showToast = function(msg, dur=2400){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), dur); }
 function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 
