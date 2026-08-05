@@ -51,6 +51,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
+/* ===== 父親節特別企劃：思念化作星光 ===== */
+@keyframes floatUpToStars {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); color: rgba(255, 255, 255, 0.7); }
+    20% { opacity: 1; transform: translate(-50%, -60%) scale(1.0); color: var(--gold); text-shadow: 0 0 20px rgba(201,168,76, 0.8); }
+    80% { opacity: 0.8; transform: translate(-50%, -150%) scale(0.9); }
+    100% { opacity: 0; transform: translate(-50%, -200%) scale(0.5); }
+}
+
+.star-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10000;
+    animation: floatUpToStars 4.5s forwards ease-in-out;
+}
 /* EMPATH 專屬優雅滾動條 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -836,6 +856,12 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     
     <div style="font-family:'Noto Serif TC',serif; font-size:15px; line-height:2.2; color:var(--fog); letter-spacing:1.5px; max-height: 400px; overflow-y: auto; padding-right: 8px;">
       
+      <!-- 📝 父親節溫柔企劃公告 (最新) -->
+      <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed rgba(255,255,255,0.15);">
+          <p style="font-size:12px; color:var(--gold); margin-bottom:8px; font-weight:bold; letter-spacing: 2px;">2026.08.05</p>
+          <p>這幾天，我在這裡看見了許多無處安放的思念。<br><br>如果你在今夜，也有無法寄達的話語，請放心地交給 Room E 的黑暗。<br>宇宙會認得那些名字，並替你將它們化作星光 ✦</p>
+      </div>
+
       <!-- 📝 妳可以在這裡隨時新增或修改公告 -->
       <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed rgba(255,255,255,0.15);">
           <p style="font-size:12px; color:var(--gold); margin-bottom:8px; font-weight:bold; letter-spacing: 2px;">2026.08.04</p>
@@ -2499,8 +2525,36 @@ window.submitE = async function(){
         if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_submit');
         
         logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]'); 
-        playRitual('e-submit-btn', origText); 
-        window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
+
+        // --- 🌟 父親節溫柔彩蛋邏輯 開始 ---
+        // 抓取原本輸入的文字來檢查
+        const checkText = origText || text || '';
+        const fatherKeywords = /爸爸|父親|老爸|爸|Dad|father|阿公|爺爺/i;
+        
+        if (fatherKeywords.test(checkText)) {
+            // 1. 產生上升星光
+            const starText = document.createElement('div');
+            starText.className = 'star-message';
+            starText.innerText = "你的思念，宇宙收到了 ✦"; 
+            document.body.appendChild(starText);
+            
+            // 4.5秒後自動清除星光元素
+            setTimeout(() => {
+                if(starText.parentNode) starText.remove();
+            }, 4500);
+
+            // 紀錄有人觸發了溫柔彩蛋
+            if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'fathers_day_egg_triggered');
+            
+            // 改變原本的提示文字，不播放下墜動畫
+            window.showToast("已化作星光，溫柔升空 ✦"); 
+        } else {
+            // 正常情況：播放原本的下墜動畫與提示
+            playRitual('e-submit-btn', origText); 
+            window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
+        }
+        // --- 🌟 父親節溫柔彩蛋邏輯 結束 ---
+
     } catch(e) { 
         console.error("Firestore 寫入失敗：", e); 
         window.showToast(t('傳送失敗，請稍後再試 ✦', 'Failed to send, please try again ✦', '送信に失敗しました。後でもう一度お試しください ✦', 'Error al enviar, inténtalo de nuevo ✦', 'Échec de l\'envoi, veuillez réessayer ✦', 'Senden fehlgeschlagen, bitte versuche es erneut ✦', '传送失败，请稍后再试 ✦'));
