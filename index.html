@@ -871,12 +871,14 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 <script>
     // 只要網頁發生無法挽回的 JS 語法錯誤，立刻彈出安全網
     window.addEventListener('error', function(e) {
-        document.getElementById('empath-safe-mode').style.display = 'flex';
-    });
+    if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) return;
+    if (!e.message) return;
+    document.getElementById('empath-safe-mode').style.display = 'flex';
+}, true);
 </script>
 
 <!-- 🏆 CSSLight 國際畫廊榮譽勳章 🏆 -->
-<a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(http://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
+<a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(https://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
 
 <!-- 新增：星雲檔案館 (隱藏彩蛋) -->
 <div id="nebula-overlay" onclick="window.closeNebula()">
