@@ -1669,19 +1669,13 @@ function updateSoulWeather() {
 const cursorGlow = document.getElementById('cursor-glow');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let glowX = mouseX, glowY = mouseY;
-let mouseTicking = false;
+
 document.addEventListener('mousemove', (e) => {
-    if (mouseTicking) return;
-    mouseTicking = true;
-    requestAnimationFrame(() => {
-        const glowX = e.clientX;
-        const glowY = e.clientY;
-        if(cursorGlow && (cursorGlow.style.opacity === '0' || cursorGlow.style.opacity === '')) {
-            cursorGlow.style.opacity = '1';
-        }
-        if(cursorGlow) cursorGlow.style.transform = `translate(calc(${glowX}px - 50%), calc(${glowY}px - 50%))`;
-        mouseTicking = false;
-    });
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if(cursorGlow && cursorGlow.style.opacity !== '1') {
+        cursorGlow.style.opacity = '1';
+    }
 });
 
 function animateGlow() {
