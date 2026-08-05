@@ -1517,7 +1517,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 // 🌟 新增載入 GA4 引擎
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
 
@@ -2124,13 +2124,13 @@ let isAnimating = true; let starsRafId = null; let sandRafId = null; let firesto
 
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
+    fetchRealCounts();
     
     // 1. 監聽情緒出口
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc")), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
-    
+    onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), limit(30)), (snapshot) => { globalCounts.e = snapshot.size; 
+                                                                                                          
     // 2. 監聽星星
-    firestoreUnsubs.push(onSnapshot(collection(db, "stars"), (snapshot) => { 
-        globalCounts.m = snapshot.size; 
+    onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), limit(80)), (snapshot) => { globalCounts.m = snapshot.size;
         let tempStars = []; 
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); }); 
         // 🌟 效能救星：只抓最亮的前 80 顆進行物理運算，徹底消除卡頓！
@@ -2140,7 +2140,7 @@ function subscribeAll() {
     }));
   
     // 3. 監聽星系金線
-    firestoreUnsubs.push(onSnapshot(collection(db, "constellations"), (snapshot) => {
+    onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), limit(50)), (snapshot) => {
         const nowMs = Date.now();
         window.activeConstellations = [];
         snapshot.forEach(docSnap => {
@@ -2156,7 +2156,7 @@ function subscribeAll() {
     }));
 
     // 4. 監聽碎片與金繼進度
-    firestoreUnsubs.push(onSnapshot(collection(db, "shards"), (snapshot) => { 
+    onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), limit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return; board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size; 
         snapshot.forEach(docSnap => { 
             const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++; 
@@ -2197,7 +2197,7 @@ function subscribeAll() {
     }));
 
     // 5. 監聽沙畫 (剛剛不小心被切斷的大動脈！)
-    firestoreUnsubs.push(onSnapshot(collection(db, "sand"), (snapshot) => { 
+    onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), limit(30)), (snapshot) => {
         globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return; 
         feed.innerHTML = ''; const nowMs = Date.now(); 
         snapshot.forEach(docSnap => { 
@@ -2217,7 +2217,7 @@ function subscribeAll() {
     }));
   
     // 6. 監聽溫暖共振
-    firestoreUnsubs.push(onSnapshot(collection(db, "warmth"), (snapshot) => { 
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), limit(30)), (snapshot) => {
         globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return; 
         feed.innerHTML = ''; 
         snapshot.forEach(docSnap => { 
@@ -2238,7 +2238,23 @@ function subscribeAll() {
     }));
 }
 
-function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
+async function fetchRealCounts() {
+    try {
+        const [eSnap, mSnap, pSnap, aSnap, tSnap] = await Promise.all([
+            getCountFromServer(collection(db, "emotions")),
+            getCountFromServer(collection(db, "stars")),
+            getCountFromServer(collection(db, "shards")),
+            getCountFromServer(collection(db, "sand")),
+            getCountFromServer(collection(db, "warmth")),
+        ]);
+        globalCounts.e = eSnap.data().count;
+        globalCounts.m = mSnap.data().count;
+        globalCounts.p = pSnap.data().count;
+        globalCounts.a = aSnap.data().count;
+        globalCounts.t = tSnap.data().count;
+        updateCountersUI();
+    } catch(e) { console.error(e); }
+}
 
 let sandGlobalTimer = null;
 function startGlobalSandTimer() { 
