@@ -2628,15 +2628,21 @@ window.submitE = async function(){
     }
 }
 
+let currentEFeedLimit = 3; // 初始只顯示 3 筆
+
 window.renderEFeed = function() { 
     const feed = document.getElementById('e-feed'); 
     const fade = document.getElementById('e-feed-fade'); 
     const btn = document.getElementById('e-expand-btn'); 
     if(!feed) return; 
-    feed.innerHTML = ''; 
-    const limit = eFeedExpanded ? allEmotions.length : 3; 
     
-    allEmotions.slice(0, limit).forEach(data => { 
+    // 每次渲染前清空
+    feed.innerHTML = ''; 
+    
+    // 根據目前的顯示上限來切出要顯示的資料
+    const dataToShow = allEmotions.slice(0, currentEFeedLimit);
+    
+    dataToShow.forEach(data => { 
         const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); 
         const div = document.createElement('div'); 
         div.className = 'e-msg'; 
@@ -2652,21 +2658,34 @@ window.renderEFeed = function() {
         feed.appendChild(div); 
     }); 
     
+    // 按鈕與漸層的顯示邏輯
     if(allEmotions.length > 3) { 
         btn.style.display = 'inline-flex'; 
-        if(!eFeedExpanded) { 
+        
+        if(currentEFeedLimit < allEmotions.length) { 
+            // 如果還沒顯示完所有抓下來的資料
             fade.style.display = 'block'; 
-            btn.innerHTML = t('↓ 展開更多', '↓ Show More', '↓ もっと見る', '↓ Ver más', '↓ Voir plus', '↓ Mehr anzeigen', '↓ 展开更多'); 
+            btn.innerHTML = t('↓ 載入更多', '↓ Load More', '↓ もっと読み込む', '↓ Cargar más', '↓ Charger plus', '↓ Mehr laden', '↓ 载入更多'); 
         } else { 
+            // 已經顯示到極限了
             fade.style.display = 'none'; 
-            btn.innerHTML = t('↑ 收起', '↑ Collapse', '↑ 閉じる', '↑ Ocultar', '↑ Réduire', '↑ Einklappen', '↑ 收起'); 
+            btn.innerHTML = t('↑ 收起全部', '↑ Collapse All', '↑ すべて閉じる', '↑ Ocultar todo', '↑ Tout réduire', '↑ Alle einklappen', '↑ 收起全部'); 
         } 
     } else { 
         btn.style.display = 'none'; fade.style.display = 'none'; 
     } 
 }
 
-window.toggleEFeed = function() { eFeedExpanded = !eFeedExpanded; window.renderEFeed(); }
+window.toggleEFeed = function() { 
+    if (currentEFeedLimit < allEmotions.length) {
+        // 如果還沒到底，每次點擊多顯示 30 筆 (這樣保證滑順，絕對不會當機)
+        currentEFeedLimit += 30;
+    } else {
+        // 如果已經到底了，再點一次就會收回到只剩 3 筆
+        currentEFeedLimit = 3;
+    }
+    window.renderEFeed(); 
+}
 
 const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let starMessages = [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 window.resizeCanvas = function(){ 
