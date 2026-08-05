@@ -2181,8 +2181,8 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     fetchRealCounts();
 
-    // 1. 監聽情緒出口 (將上限從 30 提高到 300，讓 400 多條留言都可以被抓下來)
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(300)), (snapshot) => {
+    // 1. 監聽情緒出口
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
@@ -2634,9 +2634,7 @@ window.renderEFeed = function() {
     const btn = document.getElementById('e-expand-btn'); 
     if(!feed) return; 
     feed.innerHTML = ''; 
-    
-    // 預設顯示 3 則，按下去後改成一次展開 50 則（或直接改成員工全部展開 allEmotions.length）
-    const limit = eFeedExpanded ? Math.min(allEmotions.length, 100) : 3; 
+    const limit = eFeedExpanded ? allEmotions.length : 3; 
     
     allEmotions.slice(0, limit).forEach(data => { 
         const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); 
@@ -2650,23 +2648,9 @@ window.renderEFeed = function() {
             contentHtml = `<img src="${data.image}" class="e-msg-img" alt="Emotional Scribble">`;
         }
 
-        div.innerHTML = `<div class="e-msg-anon">匿名 · ANONYMOUS</div>${contentHtml}<div class="e-msg-time">${timeStr}</div>`; 
+        div.innerHTML = `<div class="e-msg-anon">${t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS')}</div>${contentHtml}<div class="e-msg-time">${timeStr}</div>`; 
         feed.appendChild(div); 
     }); 
-    
-    if(allEmotions.length > 3) { 
-        btn.style.display = 'inline-flex'; 
-        if(!eFeedExpanded) { 
-            fade.style.display = 'block'; 
-            btn.innerHTML = '↓ 展開更多'; 
-        } else { 
-            fade.style.display = 'none'; 
-            btn.innerHTML = '↑ 收起'; 
-        } 
-    } else { 
-        btn.style.display = 'none'; fade.style.display = 'none'; 
-    } 
-}
     
     if(allEmotions.length > 3) { 
         btn.style.display = 'inline-flex'; 
