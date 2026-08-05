@@ -51,26 +51,42 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
-/* ===== 父親節特別企劃：思念化作星光 ===== */
+  
+/* ===== 父親節特別企劃：思念化作星光 (高反差進化版) ===== */
 @keyframes floatUpToStars {
     0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); color: rgba(255, 255, 255, 0.7); }
-    20% { opacity: 1; transform: translate(-50%, -60%) scale(1.0); color: var(--gold); text-shadow: 0 0 20px rgba(201,168,76, 0.8); }
-    80% { opacity: 0.8; transform: translate(-50%, -150%) scale(0.9); }
-    100% { opacity: 0; transform: translate(-50%, -200%) scale(0.5); }
+    20% { 
+        opacity: 1; 
+        transform: translate(-50%, -60%) scale(1.0); 
+        color: #FFF8DC; /* 讓文字本體變成極亮白金 */
+        text-shadow: 
+            0 0 10px rgba(0, 0, 0, 1),      /* 第一層：純黑保護罩，強力阻擋星星干擾 */
+            0 0 20px rgba(0, 0, 0, 0.9),    /* 第二層：擴大黑色陰影 */
+            0 0 35px rgba(201, 168, 76, 1), /* 第三層：外圍透出金色微光 */
+            0 0 60px rgba(201, 168, 76, 0.6); 
+    }
+    80% { opacity: 0.9; transform: translate(-50%, -150%) scale(0.9); }
+    100% { opacity: 0; transform: translate(-50%, -200%) scale(0.6); }
 }
 
 .star-message {
     position: fixed;
     top: 50%;
     left: 50%;
-    font-size: 16px;
-    letter-spacing: 2px;
-    color: var(--gold);
+    font-size: 18px; /* 字體稍微放大一點 */
+    font-weight: bold; /* 加粗增加易讀性 */
+    letter-spacing: 3px;
+    color: #FFF8DC;
     white-space: nowrap;
     pointer-events: none;
     z-index: 10000;
-    animation: floatUpToStars 4.5s forwards ease-in-out;
+    /* 加入一點極其溫柔的深色漸層底底色，作為最後的保護網 */
+    background: radial-gradient(ellipse, rgba(5, 10, 15, 0.7) 0%, rgba(5, 10, 15, 0) 70%);
+    padding: 30px 60px;
+    border-radius: 50px;
+    animation: floatUpToStars 5.5s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+  
 /* EMPATH 專屬優雅滾動條 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
