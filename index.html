@@ -601,11 +601,10 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 
 /* ===== 提案一：靈魂跟隨 (光暈) ===== */
 #cursor-glow {
-    position: fixed; top: 0; left: 0; width: 500px; height: 500px;
+    position: fixed; top: 0; left: 0; width: 300px; height: 300px;
     background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0) 60%);
     border-radius: 50%; pointer-events: none; z-index: 9999;
     transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.8s ease;
-    mix-blend-mode: screen; /* 讓光暈疊加時有發光感 */
     will-change: transform; /* 🚀 召喚 GPU 讓光暈移動極度滑順 */
 }
 
@@ -2920,76 +2919,102 @@ window.submitM = async function(){ if(!canSubmit()) return; const input = docume
 
 let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 300; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
-window.drawKintsugiVessel = function(){ 
-    if(!pCtx) return; 
-    const c = pCtx; 
-    const w = pCanvas.offsetWidth || 540; 
-    const h = 300; 
-    c.clearRect(0,0,w,h); 
-    const cx = w/2; const cy = h/2;
+window.drawKintsugiVessel = function(){
+    if(!pCtx) return;
+    const c = pCtx;
+    const w = pCanvas.offsetWidth || 540;
+    const h = 300;
+    c.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2 + 10;
 
-    // 1. 畫出具備立體感的日式茶碗
+    // 1. 瓷器主體（橢圓碗形，有立體感的填色）
+    const vesselGrad = c.createRadialGradient(cx - 30, cy - 40, 20, cx, cy, 140);
+    vesselGrad.addColorStop(0, 'rgba(38, 32, 28, 0.95)');
+    vesselGrad.addColorStop(0.6, 'rgba(22, 18, 14, 0.97)');
+    vesselGrad.addColorStop(1, 'rgba(10, 8, 6, 0.99)');
+
     c.beginPath();
-    c.moveTo(cx - 130, cy - 30);
-    c.bezierCurveTo(cx - 60, cy - 50, cx + 60, cy - 50, cx + 130, cy - 30);
-    c.bezierCurveTo(cx + 70, cy - 10, cx - 70, cy - 10, cx - 130, cy - 30);
-    c.bezierCurveTo(cx + 130, cy + 60, cx + 80, cy + 100, cx + 45, cy + 110);
-    c.lineTo(cx - 45, cy + 110);
-    c.bezierCurveTo(cx - 80, cy + 100, cx - 130, cy + 60, cx - 130, cy - 30);
-    c.fillStyle = 'rgba(8, 12, 18, 0.7)'; c.fill();
-    c.strokeStyle = 'rgba(201,168,76,0.15)'; c.lineWidth = 1; c.stroke();
+    c.moveTo(cx - 120, cy - 60);
+    c.bezierCurveTo(cx - 120, cy - 100, cx + 120, cy - 100, cx + 120, cy - 60);
+    c.bezierCurveTo(cx + 130, cy + 20, cx + 90, cy + 100, cx + 50, cy + 115);
+    c.bezierCurveTo(cx + 20, cy + 125, cx - 20, cy + 125, cx - 50, cy + 115);
+    c.bezierCurveTo(cx - 90, cy + 100, cx - 130, cy + 20, cx - 120, cy - 60);
+    c.closePath();
+    c.fillStyle = vesselGrad;
+    c.fill();
 
-    // 2. 美學重塑：更密集、如樹枝般交織蔓延的日式主副脈絡
-    const kintsugiVeins = [
-        [{x:-110, y:-10}, {cx:-90, cy:30, x:-50, y:50}, {cx:-10, cy:70, x:20, y:95}],
-        [{x:110, y:10}, {cx:80, cy:40, x:40, y:45}, {cx:10, cy:50, x:-20, y:80}],
-        [{x:-50, y:50}, {cx:-30, cy:10, x:0, y:0}],
-        [{x:40, y:45}, {cx:60, cy:80, x:30, y:105}],
-        [{x:0, y:0}, {cx:30, cy:-20, x:80, y:-25}],
-        [{x:-70, y:-25}, {cx:-40, cy:5, x:-10, y:20}],
-        // 增強細節的交錯分支，讓它看起來更自然
-        [{x:-130, y:-30}, {cx:-100, cy:-10, x:-70, y:-25}],
-        [{x:130, y:-30}, {cx:100, cy:-15, x:80, y:-25}],
-        [{x:-20, y:80}, {cx:-40, cy:100, x:-45, y:110}],
-        [{x:20, y:95}, {cx:30, cy:110, x:45, y:110}],
-        [{x:0, y:0}, {cx:-20, cy:25, x:-50, y:50}],
-        [{x:80, y:-25}, {cx:60, cy:10, x:40, y:45}],
-        [{x:-10, y:20}, {cx:10, cy:10, x:40, y:45}],
-        [{x:-50, y:50}, {cx:-70, cy:60, x:-90, y:80}],
-        [{x:40, y:45}, {cx:60, cy:30, x:90, y:20}]
+    // 2. 瓷器邊緣光澤
+    c.strokeStyle = 'rgba(201,168,76,0.12)';
+    c.lineWidth = 1.5;
+    c.stroke();
+
+    // 3. 瓷器高光（讓它有陶瓷感）
+    const shineGrad = c.createLinearGradient(cx - 80, cy - 90, cx - 20, cy - 20);
+    shineGrad.addColorStop(0, 'rgba(255,255,255,0.06)');
+    shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = shineGrad;
+    c.fill();
+
+    // 4. 裂縫定義（固定形狀，修補前是暗色細線，修補後變金線）
+    const veins = [
+        [[cx-110, cy-55], [cx-85, cy-20], [cx-60, cy+15], [cx-30, cy+50], [cx-10, cy+90]],
+        [[cx+115, cy-50], [cx+80, cy-10], [cx+50, cy+30], [cx+20, cy+65], [cx+5, cy+100]],
+        [[cx-60, cy+15], [cx-20, cy+5], [cx+20, cy+10], [cx+50, cy+30]],
+        [[cx-30, cy+50], [cx+5, cy+40], [cx+40, cy+55], [cx+70, cy+80]],
+        [[cx-85, cy-20], [cx-50, cy-35], [cx-10, cy-45], [cx+40, cy-30], [cx+80, cy-10]],
+        [[cx-10, cy-45], [cx+5, cy-15], [cx-10, cy+20]],
+        [[cx-60, cy+15], [cx-90, cy+45], [cx-105, cy+80]],
+        [[cx+50, cy+30], [cx+75, cy+55], [cx+80, cy+90]],
     ];
 
-    const drawVein = (index, isHealed) => {
-        const vein = kintsugiVeins[index % kintsugiVeins.length];
-        c.beginPath();
-        vein.forEach((pt, k) => {
-            if (k === 0) c.moveTo(cx + pt.x, cy + pt.y);
-            else c.quadraticCurveTo(cx + pt.cx, cy + pt.cy, cx + pt.x, cy + pt.y);
-        });
-
-        if (isHealed) {
-            const gradient = c.createLinearGradient(cx - 50, cy - 50, cx + 50, cy + 50);
-            gradient.addColorStop(0, '#D4AF37');
-            gradient.addColorStop(0.5, '#FFF8DC');
-            gradient.addColorStop(1, '#B38728');
-            c.strokeStyle = gradient;
-            c.lineWidth = 2.0; 
-            c.shadowBlur = 8;
-            c.shadowColor = 'rgba(212, 175, 55, 0.5)';
-        } else {
-            c.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            c.lineWidth = 1; c.shadowBlur = 0;
-        }
-        c.stroke(); c.shadowBlur = 0; 
-    };
-
-    // 效能救星 2：把 2000 個碎片轉換成「比例」，映射到 6 條精緻主線上
     const healedRatio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
-    const linesToHeal = Math.ceil(healedRatio * kintsugiVeins.length);
+    const linesToHeal = Math.round(healedRatio * veins.length);
 
-    for(let i = 0; i < kintsugiVeins.length; i++) drawVein(i, false);
-    for(let i = 0; i < linesToHeal; i++) drawVein(i, true);
-}
+    veins.forEach((vein, i) => {
+        c.beginPath();
+        c.moveTo(vein[0][0], vein[0][1]);
+        for(let k = 1; k < vein.length; k++){
+            if(k < vein.length - 1){
+                const mx = (vein[k][0] + vein[k+1][0]) / 2;
+                const my = (vein[k][1] + vein[k+1][1]) / 2;
+                c.quadraticCurveTo(vein[k][0], vein[k][1], mx, my);
+            } else {
+                c.lineTo(vein[k][0], vein[k][1]);
+            }
+        }
+
+        const isHealed = i < linesToHeal;
+        if(isHealed){
+            // 金色裂縫：帶光暈的漸層金線
+            const g = c.createLinearGradient(vein[0][0], vein[0][1], vein[vein.length-1][0], vein[vein.length-1][1]);
+            g.addColorStop(0, '#B8860B');
+            g.addColorStop(0.3, '#FFD700');
+            g.addColorStop(0.6, '#FFF8DC');
+            g.addColorStop(1, '#C9A84C');
+            c.strokeStyle = g;
+            c.lineWidth = 2.5;
+            c.shadowBlur = 10;
+            c.shadowColor = 'rgba(212,175,55,0.7)';
+            c.lineCap = 'round';
+            c.stroke();
+            c.shadowBlur = 0;
+
+            // 金線上的細小光點
+            const mid = vein[Math.floor(vein.length/2)];
+            c.beginPath();
+            c.arc(mid[0], mid[1], 1.5, 0, Math.PI * 2);
+            c.fillStyle = '#FFF8DC';
+            c.fill();
+        } else {
+            // 未修補：幾乎不可見的暗裂縫
+            c.strokeStyle = 'rgba(255,255,255,0.07)';
+            c.lineWidth = 1;
+            c.lineCap = 'round';
+            c.shadowBlur = 0;
+            c.stroke();
+        }
+    });
+};
   
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
