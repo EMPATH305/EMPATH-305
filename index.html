@@ -2127,8 +2127,8 @@ function subscribeAll() {
     fetchRealCounts();
     
     // 1. 監聽情緒出口
-    onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => { globalCounts.e = snapshot.size; 
-                                                                                                          
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => { globalCounts.e = snapshot.size; allEmotions = []; snapshot.forEach(docSnap => allEmotions.push(docSnap.data())); if(typeof window.renderEFeed === 'function') window.renderEFeed(); updateCountersUI(); }));
+
     // 2. 監聽星星
     onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => { globalCounts.m = snapshot.size;
         let tempStars = []; 
