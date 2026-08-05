@@ -1664,34 +1664,52 @@ function updateSoulWeather() {
 }
 
 // ==========================================
-// 提案一：靈魂跟隨 (游標延遲光暈)
+// 提案一：靈魂跟隨 (游標延遲光暈) - 終極效能優化版
 // ==========================================
 const cursorGlow = document.getElementById('cursor-glow');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let glowX = mouseX, glowY = mouseY;
+let isMoving = false; // 新增：用來控制何時需要計算
 
 document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    if(cursorGlow && cursorGlow.style.opacity !== '1') {
-        cursorGlow.style.opacity = '1';
+    
+    // 如果游標剛剛靜止，現在開始移動了，就喚醒動畫引擎
+    if (!isMoving) {
+        isMoving = true;
+        if (cursorGlow) cursorGlow.style.opacity = '1';
+        requestAnimationFrame(animateGlow); 
     }
 });
 
 function animateGlow() {
-    // 降噪模式下暫停光暈
-    if(!document.body.classList.contains('hsp-mode') && window.innerWidth > 768) {
-        // 使用 Lerp (線性插值) 創造極其滑順的「延遲跟隨感」
-        glowX += (mouseX - glowX) * 0.08;
-        glowY += (mouseY - glowY) * 0.08;
-        if(cursorGlow) cursorGlow.style.transform = `translate(calc(${glowX}px - 50%), calc(${glowY}px - 50%))`;
-    } else {
-        if(cursorGlow) cursorGlow.style.opacity = '0';
-    }
-    requestAnimationFrame(animateGlow);
-}
-animateGlow();
+    if (!document.body.classList.contains('hsp-mode') && window.innerWidth > 768) {
+        // 計算游標與光暈的距離
+        const dx = mouseX - glowX;
+        const dy = mouseY - glowY;
+        
+        // 使用 Lerp 平滑移動
+        glowX += dx * 0.15; // 稍微調快一點點，讓拖影更自然
+        glowY += dy * 0.15;
+        
+        if (cursorGlow) {
+            cursorGlow.style.transform = `translate3d(calc(${glowX}px - 50%), calc(${glowY}px - 50%), 0)`; // 使用 translate3d 強制開啟 GPU 硬體加速
+        }
 
+        // 如果光暈幾乎追上游標了，就讓引擎休息，節省效能！
+        if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+            isMoving = false; 
+        } else {
+            // 如果還沒追上，下一幀繼續算
+            requestAnimationFrame(animateGlow);
+        }
+    } else {
+        if (cursorGlow) cursorGlow.style.opacity = '0';
+        isMoving = false; // 降噪模式或手機版直接關閉引擎
+    }
+}
+  
 // ==========================================
 // 提案二：離站的詩意 (網頁標籤頁文字動態切換)
 // ==========================================
