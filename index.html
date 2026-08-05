@@ -570,6 +570,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
     border-radius: 50%; pointer-events: none; z-index: 9999;
     transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.8s ease;
     mix-blend-mode: screen; /* 讓光暈疊加時有發光感 */
+    will-change: transform; /* 🚀 召喚 GPU 讓光暈移動極度滑順 */
 }
 
 /* ===== 提案三：同步呼吸引導 ===== */
@@ -663,7 +664,7 @@ footer{ padding:48px 40px 32px;border-top:1px solid rgba(255,255,255,.12); backg
 }
 /* 手機版 Room M 專屬星空與排版優化 */
 @media(max-width: 768px) {
-    #room-m { padding-bottom: 420px !important; } /* 強制在底下開拓 420px 的深邃星空 */
+    #room-m { padding-bottom: 600px !important; } /* 強制在底下開拓 420px 的深邃星空 */
     .m-stats { gap: 12px !important; justify-content: space-between; width: 100%; margin-top: 20px; } /* 縮小間距，確保文字在同一行 */
     .m-stat { font-size: 11px; letter-spacing: 1px; }
     .m-stat span { font-size: 16px; }
@@ -817,9 +818,9 @@ body.anniversary-mode .sand-timer-fill {
 textarea:focus-visible, input:focus-visible { outline: none !important; }
 
 /* 放大 Room M 星空版面 */
-#room-m { min-height: 120vh !important; padding-bottom: 200px; }
+#room-m { min-height: 150vh !important; padding-bottom: 300px; }
 @media(max-width: 768px) {
-    #room-m { min-height: 140vh !important; padding-bottom: 600px !important; }
+    #room-m { min-height: 180vh !important; padding-bottom: 800px !important; }
 }
   
 </style>
@@ -1627,12 +1628,19 @@ function updateSoulWeather() {
 const cursorGlow = document.getElementById('cursor-glow');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let glowX = mouseX, glowY = mouseY;
-
+let mouseTicking = false;
 document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX; mouseY = e.clientY;
-    if(cursorGlow && (cursorGlow.style.opacity === '0' || cursorGlow.style.opacity === '')) {
-        cursorGlow.style.opacity = '1';
-    }
+    if (mouseTicking) return;
+    mouseTicking = true;
+    requestAnimationFrame(() => {
+        const glowX = e.clientX;
+        const glowY = e.clientY;
+        if(cursorGlow && (cursorGlow.style.opacity === '0' || cursorGlow.style.opacity === '')) {
+            cursorGlow.style.opacity = '1';
+        }
+        if(cursorGlow) cursorGlow.style.transform = `translate(calc(${glowX}px - 50%), calc(${glowY}px - 50%))`;
+        mouseTicking = false;
+    });
 });
 
 function animateGlow() {
