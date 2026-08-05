@@ -873,6 +873,9 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     window.addEventListener('error', function(e) {
     if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) return;
     if (!e.message) return;
+    if (e.filename && e.filename.includes('translate.google')) return;
+    if (e.filename && e.filename.includes('gstatic.com')) return;
+    if (e.message && e.message.includes('goog')) return;
     document.getElementById('empath-safe-mode').style.display = 'flex';
 }, true);
 </script>
