@@ -2726,9 +2726,25 @@ window.resizeCanvas = function(){
         initSandBg(sw, sh); 
     } 
 }
-// 加入 300 毫秒延遲，完美解決手機旋轉時瀏覽器排版還沒跟上的 Bug
-window.addEventListener('resize', () => setTimeout(window.resizeCanvas, 300));
-window.addEventListener('orientationchange', () => setTimeout(window.resizeCanvas, 300));
+  
+// 終極防護：加入防抖 (Debounce) 機制，並忽略手機上下滑動時的網址列縮放
+let resizeTimer = null;
+let lastWidth = window.innerWidth;
+
+window.addEventListener('resize', () => {
+    // 核心關鍵：如果只是上下滑動導致網址列縮放（寬度沒變），就絕對不要重繪畫布！
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    
+    clearTimeout(resizeTimer); // 踩煞車，取消前一次的倒數
+    resizeTimer = setTimeout(window.resizeCanvas, 300);
+});
+
+window.addEventListener('orientationchange', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(window.resizeCanvas, 300);
+});
+  
 function initBgStars(w, h){ 
     bgStars=[]; 
     // 動態計算：電腦給 100 顆，手機寬度小於 768px 時只給 35 顆
