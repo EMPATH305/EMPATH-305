@@ -2232,6 +2232,7 @@ function subscribeRoom(roomId) {
             snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
             starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
             if(typeof window.updateMStats === 'function') window.updateMStats();
+            if(typeof window.drawStars === 'function') { if(starsRafId) cancelAnimationFrame(starsRafId); starsRafId = null; window.drawStars(); }
             updateCountersUI();
         }));
     }
@@ -2321,6 +2322,7 @@ function subscribeAll() {
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
         if(typeof window.updateMStats === 'function') window.updateMStats();
+        if(typeof window.drawStars === 'function') { if(starsRafId) cancelAnimationFrame(starsRafId); starsRafId = null; window.drawStars(); }
         updateCountersUI();
     }));
 }
