@@ -2205,6 +2205,25 @@ async function fetchRealCounts() {
         updateCountersUI();
     } catch(e) { console.error(e); }
 }
+
+const lazyRooms = {
+    'room-m': false,
+    'room-p': false,
+    'room-a': false,
+    'room-t': false,
+};
+Object.keys(lazyRooms).forEach(roomId => {
+    const el = document.getElementById(roomId);
+    if(!el) return;
+    const observer = new IntersectionObserver((entries) => {
+        if(entries[0].isIntersecting && !lazyRooms[roomId]) {
+            lazyRooms[roomId] = true;
+            observer.disconnect();
+            subscribeRoom(roomId);
+        }
+    }, { rootMargin: '200px' });
+    observer.observe(el);
+});
   
 function subscribeRoom(roomId) {
     if(roomId === 'room-m') {
