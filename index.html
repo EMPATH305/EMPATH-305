@@ -2188,6 +2188,24 @@ window.clearEDraw = function() {
 
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
 
+async function fetchRealCounts() {
+    try {
+        const [eSnap, mSnap, pSnap, aSnap, tSnap] = await Promise.all([
+            getCountFromServer(collection(db, "emotions")),
+            getCountFromServer(collection(db, "stars")),
+            getCountFromServer(collection(db, "shards")),
+            getCountFromServer(collection(db, "sand")),
+            getCountFromServer(collection(db, "warmth")),
+        ]);
+        globalCounts.e = eSnap.data().count;
+        globalCounts.m = mSnap.data().count;
+        globalCounts.p = pSnap.data().count;
+        globalCounts.a = aSnap.data().count;
+        globalCounts.t = tSnap.data().count;
+        updateCountersUI();
+    } catch(e) { console.error(e); }
+}
+  
 function subscribeRoom(roomId) {
     if(roomId === 'room-m') {
         firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
