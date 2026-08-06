@@ -2188,10 +2188,6 @@ window.clearEDraw = function() {
 
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
 
-function subscribeAll() {
-    if(firestoreUnsubs.length > 0) return;
-    fetchRealCounts();
-
 function subscribeRoom(roomId) {
     if(roomId === 'room-m') {
         firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
@@ -2271,75 +2267,35 @@ function subscribeRoom(roomId) {
     }
 }
 
-    // 先只載入 Room E，其他房間用 IntersectionObserver 延遲載入
-const lazyRooms = {
-    'room-m': false,
-    'room-p': false,
-    'room-a': false,
-    'room-t': false,
-};
+function subscribeAll() {
+    if(firestoreUnsubs.length > 0) return;
+    fetchRealCounts();
 
-Object.keys(lazyRooms).forEach(roomId => {
-    const el = document.getElementById(roomId);
-    if(!el) return;
-    const observer = new IntersectionObserver((entries) => {
-        if(entries[0].isIntersecting && !lazyRooms[roomId]) {
-            lazyRooms[roomId] = true;
-            observer.disconnect();
-            subscribeRoom(roomId);
-        }
-    }, { rootMargin: '200px' });
-    observer.observe(el);
-});
+    const lazyRooms = {
+        'room-m': false,
+        'room-p': false,
+        'room-a': false,
+        'room-t': false,
+    };
+    Object.keys(lazyRooms).forEach(roomId => {
+        const el = document.getElementById(roomId);
+        if(!el) return;
+        const observer = new IntersectionObserver((entries) => {
+            if(entries[0].isIntersecting && !lazyRooms[roomId]) {
+                lazyRooms[roomId] = true;
+                observer.disconnect();
+                subscribeRoom(roomId);
+            }
+        }, { rootMargin: '200px' });
+        observer.observe(el);
+    });
 
-    // 1. 監聽情緒出口
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(300)), (snapshot) => {
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
         updateCountersUI();
     }));
-}
-
-async function fetchRealCounts() {
-    try {
-        const [eSnap, mSnap, pSnap, aSnap, tSnap] = await Promise.all([
-            getCountFromServer(collection(db, "emotions")),
-            getCountFromServer(collection(db, "stars")),
-            getCountFromServer(collection(db, "shards")),
-            getCountFromServer(collection(db, "sand")),
-            getCountFromServer(collection(db, "warmth")),
-        ]);
-        globalCounts.e = eSnap.data().count;
-        globalCounts.m = mSnap.data().count;
-        globalCounts.p = pSnap.data().count;
-        globalCounts.a = aSnap.data().count;
-        globalCounts.t = tSnap.data().count;
-        updateCountersUI();
-    } catch(e) { console.error(e); }
-}
-
-let sandGlobalTimer = null;
-function startGlobalSandTimer() { 
-    if(sandGlobalTimer) clearInterval(sandGlobalTimer); 
-    sandGlobalTimer = setInterval(() => { 
-        if(document.hidden) return; 
-        const now = Date.now(); 
-        document.querySelectorAll('.sand-msg:not(.dissolving)').forEach(div => { 
-            const expiresAt = parseInt(div.dataset.expires); 
-            const lifespanMs = parseInt(div.dataset.lifespan) || (24 * 60 * 60 * 1000);
-            const leftSecs = (expiresAt - now) / 1000; 
-            
-            if(leftSecs <= 0) { 
-                div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; 
-            } 
-            const fill = div.querySelector('.sand-timer-fill'); 
-            const label = div.querySelector('.sand-time-left'); 
-            
-            if(fill) fill.style.width = ((leftSecs / (lifespanMs / 1000)) * 100) + '%'; 
-            if(label) label.textContent = formatTimeLeft(Math.floor(leftSecs)); 
-        }); 
-    }, 1000); 
 }
 
 function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
