@@ -2316,6 +2316,13 @@ function subscribeAll() {
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
         updateCountersUI();
     }));
+   firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
+        let tempStars = [];
+        snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
+        starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
+        if(typeof window.updateMStats === 'function') window.updateMStats();
+        updateCountersUI();
+    }));
 }
 
 function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
