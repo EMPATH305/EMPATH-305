@@ -2205,112 +2205,10 @@ async function fetchRealCounts() {
         updateCountersUI();
     } catch(e) { console.error(e); }
 }
-
-const lazyRooms = {
-    'room-m': false,
-    'room-p': false,
-    'room-a': false,
-    'room-t': false,
-};
-Object.keys(lazyRooms).forEach(roomId => {
-    const el = document.getElementById(roomId);
-    if(!el) return;
-    const observer = new IntersectionObserver((entries) => {
-        if(entries[0].isIntersecting && !lazyRooms[roomId]) {
-            lazyRooms[roomId] = true;
-            observer.disconnect();
-            subscribeRoom(roomId);
-        }
-    }, { rootMargin: '200px' });
-    observer.observe(el);
-});
   
-function subscribeRoom(roomId) {
-    if(roomId === 'room-m') {
-        firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
-            let tempStars = [];
-            snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
-            window._starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
-            starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
-            if(typeof window.updateMStats === 'function') window.updateMStats();
-            if(typeof window.drawStars === 'function') { if(starsRafId) cancelAnimationFrame(starsRafId); starsRafId = null; window.drawStars(); }
-            updateCountersUI();
-        }));
-    }
-    if(roomId === 'room-p') {
-        firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
-            const board = document.getElementById('p-board'); if(!board) return;
-            board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size;
-            snapshot.forEach(docSnap => {
-                const data = docSnap.data(); const id = docSnap.id; if(data.healed) pHealedTotal++;
-                const div = document.createElement('div'); div.className = 'shard' + (data.healed ? ' healed' : '');
-                if(!data.healed) { div.tabIndex = 0; }
-                div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補','Healed','修復済','Reparado','Réparé','Geheilt','已修补')}</div><div class="shard-glow"></div>`;
-                div.addEventListener('click', async () => {
-                    if(data.healed) return;
-                    await updateDoc(doc(db, "shards", id), { healed: true });
-                    if(typeof window.playChime === 'function') window.playChime();
-                    logJourney('p', data.text);
-                    window.showToast(t('以金修補，裂縫成為了光 ✦','Mended with gold ✦','金で修復しました ✦','Reparado con oro ✦','Réparé avec de l\'or ✦','Mit Gold geflickt ✦','以金修补，裂缝成为了光 ✦'));
-                });
-                board.appendChild(div);
-            });
-            globalCounts.p = pHealedTotal;
-            if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
-            updateCountersUI();
-        }));
-    }
-    if(roomId === 'room-a') {
-        firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-            globalCounts.a = snapshot.size;
-            const feed = document.getElementById('a-feed'); if(!feed) return;
-            feed.innerHTML = '';
-            const nowMs = Date.now();
-            snapshot.forEach(docSnap => {
-                const data = docSnap.data();
-                const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
-                const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000);
-                const expiresAt = msgTime + lifespanMs;
-                const leftSecs = (expiresAt - nowMs) / 1000;
-                if(leftSecs <= 0) return;
-                const div = document.createElement('div'); div.className = 'sand-msg';
-                div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs;
-                const pct = (leftSecs / (lifespanMs / 1000)) * 100;
-                div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap notranslate"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
-                feed.appendChild(div);
-            });
-            updateCountersUI();
-        }));
-    }
-    if(roomId === 'room-t') {
-        firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-            globalCounts.t = snapshot.size;
-            const feed = document.getElementById('t-feed'); if(!feed) return;
-            feed.innerHTML = '';
-            snapshot.forEach(docSnap => {
-                const data = docSnap.data(); const id = docSnap.id;
-                const div = document.createElement('div'); div.className = 'warmth-item';
-                div.innerHTML = `<div class="warmth-pulse"></div><div>${data.text}</div><button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"><span class="heart">🕯️</span> Echo Pulse</button>`;
-                div.querySelector('.echo-btn').addEventListener('click', async function(e){
-                    if(this.classList.contains('pulsed')) return;
-                    this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
-                    await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 });
-                    window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
-                    if(typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
-                    if(typeof window.playChime === 'function') window.playChime();
-                });
-                feed.appendChild(div);
-            });
-            updateCountersUI();
-        }));
-    }
-}
-
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     fetchRealCounts();
-
-    
 
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
@@ -2318,17 +2216,86 @@ function subscribeAll() {
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
         updateCountersUI();
     }));
-   firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
+
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
-        window._starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
         starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
+        window._starMessages = starMessages;
         if(typeof window.updateMStats === 'function') window.updateMStats();
-        if(typeof window.drawStars === 'function') { if(starsRafId) cancelAnimationFrame(starsRafId); starsRafId = null; window.drawStars(); }
+        if(starsRafId) cancelAnimationFrame(starsRafId);
+        starsRafId = null;
+        if(typeof window.drawStars === 'function') window.drawStars();
+        updateCountersUI();
+    }));
+
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
+        const board = document.getElementById('p-board'); if(!board) return;
+        board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size;
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data(); const id = docSnap.id;
+            if(data.healed) pHealedTotal++;
+            const div = document.createElement('div');
+            div.className = 'shard' + (data.healed ? ' healed' : '');
+            if(!data.healed) { div.tabIndex = 0; }
+            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補','Healed','修復済','Reparado','Réparé','Geheilt','已修补')}</div><div class="shard-glow"></div>`;
+            div.addEventListener('click', async () => {
+                if(data.healed) return;
+                await updateDoc(doc(db, "shards", id), { healed: true });
+                if(typeof window.playChime === 'function') window.playChime();
+                logJourney('p', data.text);
+                window.showToast(t('以金修補，裂縫成為了光 ✦','Mended with gold ✦','金で修復しました ✦','Reparado con oro ✦','Réparé avec de l\'or ✦','Mit Gold geflickt ✦','以金修补，裂缝成为了光 ✦'));
+            });
+            board.appendChild(div);
+        });
+        globalCounts.p = pHealedTotal;
+        if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
+        updateCountersUI();
+    }));
+
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+        globalCounts.a = snapshot.size;
+        const feed = document.getElementById('a-feed'); if(!feed) return;
+        feed.innerHTML = '';
+        const nowMs = Date.now();
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
+            const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000);
+            const expiresAt = msgTime + lifespanMs;
+            const leftSecs = (expiresAt - nowMs) / 1000;
+            if(leftSecs <= 0) return;
+            const div = document.createElement('div'); div.className = 'sand-msg';
+            div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs;
+            const pct = (leftSecs / (lifespanMs / 1000)) * 100;
+            div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap notranslate"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
+            feed.appendChild(div);
+        });
+        updateCountersUI();
+    }));
+
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+        globalCounts.t = snapshot.size;
+        const feed = document.getElementById('t-feed'); if(!feed) return;
+        feed.innerHTML = '';
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data(); const id = docSnap.id;
+            const div = document.createElement('div'); div.className = 'warmth-item';
+            div.innerHTML = `<div class="warmth-pulse"></div><div>${data.text}</div><button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"><span class="heart">🕯️</span> Echo Pulse</button>`;
+            div.querySelector('.echo-btn').addEventListener('click', async function(e){
+                if(this.classList.contains('pulsed')) return;
+                this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
+                await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 });
+                window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
+                if(typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
+                if(typeof window.playChime === 'function') window.playChime();
+            });
+            feed.appendChild(div);
+        });
         updateCountersUI();
     }));
 }
-
+  
 function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
