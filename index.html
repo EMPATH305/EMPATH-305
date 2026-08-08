@@ -2729,7 +2729,8 @@ window.updateMStats = function() {
 
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ 
-    if(!canvas.width || !isAnimating) return; 
+    if(!canvas.width || !isAnimating) return;
+    starMessages = window.starMessages || [];
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
@@ -2903,6 +2904,8 @@ window.pHealedTotal = 0;
 window.pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 380; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
 window.drawKintsugiVessel = function(){
+    const pHealedTotal = window.pHealedTotal || 0;
+    const pTotalShards = window.pTotalShards || 0;
     if(!pCtx) return;
     const c = pCtx;
     const w = pCanvas.offsetWidth || 540;
