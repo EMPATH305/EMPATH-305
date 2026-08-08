@@ -2220,8 +2220,8 @@ function subscribeAll() {
     firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
-        starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
-        window._starMessages = starMessages;
+        window.starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
+        starMessages = window.starMessages;
         if(typeof window.updateMStats === 'function') window.updateMStats();
         if(starsRafId) cancelAnimationFrame(starsRafId);
         starsRafId = null;
@@ -2231,10 +2231,10 @@ function subscribeAll() {
 
     firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
-        board.innerHTML = ''; pHealedTotal = 0; pTotalShards = snapshot.size;
+        board.innerHTML = ''; window.pHealedTotal = 0; window.pTotalShards = snapshot.size;
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id;
-            if(data.healed) pHealedTotal++;
+            if(data.healed) window.pHealedTotal++;
             const div = document.createElement('div');
             div.className = 'shard' + (data.healed ? ' healed' : '');
             if(!data.healed) { div.tabIndex = 0; }
@@ -2248,7 +2248,7 @@ function subscribeAll() {
             });
             board.appendChild(div);
         });
-        globalCounts.p = pHealedTotal;
+        globalCounts.p = window.pHealedTotal;
         if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
         updateCountersUI();
     }));
@@ -2651,7 +2651,7 @@ window.toggleEFeed = function() {
     window.renderEFeed(); 
 }
 
-const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let starMessages = window._starMessages || [], bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
+const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); window.starMessages = window.starMessages || []; let starMessages = window.starMessages; let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 window.resizeCanvas = function(){ 
     const dpr = window.devicePixelRatio || 1; 
     
@@ -2898,7 +2898,9 @@ roomM.addEventListener('click', async e => {
   
 window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); } }
 
-let pCanvas, pCtx, pHealedTotal = 0, pTotalShards = 0;
+let pCanvas, pCtx;
+window.pHealedTotal = 0;
+window.pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 380; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
 window.drawKintsugiVessel = function(){
     if(!pCtx) return;
@@ -2971,7 +2973,7 @@ window.drawKintsugiVessel = function(){
         { pts: [[cx+78, cy-10], [cx+58, cy+30]], width: 1.0 },
     ];
 
-    const healedRatio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
+    const healedRatio = window.pTotalShards > 0 ? window.pHealedTotal / window.pTotalShards : 0;
     const linesToHeal = Math.round(healedRatio * veins.length);
 
     veins.forEach((vein, i) => {
