@@ -3586,7 +3586,7 @@ window.checkRoomTWarmth = function() {
   document.querySelectorAll('.room, #hero').forEach(el => observer.observe(el));
   observer.observe(document.getElementById('room-m'));
   observer.observe(document.getElementById('room-a'));
-  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 200);
+  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 50);
 });
 </script>
 <!-- 註冊 PWA Service Worker -->
