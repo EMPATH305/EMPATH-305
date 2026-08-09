@@ -1187,6 +1187,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 
 <section id="room-m" class="room">
   <canvas id="star-canvas" role="img" aria-label="思念星空" data-zh-aria="思念星空" data-en-aria="Memory starry sky"></canvas>
+  <div id="star-loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.2);font-size:13px;letter-spacing:3px;pointer-events:none;">✦ 星空連線中</div>
   <div class="room-letter">M</div>
   <div class="room-content">
     <p class="room-tag">M — Missing / Memory</p>
@@ -2230,11 +2231,13 @@ function subscribeOtherRooms() {
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
         window.starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
+        try { localStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks})))); } catch(e) {}
         starMessages = window.starMessages;
         
         if(typeof window.updateMStats === 'function') window.updateMStats();
         if(starsRafId) cancelAnimationFrame(starsRafId);
         starsRafId = null;
+        const _sl = document.getElementById('star-loading'); if(_sl) _sl.style.display = 'none';
         if(typeof window.drawStars === 'function') window.drawStars();
         updateCountersUI();
     }));
@@ -2698,7 +2701,7 @@ window.toggleEFeed = function() {
     window.renderEFeed(); 
 }
 
-const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); window.starMessages = window.starMessages || []; let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
+const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); try { const _c = localStorage.getItem('empath_stars_cache'); window.starMessages = _c ? JSON.parse(_c) : []; } catch(e) { window.starMessages = []; } let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 window.resizeCanvas = function(){ 
     const dpr = window.devicePixelRatio || 1; 
     
