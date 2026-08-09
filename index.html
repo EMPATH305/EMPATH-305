@@ -2781,6 +2781,10 @@ function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.transl
 window.drawStars = function(){ 
     if(!canvas.width || !isAnimating) return;
     const starMessages = window.starMessages || [];
+    if(!canvas.width || !canvas.height || canvas.width === 0 || canvas.height === 0) { 
+    if(typeof window.resizeCanvas === 'function') window.resizeCanvas(); 
+    return; 
+}
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
