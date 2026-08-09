@@ -2707,7 +2707,7 @@ window.resizeCanvas = function(){
     
     if(canvas && roomM) { 
         const w = roomM.clientWidth;
-        const h = roomM.scrollHeight;
+        const h = Math.max(roomM.scrollHeight, roomM.offsetHeight, 600);
         canvas.width = w * dpr; 
         canvas.height = h * dpr; 
         canvas.style.width = w + 'px'; 
@@ -3586,7 +3586,7 @@ window.checkRoomTWarmth = function() {
   document.querySelectorAll('.room, #hero').forEach(el => observer.observe(el));
   observer.observe(document.getElementById('room-m'));
   observer.observe(document.getElementById('room-a'));
-  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 50);
+  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 800);
 });
 </script>
 <!-- 註冊 PWA Service Worker -->
