@@ -2777,7 +2777,6 @@ window.updateMStats = function() {
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ 
     if(!canvas.width || !isAnimating) return;
-    starMessages = window.starMessages || [];
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
