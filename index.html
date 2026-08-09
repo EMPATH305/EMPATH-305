@@ -2210,18 +2210,28 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     fetchRealCounts();
 
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    // 1. 監聽情緒出口 (Room E 優先載入，並將上限提高至 300)
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(300)), (snapshot) => {
         allEmotions = [];
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
         updateCountersUI();
     }));
 
+    // 神奇魔法：網頁載入 3 秒後，才在背景偷偷載入其他房間的資料
+    setTimeout(subscribeOtherRooms, 3000);
+}
+
+// 📦 負責載入其他房間的資料
+function subscribeOtherRooms() {
+    // 2. 監聽星星 (修正全域變數綁定)
     firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
+        
         window.starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
         starMessages = window.starMessages;
+        
         if(typeof window.updateMStats === 'function') window.updateMStats();
         if(starsRafId) cancelAnimationFrame(starsRafId);
         starsRafId = null;
@@ -2229,35 +2239,72 @@ function subscribeAll() {
         updateCountersUI();
     }));
 
+    // 3. 監聽星系金線
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), firestoreLimit(50)), (snapshot) => {
+        const nowMs = Date.now();
+        window.activeConstellations = [];
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const createdAtMs = data.createdAt ? data.createdAt.seconds * 1000 : Date.now();
+            const createdDate = new Date(createdAtMs);
+            const today = new Date();
+            if (createdDate.toDateString() !== today.toDateString()) return;
+            window.activeConstellations.push({ s1Id: data.s1Id, s2Id: data.s2Id, createdAt: createdAtMs });
+        });
+    }));
+
+    // 4. 監聽碎片與金繼進度 (修正全域變數綁定)
     firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
-        board.innerHTML = ''; window.pHealedTotal = 0; window.pTotalShards = snapshot.size;
+        board.innerHTML = ''; 
+        window.pHealedTotal = 0; 
+        window.pTotalShards = snapshot.size;
+        
         snapshot.forEach(docSnap => {
-            const data = docSnap.data(); const id = docSnap.id;
+            const data = docSnap.data(); const id = docSnap.id; 
             if(data.healed) window.pHealedTotal++;
+            
             const div = document.createElement('div');
             div.className = 'shard' + (data.healed ? ' healed' : '');
-            if(!data.healed) { div.tabIndex = 0; }
-            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補','Healed','修復済','Reparado','Réparé','Geheilt','已修补')}</div><div class="shard-glow"></div>`;
+            if(!data.healed) { div.tabIndex = 0; div.addEventListener('keydown', e => { if(e.key === 'Enter') div.click(); }); }
+            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`;
             div.addEventListener('click', async () => {
-                if(data.healed) return;
-                await updateDoc(doc(db, "shards", id), { healed: true });
-                if(typeof window.playChime === 'function') window.playChime();
-                logJourney('p', data.text);
-                window.showToast(t('以金修補，裂縫成為了光 ✦','Mended with gold ✦','金で修復しました ✦','Reparado con oro ✦','Réparé avec de l\'or ✦','Mit Gold geflickt ✦','以金修补，裂缝成为了光 ✦'));
+                if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true });
+                if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text);
+                window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
             });
             board.appendChild(div);
         });
+        
         globalCounts.p = window.pHealedTotal;
+        pHealedTotal = window.pHealedTotal; 
+        pTotalShards = window.pTotalShards;
+        
         if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
+        updateDynamicTexts();
         updateCountersUI();
+
+        const baseTotal = 300;
+        const baseHealed = 142;
+        const ratio = (window.pTotalShards + baseTotal) > 0 ? (window.pHealedTotal + baseHealed) / (window.pTotalShards + baseTotal) : 0;
+        const pct = (ratio * 100).toFixed(1);
+        const bar = document.getElementById('global-healing-bar');
+        const pctText = document.getElementById('global-healing-pct');
+        if (bar) bar.style.width = pct + '%';
+        if (pctText) pctText.textContent = pct + '%';
+
+        if (ratio >= 0.5 && !localStorage.getItem('empath_p_50_reached')) {
+            localStorage.setItem('empath_p_50_reached', 'true');
+            setTimeout(() => {
+                window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
+            }, 2000);
+        }
     }));
 
+    // 5. 監聽沙畫
     firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-        globalCounts.a = snapshot.size;
-        const feed = document.getElementById('a-feed'); if(!feed) return;
-        feed.innerHTML = '';
-        const nowMs = Date.now();
+        globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return;
+        feed.innerHTML = ''; const nowMs = Date.now();
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
@@ -2274,21 +2321,21 @@ function subscribeAll() {
         updateCountersUI();
     }));
 
+    // 6. 監聽溫暖共振
     firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-        globalCounts.t = snapshot.size;
-        const feed = document.getElementById('t-feed'); if(!feed) return;
+        globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return;
         feed.innerHTML = '';
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id;
             const div = document.createElement('div'); div.className = 'warmth-item';
-            div.innerHTML = `<div class="warmth-pulse"></div><div>${data.text}</div><button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"><span class="heart">🕯️</span> Echo Pulse</button>`;
+            div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`;
             div.querySelector('.echo-btn').addEventListener('click', async function(e){
                 if(this.classList.contains('pulsed')) return;
                 this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
                 await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 });
                 window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
-                if(typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
-                if(typeof window.playChime === 'function') window.playChime();
+                if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
+                if (typeof window.playChime === 'function') window.playChime();
             });
             feed.appendChild(div);
         });
