@@ -2188,7 +2188,6 @@ window.clearEDraw = function() {
 }
 
 let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
-window.starMessages = []; window.pHealedTotal = 0; window.pTotalShards = 0;
 
 async function fetchRealCounts() {
     try {
@@ -2347,29 +2346,6 @@ function subscribeOtherRooms() {
     }));
 }
   
-let sandGlobalTimer = null;
-function startGlobalSandTimer() { 
-    if(sandGlobalTimer) clearInterval(sandGlobalTimer); 
-    sandGlobalTimer = setInterval(() => { 
-        if(document.hidden) return; 
-        const now = Date.now(); 
-        document.querySelectorAll('.sand-msg:not(.dissolving)').forEach(div => { 
-            const expiresAt = parseInt(div.dataset.expires); 
-            const lifespanMs = parseInt(div.dataset.lifespan) || (24 * 60 * 60 * 1000);
-            const leftSecs = (expiresAt - now) / 1000; 
-            
-            if(leftSecs <= 0) { 
-                div.classList.add('dissolving'); setTimeout(()=> div.remove(), 4000); return; 
-            } 
-            const fill = div.querySelector('.sand-timer-fill'); 
-            const label = div.querySelector('.sand-time-left'); 
-            
-            if(fill) fill.style.width = ((leftSecs / (lifespanMs / 1000)) * 100) + '%'; 
-            if(label) label.textContent = formatTimeLeft(Math.floor(leftSecs)); 
-        }); 
-    }, 1000); 
-}
-
 function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
