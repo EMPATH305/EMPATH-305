@@ -2187,7 +2187,8 @@ window.clearEDraw = function() {
     eCanvasHasDrawn = false; // 清除畫布時，重置標記
 }
 
-let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = []; let starMessages = [];
+let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
+window.starMessages = []; window.pHealedTotal = 0; window.pTotalShards = 0;
 
 async function fetchRealCounts() {
     try {
