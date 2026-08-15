@@ -858,6 +858,88 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     #room-m { min-height: 180vh !important; padding-bottom: 800px !important; }
 }
   
+
+/* ===== Cinematic Home — deep night editorial direction ===== */
+#hero{
+  display:block; min-height:0; padding:0; text-align:left;
+  background:#03070d; isolation:isolate; overflow:hidden;
+}
+.cinematic-sky{position:absolute;inset:0 0 auto;height:100vh;min-height:720px;overflow:hidden;pointer-events:none;z-index:-1;background:linear-gradient(180deg,#03070d 0%,#07111f 52%,#03070d 100%);}
+.cinematic-nebula{position:absolute;inset:-20%;background:radial-gradient(ellipse at 72% 34%,rgba(64,86,125,.25),transparent 34%),radial-gradient(ellipse at 25% 60%,rgba(39,61,91,.18),transparent 38%);filter:blur(20px);}
+.cinematic-stars{position:absolute;inset:0;background-repeat:repeat;opacity:.7;}
+.cinematic-stars-a{background-image:radial-gradient(circle,rgba(255,255,255,.9) 0 1px,transparent 1.5px);background-size:93px 87px;animation:cinemaDrift 42s linear infinite;}
+.cinematic-stars-b{background-image:radial-gradient(circle,rgba(201,168,76,.8) 0 1px,transparent 1.4px);background-size:167px 149px;background-position:38px 21px;opacity:.36;animation:cinemaDrift 64s linear infinite reverse;}
+.cinematic-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 32%,rgba(0,0,0,.58) 100%);}
+.cinematic-grain{position:absolute;inset:0;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");mix-blend-mode:screen;}
+@keyframes cinemaDrift{to{transform:translate3d(-93px,87px,0);}}
+.hero-opening{height:100vh;min-height:720px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 32px 72px;position:relative;}
+.hero-kicker,.journey-index,.manifesto-label{font-size:10px;letter-spacing:.42em;color:rgba(232,230,225,.48);font-weight:400;}
+.hero-opening .hero-bg-text{font-size:min(26vw,360px);top:48%;color:rgba(255,255,255,.018);}
+.hero-opening .hero-title{font-size:clamp(76px,13vw,176px);font-weight:300;letter-spacing:.19em;line-height:.82;margin:0 0 30px;text-indent:.19em;text-shadow:0 0 60px rgba(150,180,220,.14);}
+.hero-opening .hero-sub{font-size:clamp(13px,1.5vw,19px);letter-spacing:.32em;margin:0 0 48px;color:rgba(225,205,147,.9);}
+.hero-lead{max-width:620px;font-family:'Noto Serif TC',serif;font-size:clamp(15px,1.5vw,18px);line-height:2.2;letter-spacing:.12em;color:rgba(242,232,217,.76);}
+.hero-actions{display:flex;align-items:center;gap:18px;margin-top:44px;position:relative;z-index:2;}
+.cinema-cta{height:52px;padding:0 30px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(253,252,248,.86);font:400 12px 'Noto Sans TC',sans-serif;letter-spacing:.2em;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.45s ease;}
+.cinema-cta-primary{border-color:rgba(201,168,76,.58);background:rgba(201,168,76,.08);}
+.cinema-cta:hover{border-color:rgba(255,255,255,.72);background:rgba(255,255,255,.08);transform:translateY(-2px);}
+.opening-scroll{position:absolute;bottom:30px;font-size:9px;letter-spacing:.34em;color:rgba(255,255,255,.34);display:flex;flex-direction:column;align-items:center;gap:12px;}
+.opening-scroll i{display:block;width:1px;height:34px;background:linear-gradient(var(--gold),transparent);animation:pulse 2.6s infinite;}
+#hero .onboarding-box{display:none;position:fixed;z-index:1500;left:50%;top:50%;transform:translate(-50%,-50%);max-height:min(82vh,760px);overflow:auto;margin:0;background:rgba(4,9,15,.97);border:1px solid rgba(201,168,76,.34);box-shadow:0 30px 100px rgba(0,0,0,.8);backdrop-filter:blur(24px);}
+#hero .onboarding-box.is-open{display:flex;}
+.journey-map{position:relative;padding:120px max(32px,7vw) 112px;background:linear-gradient(180deg,#03070d,#07111b 48%,#04080e);border-top:1px solid rgba(255,255,255,.06);}
+.journey-heading{max-width:760px;margin-bottom:72px;}
+.journey-heading h2{font-family:'Noto Serif TC',serif;font-size:clamp(32px,4.6vw,62px);font-weight:300;letter-spacing:.08em;color:var(--white);margin:18px 0 22px;}
+.journey-heading>p:last-child{font-family:'Noto Serif TC',serif;font-size:15px;line-height:2;color:rgba(232,230,225,.56);letter-spacing:.08em;}
+.journey-acts{max-width:1180px;margin:0 auto;}
+.journey-act{display:grid;grid-template-columns:180px 1fr;gap:48px;padding:44px 0;border-top:1px solid rgba(255,255,255,.1);}
+.journey-act:last-child{border-bottom:1px solid rgba(255,255,255,.1);}
+.act-meta{display:flex;flex-direction:column;gap:12px;padding-top:8px;}
+.act-meta span{font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:.3em;color:var(--gold);}
+.act-meta strong{font-family:'Noto Serif TC',serif;font-size:15px;letter-spacing:.18em;color:rgba(255,255,255,.68);font-weight:400;}
+.act-rooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+#hero .door-btn{min-width:0;min-height:174px;display:grid;grid-template-columns:52px 72px 1fr 24px;align-items:center;gap:12px;padding:28px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.09);border-radius:0;box-shadow:none;text-align:left;position:relative;overflow:hidden;}
+#hero .door-btn::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 76% 40%,rgba(255,255,255,.08),transparent 44%);opacity:0;transition:.5s;}
+#hero .door-btn:hover{transform:translateY(-3px);background:rgba(255,255,255,.035);border-color:rgba(201,168,76,.42);box-shadow:0 20px 50px rgba(0,0,0,.32);}
+#hero .door-btn:hover::before{opacity:1;}
+#hero .door-btn .room-no{align-self:start;font:300 11px 'Cormorant Garamond',serif;letter-spacing:.2em;color:rgba(255,255,255,.3);}
+#hero .door-btn .dl{font-size:58px;font-weight:300;text-align:center;opacity:.82;}
+.door-copy{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;}
+.door-copy b{font-family:'Noto Serif TC',serif;font-size:17px;font-weight:400;letter-spacing:.12em;color:rgba(255,255,255,.9);}
+.door-copy small{font-size:12px;font-weight:300;line-height:1.7;letter-spacing:.08em;color:rgba(255,255,255,.42);}
+.door-arrow{font-size:16px;color:rgba(255,255,255,.3);transition:.4s;}
+#hero .door-btn:hover .door-arrow{color:var(--gold);transform:translate(3px,-3px);}
+.journey-map .flow-line{text-align:center;margin:72px 0 0;font-weight:300;color:rgba(255,255,255,.32);}
+.hero-manifesto{padding:104px max(32px,10vw);background:#03070a;border-top:1px solid rgba(255,255,255,.05);}
+.hero-manifesto .hero-desc{margin:24px 0 54px;max-width:760px;font-family:'Noto Serif TC',serif;font-size:clamp(22px,3vw,38px);font-weight:300;line-height:1.65;letter-spacing:.08em;color:rgba(255,255,255,.82);}
+.hero-manifesto .hero-desc span{display:block;}
+.hero-manifesto .hero-desc span+span{font-size:.48em;margin-top:18px;color:rgba(255,255,255,.4);}
+.hero-manifesto .hero-quotes{justify-content:flex-start;gap:56px;margin:0;}
+.hero-manifesto .hero-quote{max-width:420px;padding:0 0 0 24px;background:none;border-left:1px solid rgba(201,168,76,.34);font-size:14px;color:rgba(255,255,255,.46);}
+
+@media(max-width:900px){
+  .journey-act{grid-template-columns:1fr;gap:24px;}
+  .act-meta{flex-direction:row;align-items:center;}
+  #hero .door-btn{grid-template-columns:40px 58px 1fr 20px;padding:22px;}
+  #hero .door-btn .dl{font-size:48px;}
+}
+@media(max-width:680px){
+  .hero-opening{min-height:680px;padding:108px 22px 64px;}
+  .hero-opening .hero-title{font-size:clamp(52px,18vw,82px);letter-spacing:.12em;text-indent:.12em;}
+  .hero-opening .hero-sub{letter-spacing:.18em;margin-bottom:36px;}
+  .hero-lead{font-size:14px;max-width:330px;}
+  .hero-actions{flex-direction:column;width:100%;max-width:320px;margin-top:34px;}
+  .cinema-cta{width:100%;}
+  .journey-map{padding:88px 20px;}
+  .journey-heading{margin-bottom:54px;}
+  .journey-heading h2{font-size:32px;}
+  .act-rooms{grid-template-columns:1fr;}
+  .journey-act{padding:34px 0;}
+  #hero .door-btn{min-height:142px;grid-template-columns:30px 46px 1fr 18px;padding:20px 16px;}
+  #hero .door-btn .dl{font-size:42px;}
+  .hero-manifesto{padding:80px 24px;}
+  .hero-manifesto .hero-quotes{display:grid;gap:34px;}
+  #hero .onboarding-box{width:calc(100% - 28px);padding:28px 18px;}
+}
 </style>
 </head>
 <body>
@@ -1034,10 +1116,27 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 </nav>
 
 <section id="hero">
-  <div class="hero-bg-text">EMPATH</div>
-  <h1 class="hero-title">EMPATH</h1>
-  <p class="hero-sub">Every Moment As Truth Heals</p>
-  
+  <div class="cinematic-sky" aria-hidden="true">
+    <div class="cinematic-nebula"></div>
+    <div class="cinematic-stars cinematic-stars-a"></div>
+    <div class="cinematic-stars cinematic-stars-b"></div>
+    <div class="cinematic-vignette"></div>
+    <div class="cinematic-grain"></div>
+  </div>
+
+  <div class="hero-opening">
+    <p class="hero-kicker">DIGITAL SANCTUARY · EST. 2026</p>
+    <div class="hero-bg-text">EMPATH</div>
+    <h1 class="hero-title">EMPATH</h1>
+    <p class="hero-sub">Every Moment As Truth Heals</p>
+    <p class="hero-lead" data-zh="有些情緒不需要被解決，只需要一個地方，被好好看見。" data-en="Some feelings do not need to be solved. They only need a place to be seen.">有些情緒不需要被解決，只需要一個地方，被好好看見。</p>
+    <div class="hero-actions">
+      <a class="cinema-cta cinema-cta-primary" href="#journey" data-zh="進入星空" data-en="Enter the night">進入星空</a>
+      <button class="cinema-cta cinema-cta-quiet" onclick="window.openGuide()" data-zh="讓 EMPATH 為我引路" data-en="Let EMPATH guide me">讓 EMPATH 為我引路</button>
+    </div>
+    <span class="opening-scroll">SCROLL TO BEGIN <i></i></span>
+  </div>
+
   <div class="onboarding-box" id="onboarding-box">
     <div id="ob-state-0">
       <p style="font-weight:bold; color:var(--gold); margin-bottom:12px; letter-spacing:2px; font-size:16px;" data-zh="這是一個什麼樣的空間？" data-en="What is this space?" data-ja="ここはどんな空間ですか？" data-es="¿Qué es este espacio?" data-fr="Quel est cet espace ?" data-de="Was ist dieser Raum?" data-zh-cn="这是一个什么样的空间？">這是一個什麼樣的空間？</p>
@@ -1068,52 +1167,65 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     </div>
   </div>
 
-  <p class="flow-line" data-zh="承認 → 安放 → 修補 → 釋放 → 交換 → 回家" data-en="Acknowledge → Place → Repair → Release → Exchange → Home" data-ja="承認 → 安置 → 修復 → 解放 → 交換 → 帰郷" data-es="Reconocer → Colocar → Reparar → Liberar → Intercambiar → Hogar" data-fr="Reconnaître → Placer → Réparer → Libérer → Échanger → Maison" data-de="Anerkennen → Platzieren → Reparieren → Befreien → Austauschen → Zuhause" data-zh-cn="承认 → 安放 → 修补 → 释放 → 交换 → 回家">承認 → 安放 → 修補 → 釋放 → 交換 → 回家</p>
-  <div class="doors-nav">
-    <a class="door-btn" data-d="E" href="#room-e" aria-label="前往 Room E — 情緒出口" data-zh-aria="前往 Room E — 情緒出口" data-en-aria="Go to Room E — Emotional Exit">
-        <span class="dl" aria-hidden="true">E</span><span class="dz" data-zh="情緒出口">情緒出口</span>
-        <span class="d-act" data-zh="拋下煩惱">拋下煩惱</span>
-    </a>
-    <a class="door-btn" data-d="M" href="#room-m" aria-label="前往 Room M — 思念映射" data-zh-aria="前往 Room M — 思念映射" data-en-aria="Go to Room M — Memory Mapping">
-        <span class="dl" aria-hidden="true">M</span><span class="dz" data-zh="思念映射">思念映射</span>
-        <span class="d-act" data-zh="化作星星">化作星星</span>
-    </a>
-    <a class="door-btn" data-d="P" href="#room-p" aria-label="前往 Room P — 碎片修補" data-zh-aria="前往 Room P — 碎片修補" data-en-aria="Go to Room P — Kintsugi Repair">
-        <span class="dl" aria-hidden="true">P</span><span class="dz" data-zh="碎片修補">碎片修補</span>
-        <span class="d-act" data-zh="修復遺憾">修復遺憾</span>
-    </a>
-    <a class="door-btn" data-d="A" href="#room-a" aria-label="前往 Room A — 神聖避難所" data-zh-aria="前往 Room A — 神聖避難所" data-en-aria="Go to Room A — Sacred Asylum">
-        <span class="dl" aria-hidden="true">A</span><span class="dz" data-zh="神聖避難所">神聖避難所</span>
-        <span class="d-act" data-zh="隨風消散">隨風消散</span>
-    </a>
-    <a class="door-btn" data-d="T" href="#room-t" aria-label="前往 Room T — 能量共振" data-zh-aria="前往 Room T — 能量共振" data-en-aria="Go to Room T — Energy Resonance">
-        <span class="dl" aria-hidden="true">T</span><span class="dz" data-zh="能量共振">能量共振</span>
-        <span class="d-act" data-zh="給予溫暖">給予溫暖</span>
-    </a>
-    <a class="door-btn" data-d="H" href="#room-h" aria-label="前往 Room H — 靈魂歸宿" data-zh-aria="前往 Room H — 靈魂歸宿" data-en-aria="Go to Room H — Soul's Home">
-        <span class="dl" aria-hidden="true">H</span><span class="dz" data-zh="靈魂歸宿">靈魂歸宿</span>
-        <span class="d-act" data-zh="備份足跡">備份足跡</span>
-    </a>
-  </div>
-  
-  <p class="hero-desc">
-    <span data-zh="數位時代的情緒安放平台" data-en="An emotional sanctuary for the digital age." data-ja="デジタル時代の感情のサンクチュアリ。" data-es="Un santuario emocional para la era digital." data-fr="Un sanctuaire émotionnel pour l'ère numérique." data-de="Ein emotionales Heiligtum für das digitale Zeitalter." data-zh-cn="数字时代的情绪安放平台">數位時代的情緒安放平台</span>
-    <span style="display:block; margin-top:12px; opacity:0.7;" data-zh="以文學敘事對抗視覺霸權的設計實踐" data-en="A design practice countering visual hegemony through literary narrative." data-ja="文学的アプローチによるデザイン実践。" data-es="Práctica de diseño mediante narrativa." data-fr="Une pratique de conception contre l'hégémonie visuelle." data-de="Ein Designansatz gegen visuelle Hegemonie." data-zh-cn="以文学叙事对抗视觉霸权的设计实践">以文學敘事對抗視覺霸權的設計實踐</span>
-  </p>
-  
-  <button id="hero-quotes-toggle" class="func-btn" style="display:none;" onclick="window.toggleHeroQuotes()" data-zh="📖 閱讀設計理念 ↓" data-en="📖 Read Philosophy ↓" data-ja="📖 コンセプトを読む ↓" data-es="📖 Leer Filosofía ↓" data-fr="📖 Lire la philosophie ↓" data-de="📖 Philosophie lesen ↓" data-zh-cn="📖 阅读设计理念 ↓">📖 閱讀設計理念 ↓</button>
-  
-  <div class="hero-quotes" id="hero-quotes">
-    <div class="hero-quote" data-zh="廣告以「迷人(Glamour)」製造幻覺，讓人相信擁有某種形象就能被渴望。<cite>—— JOHN BERGER《觀看的方式》</cite>" data-en="Glamour is an illusion manufactured by advertising, making us believe that possessing a certain image makes us desirable.<cite>— JOHN BERGER, Ways of Seeing</cite>" data-ja="広告は「グラマー」によって幻想を作り出し、特定のイメージを持てば望まれると信じさせる。<cite>— ジョン・バージャー</cite>" data-es="La publicidad crea ilusiones, haciéndonos creer que poseer cierta imagen nos hace deseables.<cite>— John Berger</cite>" data-fr="Le glamour est une illusion fabriquée par la publicité, nous faisant croire que posséder une certaine image nous rend désirables.<cite>— John Berger</cite>" data-de="Glamour ist eine durch Werbung erzeugte Illusion, die uns glauben macht, dass der Besitz eines bestimmten Images uns begehrenswert macht.<cite>— John Berger</cite>" data-zh-cn="广告以“迷人(Glamour)”制造幻觉，让人相信拥有某种形象就能被渴望。<cite>—— JOHN BERGER《观看的方式》</cite>">
-      廣告以「迷人(Glamour)」製造幻覺，讓人相信擁有某種形象就能被渴望。
-      <cite>—— JOHN BERGER《觀看的方式》</cite>
+  <div id="journey" class="journey-map">
+    <header class="journey-heading">
+      <p class="journey-index">CHAPTERS · 01—03</p>
+      <h2 data-zh="沿著情緒，走回自己" data-en="Follow the feeling back to yourself">沿著情緒，走回自己</h2>
+      <p data-zh="六個房間，三段旅程。你不必依序前進，只要選擇此刻最接近你的入口。" data-en="Six rooms, three movements. Begin wherever feels closest tonight.">六個房間，三段旅程。你不必依序前進，只要選擇此刻最接近你的入口。</p>
+    </header>
+
+    <div class="journey-acts">
+      <section class="journey-act">
+        <div class="act-meta"><span>ACT I</span><strong data-zh="說出與懷念" data-en="Speak & Remember">說出與懷念</strong></div>
+        <div class="act-rooms">
+          <a class="door-btn" data-d="E" href="#room-e" aria-label="前往 Room E — 情緒出口">
+            <span class="room-no">01</span><span class="dl">E</span><span class="door-copy"><b data-zh="情緒出口" data-en="Emotional Exit">情緒出口</b><small data-zh="讓沒有名字的重量，被聽見" data-en="Let the unnamed weight be heard">讓沒有名字的重量，被聽見</small></span><span class="door-arrow">↗</span>
+          </a>
+          <a class="door-btn" data-d="M" href="#room-m" aria-label="前往 Room M — 思念映射">
+            <span class="room-no">02</span><span class="dl">M</span><span class="door-copy"><b data-zh="思念映射" data-en="Memory Mapping">思念映射</b><small data-zh="把想念放上夜空" data-en="Place your memory among the stars">把想念放上夜空</small></span><span class="door-arrow">↗</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="journey-act">
+        <div class="act-meta"><span>ACT II</span><strong data-zh="修補與釋放" data-en="Repair & Release">修補與釋放</strong></div>
+        <div class="act-rooms">
+          <a class="door-btn" data-d="P" href="#room-p" aria-label="前往 Room P — 碎片修補">
+            <span class="room-no">03</span><span class="dl">P</span><span class="door-copy"><b data-zh="碎片修補" data-en="Kintsugi Repair">碎片修補</b><small data-zh="讓裂痕成為光的入口" data-en="Let the fracture become an opening for light">讓裂痕成為光的入口</small></span><span class="door-arrow">↗</span>
+          </a>
+          <a class="door-btn" data-d="A" href="#room-a" aria-label="前往 Room A — 神聖避難所">
+            <span class="room-no">04</span><span class="dl">A</span><span class="door-copy"><b data-zh="神聖避難所" data-en="Sacred Asylum">神聖避難所</b><small data-zh="讓痛苦隨時間消散" data-en="Let pain dissolve with time">讓痛苦隨時間消散</small></span><span class="door-arrow">↗</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="journey-act">
+        <div class="act-meta"><span>ACT III</span><strong data-zh="交換與回家" data-en="Exchange & Return">交換與回家</strong></div>
+        <div class="act-rooms">
+          <a class="door-btn" data-d="T" href="#room-t" aria-label="前往 Room T — 能量共振">
+            <span class="room-no">05</span><span class="dl">T</span><span class="door-copy"><b data-zh="能量共振" data-en="Energy Resonance">能量共振</b><small data-zh="把溫暖交給另一個靈魂" data-en="Pass warmth to another soul">把溫暖交給另一個靈魂</small></span><span class="door-arrow">↗</span>
+          </a>
+          <a class="door-btn" data-d="H" href="#room-h" aria-label="前往 Room H — 靈魂歸宿">
+            <span class="room-no">06</span><span class="dl">H</span><span class="door-copy"><b data-zh="靈魂歸宿" data-en="Soul's Home">靈魂歸宿</b><small data-zh="保存走過的情緒足跡" data-en="Keep the traces of your journey">保存走過的情緒足跡</small></span><span class="door-arrow">↗</span>
+          </a>
+        </div>
+      </section>
     </div>
-    <div class="hero-quote" data-zh="所看的從來不是所說的，影像以各種方式不斷處決文字。<cite>—— 楊凱麟，論馬格利特</cite>" data-en="What is seen is never what is said; images continuously execute words in various ways.<cite>— Michel Foucault (on Magritte)</cite>" data-ja="見られるものは決して語られるものではない。画像は様々な方法で言葉を処刑し続ける。<cite>— ミシェル・フーコー</cite>" data-es="Lo que se ve nunca es lo que se dice; las imágenes ejecutan continuamente a las palabras.<cite>— Michel Foucault</cite>" data-fr="Ce qui est vu n'est jamais ce qui est dit ; les images exécutent continuellement les mots de diverses manières.<cite>— Michel Foucault</cite>" data-de="Was gesehen wird, ist niemals das, was gesagt wird; Bilder exekutieren kontinuierlich Wörter auf verschiedene Weise.<cite>— Michel Foucault</cite>" data-zh-cn="所看的从来不是所说的，影像以各种方式不断处决文字。<cite>—— 杨凯麟，论马格利特</cite>">
-      所看的從來不是所說的，影像以各種方式不斷處決文字。
-      <cite>—— 楊凱麟，論馬格利特</cite>
-    </div>
+
+    <p class="flow-line" data-zh="承認 · 安放 · 修補 · 釋放 · 交換 · 回家" data-en="Acknowledge · Place · Repair · Release · Exchange · Home">承認 · 安放 · 修補 · 釋放 · 交換 · 回家</p>
   </div>
-  <span class="scroll-hint">↓ &nbsp; SCROLL</span>
+
+  <aside class="hero-manifesto">
+    <p class="manifesto-label">CREATIVE STATEMENT</p>
+    <p class="hero-desc">
+      <span data-zh="數位時代的情緒安放平台" data-en="An emotional sanctuary for the digital age.">數位時代的情緒安放平台</span>
+      <span data-zh="以文學敘事，留下不被影像取代的真實。" data-en="Literary narrative for truths that images cannot replace.">以文學敘事，留下不被影像取代的真實。</span>
+    </p>
+    <div class="hero-quotes" id="hero-quotes">
+      <div class="hero-quote" data-zh="廣告以「迷人」製造幻覺，讓人相信擁有某種形象就能被渴望。<cite>—— JOHN BERGER《觀看的方式》</cite>" data-en="Glamour is an illusion manufactured by advertising.<cite>— JOHN BERGER, Ways of Seeing</cite>">廣告以「迷人」製造幻覺，讓人相信擁有某種形象就能被渴望。<cite>—— JOHN BERGER《觀看的方式》</cite></div>
+      <div class="hero-quote" data-zh="所看的從來不是所說的，影像以各種方式不斷處決文字。<cite>—— 楊凱麟，論馬格利特</cite>" data-en="What is seen is never what is said; images continuously execute words.<cite>— On Magritte</cite>">所看的從來不是所說的，影像以各種方式不斷處決文字。<cite>—— 楊凱麟，論馬格利特</cite></div>
+    </div>
+  </aside>
 </section>
 
 <section id="room-e" class="room">
@@ -1770,6 +1882,15 @@ const guideData = {
     'H': { title: {zh: '房間 H — 靈魂歸宿', en: 'Room H — Soul\'s Home', ja: '部屋 H — 魂の帰郷', es: 'Habitación H — Hogar del Alma', fr: 'Salle H — Foyer de l\'Âme', de: 'Raum H — Zuhause der Seele', 'zh-cn': '房间 H — 灵魂归宿', 'uk': 'Кімната H — Дім Душі', 'pl': 'Pokój H — Dom Duszy'}, desc: {zh: '回家，回到不需偽裝的地方。這裡記錄了全世界的靈魂足跡。你可以先在這裡安靜地待著。', en: 'Come home, to a place where no disguise is needed. You can just rest here quietly.', ja: 'おかえりなさい。偽りの必要がない場所へ。まずはここで静かに休んでください。', es: 'Vuelve a casa, a un lugar donde no necesitas fingir. Puedes descansar aquí tranquilamente.', fr: 'Rentrez chez vous, dans un endroit sans déguisement. Vous pouvez simplement vous reposer ici.', de: 'Komm nach Hause, an einen Ort ohne Verstellung. Du kannst hier einfach ruhig ausruhen.', 'zh-cn': '回家，回到不需伪装的地方。这里记录了全世界的灵魂足迹。你可以先在这里安静地待着。', 'uk': 'Повертайся додому. Ти можеш просто тихо відпочити тут.', 'pl': 'Wróć do domu. Możesz po prostu cicho tu odpocząć.'}, link: '#room-h' }
 };
 
+window.openGuide = function() {
+    const obBox = document.getElementById('onboarding-box');
+    if(!obBox) return;
+    obBox.style.display = '';
+    obBox.style.opacity = '1';
+    obBox.style.transform = 'translate(-50%, -50%)';
+    obBox.classList.add('is-open');
+    window.startGuide();
+};
 window.startGuide = function() { document.getElementById('ob-state-0').style.display = 'none'; document.getElementById('ob-state-2').style.display = 'none'; document.getElementById('ob-state-1').style.display = 'block'; }
 window.showGuideResult = function(roomKey) {
     document.getElementById('ob-state-1').style.display = 'none'; document.getElementById('ob-state-2').style.display = 'block';
@@ -1778,7 +1899,7 @@ window.showGuideResult = function(roomKey) {
     document.getElementById('ob-res-desc').textContent = data.desc[lang] || data.desc['en'] || data.desc['zh'];
     const linkBtn = document.getElementById('ob-res-link'); linkBtn.href = data.link; linkBtn.onclick = function() { window.closeGuide(); window.closeMobileNav(); };
 }
-window.closeGuide = function() { const obBox = document.getElementById('onboarding-box'); if(obBox) { obBox.style.opacity = '0'; obBox.style.transform = 'translateY(-20px)'; setTimeout(() => { obBox.style.display = 'none'; }, 500); } }
+window.closeGuide = function() { const obBox = document.getElementById('onboarding-box'); if(obBox) { obBox.style.opacity = '0'; setTimeout(() => { obBox.classList.remove('is-open'); obBox.style.display = 'none'; }, 450); } }
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
