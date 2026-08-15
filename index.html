@@ -1248,6 +1248,10 @@ body.visual-ready .room .desc-wrap.is-revealed{opacity:1;transform:translateY(0)
   body.visual-ready .room .room-title-wrap,
   body.visual-ready .room .desc-wrap{opacity:1;transform:none;filter:none;}
 }
+
+/* Wabi-sabi kintsugi vessel */
+.p-vessel{max-width:620px;margin:0 0 48px;position:relative;}
+#p-canvas{display:block;width:100%;max-width:620px;filter:drop-shadow(0 24px 34px rgba(0,0,0,.30));}
 </style>
 </head>
 <body>
@@ -3459,130 +3463,187 @@ window.addEventListener('load', () => { pCanvas = document.getElementById('p-can
 window.drawKintsugiVessel = function(){
     const pHealedTotal = window.pHealedTotal || 0;
     const pTotalShards = window.pTotalShards || 0;
-    if(!pCtx) return;
+    if(!pCtx || !pCanvas) return;
+
     const c = pCtx;
     const w = pCanvas.offsetWidth || 540;
     const h = 380;
     c.clearRect(0, 0, w, h);
+
     const cx = w / 2;
-    const cy = h / 2 + 10;
-
-    // ── 1. 瓷器主體：不對稱的手拉坯日式茶碗 ──
-    // 刻意讓左右不完全對稱，模仿手工感
+    const cy = h / 2 + 12;
+    const scale = Math.min(1, w / 540);
     c.save();
+    c.translate(cx, cy);
+    c.scale(scale, scale);
+
+    // 侘寂茶碗：低矮、寬口、略微歪斜，不追求機械式對稱。
+    const bowl = new Path2D();
+    bowl.moveTo(-138, -62);
+    bowl.bezierCurveTo(-91, -82, 72, -77, 134, -55);
+    bowl.bezierCurveTo(132, -8, 111, 53, 72, 91);
+    bowl.bezierCurveTo(47, 108, -42, 110, -70, 94);
+    bowl.bezierCurveTo(-111, 60, -136, 3, -138, -62);
+    bowl.closePath();
+
+    // 柔和陰影，讓器物像安靜地放在漆黑展示台上。
+    c.save();
+    c.filter = 'blur(13px)';
+    c.fillStyle = 'rgba(0,0,0,.48)';
     c.beginPath();
-    // 碗口橢圓（微微歪斜）
-    c.moveTo(cx - 105, cy - 95);
-    c.bezierCurveTo(cx - 90, cy - 130, cx + 95, cy - 125, cx + 108, cy - 90);
-    // 右側碗身（微微外鼓）
-    c.bezierCurveTo(cx + 125, cy - 40, cx + 118, cy + 50, cx + 85, cy + 105);
-    // 碗底（略寬於想像，更像真實陶器）
-    c.bezierCurveTo(cx + 55, cy + 125, cx - 50, cy + 128, cx - 80, cy + 108);
-    // 左側碗身（比右側稍微內收）
-    c.bezierCurveTo(cx - 112, cy + 55, cx - 120, cy - 35, cx - 105, cy - 95);
-    c.closePath();
-
-    // 瓷器填色：深色陶土感，有輕微的徑向漸層模仿釉面
-    const bodyGrad = c.createRadialGradient(cx - 25, cy - 50, 15, cx, cy + 10, 145);
-    bodyGrad.addColorStop(0,   'rgba(88, 72, 58, 0.97)');
-    bodyGrad.addColorStop(0.4, 'rgba(62, 50, 40, 0.98)');
-    bodyGrad.addColorStop(1,   'rgba(35, 27, 20, 0.99)');
-    c.fillStyle = bodyGrad;
-    c.fill();
-
-    // 釉面高光（左上角一道弧形反光，模仿真實陶瓷）
-    c.clip();
-    const shine = c.createLinearGradient(cx - 110, cy - 120, cx - 30, cy - 30);
-    shine.addColorStop(0, 'rgba(255,255,255,0.07)');
-    shine.addColorStop(0.5, 'rgba(255,255,255,0.02)');
-    shine.addColorStop(1, 'rgba(255,255,255,0)');
-    c.fillStyle = shine;
+    c.ellipse(4, 112, 112, 16, 0, 0, Math.PI * 2);
     c.fill();
     c.restore();
 
-    // 碗口邊緣線（細、淡）
+    const clay = c.createRadialGradient(-48, -54, 8, 12, 30, 190);
+    clay.addColorStop(0, '#6f6559');
+    clay.addColorStop(.28, '#514a42');
+    clay.addColorStop(.66, '#302c28');
+    clay.addColorStop(1, '#171512');
+    c.fillStyle = clay;
+    c.shadowBlur = 28;
+    c.shadowColor = 'rgba(201,168,76,.08)';
+    c.fill(bowl);
+    c.shadowBlur = 0;
+
+    // 落灰釉：不規則霧面亮區，而不是塑膠般均勻的高光。
+    c.save();
+    c.clip(bowl);
+    const ashGlaze = c.createLinearGradient(-125, -95, 100, 105);
+    ashGlaze.addColorStop(0, 'rgba(235,225,207,.12)');
+    ashGlaze.addColorStop(.30, 'rgba(202,193,175,.035)');
+    ashGlaze.addColorStop(.58, 'rgba(255,255,255,0)');
+    ashGlaze.addColorStop(1, 'rgba(0,0,0,.22)');
+    c.fillStyle = ashGlaze;
+    c.fillRect(-155, -100, 310, 220);
+
+    // 固定分布的陶土顆粒，重畫時不會閃爍。
+    for(let i = 0; i < 95; i++){
+        const px = -132 + ((i * 73) % 264);
+        const py = -62 + ((i * 47) % 164);
+        const radius = .35 + ((i * 19) % 10) / 16;
+        c.beginPath();
+        c.arc(px, py, radius, 0, Math.PI * 2);
+        c.fillStyle = i % 4 === 0 ? 'rgba(235,220,192,.085)' : 'rgba(0,0,0,.10)';
+        c.fill();
+    }
+
+    // 左上方一小片釉色堆積，增加手作與燒製痕跡。
+    const glazePool = c.createRadialGradient(-78, -35, 2, -70, -28, 58);
+    glazePool.addColorStop(0, 'rgba(174,166,149,.16)');
+    glazePool.addColorStop(.55, 'rgba(121,115,104,.06)');
+    glazePool.addColorStop(1, 'rgba(80,74,66,0)');
+    c.fillStyle = glazePool;
+    c.fillRect(-145, -95, 155, 145);
+    c.restore();
+
+    // 不平整的碗口：外緣、內緣與幽暗的釉池。
     c.beginPath();
-    c.moveTo(cx - 105, cy - 95);
-    c.bezierCurveTo(cx - 90, cy - 130, cx + 95, cy - 125, cx + 108, cy - 90);
-    c.strokeStyle = 'rgba(201,168,76,0.10)';
+    c.moveTo(-138, -62);
+    c.bezierCurveTo(-87, -84, 73, -79, 134, -55);
+    c.bezierCurveTo(77, -36, -82, -39, -138, -62);
+    c.closePath();
+    const rimFill = c.createLinearGradient(0, -82, 0, -35);
+    rimFill.addColorStop(0, 'rgba(116,106,94,.78)');
+    rimFill.addColorStop(1, 'rgba(24,22,20,.96)');
+    c.fillStyle = rimFill;
+    c.fill();
+
+    c.beginPath();
+    c.moveTo(-138, -62);
+    c.bezierCurveTo(-87, -84, 73, -79, 134, -55);
+    c.strokeStyle = 'rgba(224,213,192,.22)';
+    c.lineWidth = 1.15;
+    c.stroke();
+
+    c.beginPath();
+    c.moveTo(-132, -58);
+    c.bezierCurveTo(-73, -41, 75, -39, 128, -54);
+    c.strokeStyle = 'rgba(0,0,0,.42)';
     c.lineWidth = 1;
     c.stroke();
 
-    // ── 2. 裂縫：有機分叉、粗細不均、非對稱 ──
-    // 每條裂縫用多段折線模仿真實破裂感，刻意加入隨機感的手動偏移
+    // 小圈足讓輪廓更接近日式茶碗，而不是直筒花器。
+    c.beginPath();
+    c.moveTo(-48, 96);
+    c.bezierCurveTo(-38, 116, 39, 116, 54, 96);
+    c.lineTo(43, 109);
+    c.bezierCurveTo(24, 119, -23, 119, -39, 108);
+    c.closePath();
+    c.fillStyle = 'rgba(25,22,18,.95)';
+    c.fill();
+    c.strokeStyle = 'rgba(199,181,147,.13)';
+    c.lineWidth = 1;
+    c.stroke();
+
+    // 裂縫採單一主脈絡與自然分支，避免對稱 X 形。
     const veins = [
-        // 主裂縫 A：從左肩往右下蜿蜒，途中分叉
-        { pts: [[cx-95, cy-80], [cx-70, cy-40], [cx-38, cy+5], [cx-5, cy+45], [cx+18, cy+95]], width: 2.8 },
-        // 分叉 A1：從主裂縫中段往左下分出
-        { pts: [[cx-38, cy+5], [cx-62, cy+30], [cx-75, cy+70]], width: 1.6 },
-        // 分叉 A2：從主裂縫末端往右
-        { pts: [[cx+18, cy+95], [cx+42, cy+105]], width: 1.2 },
-        // 主裂縫 B：從右肩往左下，比 A 短
-        { pts: [[cx+98, cy-75], [cx+72, cy-30], [cx+40, cy+20], [cx+8, cy+55]], width: 2.2 },
-        // 分叉 B1：往右下
-        { pts: [[cx+40, cy+20], [cx+68, cy+55], [cx+72, cy+95]], width: 1.4 },
-        // 短裂縫 C：碗口附近一道獨立短縫
-        { pts: [[cx-30, cy-110], [cx-15, cy-80], [cx+5, cy-60]], width: 1.8 },
-        // 細縫 D：左下角一道幾乎看不見的微裂
-        { pts: [[cx-80, cy+65], [cx-58, cy+90], [cx-48, cy+112]], width: 1.0 },
-        // 細縫 E：右側中段
-        { pts: [[cx+78, cy-10], [cx+58, cy+30]], width: 1.0 },
+        { pts: [[48,-58],[42,-30],[25,-8],[31,18],[10,43],[-4,72],[-1,101]], width: 2.7 },
+        { pts: [[25,-8],[-4,2],[-22,20],[-48,30]], width: 1.55 },
+        { pts: [[10,43],[34,52],[51,70]], width: 1.25 },
+        { pts: [[42,-30],[66,-22],[84,-7]], width: 1.05 },
+        { pts: [[-105,-55],[-92,-31],[-98,-7],[-77,13]], width: 1.45 },
+        { pts: [[-98,-7],[-117,10],[-122,34]], width: .9 },
+        { pts: [[84,-7],[72,15],[79,35]], width: .8 }
     ];
 
-    const healedRatio = window.pTotalShards > 0 ? window.pHealedTotal / window.pTotalShards : 0;
+    const healedRatio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
     const linesToHeal = Math.round(healedRatio * veins.length);
 
-    veins.forEach((vein, i) => {
-        const pts = vein.pts;
+    const traceVein = (pts) => {
         c.beginPath();
         c.moveTo(pts[0][0], pts[0][1]);
-
-        for(let k = 1; k < pts.length; k++){
-            if(k < pts.length - 1){
-                // 用中點控制曲率，讓線條微微彎曲而不是筆直
-                const mx = (pts[k][0] + pts[k+1][0]) / 2;
-                const my = (pts[k][1] + pts[k+1][1]) / 2;
-                c.quadraticCurveTo(pts[k][0], pts[k][1], mx, my);
+        for(let i = 1; i < pts.length; i++){
+            if(i < pts.length - 1){
+                const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+                const my = (pts[i][1] + pts[i + 1][1]) / 2;
+                c.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
             } else {
-                c.lineTo(pts[k][0], pts[k][1]);
+                c.lineTo(pts[i][0], pts[i][1]);
             }
         }
+    };
 
+    veins.forEach((vein, index) => {
+        traceVein(vein.pts);
         c.lineCap = 'round';
         c.lineJoin = 'round';
 
-        if(i < linesToHeal){
-            // 已修補：漸層金線 + 外發光
-            const p0 = pts[0], pN = pts[pts.length-1];
-            const g = c.createLinearGradient(p0[0], p0[1], pN[0], pN[1]);
-            g.addColorStop(0,   '#9A7B2E');
-            g.addColorStop(0.25,'#D4AF37');
-            g.addColorStop(0.5, '#FFF0A0');
-            g.addColorStop(0.75,'#C9A84C');
-            g.addColorStop(1,   '#8B6914');
-            c.strokeStyle = g;
+        if(index < linesToHeal){
+            const first = vein.pts[0];
+            const last = vein.pts[vein.pts.length - 1];
+            const gold = c.createLinearGradient(first[0], first[1], last[0], last[1]);
+            gold.addColorStop(0, '#8d6820');
+            gold.addColorStop(.22, '#c49a3a');
+            gold.addColorStop(.48, '#f0d77d');
+            gold.addColorStop(.72, '#b88929');
+            gold.addColorStop(1, '#765214');
+
+            // 深色底縫先露出一點，金漆才像填入裂口，而非畫在表面。
+            c.strokeStyle = 'rgba(8,7,5,.72)';
+            c.lineWidth = vein.width + 2.1;
+            c.shadowBlur = 0;
+            c.stroke();
+
+            traceVein(vein.pts);
+            c.strokeStyle = gold;
             c.lineWidth = vein.width;
-            c.shadowBlur = 7;
-            c.shadowColor = 'rgba(212,175,55,0.55)';
+            c.shadowBlur = 4;
+            c.shadowColor = 'rgba(212,175,55,.34)';
             c.stroke();
             c.shadowBlur = 0;
-
-            // 金線上偶爾有一個極小光點，模仿金粉顆粒
-            if(vein.width >= 1.8){
-                const mid = pts[Math.floor(pts.length / 2)];
-                c.beginPath();
-                c.arc(mid[0], mid[1], 1.2, 0, Math.PI * 2);
-                c.fillStyle = 'rgba(255,248,200,0.9)';
-                c.fill();
-            }
         } else {
-            // 未修補：極淡的暗色裂縫痕跡
-            c.strokeStyle = 'rgba(255,255,255,0.12)';
-            c.lineWidth = vein.width * 0.6;
-            c.shadowBlur = 0;
+            c.strokeStyle = 'rgba(5,4,3,.58)';
+            c.lineWidth = vein.width;
+            c.stroke();
+            traceVein(vein.pts);
+            c.strokeStyle = 'rgba(230,220,201,.07)';
+            c.lineWidth = Math.max(.45, vein.width * .32);
             c.stroke();
         }
     });
+
+    c.restore();
 };
   
 window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
