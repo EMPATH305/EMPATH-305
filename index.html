@@ -942,7 +942,26 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
 }
 
 /* ===== Premium polish & guide modal repair ===== */
-a[title="CSS Light"]{display:none!important;}
+a[title="CSS Light"]{
+  display:block!important;
+  position:fixed!important;
+  top:auto!important;right:auto!important;bottom:18px!important;left:18px!important;
+  width:72px!important;height:25px!important;
+  z-index:820!important;
+  background-size:72px auto!important;
+  opacity:.38;
+  filter:grayscale(100%);
+  transform:translateZ(0);
+  border-radius:2px;
+  overflow:hidden;
+  transition:opacity .35s ease,filter .35s ease,transform .35s ease;
+}
+a[title="CSS Light"]:hover,
+a[title="CSS Light"]:focus-visible{
+  opacity:.9;
+  filter:grayscale(15%);
+  transform:translateY(-2px);
+}
 
 nav{
   padding:14px 42px;
