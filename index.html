@@ -2602,6 +2602,58 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
     padding: 32px 20px !important;
   }
 }
+
+/* ===== CURSOR DRIFT + SOUL LABEL REPAIR · 2026-08-15 ===== */
+#room-h #g-summary .visitor-card {
+  display: grid !important;
+  grid-template-rows: 24px minmax(88px,auto) minmax(44px,auto) !important;
+  row-gap: 12px !important;
+  align-content: center !important;
+  justify-items: center !important;
+}
+#room-h #g-summary .visitor-card .g-letter {
+  width: 100% !important;
+  height: 24px !important;
+  margin: 0 !important;
+  line-height: 24px !important;
+}
+#room-h #g-summary .visitor-card .g-num,
+#room-h #g-summary .visitor-card .g-num.lux-counter {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 88px !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+#room-h #g-summary .visitor-card .g-label {
+  width: 100% !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding-top: 8px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  line-height: 1.8 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+@media (max-width:680px) {
+  #room-h #g-summary .visitor-card {
+    grid-template-rows: 20px minmax(72px,auto) minmax(42px,auto) !important;
+    row-gap: 10px !important;
+  }
+  #room-h #g-summary .visitor-card .g-num,
+  #room-h #g-summary .visitor-card .g-num.lux-counter {
+    min-height: 72px !important;
+    font-size: clamp(48px,16vw,68px) !important;
+  }
+}
 </style>
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
@@ -3485,8 +3537,9 @@ let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let glowX = mouseX, glowY = mouseY;
 let glowVX = 0, glowVY = 0;
 let glowLastFrame = 0;
-const CURSOR_SPRING_STIFFNESS = 0.008;
-const CURSOR_SPRING_DAMPING = 0.86;
+const CURSOR_SPRING_STIFFNESS = 0.0024;
+const CURSOR_SPRING_DAMPING = 0.84;
+const CURSOR_MAX_SPEED = 9;
 let isMoving = false;
 
 document.addEventListener('mousemove', (e) => {
@@ -3519,6 +3572,15 @@ function animateGlow(timestamp) {
             const damping = Math.pow(CURSOR_SPRING_DAMPING, step);
             glowVX *= damping;
             glowVY *= damping;
+
+            // 限制長距離移動時的追趕速度，保留可感知的精品漂移。
+            const glowSpeed = Math.hypot(glowVX, glowVY);
+            if (glowSpeed > CURSOR_MAX_SPEED) {
+                const speedScale = CURSOR_MAX_SPEED / glowSpeed;
+                glowVX *= speedScale;
+                glowVY *= speedScale;
+            }
+
             glowX += glowVX * step;
             glowY += glowVY * step;
         }
