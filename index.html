@@ -1880,6 +1880,196 @@ body.aw-ready .room .aw-stage.aw-in {
     .aw-site-noise{animation:none !important}
 }
 
+
+
+/* ===== EMPATH LUXURY MICRODETAILS · LEVEL 2 ===== */
+
+/* 1 — 房間背景字母呼吸 */
+.room .room-letter {
+    animation: luxRoomBreath 6s ease-in-out infinite !important;
+    will-change: opacity !important;
+}
+@keyframes luxRoomBreath {
+    0%,100% { opacity:.05; }
+    50% { opacity:.09; }
+}
+
+/* 2 — 送出按鈕液態漣漪 */
+.send-btn {
+    position:relative !important;
+    overflow:hidden !important;
+    isolation:isolate !important;
+}
+.send-btn > *:not(.lux-btn-ripple) {
+    position:relative !important;
+    z-index:2 !important;
+}
+.lux-btn-ripple {
+    position:absolute !important;
+    width:12px !important;
+    height:12px !important;
+    left:var(--ripple-x,50%) !important;
+    top:var(--ripple-y,50%) !important;
+    border-radius:50% !important;
+    background:var(--ripple-color,currentColor) !important;
+    opacity:.4 !important;
+    pointer-events:none !important;
+    z-index:1 !important;
+    transform:translate(-50%,-50%) scale(0) !important;
+    animation:luxLiquidRipple 600ms cubic-bezier(.2,.7,.25,1) forwards !important;
+}
+@keyframes luxLiquidRipple {
+    to { opacity:0; transform:translate(-50%,-50%) scale(var(--ripple-scale,20)) !important; }
+}
+
+/* 3 — 留言逐則被接收 */
+#e-feed > .lux-feed-item,
+#t-feed > .lux-feed-item,
+#a-feed > .lux-feed-item {
+    opacity:0 !important;
+    transform:translate3d(0,14px,0) !important;
+    animation:luxFeedReceive 700ms cubic-bezier(.23,1,.32,1) forwards !important;
+    animation-delay:var(--feed-delay,0ms) !important;
+}
+#e-feed > .lux-feed-steady,
+#t-feed > .lux-feed-steady,
+#a-feed > .lux-feed-steady {
+    opacity:1 !important;
+    transform:none !important;
+    animation:none !important;
+}
+@keyframes luxFeedReceive {
+    to { opacity:1; transform:translate3d(0,0,0); }
+}
+
+/* 4 — 房間轉場光幕 */
+.lux-room-curtain {
+    position:fixed !important;
+    inset:0 !important;
+    z-index:9999998 !important;
+    pointer-events:none !important;
+    opacity:0 !important;
+    background:
+      radial-gradient(circle at 50% 50%,rgba(27,42,74,.5),transparent 58%),
+      #050a10 !important;
+    transition:opacity 300ms cubic-bezier(.23,1,.32,1) !important;
+}
+.lux-room-curtain.is-entering {
+    opacity:1 !important;
+    transition-duration:100ms !important;
+}
+.lux-room-curtain.is-leaving {
+    opacity:0 !important;
+    transition-duration:300ms !important;
+}
+
+/* 5 — 輸入文字能量線 */
+.lux-input-host { position:relative !important; }
+.lux-input-spark {
+    position:absolute !important;
+    pointer-events:none !important;
+    left:var(--spark-left,0px) !important;
+    top:var(--spark-top,0px) !important;
+    width:var(--spark-width,100px) !important;
+    height:1px !important;
+    overflow:visible !important;
+    opacity:0 !important;
+    transition:opacity 500ms ease !important;
+    z-index:5 !important;
+}
+.lux-input-spark::after {
+    content:'' !important;
+    position:absolute !important;
+    top:-2px !important;
+    left:0 !important;
+    width:5px !important;
+    height:5px !important;
+    border-radius:50% !important;
+    background:var(--input-energy,var(--gold)) !important;
+    box-shadow:0 0 7px var(--input-energy,var(--gold)),
+               0 0 16px color-mix(in srgb,var(--input-energy,var(--gold)) 55%,transparent) !important;
+    animation:luxInputCurrent 3.2s ease-in-out infinite !important;
+}
+.lux-input-host.has-input-energy .lux-input-spark { opacity:.85 !important; }
+@keyframes luxInputCurrent {
+    0% { left:0; opacity:0; transform:scale(.65); }
+    15% { opacity:1; }
+    85% { opacity:1; }
+    100% { left:calc(100% - 5px); opacity:0; transform:scale(1); }
+}
+
+/* 6 — 計數器機械滾動 */
+.lux-counter {
+    display:inline-block !important;
+    font-variant-numeric:tabular-nums !important;
+    transform-origin:50% 50% !important;
+}
+.lux-counter.is-rolling {
+    animation:luxCounterRoll 360ms cubic-bezier(.23,1,.32,1) !important;
+}
+@keyframes luxCounterRoll {
+    0% { opacity:.45; transform:translate3d(0,.45em,0) rotateX(-38deg); filter:blur(2px); }
+    100% { opacity:1; transform:translate3d(0,0,0) rotateX(0); filter:blur(0); }
+}
+
+/* 7 — 房間儀式分界 */
+.room { position:relative !important; }
+.lux-room-boundary {
+    position:absolute !important;
+    top:0 !important;
+    left:clamp(24px,6vw,96px) !important;
+    right:clamp(24px,6vw,96px) !important;
+    height:1px !important;
+    pointer-events:none !important;
+    z-index:6 !important;
+    background:rgba(201,168,76,.15) !important;
+    box-shadow:
+      0 -5px 18px rgba(201,168,76,.12),
+      0 -18px 48px rgba(201,168,76,.07) !important;
+}
+
+/* 8 — HSP 像把世界音量慢慢調小 */
+body,
+body .room,
+body nav,
+body .room-desc,
+body .room-title,
+body .send-btn,
+body .door-btn {
+    transition-duration:1.5s !important;
+    transition-timing-function:cubic-bezier(.23,1,.32,1) !important;
+}
+.lux-hsp-veil {
+    position:fixed !important;
+    inset:0 !important;
+    z-index:9997 !important;
+    pointer-events:none !important;
+    opacity:0 !important;
+    background:rgba(4,8,12,.22) !important;
+    backdrop-filter:saturate(1) contrast(1) !important;
+    transition:opacity 1.5s cubic-bezier(.23,1,.32,1),
+               backdrop-filter 1.5s cubic-bezier(.23,1,.32,1) !important;
+}
+body.hsp-mode .lux-hsp-veil {
+    opacity:1 !important;
+    backdrop-filter:saturate(.68) contrast(.84) brightness(.9) !important;
+}
+body.hsp-transitioning * {
+    animation-play-state:running !important;
+}
+body.hsp-mode:not(.hsp-transitioning) * {
+    animation-play-state:paused !important;
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .room .room-letter,.lux-input-spark::after,.lux-feed-item,.lux-counter.is-rolling {
+        animation:none !important;
+    }
+    .lux-feed-item { opacity:1 !important; transform:none !important; }
+    .lux-room-curtain { display:none !important; }
+    .lux-hsp-veil { transition:none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -5079,6 +5269,236 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
+})();
+</script>
+
+
+<script>
+/* ===== EMPATH LUXURY MICRODETAILS · LEVEL 2 ===== */
+(() => {
+  'use strict';
+  if (window.__EMPATH_LUXURY_LEVEL_2__) return;
+  window.__EMPATH_LUXURY_LEVEL_2__ = true;
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function setupLiquidRipples() {
+    document.querySelectorAll('.send-btn').forEach(button => {
+      button.addEventListener('pointerdown', event => {
+        if (reducedMotion.matches) return;
+        const rect = button.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const ripple = document.createElement('span');
+        ripple.className = 'lux-btn-ripple';
+        ripple.setAttribute('aria-hidden', 'true');
+        const room = button.closest('.room');
+        const color = getComputedStyle(button).borderTopColor || getComputedStyle(room || button).color;
+        const diameter = Math.hypot(Math.max(x,rect.width-x),Math.max(y,rect.height-y)) * 2;
+        ripple.style.setProperty('--ripple-x', x + 'px');
+        ripple.style.setProperty('--ripple-y', y + 'px');
+        ripple.style.setProperty('--ripple-color', color);
+        ripple.style.setProperty('--ripple-scale', Math.max(12, diameter / 12));
+        button.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove(), { once:true });
+        window.setTimeout(() => ripple.remove(), 750);
+      }, { passive:true });
+    });
+  }
+
+  function setupFeedRhythm() {
+    const seen = new Map();
+    const feeds = ['e-feed','t-feed','a-feed']
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+    feeds.forEach(feed => seen.set(feed,new Set()));
+    const animateChildren = feed => {
+      const known = seen.get(feed);
+      Array.from(feed.children).forEach((card,index) => {
+        if (card.classList.contains('lux-feed-item') || card.classList.contains('lux-feed-steady')) return;
+        const signature = (card.textContent || '').replace(/\s+/g,' ').trim();
+        if (signature && known.has(signature)) {
+          card.classList.add('lux-feed-steady');
+          return;
+        }
+        if (signature) known.add(signature);
+        card.style.setProperty('--feed-delay', Math.min(index * 80, 640) + 'ms');
+        card.classList.add('lux-feed-item');
+      });
+    };
+    const observer = new MutationObserver(records => {
+      const changed = new Set(records.map(record => record.target.closest?.('#e-feed,#t-feed,#a-feed')).filter(Boolean));
+      changed.forEach(animateChildren);
+    });
+    feeds.forEach(feed => {
+      observer.observe(feed,{childList:true});
+      animateChildren(feed);
+    });
+  }
+
+  function setupRoomCurtain() {
+    const curtain = document.createElement('div');
+    curtain.className = 'lux-room-curtain';
+    curtain.setAttribute('aria-hidden','true');
+    document.body.appendChild(curtain);
+    let transitioning = false;
+    document.querySelectorAll('nav a[href^="#room-"]').forEach(link => {
+      link.addEventListener('click', event => {
+        const hash = link.getAttribute('href');
+        const target = hash && document.querySelector(hash);
+        if (!target || reducedMotion.matches || transitioning) return;
+        event.preventDefault();
+        transitioning = true;
+        curtain.classList.remove('is-leaving');
+        curtain.classList.add('is-entering');
+        window.setTimeout(() => {
+          const oldBehavior = document.documentElement.style.scrollBehavior;
+          document.documentElement.style.scrollBehavior = 'auto';
+          target.scrollIntoView({block:'start',behavior:'auto'});
+          history.replaceState(null,'',hash);
+          document.documentElement.style.scrollBehavior = oldBehavior;
+          requestAnimationFrame(() => {
+            curtain.classList.remove('is-entering');
+            curtain.classList.add('is-leaving');
+          });
+          window.setTimeout(() => {
+            curtain.classList.remove('is-leaving');
+            transitioning = false;
+          },320);
+        },110);
+      },true);
+    });
+  }
+
+  function setupInputEnergy() {
+    const syncSpark = textarea => {
+      const host = textarea.parentElement;
+      const spark = host.querySelector(':scope > .lux-input-spark[data-for="' + textarea.id + '"]');
+      if (!spark) return;
+      host.classList.toggle('has-input-energy', textarea.value.trim().length > 0);
+      spark.style.setProperty('--spark-left', textarea.offsetLeft + 'px');
+      spark.style.setProperty('--spark-top', (textarea.offsetTop + textarea.offsetHeight - 1) + 'px');
+      spark.style.setProperty('--spark-width', textarea.offsetWidth + 'px');
+      const roomColor = getComputedStyle(textarea.closest('.room')?.querySelector('.room-tag') || textarea).color;
+      spark.style.setProperty('--input-energy', roomColor);
+    };
+    document.querySelectorAll('textarea').forEach((textarea,index) => {
+      if (!textarea.id) textarea.id = 'lux-textarea-' + index;
+      const host = textarea.parentElement;
+      host.classList.add('lux-input-host');
+      const spark = document.createElement('span');
+      spark.className = 'lux-input-spark';
+      spark.dataset.for = textarea.id;
+      spark.setAttribute('aria-hidden','true');
+      host.appendChild(spark);
+      const update = () => syncSpark(textarea);
+      textarea.addEventListener('input',update,{passive:true});
+      new ResizeObserver(update).observe(textarea);
+      update();
+    });
+  }
+
+  function setupRollingCounters() {
+    const selector = [
+      '#m-count','#p-healed-count','#t-echo-count',
+      '#g-v-count','#g-e-count','#g-m-count','#g-p-count','#g-t-count',
+      '#h-e-count','#h-m-count','#h-p-count','#h-a-count','#h-t-count'
+    ].join(',');
+    const counters = Array.from(document.querySelectorAll(selector));
+    const values = new WeakMap();
+    const internal = new WeakSet();
+    const animations = new WeakMap();
+    const numericValue = element => {
+      const match = (element.textContent || '').replace(/,/g,'').match(/-?\d+/);
+      return match ? Number(match[0]) : null;
+    };
+    counters.forEach(counter => {
+      counter.classList.add('lux-counter');
+      values.set(counter,numericValue(counter) ?? 0);
+    });
+    const roll = (counter,to) => {
+      const from = values.get(counter) ?? 0;
+      if (!Number.isFinite(to) || to === from) return;
+      animations.get(counter)?.cancel?.();
+      const duration = reducedMotion.matches ? 0 : Math.min(1100,420 + Math.abs(to-from) * 8);
+      const started = performance.now();
+      const token = {cancelled:false,cancel(){this.cancelled=true;}};
+      animations.set(counter,token);
+      const frame = now => {
+        if (token.cancelled) return;
+        const progress = duration ? Math.min(1,(now-started)/duration) : 1;
+        const eased = 1 - Math.pow(1-progress,3);
+        const value = Math.round(from + (to-from)*eased);
+        internal.add(counter);
+        counter.textContent = value.toLocaleString();
+        queueMicrotask(() => internal.delete(counter));
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
+          values.set(counter,to);
+          counter.classList.remove('is-rolling');
+          void counter.offsetWidth;
+          counter.classList.add('is-rolling');
+        }
+      };
+      requestAnimationFrame(frame);
+    };
+    const observer = new MutationObserver(records => {
+      records.forEach(record => {
+        const counter = record.target.nodeType === Node.TEXT_NODE
+          ? record.target.parentElement?.closest(selector)
+          : record.target.closest?.(selector);
+        if (!counter || internal.has(counter)) return;
+        const next = numericValue(counter);
+        if (next !== null) roll(counter,next);
+      });
+    });
+    counters.forEach(counter => observer.observe(counter,{childList:true,characterData:true,subtree:true}));
+  }
+
+  function setupRoomBoundaries() {
+    document.querySelectorAll('.room').forEach(room => {
+      if (room.querySelector(':scope > .lux-room-boundary')) return;
+      const line = document.createElement('div');
+      line.className = 'lux-room-boundary';
+      line.setAttribute('aria-hidden','true');
+      room.prepend(line);
+    });
+  }
+
+  function setupHSPTransition() {
+    if (!document.querySelector('.lux-hsp-veil')) {
+      const veil = document.createElement('div');
+      veil.className = 'lux-hsp-veil';
+      veil.setAttribute('aria-hidden','true');
+      document.body.appendChild(veil);
+    }
+    const originalToggle = window.toggleHSP;
+    if (typeof originalToggle !== 'function' || originalToggle.__luxWrapped) return;
+    const wrapped = function(...args) {
+      document.body.classList.add('hsp-transitioning');
+      const result = originalToggle.apply(this,args);
+      window.setTimeout(() => document.body.classList.remove('hsp-transitioning'),1500);
+      return result;
+    };
+    wrapped.__luxWrapped = true;
+    window.toggleHSP = wrapped;
+  }
+
+  function initLuxuryLevel2() {
+    setupLiquidRipples();
+    setupFeedRhythm();
+    setupRoomCurtain();
+    setupInputEnergy();
+    setupRollingCounters();
+    setupRoomBoundaries();
+    setupHSPTransition();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded',initLuxuryLevel2,{once:true});
+  } else {
+    initLuxuryLevel2();
+  }
 })();
 </script>
 
