@@ -302,8 +302,8 @@ nav{
 .e-mode-btn:hover { background: rgba(123,143,161,0.2); color: var(--fog); }
 
 #e-draw-wrap { display: none; width: 100%; max-width: 600px; position: relative; }
-#e-draw-canvas { width: 100%; height: 220px; background: rgba(0,0,0,0.45); border: 1px dashed rgba(123,143,161,0.5); border-radius: 6px; cursor: crosshair; touch-action: none; box-shadow: inset 0 2px 15px rgba(0,0,0,0.5); }
-.e-draw-tools { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 8px; }
+#e-draw-canvas { display:block; width:100%; height:220px; position:relative; z-index:1; background:rgba(0,0,0,0.45); border:1px dashed rgba(123,143,161,0.5); border-radius:6px; cursor:crosshair; touch-action:none; -ms-touch-action:none; pointer-events:auto; user-select:none; -webkit-user-select:none; box-shadow:inset 0 2px 15px rgba(0,0,0,0.5); }
+.e-draw-tools { position:absolute; z-index:2; bottom:12px; right:12px; display:flex; gap:8px; }
 .e-tool-btn { background: rgba(8, 13, 18, 0.8); border: 1px solid rgba(123,143,161,0.4); color: rgba(123,143,161,0.9); padding: 6px 14px; font-size: 11px; border-radius: 4px; cursor: pointer; letter-spacing: 2px; transition: all 0.2s;}
 .e-tool-btn:hover { background: rgba(123,143,161,0.3); color: var(--white); }
 .e-msg-img { max-width: 100%; border-radius: 4px; margin-top: 12px; opacity: 0.85; filter: contrast(1.2); }
@@ -2418,85 +2418,131 @@ let eMode = 'text';
 let eDrawCanvas = null;
 let eCtx = null;
 let isDrawing = false;
-let eCanvasHasDrawn = false; 
-let lastX = 0; let lastY = 0;
+let eCanvasHasDrawn = false;
+let lastX = 0;
+let lastY = 0;
+let eDrawEventsBound = false;
+let eDrawResizeTimer = null;
 
 window.setEMode = function(mode) {
     eMode = mode;
-    document.getElementById('btn-mode-text').classList.toggle('active', mode === 'text');
-    document.getElementById('btn-mode-draw').classList.toggle('active', mode === 'draw');
-    document.getElementById('e-input').style.display = mode === 'text' ? 'block' : 'none';
-    document.getElementById('e-char').style.display = mode === 'text' ? 'block' : 'none';
-    document.getElementById('e-draw-wrap').style.display = mode === 'draw' ? 'block' : 'none';
-    
-    // 確保 DOM 已經顯示出來後，再初始化畫布
-    if(mode === 'draw' && !eCtx) {
-        setTimeout(initEDrawCanvas, 50); 
+    const textBtn = document.getElementById('btn-mode-text');
+    const drawBtn = document.getElementById('btn-mode-draw');
+    const input = document.getElementById('e-input');
+    const counter = document.getElementById('e-char');
+    const drawWrap = document.getElementById('e-draw-wrap');
+
+    if(textBtn) textBtn.classList.toggle('active', mode === 'text');
+    if(drawBtn) drawBtn.classList.toggle('active', mode === 'draw');
+    if(input) input.style.display = mode === 'text' ? 'block' : 'none';
+    if(counter) counter.style.display = mode === 'text' ? 'block' : 'none';
+    if(drawWrap) drawWrap.style.display = mode === 'draw' ? 'block' : 'none';
+
+    // iPhone/Safari 需要等 display:block 真正完成排版後才能取得畫布寬度。
+    if(mode === 'draw') {
+        requestAnimationFrame(() => requestAnimationFrame(() => initEDrawCanvas()));
+    }
+};
+
+function resizeEDrawCanvas() {
+    if(!eDrawCanvas || !eCtx) return;
+    const rect = eDrawCanvas.getBoundingClientRect();
+    const wrap = document.getElementById('e-draw-wrap');
+    const cssWidth = Math.max(280, Math.round(rect.width || (wrap && wrap.clientWidth) || 600));
+    const cssHeight = 220;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const nextWidth = Math.round(cssWidth * dpr);
+    const nextHeight = Math.round(cssHeight * dpr);
+
+    if(eDrawCanvas.width !== nextWidth || eDrawCanvas.height !== nextHeight) {
+        eDrawCanvas.width = nextWidth;
+        eDrawCanvas.height = nextHeight;
+        eDrawCanvas.style.height = cssHeight + 'px';
+        eCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        eCtx.lineCap = 'round';
+        eCtx.lineJoin = 'round';
+        eCanvasHasDrawn = false;
     }
 }
 
 function initEDrawCanvas() {
     eDrawCanvas = document.getElementById('e-draw-canvas');
-    eCtx = eDrawCanvas.getContext('2d');
-    
-    const resizeEDraw = () => {
-        const wrap = document.getElementById('e-draw-wrap');
-        // 強制給定寬度，避免 display:none 造成抓不到寬度
-        eDrawCanvas.width = wrap.clientWidth || 600;
-        eDrawCanvas.height = 220; 
-        eCtx.lineCap = 'round';
-        eCtx.lineJoin = 'round';
-    };
-    resizeEDraw();
-    window.addEventListener('resize', () => { if(eMode === 'draw') resizeEDraw(); });
+    if(!eDrawCanvas) return;
+    eCtx = eDrawCanvas.getContext('2d', { alpha: true });
+    if(!eCtx) return;
+    resizeEDrawCanvas();
 
-    eDrawCanvas.addEventListener('pointerdown', (e) => {
-        isDrawing = true;
-        eCanvasHasDrawn = true; // 標記：確定有畫東西了！
-        const pos = getPos(e);
-        lastX = pos.x; lastY = pos.y;
-        eCtx.beginPath();
-        eCtx.moveTo(lastX, lastY);
-        eDrawCanvas.setPointerCapture(e.pointerId);
-    });
+    if(!eDrawEventsBound) {
+        const point = (e) => {
+            const rect = eDrawCanvas.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left) * ((eDrawCanvas.width / Math.min(window.devicePixelRatio || 1, 2)) / rect.width),
+                y: (e.clientY - rect.top) * ((eDrawCanvas.height / Math.min(window.devicePixelRatio || 1, 2)) / rect.height)
+            };
+        };
 
-    eDrawCanvas.addEventListener('pointermove', (e) => {
-        if(!isDrawing) return;
-        const pos = getPos(e);
-        
-        const dx = pos.x - lastX;
-        const dy = pos.y - lastY;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        const lineWidth = Math.max(1.5, 5 - (dist * 0.1)); 
+        const beginDraw = (e) => {
+            if(e.pointerType === 'mouse' && e.button !== 0) return;
+            e.preventDefault();
+            isDrawing = true;
+            eCanvasHasDrawn = true;
+            const pos = point(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            eCtx.beginPath();
+            eCtx.arc(lastX, lastY, 1.8, 0, Math.PI * 2);
+            eCtx.fillStyle = 'rgba(222,230,238,.9)';
+            eCtx.fill();
+            eCtx.beginPath();
+            eCtx.moveTo(lastX, lastY);
+            try { eDrawCanvas.setPointerCapture(e.pointerId); } catch(err) {}
+        };
 
-        eCtx.lineWidth = lineWidth;
-        eCtx.strokeStyle = 'rgba(210, 220, 230, 0.85)';
-        eCtx.shadowBlur = 4;
-        eCtx.shadowColor = 'rgba(123, 143, 161, 0.6)';
+        const continueDraw = (e) => {
+            if(!isDrawing) return;
+            e.preventDefault();
+            const pos = point(e);
+            const dx = pos.x - lastX;
+            const dy = pos.y - lastY;
+            const dist = Math.hypot(dx, dy);
+            eCtx.lineWidth = Math.max(1.4, 5.2 - dist * .09);
+            eCtx.strokeStyle = 'rgba(222,230,238,.9)';
+            eCtx.shadowBlur = 4;
+            eCtx.shadowColor = 'rgba(123,143,161,.62)';
+            eCtx.lineTo(pos.x, pos.y);
+            eCtx.stroke();
+            eCtx.beginPath();
+            eCtx.moveTo(pos.x, pos.y);
+            lastX = pos.x;
+            lastY = pos.y;
+            if(typeof window.setBrushVolume === 'function') window.setBrushVolume(dist);
+        };
 
-        eCtx.lineTo(pos.x, pos.y);
-      if(typeof window.setBrushVolume === 'function') window.setBrushVolume(dist);
-        eCtx.stroke();
-        eCtx.beginPath();
-        eCtx.moveTo(pos.x, pos.y);
-        lastX = pos.x; lastY = pos.y;
-    });
+        const endDraw = (e) => {
+            if(!isDrawing) return;
+            e.preventDefault();
+            isDrawing = false;
+            if(typeof window.setBrushVolume === 'function') window.setBrushVolume(0);
+            eCtx.beginPath();
+            try {
+                if(eDrawCanvas.hasPointerCapture(e.pointerId)) eDrawCanvas.releasePointerCapture(e.pointerId);
+            } catch(err) {}
+        };
 
-    const stopDraw = (e) => {
-        isDrawing = false;
-      if(typeof window.setBrushVolume === 'function') window.setBrushVolume(0);
-        eCtx.beginPath();
-        eDrawCanvas.releasePointerCapture(e.pointerId);
-    };
+        eDrawCanvas.addEventListener('pointerdown', beginDraw, { passive:false });
+        eDrawCanvas.addEventListener('pointermove', continueDraw, { passive:false });
+        eDrawCanvas.addEventListener('pointerup', endDraw, { passive:false });
+        eDrawCanvas.addEventListener('pointercancel', endDraw, { passive:false });
+        eDrawEventsBound = true;
 
-    eDrawCanvas.addEventListener('pointerup', stopDraw);
-    eDrawCanvas.addEventListener('pointercancel', stopDraw);
+        window.addEventListener('resize', () => {
+            if(eMode !== 'draw') return;
+            clearTimeout(eDrawResizeTimer);
+            eDrawResizeTimer = setTimeout(resizeEDrawCanvas, 120);
+        }, { passive:true });
+    }
 }
 
-function getPos(e) {
-    const rect = eDrawCanvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-}
 // ==========================================
 // EMPATH V2: 星雲檔案館 (隱藏彩蛋) 核心代碼
 // ==========================================
@@ -3461,186 +3507,181 @@ window.pHealedTotal = 0;
 window.pTotalShards = 0;
 window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 380; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
 window.drawKintsugiVessel = function(){
-    const pHealedTotal = window.pHealedTotal || 0;
-    const pTotalShards = window.pTotalShards || 0;
+    const healed = window.pHealedTotal || 0;
+    const total = window.pTotalShards || 0;
     if(!pCtx || !pCanvas) return;
 
     const c = pCtx;
-    const w = pCanvas.offsetWidth || 540;
+    const w = pCanvas.offsetWidth || 620;
     const h = 380;
     c.clearRect(0, 0, w, h);
-
-    const cx = w / 2;
-    const cy = h / 2 + 12;
-    const scale = Math.min(1, w / 540);
     c.save();
-    c.translate(cx, cy);
+    c.translate(w / 2, h / 2 + 18);
+    const scale = Math.min(1, w / 620);
     c.scale(scale, scale);
 
-    // 侘寂茶碗：低矮、寬口、略微歪斜，不追求機械式對稱。
-    const bowl = new Path2D();
-    bowl.moveTo(-138, -62);
-    bowl.bezierCurveTo(-91, -82, 72, -77, 134, -55);
-    bowl.bezierCurveTo(132, -8, 111, 53, 72, 91);
-    bowl.bezierCurveTo(47, 108, -42, 110, -70, 94);
-    bowl.bezierCurveTo(-111, 60, -136, 3, -138, -62);
-    bowl.closePath();
+    // 樂茶碗的手捏輪廓：低、厚、偏心，避免完美橢圓與花盆感。
+    const body = new Path2D();
+    body.moveTo(-164, -55);
+    body.bezierCurveTo(-151, -15, -139, 38, -102, 77);
+    body.bezierCurveTo(-72, 107, -31, 118, 8, 116);
+    body.bezierCurveTo(55, 116, 97, 98, 125, 65);
+    body.bezierCurveTo(151, 33, 160, -13, 157, -50);
+    body.bezierCurveTo(88, -30, -92, -27, -164, -55);
+    body.closePath();
 
-    // 柔和陰影，讓器物像安靜地放在漆黑展示台上。
     c.save();
-    c.filter = 'blur(13px)';
-    c.fillStyle = 'rgba(0,0,0,.48)';
+    c.filter = 'blur(15px)';
+    c.fillStyle = 'rgba(0,0,0,.58)';
     c.beginPath();
-    c.ellipse(4, 112, 112, 16, 0, 0, Math.PI * 2);
+    c.ellipse(-2, 128, 130, 17, -.015, 0, Math.PI * 2);
     c.fill();
     c.restore();
 
-    const clay = c.createRadialGradient(-48, -54, 8, 12, 30, 190);
-    clay.addColorStop(0, '#6f6559');
-    clay.addColorStop(.28, '#514a42');
-    clay.addColorStop(.66, '#302c28');
-    clay.addColorStop(1, '#171512');
+    // 溫潤象牙白釉，保留土色陰影，不再使用沉重的水泥灰。
+    const clay = c.createLinearGradient(-150, -75, 125, 120);
+    clay.addColorStop(0, '#d5c9b4');
+    clay.addColorStop(.22, '#b9aa91');
+    clay.addColorStop(.54, '#897a65');
+    clay.addColorStop(.78, '#5b5042');
+    clay.addColorStop(1, '#302a23');
     c.fillStyle = clay;
-    c.shadowBlur = 28;
-    c.shadowColor = 'rgba(201,168,76,.08)';
-    c.fill(bowl);
+    c.shadowBlur = 30;
+    c.shadowColor = 'rgba(203,171,91,.09)';
+    c.fill(body);
     c.shadowBlur = 0;
 
-    // 落灰釉：不規則霧面亮區，而不是塑膠般均勻的高光。
     c.save();
-    c.clip(bowl);
-    const ashGlaze = c.createLinearGradient(-125, -95, 100, 105);
-    ashGlaze.addColorStop(0, 'rgba(235,225,207,.12)');
-    ashGlaze.addColorStop(.30, 'rgba(202,193,175,.035)');
-    ashGlaze.addColorStop(.58, 'rgba(255,255,255,0)');
-    ashGlaze.addColorStop(1, 'rgba(0,0,0,.22)');
-    c.fillStyle = ashGlaze;
-    c.fillRect(-155, -100, 310, 220);
+    c.clip(body);
 
-    // 固定分布的陶土顆粒，重畫時不會閃爍。
-    for(let i = 0; i < 95; i++){
-        const px = -132 + ((i * 73) % 264);
-        const py = -62 + ((i * 47) % 164);
-        const radius = .35 + ((i * 19) % 10) / 16;
+    // 焼きむら：左側柔亮、右下帶火痕，紋理保持安靜而不髒亂。
+    const glaze = c.createRadialGradient(-92, -59, 5, -40, -5, 220);
+    glaze.addColorStop(0, 'rgba(255,250,232,.48)');
+    glaze.addColorStop(.34, 'rgba(239,226,198,.17)');
+    glaze.addColorStop(.72, 'rgba(92,74,56,.05)');
+    glaze.addColorStop(1, 'rgba(24,19,15,.28)');
+    c.fillStyle = glaze;
+    c.fillRect(-180, -90, 360, 240);
+
+    const fireMark = c.createRadialGradient(92, 56, 2, 88, 56, 82);
+    fireMark.addColorStop(0, 'rgba(126,72,45,.18)');
+    fireMark.addColorStop(.55, 'rgba(91,52,35,.07)');
+    fireMark.addColorStop(1, 'rgba(60,35,24,0)');
+    c.fillStyle = fireMark;
+    c.fillRect(5, -20, 165, 160);
+
+    // 少量固定鐵斑與釉縮孔，避免每次重繪閃動。
+    for(let i=0;i<58;i++){
+        const x=-145+((i*83)%292);
+        const y=-44+((i*53)%147);
+        const r=.28+((i*17)%9)/13;
         c.beginPath();
-        c.arc(px, py, radius, 0, Math.PI * 2);
-        c.fillStyle = i % 4 === 0 ? 'rgba(235,220,192,.085)' : 'rgba(0,0,0,.10)';
+        c.arc(x,y,r,0,Math.PI*2);
+        c.fillStyle=i%5===0?'rgba(82,54,36,.24)':'rgba(255,248,225,.12)';
         c.fill();
     }
 
-    // 左上方一小片釉色堆積，增加手作與燒製痕跡。
-    const glazePool = c.createRadialGradient(-78, -35, 2, -70, -28, 58);
-    glazePool.addColorStop(0, 'rgba(174,166,149,.16)');
-    glazePool.addColorStop(.55, 'rgba(121,115,104,.06)');
-    glazePool.addColorStop(1, 'rgba(80,74,66,0)');
-    c.fillStyle = glazePool;
-    c.fillRect(-145, -95, 155, 145);
+    // 手指修坯留下的極淡橫紋。
+    c.strokeStyle='rgba(255,245,220,.055)';
+    c.lineWidth=1;
+    for(let y=10;y<90;y+=18){
+        c.beginPath();
+        c.moveTo(-128+y*.12,y);
+        c.bezierCurveTo(-55,y+4,52,y-4,118-y*.08,y+1);
+        c.stroke();
+    }
     c.restore();
 
-    // 不平整的碗口：外緣、內緣與幽暗的釉池。
-    c.beginPath();
-    c.moveTo(-138, -62);
-    c.bezierCurveTo(-87, -84, 73, -79, 134, -55);
-    c.bezierCurveTo(77, -36, -82, -39, -138, -62);
-    c.closePath();
-    const rimFill = c.createLinearGradient(0, -82, 0, -35);
-    rimFill.addColorStop(0, 'rgba(116,106,94,.78)');
-    rimFill.addColorStop(1, 'rgba(24,22,20,.96)');
-    c.fillStyle = rimFill;
-    c.fill();
+    // 厚而不規則的口沿，以及幽深茶湯般的內釉。
+    const inner = new Path2D();
+    inner.moveTo(-164,-55);
+    inner.bezierCurveTo(-101,-83,79,-82,157,-50);
+    inner.bezierCurveTo(95,-16,-96,-15,-164,-55);
+    inner.closePath();
+    const inside = c.createRadialGradient(-36,-51,8,5,-48,172);
+    inside.addColorStop(0,'#4a4033');
+    inside.addColorStop(.58,'#29231d');
+    inside.addColorStop(1,'#120f0c');
+    c.fillStyle=inside;
+    c.fill(inner);
 
     c.beginPath();
-    c.moveTo(-138, -62);
-    c.bezierCurveTo(-87, -84, 73, -79, 134, -55);
-    c.strokeStyle = 'rgba(224,213,192,.22)';
-    c.lineWidth = 1.15;
+    c.moveTo(-164,-55);
+    c.bezierCurveTo(-101,-83,79,-82,157,-50);
+    c.strokeStyle='rgba(255,242,210,.52)';
+    c.lineWidth=2.2;
     c.stroke();
 
     c.beginPath();
-    c.moveTo(-132, -58);
-    c.bezierCurveTo(-73, -41, 75, -39, 128, -54);
-    c.strokeStyle = 'rgba(0,0,0,.42)';
-    c.lineWidth = 1;
+    c.moveTo(-158,-51);
+    c.bezierCurveTo(-91,-27,88,-25,151,-48);
+    c.strokeStyle='rgba(18,14,11,.72)';
+    c.lineWidth=2.4;
     c.stroke();
 
-    // 小圈足讓輪廓更接近日式茶碗，而不是直筒花器。
-    c.beginPath();
-    c.moveTo(-48, 96);
-    c.bezierCurveTo(-38, 116, 39, 116, 54, 96);
-    c.lineTo(43, 109);
-    c.bezierCurveTo(24, 119, -23, 119, -39, 108);
-    c.closePath();
-    c.fillStyle = 'rgba(25,22,18,.95)';
-    c.fill();
-    c.strokeStyle = 'rgba(199,181,147,.13)';
-    c.lineWidth = 1;
-    c.stroke();
+    // 小而略偏的高台足。
+    const foot = new Path2D();
+    foot.moveTo(-47,108);
+    foot.bezierCurveTo(-33,119,36,120,52,105);
+    foot.lineTo(43,121);
+    foot.bezierCurveTo(18,132,-25,131,-42,120);
+    foot.closePath();
+    c.fillStyle='#272019';
+    c.fill(foot);
+    c.strokeStyle='rgba(222,202,162,.25)';
+    c.lineWidth=1.2;
+    c.stroke(foot);
 
-    // 裂縫採單一主脈絡與自然分支，避免對稱 X 形。
-    const veins = [
-        { pts: [[48,-58],[42,-30],[25,-8],[31,18],[10,43],[-4,72],[-1,101]], width: 2.7 },
-        { pts: [[25,-8],[-4,2],[-22,20],[-48,30]], width: 1.55 },
-        { pts: [[10,43],[34,52],[51,70]], width: 1.25 },
-        { pts: [[42,-30],[66,-22],[84,-7]], width: 1.05 },
-        { pts: [[-105,-55],[-92,-31],[-98,-7],[-77,13]], width: 1.45 },
-        { pts: [[-98,-7],[-117,10],[-122,34]], width: .9 },
-        { pts: [[84,-7],[72,15],[79,35]], width: .8 }
+    // 裂紋以一條主脈帶細小支線構成；分布偏側，保留留白。
+    const veins=[
+      {p:[[-18,112],[-19,79],[-4,51],[-12,24],[8,-4],[3,-35],[19,-66]],w:3.1},
+      {p:[[-5,50],[-35,38],[-53,18],[-78,9]],w:1.7},
+      {p:[[-12,24],[18,30],[38,20],[61,24]],w:1.35},
+      {p:[[7,-4],[34,-16],[49,-38]],w:1.5},
+      {p:[[34,-16],[62,-7],[79,8]],w:1.05},
+      {p:[[-53,18],[-70,35],[-75,55]],w:.95}
     ];
+    const ratio=total>0?healed/total:0;
+    const goldCount=Math.round(ratio*veins.length);
 
-    const healedRatio = pTotalShards > 0 ? pHealedTotal / pTotalShards : 0;
-    const linesToHeal = Math.round(healedRatio * veins.length);
-
-    const traceVein = (pts) => {
-        c.beginPath();
-        c.moveTo(pts[0][0], pts[0][1]);
-        for(let i = 1; i < pts.length; i++){
-            if(i < pts.length - 1){
-                const mx = (pts[i][0] + pts[i + 1][0]) / 2;
-                const my = (pts[i][1] + pts[i + 1][1]) / 2;
-                c.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
-            } else {
-                c.lineTo(pts[i][0], pts[i][1]);
-            }
-        }
+    const pathFor=(points)=>{
+      c.beginPath();
+      c.moveTo(points[0][0],points[0][1]);
+      for(let i=1;i<points.length;i++){
+        const prev=points[i-1],cur=points[i];
+        const mx=(prev[0]+cur[0])/2,my=(prev[1]+cur[1])/2;
+        c.quadraticCurveTo(prev[0],prev[1],mx,my);
+        if(i===points.length-1)c.lineTo(cur[0],cur[1]);
+      }
     };
 
-    veins.forEach((vein, index) => {
-        traceVein(vein.pts);
-        c.lineCap = 'round';
-        c.lineJoin = 'round';
+    veins.forEach((v,i)=>{
+      pathFor(v.p);
+      c.lineCap='round';
+      c.lineJoin='round';
+      c.strokeStyle='rgba(25,16,10,.72)';
+      c.lineWidth=v.w+1.8;
+      c.shadowBlur=0;
+      c.stroke();
 
-        if(index < linesToHeal){
-            const first = vein.pts[0];
-            const last = vein.pts[vein.pts.length - 1];
-            const gold = c.createLinearGradient(first[0], first[1], last[0], last[1]);
-            gold.addColorStop(0, '#8d6820');
-            gold.addColorStop(.22, '#c49a3a');
-            gold.addColorStop(.48, '#f0d77d');
-            gold.addColorStop(.72, '#b88929');
-            gold.addColorStop(1, '#765214');
-
-            // 深色底縫先露出一點，金漆才像填入裂口，而非畫在表面。
-            c.strokeStyle = 'rgba(8,7,5,.72)';
-            c.lineWidth = vein.width + 2.1;
-            c.shadowBlur = 0;
-            c.stroke();
-
-            traceVein(vein.pts);
-            c.strokeStyle = gold;
-            c.lineWidth = vein.width;
-            c.shadowBlur = 4;
-            c.shadowColor = 'rgba(212,175,55,.34)';
-            c.stroke();
-            c.shadowBlur = 0;
-        } else {
-            c.strokeStyle = 'rgba(5,4,3,.58)';
-            c.lineWidth = vein.width;
-            c.stroke();
-            traceVein(vein.pts);
-            c.strokeStyle = 'rgba(230,220,201,.07)';
-            c.lineWidth = Math.max(.45, vein.width * .32);
-            c.stroke();
-        }
+      pathFor(v.p);
+      if(i<goldCount){
+        const g=c.createLinearGradient(v.p[0][0],v.p[0][1],v.p[v.p.length-1][0],v.p[v.p.length-1][1]);
+        g.addColorStop(0,'#7c5415');
+        g.addColorStop(.28,'#d6ad45');
+        g.addColorStop(.5,'#fff0a5');
+        g.addColorStop(.72,'#c08a25');
+        g.addColorStop(1,'#68420c');
+        c.strokeStyle=g;
+        c.lineWidth=v.w;
+        c.shadowBlur=3;
+        c.shadowColor='rgba(235,190,75,.28)';
+      }else{
+        c.strokeStyle='rgba(34,24,17,.82)';
+        c.lineWidth=Math.max(.8,v.w);
+      }
+      c.stroke();
+      c.shadowBlur=0;
     });
 
     c.restore();
