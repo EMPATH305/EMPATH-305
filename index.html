@@ -1746,6 +1746,140 @@ textarea {
     }
 }
 
+
+
+/* ===== EMPATH CINEMATIC INTERACTION SYSTEM ===== */
+/* 1 — 房間內容依序展開 */
+body.aw-ready .room .aw-stage {
+    opacity:0 !important;
+    transform:translate3d(0,30px,0) !important;
+    filter:blur(3px) !important;
+    transition:opacity 900ms cubic-bezier(.23,1,.32,1),
+               transform 900ms cubic-bezier(.23,1,.32,1),
+               filter 900ms cubic-bezier(.23,1,.32,1) !important;
+    transition-delay:var(--aw-delay,0ms) !important;
+    will-change:opacity,transform,filter !important;
+}
+body.aw-ready .room .aw-stage.aw-in {
+    opacity:1 !important;
+    transform:translate3d(0,0,0) !important;
+    filter:blur(0) !important;
+}
+
+/* 2 — Hero 背景字視差 */
+.hero-bg-text {
+    will-change:transform !important;
+    backface-visibility:hidden !important;
+    transform:translate3d(-50%,calc(-50% + var(--hero-parallax-y,0px)),0) !important;
+}
+
+/* 3 — 磁性按鈕 */
+.send-btn,.door-btn {
+    --magnetic-x:0px;
+    --magnetic-y:0px;
+    transform:translate3d(var(--magnetic-x),var(--magnetic-y),0) !important;
+    transition:transform 650ms cubic-bezier(.23,1,.32,1),
+               color 320ms ease,background-color 320ms ease,
+               border-color 320ms ease,box-shadow 400ms ease !important;
+    will-change:transform !important;
+}
+.send-btn.is-magnetic,.door-btn.is-magnetic {
+    transition:transform 90ms linear,color 320ms ease,
+               background-color 320ms ease,border-color 320ms ease,
+               box-shadow 400ms ease !important;
+}
+
+/* 4 — 標題逐字浮現 */
+.room-title { overflow:hidden !important; }
+.aw-title-char {
+    display:inline-block !important;
+    opacity:0 !important;
+    transform:translate3d(0,.85em,0) rotate(2deg) !important;
+    filter:blur(4px) !important;
+    transition:opacity 700ms cubic-bezier(.23,1,.32,1),
+               transform 850ms cubic-bezier(.23,1,.32,1),
+               filter 700ms ease !important;
+    transition-delay:calc(var(--char-index,0) * 50ms + 100ms) !important;
+    will-change:opacity,transform,filter !important;
+}
+.room-title.aw-title-in .aw-title-char {
+    opacity:1 !important;
+    transform:translate3d(0,0,0) rotate(0) !important;
+    filter:blur(0) !important;
+}
+.aw-title-char.is-space { width:.3em !important; }
+
+/* 5 — 精緻游標 */
+@media (pointer:fine) and (min-width:769px) {
+    html.aw-custom-cursor,html.aw-custom-cursor body,
+    html.aw-custom-cursor a,html.aw-custom-cursor button,
+    html.aw-custom-cursor [role="button"],html.aw-custom-cursor .shard,
+    html.aw-custom-cursor .echo-btn { cursor:none !important; }
+    html.aw-custom-cursor input,html.aw-custom-cursor textarea,
+    html.aw-custom-cursor [contenteditable="true"] { cursor:text !important; }
+    #cursor-glow {
+        width:6px !important;height:6px !important;
+        background:rgba(255,255,255,.92) !important;
+        border:1px solid transparent !important;
+        border-radius:50% !important;
+        box-shadow:0 0 8px rgba(255,255,255,.25) !important;
+        mix-blend-mode:difference !important;
+        z-index:10000000 !important;
+        transition:width 600ms cubic-bezier(.23,1,.32,1),
+                   height 600ms cubic-bezier(.23,1,.32,1),
+                   background-color 450ms cubic-bezier(.23,1,.32,1),
+                   border-color 450ms cubic-bezier(.23,1,.32,1),
+                   box-shadow 450ms ease,opacity 300ms ease !important;
+    }
+    #cursor-glow.is-interactive {
+        width:40px !important;height:40px !important;
+        background:rgba(255,255,255,.01) !important;
+        border-color:rgba(255,255,255,.72) !important;
+        box-shadow:0 0 24px rgba(255,255,255,.08),
+                   inset 0 0 16px rgba(255,255,255,.04) !important;
+    }
+    #cursor-glow.is-pressing {
+        width:30px !important;height:30px !important;
+        background:rgba(201,168,76,.16) !important;
+        border-color:rgba(201,168,76,.9) !important;
+    }
+}
+
+/* 6 — 極淡噪點 */
+.aw-site-noise {
+    position:fixed !important;inset:-50% !important;
+    width:200% !important;height:200% !important;
+    pointer-events:none !important;user-select:none !important;
+    z-index:9998 !important;opacity:.03 !important;
+    mix-blend-mode:soft-light !important;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.72'/%3E%3C/svg%3E") !important;
+    animation:awNoiseShift .22s steps(2) infinite !important;
+}
+@keyframes awNoiseShift {
+    0%{transform:translate3d(0,0,0)}
+    25%{transform:translate3d(1%,-1%,0)}
+    50%{transform:translate3d(-1%,1%,0)}
+    75%{transform:translate3d(1%,1%,0)}
+    100%{transform:translate3d(-1%,-1%,0)}
+}
+@media (max-width:768px) {
+    .hero-bg-text{--hero-parallax-y:0px !important}
+    #cursor-glow{display:none !important}
+    .send-btn,.door-btn{--magnetic-x:0px !important;--magnetic-y:0px !important}
+}
+@media (prefers-reduced-motion:reduce) {
+    body.aw-ready .room .aw-stage,.aw-title-char {
+        opacity:1 !important;transform:none !important;filter:none !important;
+        transition:none !important;
+    }
+    .hero-bg-text{--hero-parallax-y:0px !important}
+    .send-btn,.door-btn {
+        --magnetic-x:0px !important;--magnetic-y:0px !important;
+        transition:none !important;
+    }
+    .aw-site-noise{animation:none !important}
+}
+
 </style>
 </head>
 <body>
@@ -4793,6 +4927,158 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 </script>
 <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+
+<script>
+/* ===== EMPATH CINEMATIC INTERACTION SYSTEM ===== */
+(() => {
+  'use strict';
+  if (window.__EMPATH_CINEMATIC_SYSTEM__) return;
+  window.__EMPATH_CINEMATIC_SYSTEM__ = true;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  function setupNoise() {
+    if (document.querySelector('.aw-site-noise')) return;
+    const noise = document.createElement('div');
+    noise.className = 'aw-site-noise';
+    noise.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(noise);
+  }
+
+  function setupRoomStages() {
+    const selector = [
+      '.room-tag', '.room-title-wrap', '.desc-wrap', '.e-mode-toggle',
+      '.input-area', '#e-draw-wrap', '.m-input-wrap', '.step-wrapper',
+      '.a-warning-mask', '.t-layout', '.h-journey'
+    ].join(',');
+    const items = qsa(selector);
+    items.forEach((element, index) => {
+      element.classList.add('aw-stage');
+      element.style.setProperty('--aw-delay', Math.min(index * 110, 660) + 'ms');
+    });
+    if (reduceMotion.matches || !('IntersectionObserver' in window)) {
+      items.forEach(element => element.classList.add('aw-in'));
+      return;
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('aw-in');
+        else if (Math.abs(entry.boundingClientRect.top) > window.innerHeight * 1.25) {
+          entry.target.classList.remove('aw-in');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
+    items.forEach(element => observer.observe(element));
+  }
+
+  function setupHeroParallax() {
+    const hero = document.querySelector('#hero');
+    const backgroundText = document.querySelector('.hero-bg-text');
+    if (!hero || !backgroundText) return;
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const disabled = reduceMotion.matches || window.innerWidth < 768;
+      const offset = disabled ? 0 : Math.min(window.scrollY * 0.3, window.innerHeight * 0.35);
+      backgroundText.style.setProperty('--hero-parallax-y', offset.toFixed(2) + 'px');
+    };
+    const requestUpdate = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+    reduceMotion.addEventListener?.('change', requestUpdate);
+    update();
+  }
+
+  function setupMagneticButtons() {
+    if (!finePointer.matches || reduceMotion.matches) return;
+    qsa('.send-btn, .door-btn').forEach(button => {
+      button.addEventListener('pointermove', event => {
+        const rect = button.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width - 0.5) * 16;
+        const y = ((event.clientY - rect.top) / rect.height - 0.5) * 16;
+        button.style.setProperty('--magnetic-x', Math.max(-8, Math.min(8, x)).toFixed(2) + 'px');
+        button.style.setProperty('--magnetic-y', Math.max(-8, Math.min(8, y)).toFixed(2) + 'px');
+      });
+      button.addEventListener('pointerleave', () => {
+        button.style.setProperty('--magnetic-x', '0px');
+        button.style.setProperty('--magnetic-y', '0px');
+      });
+    });
+  }
+
+  function setupSplitTitles() {
+    const processedText = new WeakMap();
+    const split = title => {
+      const text = title.textContent || '';
+      if (processedText.get(title) === text && title.querySelector('.aw-title-char')) return;
+      processedText.set(title, text);
+      title.setAttribute('aria-label', text);
+      title.replaceChildren(...Array.from(text).map((character, index) => {
+        const span = document.createElement('span');
+        span.className = 'aw-title-char';
+        span.setAttribute('aria-hidden', 'true');
+        span.style.setProperty('--char-index', index);
+        span.textContent = character === ' ' ? '\u00a0' : character;
+        return span;
+      }));
+    };
+    const titles = qsa('.room-title');
+    titles.forEach(split);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => entry.target.classList.toggle('aw-title-in', entry.isIntersecting));
+    }, { threshold: 0.35 });
+    titles.forEach(title => observer.observe(title));
+    const mutations = new MutationObserver(records => {
+      records.forEach(record => {
+        const title = record.target.nodeType === Node.TEXT_NODE
+          ? record.target.parentElement?.closest('.room-title')
+          : record.target.closest?.('.room-title');
+        if (title && !title.querySelector('.aw-title-char')) {
+          split(title);
+          observer.observe(title);
+        }
+      });
+    });
+    titles.forEach(title => mutations.observe(title, { childList: true, characterData: true, subtree: true }));
+  }
+
+  function setupCursorStates() {
+    if (!finePointer.matches || reduceMotion.matches) return;
+    const cursor = document.querySelector('#cursor-glow');
+    if (!cursor) return;
+    document.documentElement.classList.add('aw-custom-cursor');
+    const interactive = 'a, button, input, textarea, select, [role="button"], .door-card, .shard';
+    document.addEventListener('pointerover', event => {
+      cursor.classList.toggle('is-interactive', Boolean(event.target.closest?.(interactive)));
+    }, { passive: true });
+    document.addEventListener('pointerout', event => {
+      if (!event.relatedTarget) cursor.classList.remove('is-interactive');
+    }, { passive: true });
+    document.addEventListener('pointerdown', () => cursor.classList.add('is-pressing'), { passive: true });
+    document.addEventListener('pointerup', () => cursor.classList.remove('is-pressing'), { passive: true });
+  }
+
+  function init() {
+    setupNoise();
+    setupRoomStages();
+    setupHeroParallax();
+    setupMagneticButtons();
+    setupSplitTitles();
+    setupCursorStates();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
+})();
+</script>
 
 </body>
 </html>
