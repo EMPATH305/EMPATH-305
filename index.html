@@ -2264,6 +2264,71 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
     body.empath-room-arrived .room:target > * { animation:none !important; }
 }
 
+
+
+/* ===== CURSOR TEMPO + GLOBAL SOUL COUNTER ALIGNMENT ===== */
+.global-summary {
+    align-items:stretch !important;
+    grid-auto-rows:1fr !important;
+}
+.global-summary .g-card {
+    display:grid !important;
+    grid-template-rows:20px 56px minmax(40px,auto) !important;
+    align-items:center !important;
+    justify-items:center !important;
+    align-content:center !important;
+    min-width:0 !important;
+    padding:24px 14px !important;
+}
+.global-summary .g-letter {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    height:20px !important;
+    margin:0 !important;
+    line-height:1 !important;
+}
+.global-summary .g-num,
+.global-summary .g-num.lux-counter {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    min-width:0 !important;
+    height:56px !important;
+    min-height:56px !important;
+    margin:0 !important;
+    padding:0 !important;
+    line-height:1 !important;
+    text-align:center !important;
+    font-variant-numeric:tabular-nums lining-nums !important;
+    transform-origin:50% 50% !important;
+}
+.global-summary .g-label {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    min-height:40px !important;
+    margin:0 !important;
+    line-height:1.65 !important;
+    text-align:center !important;
+    text-wrap:balance !important;
+}
+@media (max-width:640px) {
+    .global-summary .g-card {
+        grid-template-rows:18px 50px minmax(36px,auto) !important;
+        padding:22px 12px !important;
+    }
+    .global-summary .g-num,
+    .global-summary .g-num.lux-counter {
+        height:50px !important;
+        min-height:50px !important;
+        font-size:clamp(32px,10vw,40px) !important;
+    }
+}
+
 </style>
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
@@ -3145,6 +3210,7 @@ function updateSoulWeather() {
 const cursorGlow = document.getElementById('cursor-glow');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let glowX = mouseX, glowY = mouseY;
+const CURSOR_FOLLOW_SPEED = 0.075;
 let isMoving = false; // 新增：用來控制何時需要計算
 
 document.addEventListener('mousemove', (e) => {
@@ -3166,8 +3232,8 @@ function animateGlow() {
         const dy = mouseY - glowY;
         
         // 使用 Lerp 平滑移動
-        glowX += dx * 0.15; // 稍微調快一點點，讓拖影更自然
-        glowY += dy * 0.15;
+        glowX += dx * CURSOR_FOLLOW_SPEED;
+        glowY += dy * CURSOR_FOLLOW_SPEED;
         
         if (cursorGlow) {
             cursorGlow.style.transform = `translate3d(calc(${glowX}px - 50%), calc(${glowY}px - 50%), 0)`; // 使用 translate3d 強制開啟 GPU 硬體加速
