@@ -2820,12 +2820,15 @@ window.drawStars = function(){
         if(typeof window.resizeCanvas === 'function') window.resizeCanvas();
         if(!canvas.width || !canvas.height) return;
     }
-    const starMessages = Array.isArray(window.starMessages)
+    const allStarMessages = Array.isArray(window.starMessages)
         ? window.starMessages.map(normalizeStar)
         : [];
-    window.starMessages = starMessages;
+    window.starMessages = allStarMessages;
     const w = roomM.offsetWidth; 
-    const h = roomM.offsetHeight; 
+    const h = roomM.offsetHeight;
+    // 窄視窗採代表性抽樣，避免大量星星在有限空間持續互相排斥。
+    const visibleLimit = w < 600 ? 32 : (w < 900 ? 42 : allStarMessages.length);
+    const starMessages = allStarMessages.slice(0, visibleLimit);
     ctx.clearRect(0,0,w,h); 
 
     // 1. 畫背景星星
@@ -2870,11 +2873,14 @@ window.drawStars = function(){
     starMessages.forEach(s => { 
         let targetX = safeX + (s.relX * safeW); 
         let targetY = safeY + (s.relY * safeH); 
-        if (s.x === undefined || isNaN(s.x)) {
+        if (s.x === undefined || isNaN(s.x) || s.y === undefined || isNaN(s.y)) {
             s.x = targetX; s.y = targetY;
         } else {
-            s.x += (targetX - s.x) * 0.04; 
-            s.y += (targetY - s.y) * 0.04;
+            const springX = targetX - s.x;
+            const springY = targetY - s.y;
+            // 接近目標時停止細微修正，避免像素級來回抖動。
+            if (Math.abs(springX) > 0.35) s.x += Math.max(-2.5, Math.min(2.5, springX * 0.025));
+            if (Math.abs(springY) > 0.35) s.y += Math.max(-2.5, Math.min(2.5, springY * 0.025));
         }
     });
 
@@ -2886,10 +2892,12 @@ window.drawStars = function(){
             let dx = s2.x - s1.x; let dy = s2.y - s1.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
             if (dist === 0) { dx = 1; dy = 1; dist = 1.414; }
-            const MIN_DIST = w > 768 ? 85 : 65; 
-            if (dist < MIN_DIST) {
-                let push = (MIN_DIST - dist) * 0.5; 
-                let nx = dx / dist; let ny = dy / dist;
+            // 依目前可用面積動態調整間距；畫面越窄，安全距離越小。
+            const availableArea = Math.max(safeW * safeH, 1);
+            const dynamicMinDist = Math.max(28, Math.min(85, Math.sqrt(availableArea / Math.max(starMessages.length, 1)) * 0.72));
+            if (dist < dynamicMinDist) {
+                const push = Math.min(2.2, (dynamicMinDist - dist) * 0.12);
+                const nx = dx / dist; const ny = dy / dist;
                 s1.x -= nx * push; s1.y -= ny * push;
                 s2.x += nx * push; s2.y += ny * push;
             }
