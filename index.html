@@ -2385,6 +2385,223 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
     padding: 22px 20px !important;
   }
 }
+
+/* ===== EDITORIAL CONTENT RHYTHM · 2026-08-15 ===== */
+/* 首頁：保留電影式第一幕，將六房間整理成緊湊章節 */
+#hero .hero-manifesto {
+  display: none !important;
+}
+#journey.journey-map {
+  padding: 72px max(32px, 7vw) 80px !important;
+}
+#journey .journey-heading {
+  margin-bottom: 40px !important;
+}
+#journey .journey-heading h2 {
+  font-size: clamp(30px, 3.8vw, 50px) !important;
+  margin: 12px 0 16px !important;
+}
+#journey .journey-acts {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 24px !important;
+  max-width: 1180px !important;
+}
+#journey .journey-act {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 20px !important;
+  padding: 24px 0 !important;
+  align-content: start !important;
+}
+#journey .act-meta {
+  min-height: 52px !important;
+}
+#journey .act-rooms {
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+#journey .door-btn {
+  min-height: 132px !important;
+  grid-template-columns: 28px 50px 1fr 18px !important;
+  padding: 18px !important;
+}
+#journey .door-btn .dl {
+  font-size: 42px !important;
+}
+#journey .flow-line {
+  grid-column: 1 / -1 !important;
+  margin: 38px 0 0 !important;
+}
+
+/* P：分批顯示，避免一次把整面牆展開 */
+#room-p .shard.is-pagination-hidden {
+  display: none !important;
+}
+#room-p .shard-text {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 6;
+  overflow: hidden !important;
+}
+#room-p .shard.is-text-expanded .shard-text {
+  display: block !important;
+  overflow: visible !important;
+}
+.shard-expand {
+  align-self: flex-start;
+  margin-top: 16px;
+  padding: 0 0 4px;
+  border: 0;
+  border-bottom: 1px solid rgba(201,168,76,.28);
+  background: transparent;
+  color: rgba(232,230,225,.56);
+  font: 300 11px 'Noto Sans TC',sans-serif;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+.shard-expand:hover,
+.shard-expand:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold);
+  outline: none;
+}
+.kintsugi-pagination {
+  width: min(960px,100%);
+  margin: 32px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.kintsugi-load-more {
+  min-width: 230px;
+  padding: 14px 28px;
+  border: 1px solid rgba(201,168,76,.3);
+  background: rgba(201,168,76,.035);
+  color: var(--gold);
+  font: 300 12px 'Noto Sans TC',sans-serif;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: border-color .4s ease,background .4s ease,transform .4s ease;
+}
+.kintsugi-load-more:hover,
+.kintsugi-load-more:focus-visible {
+  border-color: rgba(201,168,76,.7);
+  background: rgba(201,168,76,.08);
+  transform: translateY(-2px);
+  outline: none;
+}
+.kintsugi-page-status {
+  color: rgba(232,230,225,.36);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.kintsugi-loading {
+  width: min(960px,100%);
+  margin: 28px auto 0;
+  color: rgba(232,230,225,.4);
+  font: 300 12px 'Noto Sans TC',sans-serif;
+  letter-spacing: 3px;
+  text-align: center;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+/* H：先呈現「回家」，完整數據改成第二層 */
+#room-h .h-journey {
+  max-width: 960px !important;
+}
+#room-h #g-summary {
+  display: block !important;
+  max-width: 720px !important;
+  margin: 0 0 32px !important;
+}
+#room-h #g-summary .visitor-card {
+  min-height: 210px !important;
+  padding: 38px 32px !important;
+  border: 1px solid rgba(242,232,217,.18) !important;
+  border-top: 1px solid rgba(242,232,217,.55) !important;
+  background: radial-gradient(circle at 50% 0,rgba(242,232,217,.08),transparent 64%) !important;
+}
+#room-h #g-summary .visitor-card .g-num {
+  height: auto !important;
+  min-height: 70px !important;
+  font: 300 clamp(56px,8vw,88px)/1 'Cormorant Garamond',serif !important;
+}
+.h-details-toggle {
+  width: min(720px,100%);
+  padding: 16px 24px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: transparent;
+  color: rgba(232,230,225,.62);
+  font: 300 12px 'Noto Sans TC',sans-serif;
+  letter-spacing: 3px;
+  cursor: pointer;
+  text-align: center;
+  transition: color .4s ease,border-color .4s ease,background .4s ease;
+}
+.h-details-toggle:hover,
+.h-details-toggle:focus-visible,
+.h-details-toggle[aria-expanded="true"] {
+  color: var(--gold);
+  border-color: rgba(201,168,76,.45);
+  background: rgba(201,168,76,.035);
+  outline: none;
+}
+.h-detail-panel {
+  display: none;
+  width: 100%;
+  padding-top: 56px;
+}
+.h-detail-panel.is-open {
+  display: block;
+  animation: awRoomReveal .7s cubic-bezier(.2,.8,.2,1) both;
+}
+.h-secondary-summary {
+  display: grid !important;
+  grid-template-columns: repeat(4,minmax(0,1fr)) !important;
+  gap: 16px !important;
+  margin-bottom: 64px !important;
+}
+
+@media (max-width: 980px) {
+  #journey .journey-acts {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  #journey .journey-act {
+    grid-template-columns: 150px 1fr !important;
+    gap: 28px !important;
+  }
+  #journey .act-rooms {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+  .h-secondary-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+}
+@media (max-width: 680px) {
+  #journey.journey-map {
+    padding: 64px 20px 72px !important;
+  }
+  #journey .journey-act {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  #journey .act-rooms {
+    grid-template-columns: 1fr !important;
+  }
+  #room-p .shard-text {
+    -webkit-line-clamp: 5;
+  }
+  .h-secondary-summary {
+    grid-template-columns: 1fr !important;
+  }
+  #room-h #g-summary .visitor-card {
+    min-height: 180px !important;
+    padding: 32px 20px !important;
+  }
+}
 </style>
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
@@ -6118,5 +6335,170 @@ document.addEventListener('DOMContentLoaded', async () => {
 })();
 </script>
 
+
+<script>
+/* ===== EDITORIAL CONTENT RHYTHM · INTERACTIONS ===== */
+(() => {
+  'use strict';
+  if (window.__EMPATH_EDITORIAL_RHYTHM__) return;
+  window.__EMPATH_EDITORIAL_RHYTHM__ = true;
+
+  const language = () => window.currentLang || 'zh';
+  const copy = (zh,en,ja) => language() === 'ja' ? ja : (language().startsWith('en') ? en : zh);
+
+  function setupKintsugiPagination() {
+    const board = document.getElementById('p-board');
+    if (!board || board.dataset.paginationReady) return;
+    board.dataset.paginationReady = 'true';
+
+    const PAGE_SIZE = 12;
+    const STEP = 8;
+    let visibleCount = PAGE_SIZE;
+    let refreshTimer = 0;
+
+    const loading = document.createElement('p');
+    loading.className = 'kintsugi-loading';
+    loading.textContent = copy('正在接住這些碎片……','Receiving these fragments…','かけらを受け止めています…');
+
+    const controls = document.createElement('div');
+    controls.className = 'kintsugi-pagination';
+    controls.hidden = true;
+
+    const status = document.createElement('p');
+    status.className = 'kintsugi-page-status';
+    status.setAttribute('aria-live','polite');
+
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'kintsugi-load-more';
+    more.textContent = copy('再拾起一些碎片','REVEAL MORE FRAGMENTS','もう少しかけらを拾う');
+    controls.append(more,status);
+    board.before(loading);
+    board.after(controls);
+
+    function addExpandControl(card) {
+      if (card.querySelector('.shard-expand')) return;
+      const text = card.querySelector('.shard-text');
+      if (!text) return;
+      requestAnimationFrame(() => {
+        if (text.scrollHeight <= text.clientHeight + 3 || card.querySelector('.shard-expand')) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'shard-expand';
+        button.textContent = copy('展開文字','READ MORE','続きを読む');
+        button.addEventListener('click',event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const expanded = card.classList.toggle('is-text-expanded');
+          button.textContent = expanded
+            ? copy('收起文字','CLOSE','閉じる')
+            : copy('展開文字','READ MORE','続きを読む');
+          button.setAttribute('aria-expanded',String(expanded));
+        });
+        text.after(button);
+      });
+    }
+
+    function refresh() {
+      const cards = Array.from(board.querySelectorAll(':scope > .shard'));
+      if (!cards.length) {
+        loading.hidden = false;
+        controls.hidden = true;
+        return;
+      }
+      loading.hidden = true;
+      visibleCount = Math.min(visibleCount,cards.length);
+      cards.forEach((card,index) => {
+        card.classList.toggle('is-pagination-hidden',index >= visibleCount);
+        addExpandControl(card);
+      });
+      const remaining = Math.max(0,cards.length-visibleCount);
+      controls.hidden = false;
+      more.hidden = remaining === 0;
+      more.textContent = copy(
+        remaining ? '再拾起一些碎片' : '所有碎片都已被看見',
+        remaining ? 'REVEAL MORE FRAGMENTS' : 'ALL FRAGMENTS SEEN',
+        remaining ? 'もう少しかけらを拾う' : 'すべてのかけらを見ました'
+      );
+      status.textContent = copy(
+        '已看見 ' + visibleCount + '／' + cards.length + ' 片',
+        visibleCount + ' of ' + cards.length + ' fragments',
+        visibleCount + '／' + cards.length + ' 個'
+      );
+    }
+
+    more.addEventListener('click',() => {
+      const total = board.querySelectorAll(':scope > .shard').length;
+      visibleCount = Math.min(total,visibleCount+STEP);
+      refresh();
+    });
+
+    new MutationObserver(() => {
+      clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(refresh,60);
+    }).observe(board,{childList:true});
+    refresh();
+  }
+
+  function setupHomeEditorialCut() {
+    const manifesto = document.querySelector('#hero .hero-manifesto');
+    if (manifesto) manifesto.setAttribute('aria-hidden','true');
+  }
+
+  function setupHomeLayering() {
+    const journey = document.querySelector('#room-h .h-journey');
+    const summary = document.getElementById('g-summary');
+    if (!journey || !summary || journey.dataset.layered) return;
+    journey.dataset.layered = 'true';
+
+    const secondary = document.createElement('div');
+    secondary.className = 'h-secondary-summary';
+    Array.from(summary.querySelectorAll('.g-card:not(.visitor-card)')).forEach(card => secondary.appendChild(card));
+
+    const panel = document.createElement('div');
+    panel.className = 'h-detail-panel';
+    panel.id = 'h-detail-panel';
+    panel.appendChild(secondary);
+
+    let next = summary.nextSibling;
+    const remaining = [];
+    while (next) {
+      const current = next;
+      next = next.nextSibling;
+      remaining.push(current);
+    }
+    remaining.forEach(node => panel.appendChild(node));
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'h-details-toggle';
+    toggle.setAttribute('aria-expanded','false');
+    toggle.setAttribute('aria-controls',panel.id);
+    toggle.textContent = copy('查看完整靈魂旅程','VIEW THE FULL JOURNEY','魂の旅をすべて見る');
+
+    summary.after(toggle,panel);
+    toggle.addEventListener('click',() => {
+      const open = !panel.classList.contains('is-open');
+      panel.classList.toggle('is-open',open);
+      toggle.setAttribute('aria-expanded',String(open));
+      toggle.textContent = open
+        ? copy('收起完整旅程','CLOSE THE JOURNEY','旅を閉じる')
+        : copy('查看完整靈魂旅程','VIEW THE FULL JOURNEY','魂の旅をすべて見る');
+    });
+  }
+
+  function initEditorialRhythm() {
+    setupHomeEditorialCut();
+    setupKintsugiPagination();
+    setupHomeLayering();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded',initEditorialRhythm,{once:true});
+  } else {
+    initEditorialRhythm();
+  }
+})();
+</script>
 </body>
 </html>
