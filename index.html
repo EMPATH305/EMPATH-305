@@ -6407,6 +6407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       loading.hidden = true;
+      if (visibleCount < 1) visibleCount = Math.min(PAGE_SIZE,cards.length);
       visibleCount = Math.min(visibleCount,cards.length);
       cards.forEach((card,index) => {
         card.classList.toggle('is-pagination-hidden',index >= visibleCount);
@@ -6429,7 +6430,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     more.addEventListener('click',() => {
       const total = board.querySelectorAll(':scope > .shard').length;
-      visibleCount = Math.min(total,visibleCount+STEP);
+      if (!total) return;
+      visibleCount = Math.min(total,Math.max(PAGE_SIZE,visibleCount)+STEP);
       refresh();
     });
 
