@@ -2070,7 +2070,210 @@ body.hsp-mode:not(.hsp-transitioning) * {
     .lux-hsp-veil { transition:none !important; }
 }
 
+
+
+/* ===== EMPATH CONCEPTUAL EXPERIENCE · LEVEL 3 ===== */
+
+/* 1 — 「放下」的首次進場 */
+html.empath-entry-pending body { overflow:hidden !important; }
+html.empath-entry-pending body > *:not(.empath-entry-overlay) {
+    visibility:hidden !important;
+}
+.empath-entry-overlay {
+    position:fixed !important;
+    inset:0 !important;
+    z-index:10000020 !important;
+    display:grid !important;
+    place-items:center !important;
+    overflow:hidden !important;
+    visibility:visible !important;
+    background:#000 !important;
+    color:#E8E6E1 !important;
+    opacity:1;
+    transition:opacity 800ms cubic-bezier(.23,1,.32,1) !important;
+}
+.empath-entry-overlay.is-finished {
+    opacity:0;
+    pointer-events:none !important;
+}
+.empath-entry-question {
+    max-width:min(1200px,88vw) !important;
+    padding:0 24px !important;
+    text-align:center !important;
+    font-family:'Cormorant Garamond','Noto Serif TC',serif !important;
+    font-size:clamp(38px,6.2vw,92px) !important;
+    font-weight:400 !important;
+    line-height:1.35 !important;
+    letter-spacing:clamp(4px,.58vw,8px) !important;
+    color:#E8E6E1 !important;
+    text-wrap:balance !important;
+}
+.empath-entry-char {
+    display:inline-block !important;
+    opacity:0;
+    filter:blur(8px);
+    transform:translate3d(0,30px,0);
+    transition:
+      opacity 900ms cubic-bezier(.23,1,.32,1),
+      transform 1100ms cubic-bezier(.23,1,.32,1),
+      filter 1000ms ease !important;
+    transition-delay:calc(var(--entry-char-index) * 32ms) !important;
+    will-change:opacity,transform,filter !important;
+}
+.empath-entry-overlay.is-visible .empath-entry-char {
+    opacity:1;
+    filter:blur(0);
+    transform:translate3d(0,0,0);
+}
+.empath-entry-overlay.is-dispersing .empath-entry-char {
+    opacity:0;
+    filter:blur(7px);
+    transform:translate3d(var(--entry-drift-x),calc(-34px - var(--entry-drift-y)),0) rotate(var(--entry-rotate));
+    transition-duration:850ms !important;
+    transition-delay:calc(var(--entry-char-index) * 24ms) !important;
+}
+.empath-entry-skip {
+    position:absolute !important;
+    right:clamp(20px,4vw,64px) !important;
+    bottom:clamp(24px,5vh,56px) !important;
+    border:0 !important;
+    border-bottom:1px solid rgba(232,230,225,.28) !important;
+    border-radius:0 !important;
+    padding:8px 2px !important;
+    background:transparent !important;
+    color:rgba(232,230,225,.55) !important;
+    font-family:'Noto Sans TC',sans-serif !important;
+    font-size:11px !important;
+    letter-spacing:4px !important;
+    cursor:pointer !important;
+    transition:color 400ms ease,border-color 400ms ease !important;
+}
+.empath-entry-skip:hover {
+    color:#E8E6E1 !important;
+    border-color:rgba(232,230,225,.8) !important;
+}
+body.empath-world-open #hero .hero-opening {
+    animation:empathWorldUnfold 1500ms cubic-bezier(.23,1,.32,1) both !important;
+}
+@keyframes empathWorldUnfold {
+    from { opacity:0; filter:blur(12px); transform:translate3d(0,34px,0) scale(.985); }
+    to { opacity:1; filter:blur(0); transform:translate3d(0,0,0) scale(1); }
+}
+
+/* 2 — Hero 活粒子場 */
+#hero .empath-living-field {
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+    z-index:1 !important;
+    pointer-events:none !important;
+    opacity:.72 !important;
+    mix-blend-mode:screen !important;
+}
+#hero .hero-opening {
+    position:relative !important;
+    z-index:2 !important;
+}
+
+/* 3 — 六個房間的專屬進入儀式 */
+.empath-room-ritual {
+    --ritual-color:#C9A84C;
+    position:fixed !important;
+    inset:0 !important;
+    z-index:10000010 !important;
+    display:grid !important;
+    place-items:center !important;
+    pointer-events:none !important;
+    opacity:0;
+    visibility:hidden !important;
+    overflow:hidden !important;
+    background:
+      radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--ritual-color) 10%,transparent),transparent 48%),
+      #050a10 !important;
+    transition:opacity 420ms cubic-bezier(.23,1,.32,1),
+               visibility 0s linear 420ms !important;
+}
+.empath-room-ritual.is-active {
+    opacity:1;
+    visibility:visible !important;
+    transition:opacity 260ms cubic-bezier(.23,1,.32,1),
+               visibility 0s linear 0s !important;
+}
+.empath-room-ritual.is-releasing {
+    opacity:0;
+    transition-duration:650ms !important;
+}
+.empath-room-ritual-line {
+    max-width:min(900px,84vw) !important;
+    padding:0 24px !important;
+    text-align:center !important;
+    font-family:'Cormorant Garamond','Noto Serif TC',serif !important;
+    font-size:clamp(30px,4.5vw,68px) !important;
+    font-weight:400 !important;
+    line-height:1.55 !important;
+    letter-spacing:clamp(3px,.48vw,7px) !important;
+    color:#E8E6E1 !important;
+}
+.empath-ritual-char {
+    display:inline-block !important;
+    opacity:0;
+    filter:blur(5px);
+    transform:translate3d(0,22px,0);
+    transition:
+      opacity 650ms cubic-bezier(.23,1,.32,1),
+      transform 800ms cubic-bezier(.23,1,.32,1),
+      filter 700ms ease !important;
+    transition-delay:calc(var(--ritual-index) * 28ms) !important;
+}
+.empath-room-ritual.is-speaking .empath-ritual-char {
+    opacity:1;
+    filter:blur(0);
+    transform:translate3d(0,0,0);
+}
+.empath-room-ritual.is-dispersing .empath-ritual-char {
+    opacity:0;
+    filter:blur(6px);
+    transform:translate3d(var(--ritual-drift),-32px,0);
+    transition-duration:620ms !important;
+    transition-delay:calc(var(--ritual-index) * 18ms) !important;
+}
+
+body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
+    animation:empathRoomArrive 1100ms cubic-bezier(.23,1,.32,1) both !important;
+}
+@keyframes empathRoomArrive {
+    from { opacity:0; filter:blur(8px); transform:translate3d(0,24px,0); }
+    to { opacity:1; filter:blur(0); transform:translate3d(0,0,0); }
+}
+
+@media (max-width:768px) {
+    .empath-entry-question { font-size:clamp(34px,10vw,58px) !important; letter-spacing:4px !important; }
+    #hero .empath-living-field { opacity:.48 !important; }
+    .empath-room-ritual-line { font-size:clamp(28px,8vw,46px) !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+    .empath-entry-char,.empath-ritual-char {
+        filter:none !important;
+        transform:none !important;
+        transition:opacity 250ms ease !important;
+        transition-delay:0ms !important;
+    }
+    #hero .empath-living-field { display:none !important; }
+    body.empath-world-open #hero .hero-opening,
+    body.empath-room-arrived .room:target > * { animation:none !important; }
+}
+
 </style>
+<script>
+/* EMPATH CONCEPTUAL ENTRY · paint guard */
+try {
+  if (!sessionStorage.getItem('empath_concept_entry_seen')) {
+    document.documentElement.classList.add('empath-entry-pending');
+  }
+} catch (error) {}
+</script>
+
 </head>
 <body>
 
@@ -5498,6 +5701,267 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('DOMContentLoaded',initLuxuryLevel2,{once:true});
   } else {
     initLuxuryLevel2();
+  }
+})();
+</script>
+
+
+<script>
+/* ===== EMPATH CONCEPTUAL EXPERIENCE · LEVEL 3 ===== */
+(() => {
+  'use strict';
+  if (window.__EMPATH_CONCEPTUAL_LEVEL_3__) return;
+  window.__EMPATH_CONCEPTUAL_LEVEL_3__ = true;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)');
+  const ENTRY_KEY = 'empath_concept_entry_seen';
+
+  function splitAtmosphericText(element,text,className,indexVariable,seedName) {
+    element.setAttribute('aria-label',text);
+    element.replaceChildren(...Array.from(text).map((character,index) => {
+      const span = document.createElement('span');
+      span.className = className;
+      span.setAttribute('aria-hidden','true');
+      span.style.setProperty(indexVariable,index);
+      const drift = ((index * 17) % 25) - 12;
+      if (seedName === 'entry') {
+        span.style.setProperty('--entry-drift-x',drift + 'px');
+        span.style.setProperty('--entry-drift-y',((index * 11) % 15) + 'px');
+        span.style.setProperty('--entry-rotate',((((index * 7) % 9) - 4) * .7) + 'deg');
+      } else {
+        span.style.setProperty('--ritual-drift',(drift * .7) + 'px');
+      }
+      span.textContent = character === ' ' ? '\u00a0' : character;
+      return span;
+    }));
+  }
+
+  function setupConceptEntry() {
+    let hasSeen = false;
+    try { hasSeen = sessionStorage.getItem(ENTRY_KEY) === 'true'; } catch (error) {}
+    if (hasSeen) {
+      document.documentElement.classList.remove('empath-entry-pending');
+      return Promise.resolve(false);
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'empath-entry-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.setAttribute('aria-label','EMPATH 進場');
+    const question = document.createElement('div');
+    question.className = 'empath-entry-question';
+    splitAtmosphericText(question,'今晚，你帶著什麼走進來？','empath-entry-char','--entry-char-index','entry');
+    const skip = document.createElement('button');
+    skip.type = 'button';
+    skip.className = 'empath-entry-skip';
+    skip.textContent = '跳過';
+    skip.setAttribute('aria-label','跳過進場動畫');
+    overlay.append(question,skip);
+    document.body.appendChild(overlay);
+
+    return new Promise(resolve => {
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        try { sessionStorage.setItem(ENTRY_KEY,'true'); } catch (error) {}
+        overlay.classList.add('is-finished');
+        document.documentElement.classList.remove('empath-entry-pending');
+        document.body.classList.add('empath-world-open');
+        window.setTimeout(() => overlay.remove(),850);
+        resolve(true);
+      };
+      skip.addEventListener('click',finish,{once:true});
+      requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('is-visible')));
+      if (reduceMotion.matches) {
+        window.setTimeout(finish,900);
+      } else {
+        window.setTimeout(() => overlay.classList.add('is-dispersing'),2850);
+        window.setTimeout(finish,4100);
+      }
+    });
+  }
+
+  function setupLivingParticleField() {
+    const hero = document.getElementById('hero');
+    if (!hero || reduceMotion.matches) return;
+    const canvas = document.createElement('canvas');
+    canvas.className = 'empath-living-field';
+    canvas.setAttribute('aria-hidden','true');
+    const opening = hero.querySelector('.hero-opening');
+    hero.insertBefore(canvas,opening);
+    const context = canvas.getContext('2d',{alpha:true});
+    if (!context) return;
+
+    const colors = ['201,168,76','232,230,225','168,184,200'];
+    const pointer = {x:-9999,y:-9999,active:false};
+    let width = 0,height = 0,dpr = 1,raf = 0,visible = true;
+    let particles = [];
+
+    const createParticle = index => {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      return {
+        x,y,homeX:x,homeY:y,vx:0,vy:0,
+        radius:.65 + Math.random() * 1.35,
+        alpha:.16 + Math.random() * .44,
+        color:colors[index % colors.length],
+        phase:Math.random() * Math.PI * 2,
+        drift:.0025 + Math.random() * .004
+      };
+    };
+    const resize = () => {
+      const rect = hero.getBoundingClientRect();
+      const oldWidth = width || rect.width;
+      const oldHeight = height || rect.height;
+      width = Math.max(1,rect.width);
+      height = Math.max(1,rect.height);
+      dpr = Math.min(window.devicePixelRatio || 1,1.75);
+      canvas.width = Math.round(width*dpr);
+      canvas.height = Math.round(height*dpr);
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      context.setTransform(dpr,0,0,dpr,0,0);
+      if (!particles.length) particles = Array.from({length:80},(_,index) => createParticle(index));
+      else particles.forEach(particle => {
+        particle.x = particle.x / oldWidth * width;
+        particle.y = particle.y / oldHeight * height;
+        particle.homeX = particle.homeX / oldWidth * width;
+        particle.homeY = particle.homeY / oldHeight * height;
+      });
+    };
+    const frame = time => {
+      context.clearRect(0,0,width,height);
+      particles.forEach(particle => {
+        const floatX = Math.sin(time*particle.drift + particle.phase) * 7;
+        const floatY = Math.cos(time*particle.drift*.72 + particle.phase) * 5;
+        let targetX = particle.homeX + floatX;
+        let targetY = particle.homeY + floatY;
+        if (pointer.active) {
+          const dx = particle.x - pointer.x;
+          const dy = particle.y - pointer.y;
+          const distance = Math.hypot(dx,dy) || 1;
+          const radius = 118;
+          if (distance < radius) {
+            const force = Math.pow((radius-distance)/radius,2) * 1.35;
+            particle.vx += dx/distance*force;
+            particle.vy += dy/distance*force;
+          }
+        }
+        particle.vx += (targetX-particle.x)*.0028;
+        particle.vy += (targetY-particle.y)*.0028;
+        particle.vx *= .94;
+        particle.vy *= .94;
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        context.beginPath();
+        context.arc(particle.x,particle.y,particle.radius,0,Math.PI*2);
+        context.fillStyle = 'rgba(' + particle.color + ',' + particle.alpha + ')';
+        context.shadowColor = 'rgba(' + particle.color + ',.28)';
+        context.shadowBlur = particle.radius > 1.35 ? 7 : 3;
+        context.fill();
+      });
+      if (visible && !document.hidden && !document.body.classList.contains('hsp-mode')) {
+        raf = requestAnimationFrame(frame);
+      } else raf = 0;
+    };
+    const start = () => { if (!raf && visible && !document.hidden && !document.body.classList.contains('hsp-mode')) raf=requestAnimationFrame(frame); };
+    hero.addEventListener('pointermove',event => {
+      if (!finePointer.matches) return;
+      const rect = hero.getBoundingClientRect();
+      pointer.x = event.clientX-rect.left;
+      pointer.y = event.clientY-rect.top;
+      pointer.active = true;
+    },{passive:true});
+    hero.addEventListener('pointerleave',() => { pointer.active=false; },{passive:true});
+    new ResizeObserver(resize).observe(hero);
+    new IntersectionObserver(entries => {
+      visible = entries[0]?.isIntersecting ?? true;
+      if (visible) start();
+      else if (raf) { cancelAnimationFrame(raf); raf=0; }
+    },{threshold:.01}).observe(hero);
+    document.addEventListener('visibilitychange',start,{passive:true});
+    document.getElementById('hsp-btn')?.addEventListener('click',() => window.setTimeout(start,1550),{passive:true});
+    resize();
+    start();
+  }
+
+  const roomLines = {
+    e:{zh:'這裡沒有評斷。',en:'There is no judgment here.',ja:'ここには、評価も批判もありません。'},
+    m:{zh:'有些思念，只需要一片夜空。',en:'Some longing only needs a night sky.',ja:'ある想いには、夜空だけでいい。'},
+    p:{zh:'破碎不是你的缺陷。',en:'Brokenness is not your flaw.',ja:'壊れたことは、あなたの欠点ではない。'},
+    a:{zh:'你可以把重量留在這裡。',en:'You may leave the weight here.',ja:'その重さを、ここに置いていい。'},
+    t:{zh:'溫暖會找到需要它的人。',en:'Warmth will find the one who needs it.',ja:'温もりは、必要とする人に届く。'},
+    h:{zh:'你不必證明，這裡就是回家的地方。',en:'You need not prove anything. This is home.',ja:'証明しなくていい。ここが帰る場所です。'}
+  };
+  const roomColors = {e:'#7B8FA1',m:'#A8B8C8',p:'#C9A84C',a:'#7A9E9F',t:'#E8A87C',h:'#F2E8D9'};
+
+  function setupRoomRituals() {
+    const overlay = document.createElement('div');
+    overlay.className = 'empath-room-ritual';
+    overlay.setAttribute('aria-live','polite');
+    overlay.setAttribute('aria-atomic','true');
+    const line = document.createElement('div');
+    line.className = 'empath-room-ritual-line';
+    overlay.appendChild(line);
+    document.body.appendChild(overlay);
+    let active = false;
+
+    const enterRoom = (hash,roomKey) => {
+      if (active) return;
+      const target = document.querySelector(hash);
+      if (!target) return;
+      active = true;
+      const lang = window.currentLang === 'ja' ? 'ja' : (window.currentLang === 'zh' || window.currentLang === 'zh-cn' ? 'zh' : 'en');
+      const text = roomLines[roomKey]?.[lang] || roomLines[roomKey].en;
+      overlay.style.setProperty('--ritual-color',roomColors[roomKey]);
+      splitAtmosphericText(line,text,'empath-ritual-char','--ritual-index','ritual');
+      overlay.className = 'empath-room-ritual is-active';
+      document.body.classList.remove('empath-room-arrived');
+      requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('is-speaking')));
+      window.setTimeout(() => {
+        const previous = document.documentElement.style.scrollBehavior;
+        document.documentElement.style.scrollBehavior = 'auto';
+        target.scrollIntoView({block:'start',behavior:'auto'});
+        history.replaceState(null,'',hash);
+        document.documentElement.style.scrollBehavior = previous;
+      },420);
+      window.setTimeout(() => overlay.classList.add('is-dispersing'),1500);
+      window.setTimeout(() => {
+        overlay.classList.add('is-releasing');
+        document.body.classList.add('empath-room-arrived');
+      },1900);
+      window.setTimeout(() => {
+        overlay.className = 'empath-room-ritual';
+        active = false;
+      },2600);
+    };
+
+    document.addEventListener('click',event => {
+      const link = event.target.closest?.('a[href^="#room-"]');
+      if (!link) return;
+      const hash = link.getAttribute('href');
+      const match = hash?.match(/^#room-([empath])$/);
+      if (!match) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.closeMobileNav?.();
+      enterRoom(hash,match[1]);
+    },true);
+  }
+
+  async function initConceptualExperience() {
+    await setupConceptEntry();
+    setupLivingParticleField();
+    setupRoomRituals();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded',initConceptualExperience,{once:true});
+  } else {
+    initConceptualExperience();
   }
 })();
 </script>
