@@ -1994,27 +1994,52 @@ body.visual-ready .room .desc-wrap.is-revealed{opacity:1;transform:translateY(0)
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 // 🌟 新增載入 GA4 引擎
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
 
 // ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
-const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-MW5GYM0H77" };
+const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
 
-const app = initializeApp(firebaseConfig); 
-const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
 
-// 🌟 啟動全域追蹤功能
+// 自動偵測長輪詢可避開部分 iOS、校園網路與代理伺服器阻擋 WebChannel。
+// IndexedDB 快取讓曾載入過的房間在短暫離線時仍能先顯示內容。
+const db = initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true,
+    useFetchStreams: false,
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
+
+// Analytics 保留使用；Measurement ID 與 Firebase 後台實際設定一致。
 window.empathAnalytics = getAnalytics(app);
 window.empathLogEvent = logEvent;
 
-const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 }; const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 }; let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
-let lastSubmitTime = 0; const SUBMIT_COOLDOWN = 3000; 
+const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
+const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
+try {
+    const cachedCounts = JSON.parse(localStorage.getItem('empath_global_counts') || '{}');
+    ['e','m','p','a','t'].forEach(key => {
+        const value = Number(cachedCounts[key]);
+        if(Number.isFinite(value) && value >= 0) globalCounts[key] = value;
+    });
+} catch(err) {}
+let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
+let lastSubmitTime = 0; const SUBMIT_COOLDOWN = 3000;
+document.addEventListener('DOMContentLoaded', () => {
+    if(typeof updateCountersUI === 'function') updateCountersUI();
+}, { once:true }); 
 
 function canSubmit() { const now = Date.now(); if (now - lastSubmitTime < SUBMIT_COOLDOWN) { window.showToast(t('請稍候再送出...', 'Please wait...', '少しお待ちください...', 'Espera un momento...', 'Veuillez patienter...', 'Bitte warten...', '请稍候再送出...')); return false; } lastSubmitTime = now; return true; }
 function playRitual(btnId, origText) { const btn = document.getElementById(btnId); if(!btn) return; btn.innerHTML = t('✨ 已接住', '✨ Caught', '✨ 受け止めました', '✨ Atrapado', '✨ Attrapé', '✨ Aufgefangen', '✨ 已接住'); btn.style.pointerEvents = 'none'; btn.style.opacity = '0.6'; setTimeout(() => { btn.innerHTML = origText; btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }, SUBMIT_COOLDOWN); }
 
 function updateCountersUI() {
+    try {
+        localStorage.setItem('empath_global_counts', JSON.stringify({
+            e:globalCounts.e || 0, m:globalCounts.m || 0, p:globalCounts.p || 0,
+            a:globalCounts.a || 0, t:globalCounts.t || 0, savedAt:Date.now()
+        }));
+    } catch(err) {}
     ['g-v-count','g-e-count','g-m-count','g-p-count','g-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = globalCounts[id.split('-')[1]]; });
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
     
