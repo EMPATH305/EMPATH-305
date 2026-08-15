@@ -1912,22 +1912,22 @@ body.aw-ready .room .aw-stage.aw-in {
     top:var(--ripple-y,50%) !important;
     border-radius:50% !important;
     background:var(--ripple-color,currentColor) !important;
-    opacity:.4 !important;
+    opacity:.4;
     pointer-events:none !important;
     z-index:1 !important;
-    transform:translate(-50%,-50%) scale(0) !important;
+    transform:translate(-50%,-50%) scale(0);
     animation:luxLiquidRipple 600ms cubic-bezier(.2,.7,.25,1) forwards !important;
 }
 @keyframes luxLiquidRipple {
-    to { opacity:0; transform:translate(-50%,-50%) scale(var(--ripple-scale,20)) !important; }
+    to { opacity:0; transform:translate(-50%,-50%) scale(var(--ripple-scale,20)); }
 }
 
 /* 3 — 留言逐則被接收 */
 #e-feed > .lux-feed-item,
 #t-feed > .lux-feed-item,
 #a-feed > .lux-feed-item {
-    opacity:0 !important;
-    transform:translate3d(0,14px,0) !important;
+    opacity:0;
+    transform:translate3d(0,14px,0);
     animation:luxFeedReceive 700ms cubic-bezier(.23,1,.32,1) forwards !important;
     animation-delay:var(--feed-delay,0ms) !important;
 }
@@ -1981,7 +1981,7 @@ body.aw-ready .room .aw-stage.aw-in {
     content:'' !important;
     position:absolute !important;
     top:-2px !important;
-    left:0 !important;
+    left:0;
     width:5px !important;
     height:5px !important;
     border-radius:50% !important;
