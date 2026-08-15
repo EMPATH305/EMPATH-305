@@ -1049,6 +1049,65 @@ body.page-scrolled #breathe-btn{opacity:.42;}
   #hero .onboarding-box{inset:68px 14px 14px;width:calc(100vw - 28px);max-height:calc(100dvh - 82px);padding:36px 18px 28px;}
   .guide-close{top:-24px;margin-right:-8px;}
 }
+
+/* ===== Navigation scale & cinematic visual depth ===== */
+nav{min-height:74px;padding:15px 38px;}
+.nav-logo{font-size:22px;letter-spacing:7.5px;}
+.nav-menu{gap:32px;}
+.nav-letters{gap:5px;}
+.nav-letter{width:44px;height:44px;font-size:16px;}
+.nav-letter::after{left:13px;right:13px;bottom:1px;}
+.nav-controls{gap:10px;}
+.func-btn{height:42px;padding:0 17px;font-size:12px;letter-spacing:.14em;}
+.lang-dropdown-list{top:52px;}
+
+.cinematic-sky{--lens-x:50%;--lens-y:42%;--depth-x:0px;--depth-y:0px;}
+.cinematic-nebula{transform:translate3d(var(--depth-x),var(--depth-y),0) scale(1.04);transition:transform .6s cubic-bezier(.2,.8,.2,1);}
+.cinematic-lens{position:absolute;inset:0;background:radial-gradient(420px circle at var(--lens-x) var(--lens-y),rgba(128,164,211,.11),rgba(52,78,114,.035) 35%,transparent 72%);mix-blend-mode:screen;opacity:.9;}
+.cinematic-meteor{position:absolute;width:150px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.82),transparent);filter:drop-shadow(0 0 5px rgba(170,205,255,.72));opacity:0;transform:rotate(-28deg);pointer-events:none;}
+.cinematic-meteor::after{content:'';position:absolute;right:7px;top:-1px;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px rgba(185,213,255,.8);}
+.cinematic-meteor-one{top:22%;left:72%;animation:meteorPass 12s ease-in-out 2.5s infinite;}
+.cinematic-meteor-two{top:58%;left:18%;transform:rotate(-20deg) scale(.72);animation:meteorPassTwo 17s ease-in-out 8s infinite;}
+@keyframes meteorPass{0%,78%,100%{opacity:0;translate:90px -45px;}82%{opacity:.8;}90%{opacity:0;translate:-220px 115px;}}
+@keyframes meteorPassTwo{0%,84%,100%{opacity:0;translate:60px -25px;}87%{opacity:.48;}94%{opacity:0;translate:-170px 70px;}}
+
+.hero-opening .hero-title{transition:letter-spacing .9s cubic-bezier(.2,.8,.2,1),text-shadow .9s ease;}
+.hero-opening:hover .hero-title{letter-spacing:.205em;text-shadow:0 0 90px rgba(135,177,230,.18),0 8px 35px rgba(0,0,0,.45);}
+.hero-lead::before,.hero-lead::after{content:'✦';display:inline-block;margin:0 14px;color:rgba(201,168,76,.38);font-size:8px;vertical-align:middle;}
+
+body.visual-ready .journey-heading,
+body.visual-ready .journey-act,
+body.visual-ready .hero-manifesto>*{opacity:0;transform:translateY(32px);filter:blur(5px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1),filter .9s ease;}
+body.visual-ready .journey-heading.is-revealed,
+body.visual-ready .journey-act.is-revealed,
+body.visual-ready .hero-manifesto>*.is-revealed{opacity:1;transform:translateY(0);filter:blur(0);}
+body.visual-ready .journey-act:nth-child(2){transition-delay:.08s;}
+body.visual-ready .journey-act:nth-child(3){transition-delay:.16s;}
+
+#hero .door-btn{--card-x:75%;--card-y:40%;}
+#hero .door-btn::before{background:radial-gradient(260px circle at var(--card-x) var(--card-y),rgba(255,255,255,.115),rgba(201,168,76,.022) 38%,transparent 72%);opacity:.22;}
+#hero .door-btn:hover::before{opacity:1;}
+#hero .door-btn .dl{transition:transform .6s cubic-bezier(.2,.8,.2,1),text-shadow .6s ease,opacity .6s ease;}
+#hero .door-btn:hover .dl{transform:translateY(-3px) scale(1.04);text-shadow:0 0 28px currentColor;opacity:1;}
+
+@media(max-width:900px){
+  nav{min-height:68px;padding:12px 20px;}
+  .nav-logo{font-size:20px;letter-spacing:6px;}
+}
+@media(max-width:768px){
+  nav{min-height:64px;padding:10px 18px;}
+  .nav-logo{font-size:20px;}
+  .hamburger{padding:10px;}
+  .hamburger span{width:27px;}
+  .cinematic-lens{display:none;}
+  .hero-lead::before,.hero-lead::after{display:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  .cinematic-meteor{display:none;}
+  body.visual-ready .journey-heading,
+  body.visual-ready .journey-act,
+  body.visual-ready .hero-manifesto>*{opacity:1;transform:none;filter:none;}
+}
 </style>
 </head>
 <body>
@@ -1227,6 +1286,9 @@ body.page-scrolled #breathe-btn{opacity:.42;}
 <section id="hero">
   <div class="cinematic-sky" aria-hidden="true">
     <div class="cinematic-nebula"></div>
+    <div class="cinematic-lens"></div>
+    <div class="cinematic-meteor cinematic-meteor-one"></div>
+    <div class="cinematic-meteor cinematic-meteor-two"></div>
     <div class="cinematic-stars cinematic-stars-a"></div>
     <div class="cinematic-stars cinematic-stars-b"></div>
     <div class="cinematic-vignette"></div>
@@ -3767,7 +3829,46 @@ window.checkRoomTWarmth = function() {
     }
 };
   
-  // Premium navigation and quiet hero utilities
+  // Cinematic pointer light and restrained reveal motion
+document.addEventListener('DOMContentLoaded', () => {
+    const sky = document.querySelector('.cinematic-sky');
+    const heroOpening = document.querySelector('.hero-opening');
+    if(sky && heroOpening && window.matchMedia('(pointer:fine)').matches) {
+        heroOpening.addEventListener('pointermove', (event) => {
+            const rect = heroOpening.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            sky.style.setProperty('--lens-x', x + '%');
+            sky.style.setProperty('--lens-y', y + '%');
+            sky.style.setProperty('--depth-x', ((x - 50) * -0.18) + 'px');
+            sky.style.setProperty('--depth-y', ((y - 50) * -0.12) + 'px');
+        }, { passive: true });
+    }
+
+    document.querySelectorAll('#hero .door-btn').forEach(card => {
+        card.addEventListener('pointermove', (event) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty('--card-x', (event.clientX - rect.left) + 'px');
+            card.style.setProperty('--card-y', (event.clientY - rect.top) + 'px');
+        }, { passive: true });
+    });
+
+    const revealTargets = document.querySelectorAll('.journey-heading, .journey-act, .hero-manifesto > *');
+    if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.body.classList.add('visual-ready');
+        const revealObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('is-revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+        revealTargets.forEach(target => revealObserver.observe(target));
+    }
+});
+
+// Premium navigation and quiet hero utilities
 window.addEventListener('scroll', () => {
     document.body.classList.toggle('page-scrolled', window.scrollY > 90);
 }, { passive: true });
