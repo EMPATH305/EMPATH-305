@@ -2230,8 +2230,8 @@ function subscribeOtherRooms() {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
-        window.starMessages = tempStars.sort((a,b) => b.brightness - a.brightness).slice(0, 80);
-        try { localStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks})))); } catch(e) {}
+        window.starMessages = tempStars.map(normalizeStar).sort((a,b) => b.brightness - a.brightness).slice(0, 80);
+        try { localStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks,colorIdx:s.colorIdx,relX:s.relX,relY:s.relY})))); } catch(e) {}
         starMessages = window.starMessages;
         
         if(typeof window.updateMStats === 'function') window.updateMStats();
@@ -2701,7 +2701,43 @@ window.toggleEFeed = function() {
     window.renderEFeed(); 
 }
 
-const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); try { const _c = localStorage.getItem('empath_stars_cache'); window.starMessages = _c ? JSON.parse(_c) : []; } catch(e) { window.starMessages = []; } let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
+const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
+
+function normalizeStar(star, index = 0) {
+    const safeStar = star && typeof star === 'object' ? star : {};
+    const seed = String(safeStar.id || safeStar.text || index);
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+    const seeded = (offset) => {
+        const value = Math.sin(hash + offset) * 10000;
+        return value - Math.floor(value);
+    };
+
+    return {
+        ...safeStar,
+        text: typeof safeStar.text === 'string' ? safeStar.text : '',
+        brightness: Number.isFinite(Number(safeStar.brightness)) ? Math.max(1, Number(safeStar.brightness)) : 1,
+        clicks: Number.isFinite(Number(safeStar.clicks)) ? Number(safeStar.clicks) : 0,
+        colorIdx: Number.isInteger(Number(safeStar.colorIdx))
+            ? Math.abs(Number(safeStar.colorIdx)) % STAR_COLORS.length
+            : Math.floor(seeded(17) * STAR_COLORS.length),
+        relX: Number.isFinite(Number(safeStar.relX))
+            ? Math.min(0.95, Math.max(0.05, Number(safeStar.relX)))
+            : 0.05 + seeded(31) * 0.9,
+        relY: Number.isFinite(Number(safeStar.relY))
+            ? Math.min(0.95, Math.max(0.05, Number(safeStar.relY)))
+            : 0.05 + seeded(47) * 0.9
+    };
+}
+
+try {
+    const _c = localStorage.getItem('empath_stars_cache');
+    const cachedStars = _c ? JSON.parse(_c) : [];
+    window.starMessages = Array.isArray(cachedStars) ? cachedStars.map(normalizeStar) : [];
+} catch(e) {
+    window.starMessages = [];
+    localStorage.removeItem('empath_stars_cache');
+}
 window.resizeCanvas = function(){ 
     const dpr = window.devicePixelRatio || 1; 
     
@@ -2779,12 +2815,15 @@ window.updateMStats = function() {
 
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ 
-    if(!canvas.width || !isAnimating) return;
-    const starMessages = window.starMessages || [];
-    if(!canvas.width || !canvas.height || canvas.width === 0 || canvas.height === 0) { 
-    if(typeof window.resizeCanvas === 'function') window.resizeCanvas(); 
-    return; 
-}
+    if(!canvas || !ctx || !roomM || !isAnimating) return;
+    if(!canvas.width || !canvas.height) {
+        if(typeof window.resizeCanvas === 'function') window.resizeCanvas();
+        if(!canvas.width || !canvas.height) return;
+    }
+    const starMessages = Array.isArray(window.starMessages)
+        ? window.starMessages.map(normalizeStar)
+        : [];
+    window.starMessages = starMessages;
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
