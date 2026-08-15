@@ -3591,7 +3591,7 @@ window.checkRoomTWarmth = function() {
       updateCountersUI();
   }
 
-  subscribeAll(); startGlobalSandTimer();
+  subscribeAll();
   
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
   firestoreUnsubs.push(onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } }));
