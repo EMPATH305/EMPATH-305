@@ -940,6 +940,95 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   .hero-manifesto .hero-quotes{display:grid;gap:34px;}
   #hero .onboarding-box{width:calc(100% - 28px);padding:28px 18px;}
 }
+
+/* ===== Premium polish & guide modal repair ===== */
+a[title="CSS Light"]{display:none!important;}
+
+nav{
+  padding:14px 42px;
+  background:linear-gradient(180deg,rgba(2,6,10,.82),rgba(2,6,10,.42));
+  border-bottom-color:rgba(255,255,255,.055);
+  box-shadow:none;
+  backdrop-filter:blur(18px) saturate(115%);
+  transition:background .55s ease,border-color .55s ease,transform .55s ease;
+}
+body:not(.page-scrolled) nav{background:linear-gradient(180deg,rgba(2,6,10,.72),transparent);border-bottom-color:transparent;}
+.nav-logo{font-size:19px;font-weight:400;letter-spacing:7px;color:rgba(255,255,255,.88);}
+.nav-menu{gap:26px;}
+.nav-letters{gap:3px;}
+.nav-letter{
+  width:38px;height:38px;border-color:transparent;border-radius:0;
+  font-size:14px;font-weight:400;color:rgba(255,255,255,.48)!important;
+  position:relative;box-shadow:none!important;
+}
+.nav-letter::after{content:'';position:absolute;left:12px;right:12px;bottom:2px;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .35s ease;}
+.nav-letter:hover{transform:none!important;background:transparent!important;color:rgba(255,255,255,.92)!important;}
+.nav-letter:hover::after{transform:scaleX(1);}
+.func-btn{height:36px;padding:0 14px;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.025);font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.62);}
+.func-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.28);}
+
+#creator-btn,#fortune-spark,#breathe-btn{transition:opacity .5s ease,transform .5s ease,filter .5s ease!important;}
+body:not(.page-scrolled) #creator-btn,
+body:not(.page-scrolled) #fortune-spark,
+body:not(.page-scrolled) #breathe-btn{opacity:0!important;pointer-events:none;transform:translateY(8px) scale(.92)!important;}
+body.page-scrolled #creator-btn,
+body.page-scrolled #fortune-spark,
+body.page-scrolled #breathe-btn{opacity:.42;}
+
+.hero-opening::after{content:'';position:absolute;left:50%;bottom:0;width:min(820px,78vw);height:1px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(201,168,76,.26),transparent);}
+.hero-opening .hero-title{color:rgba(255,255,255,.94);text-shadow:0 0 80px rgba(128,165,215,.12),0 8px 35px rgba(0,0,0,.45);}
+.cinema-cta{position:relative;overflow:hidden;}
+.cinema-cta::before{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.12) 50%,transparent 70%);transform:translateX(-130%);transition:transform .8s ease;}
+.cinema-cta:hover::before{transform:translateX(130%);}
+
+.journey-map::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 0 7%,rgba(255,255,255,.018) 7% 7.08%,transparent 7.08% 93%,rgba(255,255,255,.018) 93% 93.08%,transparent 93.08%);}
+.journey-act{position:relative;}
+.journey-act::before{content:'';position:absolute;left:0;top:-1px;width:56px;height:1px;background:var(--gold);opacity:.5;}
+#hero .door-btn{backdrop-filter:blur(5px);transition:transform .5s cubic-bezier(.2,.8,.2,1),border-color .5s ease,background .5s ease,box-shadow .5s ease;}
+#hero .door-btn::after{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(transparent,var(--gold),transparent);opacity:0;transition:opacity .45s;}
+#hero .door-btn:hover::after{opacity:.8;}
+#hero .door-btn[data-d="E"],#hero .door-btn[data-d="M"]{background-color:rgba(115,145,180,.018);}
+#hero .door-btn[data-d="P"],#hero .door-btn[data-d="A"]{background-color:rgba(201,168,76,.015);}
+#hero .door-btn[data-d="T"],#hero .door-btn[data-d="H"]{background-color:rgba(232,190,155,.014);}
+
+.guide-backdrop{
+  display:none;position:fixed;inset:0;z-index:1490;
+  background:rgba(0,3,7,.72);backdrop-filter:blur(10px);
+  opacity:0;transition:opacity .35s ease;
+}
+.guide-backdrop.is-open{display:block;opacity:1;}
+#hero .onboarding-box{
+  display:none;position:fixed;z-index:1500;
+  inset:76px 24px 24px;top:auto;left:auto;transform:none!important;
+  width:min(680px,calc(100vw - 32px));height:max-content;
+  max-height:calc(100dvh - 100px);margin:auto;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;
+  padding:42px 34px 38px;
+  animation:none!important;
+  background:linear-gradient(145deg,rgba(8,15,25,.985),rgba(3,8,14,.985));
+  border:1px solid rgba(201,168,76,.28);
+  box-shadow:0 40px 120px rgba(0,0,0,.82),inset 0 1px rgba(255,255,255,.04);
+}
+#hero .onboarding-box.is-open{display:flex;}
+.guide-close{
+  position:sticky;top:-28px;align-self:flex-end;z-index:4;
+  width:38px;height:38px;margin:0 -18px -22px 0;
+  border:1px solid rgba(255,255,255,.14);border-radius:50%;
+  background:rgba(3,8,14,.88);color:rgba(255,255,255,.64);
+  font:300 25px/1 'Cormorant Garamond',serif;cursor:pointer;
+  transition:.3s ease;
+}
+.guide-close:hover{color:var(--gold);border-color:rgba(201,168,76,.5);transform:rotate(90deg);}
+#hero .onboarding-box .ob-options{padding-bottom:12px;}
+#hero .onboarding-box .ob-btn{background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.12);font-weight:300;text-align:left;}
+#hero .onboarding-box .ob-btn:hover{background:rgba(201,168,76,.07);border-color:rgba(201,168,76,.42);transform:translateX(3px);}
+
+@media(max-width:768px){
+  nav{padding:12px 18px;}
+  .nav-logo{font-size:17px;letter-spacing:5px;}
+  #hero .onboarding-box{inset:68px 14px 14px;width:calc(100vw - 28px);max-height:calc(100dvh - 82px);padding:36px 18px 28px;}
+  .guide-close{top:-24px;margin-right:-8px;}
+}
 </style>
 </head>
 <body>
@@ -1137,7 +1226,9 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
     <span class="opening-scroll">SCROLL TO BEGIN <i></i></span>
   </div>
 
-  <div class="onboarding-box" id="onboarding-box">
+  <div id="guide-backdrop" class="guide-backdrop" onclick="window.closeGuide()" aria-hidden="true"></div>
+  <div class="onboarding-box" id="onboarding-box" role="dialog" aria-modal="true" aria-label="EMPATH 情緒引路">
+    <button type="button" class="guide-close" onclick="window.closeGuide()" aria-label="退出情緒引路">×</button>
     <div id="ob-state-0">
       <p style="font-weight:bold; color:var(--gold); margin-bottom:12px; letter-spacing:2px; font-size:16px;" data-zh="這是一個什麼樣的空間？" data-en="What is this space?" data-ja="ここはどんな空間ですか？" data-es="¿Qué es este espacio?" data-fr="Quel est cet espace ?" data-de="Was ist dieser Raum?" data-zh-cn="这是一个什么样的空间？">這是一個什麼樣的空間？</p>
       <p data-zh="這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？" data-en="This is a digital sanctuary free of algorithms and judgments.<br>Today, do you need to talk, remember, or give warmth?" data-ja="ここはアルゴリズムも評価もないデジタルの避難所です。<br>今日は、誰かに話したいですか、思い出したいですか、それとも温もりを与えたいですか？" data-es="Este es un santuario digital libre de algoritmos y juicios.<br>Hoy, ¿necesitas hablar, recordar o dar calidez?" data-fr="C'est un sanctuaire numérique sans algorithmes ni jugements.<br>Aujourd'hui, avez-vous besoin de parler, de vous souvenir ou de donner de la chaleur ?" data-de="Dies ist ein digitales Heiligtum frei von Algorithmen und Urteilen.<br>Musst du heute reden, dich erinnern oder Wärme geben?" data-zh-cn="这里是一个没有算法、没有评断的数字避难所。<br>今天你是需要倾诉、怀念、还是给予温暖？">這裡是一個沒有演算法、沒有評斷的數位避難所。<br>今天你是需要傾訴、懷念、還是給予溫暖？</p>
@@ -1885,11 +1976,14 @@ const guideData = {
 window.openGuide = function() {
     const obBox = document.getElementById('onboarding-box');
     if(!obBox) return;
+    const backdrop = document.getElementById('guide-backdrop');
     obBox.style.display = '';
     obBox.style.opacity = '1';
-    obBox.style.transform = 'translate(-50%, -50%)';
     obBox.classList.add('is-open');
+    if(backdrop) backdrop.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
     window.startGuide();
+    setTimeout(() => obBox.querySelector('.guide-close')?.focus(), 50);
 };
 window.startGuide = function() { document.getElementById('ob-state-0').style.display = 'none'; document.getElementById('ob-state-2').style.display = 'none'; document.getElementById('ob-state-1').style.display = 'block'; }
 window.showGuideResult = function(roomKey) {
@@ -1899,7 +1993,20 @@ window.showGuideResult = function(roomKey) {
     document.getElementById('ob-res-desc').textContent = data.desc[lang] || data.desc['en'] || data.desc['zh'];
     const linkBtn = document.getElementById('ob-res-link'); linkBtn.href = data.link; linkBtn.onclick = function() { window.closeGuide(); window.closeMobileNav(); };
 }
-window.closeGuide = function() { const obBox = document.getElementById('onboarding-box'); if(obBox) { obBox.style.opacity = '0'; setTimeout(() => { obBox.classList.remove('is-open'); obBox.style.display = 'none'; }, 450); } }
+window.closeGuide = function() {
+    const obBox = document.getElementById('onboarding-box');
+    const backdrop = document.getElementById('guide-backdrop');
+    if(obBox) {
+        obBox.style.opacity = '0';
+        if(backdrop) backdrop.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            obBox.classList.remove('is-open');
+            obBox.style.display = 'none';
+            obBox.style.opacity = '1';
+        }, 350);
+    }
+}
 
 window.switchLang = function(lang) {
   window.currentLang = lang;
@@ -3638,7 +3745,17 @@ window.checkRoomTWarmth = function() {
     }
 };
   
-  document.addEventListener('DOMContentLoaded', async () => {
+  // Premium navigation and quiet hero utilities
+window.addEventListener('scroll', () => {
+    document.body.classList.toggle('page-scrolled', window.scrollY > 90);
+}, { passive: true });
+document.addEventListener('keydown', (event) => {
+    if(event.key === 'Escape' && document.getElementById('onboarding-box')?.classList.contains('is-open')) {
+        window.closeGuide();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
   setupRoomPresence('roomE', 'e-input');
   setupRoomPresence('roomM', 'm-input');
   setupRoomPresence('roomP', 'p-input');
