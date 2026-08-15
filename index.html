@@ -3210,45 +3210,69 @@ function updateSoulWeather() {
 const cursorGlow = document.getElementById('cursor-glow');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let glowX = mouseX, glowY = mouseY;
-const CURSOR_FOLLOW_SPEED = 0.04;
-let isMoving = false; // 新增：用來控制何時需要計算
+let glowVX = 0, glowVY = 0;
+let glowLastFrame = 0;
+const CURSOR_SPRING_STIFFNESS = 0.008;
+const CURSOR_SPRING_DAMPING = 0.86;
+let isMoving = false;
 
 document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    
-    // 如果游標剛剛靜止，現在開始移動了，就喚醒動畫引擎
+
     if (!isMoving) {
         isMoving = true;
+        glowLastFrame = 0;
         if (cursorGlow) cursorGlow.style.opacity = '1';
-        requestAnimationFrame(animateGlow); 
+        requestAnimationFrame(animateGlow);
     }
 });
 
-function animateGlow() {
+function animateGlow(timestamp) {
     if (!document.body.classList.contains('hsp-mode') && window.innerWidth > 768) {
-        // 計算游標與光暈的距離
+        const frameScale = glowLastFrame
+            ? Math.min((timestamp - glowLastFrame) / 16.667, 2)
+            : 1;
+        glowLastFrame = timestamp;
+
         const dx = mouseX - glowX;
         const dy = mouseY - glowY;
-        
-        // 使用 Lerp 平滑移動
-        glowX += dx * CURSOR_FOLLOW_SPEED;
-        glowY += dy * CURSOR_FOLLOW_SPEED;
-        
+
+        // 彈簧提供拉力，阻尼保留重量感並抑制過度震盪。
+        glowVX += dx * CURSOR_SPRING_STIFFNESS * frameScale;
+        glowVY += dy * CURSOR_SPRING_STIFFNESS * frameScale;
+        const damping = Math.pow(CURSOR_SPRING_DAMPING, frameScale);
+        glowVX *= damping;
+        glowVY *= damping;
+        glowX += glowVX * frameScale;
+        glowY += glowVY * frameScale;
+
         if (cursorGlow) {
-            cursorGlow.style.transform = `translate3d(calc(${glowX}px - 50%), calc(${glowY}px - 50%), 0)`; // 使用 translate3d 強制開啟 GPU 硬體加速
+            cursorGlow.style.transform = `translate3d(calc(${glowX}px - 50%), calc(${glowY}px - 50%), 0)`;
         }
 
-        // 如果光暈幾乎追上游標了，就讓引擎休息，節省效能！
-        if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
-            isMoving = false; 
+        const isSettled =
+            Math.abs(dx) < 0.35 &&
+            Math.abs(dy) < 0.35 &&
+            Math.abs(glowVX) < 0.04 &&
+            Math.abs(glowVY) < 0.04;
+
+        if (isSettled) {
+            glowX = mouseX;
+            glowY = mouseY;
+            glowVX = 0;
+            glowVY = 0;
+            glowLastFrame = 0;
+            isMoving = false;
         } else {
-            // 如果還沒追上，下一幀繼續算
             requestAnimationFrame(animateGlow);
         }
     } else {
         if (cursorGlow) cursorGlow.style.opacity = '0';
-        isMoving = false; // 降噪模式或手機版直接關閉引擎
+        glowVX = 0;
+        glowVY = 0;
+        glowLastFrame = 0;
+        isMoving = false;
     }
 }
   
