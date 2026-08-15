@@ -3230,22 +3230,28 @@ document.addEventListener('mousemove', (e) => {
 
 function animateGlow(timestamp) {
     if (!document.body.classList.contains('hsp-mode') && window.innerWidth > 768) {
-        const frameScale = glowLastFrame
-            ? Math.min((timestamp - glowLastFrame) / 16.667, 2)
+        const elapsedScale = glowLastFrame
+            ? Math.min((timestamp - glowLastFrame) / 16.667, 6)
             : 1;
         glowLastFrame = timestamp;
 
+        // 掉幀時拆成數個小步，讓不同更新率仍保有相同重量與阻尼。
+        const substeps = Math.max(1, Math.ceil(elapsedScale));
+        const step = elapsedScale / substeps;
+        for (let index = 0; index < substeps; index++) {
+            const springDX = mouseX - glowX;
+            const springDY = mouseY - glowY;
+            glowVX += springDX * CURSOR_SPRING_STIFFNESS * step;
+            glowVY += springDY * CURSOR_SPRING_STIFFNESS * step;
+            const damping = Math.pow(CURSOR_SPRING_DAMPING, step);
+            glowVX *= damping;
+            glowVY *= damping;
+            glowX += glowVX * step;
+            glowY += glowVY * step;
+        }
+
         const dx = mouseX - glowX;
         const dy = mouseY - glowY;
-
-        // 彈簧提供拉力，阻尼保留重量感並抑制過度震盪。
-        glowVX += dx * CURSOR_SPRING_STIFFNESS * frameScale;
-        glowVY += dy * CURSOR_SPRING_STIFFNESS * frameScale;
-        const damping = Math.pow(CURSOR_SPRING_DAMPING, frameScale);
-        glowVX *= damping;
-        glowVY *= damping;
-        glowX += glowVX * frameScale;
-        glowY += glowVY * frameScale;
 
         if (cursorGlow) {
             cursorGlow.style.transform = `translate3d(calc(${glowX}px - 50%), calc(${glowY}px - 50%), 0)`;
