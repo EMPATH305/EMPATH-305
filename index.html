@@ -3993,6 +3993,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
     });
 
+    const revealRoomHeader = (hash) => {
+        if(!hash || !hash.startsWith('#room-')) return;
+        document.querySelectorAll(hash + ' .room-tag, ' + hash + ' .room-title-wrap, ' + hash + ' .desc-wrap')
+            .forEach(element => element.classList.add('is-revealed'));
+    };
+    document.querySelectorAll('a[href^="#room-"]').forEach(link => {
+        link.addEventListener('click', () => revealRoomHeader(link.getAttribute('href')));
+    });
+    revealRoomHeader(window.location.hash);
+
     const revealTargets = document.querySelectorAll('.journey-heading, .journey-act, .hero-manifesto > *, .room .room-tag, .room .room-title-wrap, .room .desc-wrap');
     if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.body.classList.add('visual-ready');
