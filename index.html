@@ -1252,6 +1252,137 @@ body.visual-ready .room .desc-wrap.is-revealed{opacity:1;transform:translateY(0)
 /* Wabi-sabi kintsugi vessel */
 .p-vessel{max-width:620px;margin:0 0 48px;position:relative;}
 #p-canvas{display:block;width:100%;max-width:620px;filter:drop-shadow(0 24px 34px rgba(0,0,0,.30));}
+
+
+/* ===== 視覺升級：房間內部精緻化 ===== */
+
+/* 房間描述文字：加上更精緻的左側線條和微妙背景 */
+.room-desc {
+    border-left: 1px solid rgba(255,255,255,0.12) !important;
+    background: transparent !important;
+    padding: 0 0 0 20px !important;
+    font-size: 15px !important;
+    letter-spacing: 0.5px;
+    line-height: 2.2 !important;
+}
+
+/* 送出按鈕：更精緻的質感 */
+.send-btn {
+    letter-spacing: 3px !important;
+    font-size: 13px !important;
+    padding: 14px 40px !important;
+    border-radius: 2px !important;
+    position: relative;
+    overflow: hidden;
+}
+.send-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* E 房間留言卡片：相容目前實際使用的 .e-msg */
+.e-feed-item,
+.e-msg {
+    border-left: 1px solid rgba(123,143,161,0.25) !important;
+    border-radius: 0 !important;
+    padding: 20px 24px !important;
+    background: transparent !important;
+    position: relative;
+}
+.e-feed-item::before,
+.e-msg::before {
+    content: '✦';
+    position: absolute;
+    left: -8px;
+    top: 20px;
+    font-size: 10px;
+    color: rgba(123,143,161,0.6);
+    background: var(--bg, #07111b);
+    padding: 2px 0;
+}
+
+/* P 房間碎片卡：更克制、更日式 */
+.shard {
+    border-radius: 2px !important;
+    border: 1px solid rgba(201,168,76,0.2) !important;
+    background: rgba(0,0,0,0.2) !important;
+    padding: 28px 32px !important;
+    box-shadow: none !important;
+}
+.shard:hover {
+    border-color: rgba(201,168,76,0.5) !important;
+    background: rgba(201,168,76,0.06) !important;
+    box-shadow: 0 0 30px rgba(201,168,76,0.08) !important;
+    transform: translateY(-2px) !important;
+}
+.shard-text {
+    font-size: 15px !important;
+    line-height: 2.2 !important;
+    letter-spacing: 0.5px;
+}
+
+/* A 房間沙畫留言：更沈靜 */
+.sand-msg {
+    border-left: 1px solid rgba(122,158,159,0.3) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 24px 28px !important;
+    box-shadow: none !important;
+}
+.sand-msg-text {
+    font-size: 15px !important;
+    line-height: 2.3 !important;
+    letter-spacing: 0.5px;
+}
+
+/* T 房間溫暖卡：更輕盈 */
+.warmth-item {
+    border-left: 1px solid rgba(232,168,124,0.25) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 20px 24px !important;
+    box-shadow: none !important;
+    font-size: 15px !important;
+    line-height: 2.2 !important;
+}
+
+/* 房間標題：加上極細的底部分隔線 */
+.room-title-wrap {
+    padding-bottom: 24px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    margin-bottom: 40px !important;
+}
+
+/* 字數計數器：更精緻 */
+.char-count,
+[id$="-char"] {
+    font-size: 11px !important;
+    letter-spacing: 2px !important;
+    color: rgba(255,255,255,0.2) !important;
+    font-family: 'Cormorant Garamond', serif !important;
+}
+
+/* textarea：更乾淨 */
+textarea {
+    border-radius: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    background: transparent !important;
+    padding: 16px 0 !important;
+    font-size: 15px !important;
+    line-height: 2 !important;
+    letter-spacing: 0.5px;
+    resize: none;
+}
+textarea:focus {
+    border-bottom-color: rgba(255,255,255,0.3) !important;
+    outline: none !important;
+    background: transparent !important;
+}
+
 </style>
 </head>
 <body>
