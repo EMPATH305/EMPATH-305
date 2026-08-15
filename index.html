@@ -1383,6 +1383,346 @@ textarea:focus {
     background: transparent !important;
 }
 
+
+
+/* ===== EMPATH 精裝詩集系統：最終視覺覆蓋層 ===== */
+:root {
+    --space-1: 8px !important;
+    --space-2: 16px !important;
+    --space-3: 24px !important;
+    --space-4: 32px !important;
+    --space-5: 40px !important;
+    --space-6: 48px !important;
+    --space-8: 64px !important;
+    --space-10: 80px !important;
+    --space-12: 96px !important;
+    --space-16: 128px !important;
+}
+
+/* 01 — 8px 間距節奏 */
+.room {
+    padding: 128px 48px 96px !important;
+}
+.room-tag {
+    margin-bottom: 16px !important;
+}
+.room-title-wrap {
+    gap: 16px !important;
+    margin-bottom: 32px !important;
+    padding-bottom: 24px !important;
+}
+.desc-wrap {
+    gap: 16px !important;
+    margin-bottom: 64px !important;
+}
+.room-desc {
+    padding: 0 0 0 24px !important;
+}
+.kintsugi-board,
+.a-feed,
+.e-feed,
+.t-feed {
+    gap: 24px !important;
+}
+.t-layout {
+    gap: 32px !important;
+    margin-top: 48px !important;
+}
+.e-msg,
+.shard,
+.sand-msg,
+.warmth-item,
+.j-card,
+.g-card {
+    padding: 24px !important;
+}
+
+/* 02 — 精裝詩集字體層次 */
+body {
+    font-family: 'Noto Sans TC', sans-serif !important;
+    font-weight: 300 !important;
+}
+.hero-title,
+.room-title,
+.wrapped-title {
+    font-family: 'Cormorant Garamond', 'Noto Serif TC', serif !important;
+}
+.room-title {
+    font-size: clamp(40px, 4.5vw, 56px) !important;
+    font-weight: 300 !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0.06em !important;
+}
+.room-tag {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.32em !important;
+    text-transform: uppercase !important;
+}
+.room-desc {
+    font-size: 15px !important;
+    font-weight: 300 !important;
+    line-height: 2.1 !important;
+    letter-spacing: 0.04em !important;
+}
+.shard-text,
+.sand-msg-text,
+.warmth-item,
+.e-msg {
+    font-size: 15px !important;
+    font-weight: 300 !important;
+    line-height: 2 !important;
+    letter-spacing: 0.035em !important;
+}
+.e-msg-time,
+.shard-healed-tag,
+.sand-timer-label,
+.sand-time-left,
+.j-label,
+.g-label,
+.char-count,
+[id$="-char"] {
+    font-family: 'Cormorant Garamond', 'Noto Sans TC', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0.16em !important;
+    color: rgba(232,230,225,0.38) !important;
+}
+.p-step-label,
+.h-timeline-title,
+.t-panel-title,
+.sync-title {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0.22em !important;
+}
+.send-btn,
+.door-btn,
+.action-btn,
+.sync-btn-small {
+    font-family: 'Noto Sans TC', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.2em !important;
+}
+.e-tool-btn,
+.echo-btn,
+.func-btn {
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.14em !important;
+}
+
+/* 03 — 克制的線條與器物邊角 */
+.lang-dropdown-list,
+.hsp-first-visit-tooltip,
+.onboarding-box,
+.ob-btn,
+.door-btn,
+#e-draw-canvas,
+.star-tooltip,
+.a-warning-mask,
+.t-panel,
+.t-send-panel,
+.j-card,
+.g-card,
+.sync-box,
+.lighthouse,
+.action-btn,
+.wrapped-card,
+.close-modal-btn,
+.toast {
+    border-radius: 2px !important;
+}
+.e-msg,
+.shard,
+.sand-msg,
+.warmth-item,
+.home-quote {
+    border-radius: 0 !important;
+}
+.e-msg,
+.shard,
+.sand-msg,
+.warmth-item {
+    border: none !important;
+    border-left: 1px solid rgba(var(--room-accent), 0.3) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.t-panel,
+.t-send-panel,
+.sync-box,
+.onboarding-box,
+.wrapped-card {
+    border: 1px solid rgba(232,230,225,0.08) !important;
+    background: rgba(255,255,255,0.015) !important;
+    box-shadow: none !important;
+}
+.input-area,
+.sync-input,
+textarea {
+    border: none !important;
+    border-bottom: 1px solid rgba(232,230,225,0.14) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* 04 — 沈靜一致的 UI 動態 */
+.send-btn,
+.door-btn,
+.action-btn,
+.ob-btn,
+.sync-btn-small,
+.e-mode-btn,
+.e-tool-btn,
+.echo-btn,
+.func-btn {
+    transition:
+        color 320ms ease,
+        background-color 320ms ease,
+        border-color 320ms ease,
+        opacity 320ms ease,
+        transform 320ms cubic-bezier(.22,.61,.36,1) !important;
+}
+.e-msg,
+.shard,
+.sand-msg,
+.warmth-item,
+.j-card,
+.g-card {
+    transition:
+        border-color 400ms ease,
+        background-color 400ms ease,
+        opacity 400ms ease,
+        transform 400ms cubic-bezier(.22,.61,.36,1) !important;
+}
+.e-msg:hover,
+.shard:hover,
+.sand-msg:hover,
+.warmth-item:hover,
+.j-card:hover,
+.g-card:hover {
+    transform: translateY(-1px) !important;
+    border-color: rgba(var(--room-accent),0.48) !important;
+    background: rgba(var(--room-accent),0.025) !important;
+    box-shadow: none !important;
+}
+.send-btn:hover,
+.door-btn:hover,
+.action-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+}
+
+/* 05 — 三個高密度區域的章節留白 */
+/* E：輸入儀式與公共留言牆分章 */
+#room-e .e-mode-toggle {
+    margin-bottom: 24px !important;
+}
+#room-e .input-area,
+#room-e #e-draw-wrap {
+    margin-bottom: 32px !important;
+}
+#room-e .send-btn {
+    margin-top: 8px !important;
+    margin-bottom: 80px !important;
+}
+#room-e .e-feed-container {
+    margin-top: 0 !important;
+    padding-top: 48px !important;
+    border-top: 1px solid rgba(232,230,225,0.06) !important;
+}
+
+/* P：茶碗、進度與碎片牆分章 */
+#room-p .p-vessel {
+    margin-bottom: 64px !important;
+}
+#room-p .p-global-progress {
+    margin-bottom: 80px !important;
+}
+#room-p .kintsugi-board {
+    gap: 32px 24px !important;
+    margin-top: 32px !important;
+}
+#room-p .shard {
+    padding: 32px !important;
+}
+
+/* H：全網、個人足跡與同步各自成章 */
+#room-h .h-journey {
+    margin-top: 80px !important;
+}
+#room-h .h-timeline-title {
+    margin-top: 96px !important;
+    margin-bottom: 32px !important;
+}
+#room-h .h-timeline-title:first-child {
+    margin-top: 0 !important;
+}
+#room-h .global-summary,
+#room-h .journey-summary {
+    gap: 24px !important;
+    margin-bottom: 96px !important;
+}
+#room-h .sync-box {
+    margin: 96px 0 !important;
+    padding: 40px !important;
+}
+#room-h .sync-actions {
+    gap: 16px !important;
+    margin-top: 32px !important;
+}
+#room-h .h-timeline {
+    margin-top: 96px !important;
+}
+
+/* 手機：保留章節感，不犧牲可用性 */
+@media (max-width: 768px) {
+    .room {
+        padding: 96px 24px 64px !important;
+    }
+    .room-title {
+        font-size: clamp(36px, 11vw, 48px) !important;
+    }
+    .desc-wrap {
+        margin-bottom: 48px !important;
+    }
+    #room-h .global-summary,
+    #room-h .journey-summary {
+        gap: 16px !important;
+        margin-bottom: 64px !important;
+    }
+    #room-h .sync-box {
+        margin: 64px 0 !important;
+        padding: 24px !important;
+    }
+    #room-h .sync-actions {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+    #room-h .sync-input,
+    #room-h .sync-btn-small {
+        width: 100% !important;
+    }
+}
+
+/* 尊重降低動態偏好 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
 </style>
 </head>
 <body>
