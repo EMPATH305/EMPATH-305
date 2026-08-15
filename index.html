@@ -1010,6 +1010,7 @@ body.page-scrolled #breathe-btn{opacity:.42;}
 #hero .door-btn[data-d="P"],#hero .door-btn[data-d="A"]{background-color:rgba(201,168,76,.015);}
 #hero .door-btn[data-d="T"],#hero .door-btn[data-d="H"]{background-color:rgba(232,190,155,.014);}
 
+#hero.guide-active{z-index:1400;overflow:visible;}
 .guide-backdrop{
   display:none;position:fixed;inset:0;z-index:1490;
   background:rgba(0,3,7,.72);backdrop-filter:blur(10px);
@@ -2000,6 +2001,7 @@ window.openGuide = function() {
     obBox.style.opacity = '1';
     obBox.classList.add('is-open');
     if(backdrop) backdrop.classList.add('is-open');
+    document.getElementById('hero')?.classList.add('guide-active');
     document.body.style.overflow = 'hidden';
     window.startGuide();
     setTimeout(() => obBox.querySelector('.guide-close')?.focus(), 50);
@@ -2021,6 +2023,7 @@ window.closeGuide = function() {
         document.body.style.overflow = '';
         setTimeout(() => {
             obBox.classList.remove('is-open');
+            document.getElementById('hero')?.classList.remove('guide-active');
             obBox.style.display = 'none';
             obBox.style.opacity = '1';
         }, 350);
