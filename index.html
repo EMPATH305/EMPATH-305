@@ -1723,6 +1723,29 @@ textarea {
     }
 }
 
+
+
+/* H 房間五組數據：避免桌面形成四加一的孤立卡片 */
+@media (min-width: 1025px) {
+    #room-h .global-summary,
+    #room-h .journey-summary {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        max-width: 1040px !important;
+    }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+    #room-h .global-summary,
+    #room-h .journey-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+@media (max-width: 768px) {
+    #room-h .global-summary,
+    #room-h .journey-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
 </style>
 </head>
 <body>
