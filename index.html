@@ -2719,6 +2719,7 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 #room-e>br{display:none!important}
 #room-e>#e-submit-btn{grid-area:send!important;justify-self:start!important;margin:24px 0 0!important}
 #room-e>.e-feed-container{grid-area:archive!important;align-self:center!important;width:100%!important;max-width:none!important;height:min(66vh,660px);overflow:hidden;padding:64px 0 92px 54px!important;border-top:0!important;border-left:1px solid rgba(123,143,161,.18)!important}
+#room-e>.e-feed-container.is-expanded{height:auto!important;max-height:none!important;overflow:visible!important;align-self:start!important}
 #room-e>.e-feed-container::before{content:'RECEIVED / ANONYMOUS';position:absolute;left:54px;top:16px;font:10px 'Cormorant Garamond',serif;letter-spacing:.34em;color:rgba(123,143,161,.56)}
 #room-e .e-feed{gap:0!important}
 #room-e .e-msg{position:relative!important;padding:24px 24px 26px 40px!important;border:0!important;border-bottom:1px solid rgba(123,143,161,.11)!important;background:transparent!important;box-shadow:none!important}
@@ -2734,14 +2735,14 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 #room-m .desc-wrap{grid-column:1;grid-row:2;align-self:start;max-width:390px!important;margin-top:24px!important}
 #room-m .room-title-wrap,#room-m .desc-wrap{
   position:relative!important;padding-right:34px!important;
-  background:linear-gradient(90deg,rgba(3,9,20,.96) 0%,rgba(3,9,20,.82) 66%,rgba(3,9,20,0) 100%)!important;
-  box-shadow:-24px 0 38px rgba(3,9,20,.72)!important;
+  background:linear-gradient(90deg,rgba(3,9,20,.48) 0%,rgba(3,9,20,.25) 66%,rgba(3,9,20,0) 100%)!important;
+  box-shadow:-18px 0 30px rgba(3,9,20,.3)!important;
 }
 #room-m .room-title,#room-m .room-desc{text-shadow:0 2px 18px rgba(0,0,0,.95)!important}
 #room-m .m-input-wrap{grid-column:1;grid-row:3;align-self:end;width:100%;max-width:none!important;padding:28px 30px 30px!important;background:rgba(5,13,26,.62);border:1px solid rgba(168,184,200,.14);backdrop-filter:blur(16px)}
 #room-m .m-input-wrap::before{content:'ADD A CONSTELLATION';display:block;margin-bottom:12px;font:10px 'Cormorant Garamond',serif;letter-spacing:.3em;color:rgba(168,184,200,.52)}
 #room-m .m-input-wrap textarea{min-height:108px!important}
-#room-m .m-stats{grid-column:3;grid-row:1;justify-self:end!important;align-self:start!important;display:grid!important;gap:18px!important;margin:0!important;padding:18px 22px 18px 28px!important;border-left:1px solid rgba(168,184,200,.16)!important;background:linear-gradient(90deg,rgba(3,9,20,.82),rgba(3,9,20,.46))!important;backdrop-filter:blur(5px)!important;text-align:left!important}
+#room-m .m-stats{grid-column:3;grid-row:1;justify-self:end!important;align-self:start!important;display:grid!important;gap:18px!important;margin:0!important;padding:18px 22px 18px 28px!important;border-left:1px solid rgba(168,184,200,.16)!important;background:linear-gradient(90deg,rgba(3,9,20,.42),rgba(3,9,20,.16))!important;backdrop-filter:none!important;text-align:left!important}
 #room-m .m-stat{font:11px 'Noto Sans TC',sans-serif!important;letter-spacing:.18em!important;color:rgba(232,230,225,.43)!important}
 #room-m .m-stat #m-count{display:block;font:54px/.9 'Cormorant Garamond',serif!important;letter-spacing:0!important;color:rgba(232,230,225,.9)!important;margin-bottom:8px}
 #room-m #star-canvas{z-index:0!important;opacity:.96}
@@ -4743,6 +4744,7 @@ window.renderEFeed = function() {
     const feed = document.getElementById('e-feed'); 
     const fade = document.getElementById('e-feed-fade'); 
     const btn = document.getElementById('e-expand-btn'); 
+    const container = document.querySelector('#room-e .e-feed-container');
     if(!feed) return; 
     
     // 每次渲染前清空
@@ -4767,6 +4769,9 @@ window.renderEFeed = function() {
         feed.appendChild(div); 
     }); 
     
+    // 展開時同步解除外層裁切，否則新增的留言仍會被固定高度藏住。
+    if (container) container.classList.toggle('is-expanded', currentEFeedLimit > 3);
+
     // 按鈕與漸層的顯示邏輯
     if(allEmotions.length > 3) { 
         btn.style.display = 'inline-flex'; 
@@ -4921,13 +4926,29 @@ window.drawStars = function(){
     window.starMessages = allStarMessages;
     const w = roomM.offsetWidth; 
     const h = roomM.offsetHeight;
+    const canvasRect = canvas.getBoundingClientRect();
+    // 依照介面實際位置建立星星禁入區，避免星星被文字或數據面板蓋住。
+    const uiSafeRects = [...roomM.querySelectorAll('.room-title-wrap, .desc-wrap, .m-input-wrap, .m-stats')]
+        .filter(el => getComputedStyle(el).display !== 'none')
+        .map(el => {
+            const r = el.getBoundingClientRect();
+            const pad = 22;
+            return {
+                left: r.left - canvasRect.left - pad,
+                right: r.right - canvasRect.left + pad,
+                top: r.top - canvasRect.top - pad,
+                bottom: r.bottom - canvasRect.top + pad
+            };
+        });
+    const insideUiSafeRect = (x, y) => uiSafeRects.some(r => x > r.left && x < r.right && y > r.top && y < r.bottom);
     // 窄視窗採代表性抽樣，避免大量星星在有限空間持續互相排斥。
     const visibleLimit = w < 600 ? 32 : (w < 900 ? 42 : allStarMessages.length);
     const starMessages = allStarMessages.slice(0, visibleLimit);
     ctx.clearRect(0,0,w,h); 
 
     // 1. 畫背景星星
-    bgStars.forEach(s => { 
+    bgStars.forEach(s => {
+        if (insideUiSafeRect(s.x, s.y)) return;
         s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
         ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
         ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; 
@@ -5002,6 +5023,21 @@ window.drawStars = function(){
         if(s1.x > safeX + safeW) s1.x -= (s1.x - (safeX + safeW)) * 0.2;
         if(s1.y < safeY) s1.y += (safeY - s1.y) * 0.2;
         if(s1.y > safeY + safeH) s1.y -= (s1.y - (safeY + safeH)) * 0.2;
+
+        // 若排斥後進入介面禁區，推向距離最近的邊緣，而不是把星星藏在霧幕下。
+        uiSafeRects.forEach(r => {
+            if (s1.x <= r.left || s1.x >= r.right || s1.y <= r.top || s1.y >= r.bottom) return;
+            const distances = [
+                { edge: 'left', value: s1.x - r.left },
+                { edge: 'right', value: r.right - s1.x },
+                { edge: 'top', value: s1.y - r.top },
+                { edge: 'bottom', value: r.bottom - s1.y }
+            ].sort((a,b) => a.value - b.value);
+            if (distances[0].edge === 'left') s1.x = r.left;
+            else if (distances[0].edge === 'right') s1.x = r.right;
+            else if (distances[0].edge === 'top') s1.y = r.top;
+            else s1.y = r.bottom;
+        });
     }
 
     // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後)
