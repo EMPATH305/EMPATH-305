@@ -2763,6 +2763,63 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 #room-p .shard:nth-child(5n+4){grid-column:span 7!important;min-height:180px!important;margin-top:20px!important;clip-path:polygon(2% 0,96% 6%,100% 74%,85% 100%,0 89%)!important}
 #room-p .shard:nth-child(5n){grid-column:span 5!important;min-height:210px!important;clip-path:polygon(10% 4%,100% 0,94% 91%,5% 100%,0 30%)!important}
 
+/* A — writing directly into a field of passing sand */
+#room-a{min-height:100svh!important;padding:0!important;background:#071114!important;overflow:hidden!important}
+#room-a #sand-canvas{opacity:.72!important;mix-blend-mode:screen!important}
+#room-a .room-content{
+  width:100%!important;max-width:none!important;min-height:100svh!important;
+  padding:clamp(116px,12vh,152px) clamp(28px,7vw,112px) 96px!important;
+  display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;column-gap:clamp(18px,2.4vw,38px)!important;align-content:start!important;
+}
+#room-a .room-tag{grid-column:1/5!important;grid-row:1!important}
+#room-a .room-title-wrap{grid-column:1/6!important;grid-row:2!important;border:0!important;margin-bottom:24px!important}
+#room-a .desc-wrap{grid-column:1/5!important;grid-row:3/7!important;align-self:start!important;max-width:420px!important;margin:0!important}
+#room-a .a-fade-hint{grid-column:7/13!important;grid-row:1!important;margin:0 0 18px!important;font:italic 12px 'Noto Serif TC',serif!important;letter-spacing:.15em!important}
+#room-a #a-input{grid-column:7/13!important;grid-row:2/5!important;align-self:stretch!important;min-height:260px!important;padding:40px!important;border:1px solid rgba(122,158,159,.22)!important;background:linear-gradient(135deg,rgba(7,17,20,.38),rgba(7,17,20,.08))!important;box-shadow:inset 0 -1px rgba(122,158,159,.32),0 40px 100px rgba(0,0,0,.18)!important;backdrop-filter:blur(2px)}
+#room-a #a-char{grid-column:12!important;grid-row:4!important;align-self:end!important;justify-self:end!important;margin:0 16px 14px 0!important}
+#room-a .a-ritual-actions{grid-column:7/13!important;grid-row:5!important;width:100%!important;max-width:none!important;margin:16px 0 0!important;padding-bottom:32px!important;border-bottom:1px solid rgba(122,158,159,.16)!important}
+#room-a .a-ritual-actions #a-timer-select{background:transparent!important;border:0!important;border-bottom:1px solid rgba(122,158,159,.32)!important;border-radius:0!important}
+#room-a .a-ritual-actions #gravity-btn,#room-a .a-ritual-actions #blow-btn{width:auto!important;flex:1 1 210px!important;margin-top:8px!important;opacity:.55!important}
+#room-a .a-note{grid-column:7/13!important;grid-row:6!important;margin:18px 0 0!important}
+#room-a #a-feed-wrapper{grid-column:1/13!important;grid-row:7!important;width:min(100%,1040px)!important;margin:112px auto 0!important}
+#room-a .a-warning-mask,#room-a .a-feed{max-width:none!important;width:100%!important}
+#room-a .a-warning-mask{padding:64px!important;background:rgba(4,11,13,.62)!important;border:1px solid rgba(122,158,159,.16)!important;border-radius:0!important;box-shadow:none!important}
+#room-a .crisis-support{grid-column:1/13!important;grid-row:8!important;margin-top:72px!important}
+
+/* T — a two-way threshold: send on the left, receive on the right */
+#room-t{padding:clamp(120px,11vw,170px) clamp(28px,7vw,112px)!important;background:linear-gradient(90deg,#120d09 0 49.9%,#0d0b0a 50.1% 100%)!important}
+#room-t>.room-tag,#room-t>.room-title-wrap,#room-t>.desc-wrap{max-width:560px!important}
+#room-t .t-layout{position:relative!important;width:100%!important;max-width:none!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:clamp(64px,9vw,144px)!important;margin-top:96px!important}
+#room-t .t-layout::before{content:'EXCHANGE';position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(transparent,rgba(232,168,124,.25) 20% 80%,transparent);font:10px 'Cormorant Garamond',serif;letter-spacing:.32em;color:rgba(232,168,124,.32);writing-mode:vertical-rl;padding-top:24px}
+#room-t .t-layout>div:first-child{grid-column:2!important;grid-row:1!important}
+#room-t .t-layout>div:nth-child(2){grid-column:1!important;grid-row:1!important}
+#room-t .t-layout>div:first-child::before,#room-t .t-layout>div:nth-child(2)::before{display:block;margin-bottom:22px;font:10px 'Cormorant Garamond',serif;letter-spacing:.34em;color:rgba(232,168,124,.5)}
+#room-t .t-layout>div:first-child::before{content:'02 / RECEIVE'}
+#room-t .t-layout>div:nth-child(2)::before{content:'01 / SEND'}
+#room-t .t-panel,#room-t .t-send-panel{padding:32px 0!important;background:transparent!important;border:0!important;border-top:1px solid rgba(232,168,124,.2)!important;border-radius:0!important;box-shadow:none!important}
+#room-t .t-feed{max-height:620px!important;padding-right:20px!important;gap:0!important}
+#room-t .warmth-item{padding:28px 24px!important;border:0!important;border-bottom:1px solid rgba(232,168,124,.12)!important;background:transparent!important}
+#room-t .t-send-panel #t-input{min-height:180px!important;padding:28px 0!important}
+#room-t #t-submit-btn{margin-top:24px!important}
+#room-t .echo-pulse-ring{width:132px!important;height:132px!important;margin:44px auto 24px!important}
+
+/* H — the final chapter, not another dashboard */
+#room-h{padding:clamp(136px,13vw,196px) clamp(28px,8vw,132px)!important;text-align:center!important;background:radial-gradient(circle at 50% 20%,rgba(242,232,217,.045),transparent 35%),linear-gradient(180deg,#0b1723,#070810 55%,#030407)!important}
+#room-h::after{content:'THE LAST CHAPTER';position:absolute;left:32px;top:50%;writing-mode:vertical-rl;transform:translateY(-50%);font:10px 'Cormorant Garamond',serif;letter-spacing:.42em;color:rgba(242,232,217,.16)}
+#room-h>.room-tag{margin-left:auto!important;margin-right:auto!important}
+#room-h>.room-title-wrap{justify-content:center!important;border:0!important;margin:0 auto 24px!important}
+#room-h>.desc-wrap{margin:0 auto 96px!important;max-width:430px!important;text-align:left!important}
+#room-h .h-journey{width:min(100%,1040px)!important;max-width:1040px!important;margin:0 auto!important;text-align:left!important}
+#room-h .h-journey>.h-timeline-title:first-child{text-align:center!important;margin-bottom:32px!important}
+#room-h .weather-badge-wrap{opacity:.58!important}
+#room-h #g-summary{max-width:760px!important;margin:0 auto 32px!important}
+#room-h #g-summary .visitor-card{min-height:260px!important;padding:52px 32px!important;background:transparent!important;border-left:0!important;border-right:0!important;border-bottom:1px solid rgba(242,232,217,.12)!important}
+#room-h #g-summary .visitor-card .g-num{font-size:clamp(72px,10vw,116px)!important;min-height:116px!important}
+#room-h .h-details-toggle{display:block!important;margin:0 auto!important;border-left:0!important;border-right:0!important}
+#room-h .home-quote{margin:104px auto 72px!important;padding:56px 24px!important;max-width:760px!important;text-align:center!important;border:0!important;border-top:1px solid rgba(242,232,217,.16)!important;border-bottom:1px solid rgba(242,232,217,.08)!important;background:transparent!important;box-shadow:none!important}
+#room-h .lighthouse{margin:80px auto!important;border:0!important;background:transparent!important;box-shadow:none!important}
+#room-h .share-action-box{justify-content:center!important}
+
 @media(max-width:900px){
   .nav-utility-toggle{display:none!important}nav .nav-controls{position:static!important;min-width:0!important;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important}
   #room-e{display:block!important;padding:112px 24px 80px!important;background:#09131d!important}
@@ -2775,6 +2832,18 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
   #room-p .p-vessel{grid-template-columns:1fr!important;padding:32px 20px!important}
   #room-p .kintsugi-board{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
   #room-p .shard,#room-p .shard:nth-child(n){grid-column:span 1!important;min-height:180px!important;margin-top:0!important;transform:none!important}
+  #room-a{overflow:visible!important}
+  #room-a .room-content{display:block!important;padding:112px 24px 80px!important}
+  #room-a #a-input{min-height:220px!important;margin-top:44px!important;padding:28px 20px!important}
+  #room-a #a-char{margin-top:-26px!important;margin-right:12px!important}
+  #room-a .a-ritual-actions{margin-top:28px!important}
+  #room-a #a-feed-wrapper{margin-top:88px!important}
+  #room-t{background:#110d09!important}
+  #room-t .t-layout{grid-template-columns:1fr!important;gap:72px!important;margin-top:72px!important}
+  #room-t .t-layout::before{display:none!important}
+  #room-t .t-layout>div:first-child{grid-column:1!important;grid-row:2!important}
+  #room-t .t-layout>div:nth-child(2){grid-column:1!important;grid-row:1!important}
+  #room-h::after{display:none!important}
 }
 @media(max-width:560px){#room-p .kintsugi-board{grid-template-columns:1fr!important}#room-m .m-stats{position:static!important;margin:24px 0!important;padding-left:16px!important}#room-m .m-input-wrap{margin-top:28vh!important}}
 </style>
@@ -3301,13 +3370,13 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
       data-pl-ph="Wyszeptaj swój najgłębszy ból tutaj...&#10;Po 24 godzinach te słowa znikną."
       placeholder="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"></textarea>
     <div class="e-char-count" id="a-char">0 / 500</div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; max-width:600px; flex-wrap: wrap; gap: 12px;">
+    <div class="a-ritual-actions" style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; max-width:600px; flex-wrap: wrap; gap: 12px;">
         <select id="a-timer-select" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(122,158,159,0.5); color: var(--a); padding: 10px 16px; border-radius: 4px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; outline:none; cursor:pointer;">
             <option value="1">1 分鐘後消散</option>
             <option value="60">1 小時後消散</option>
             <option value="1440" selected>24 小時後消散</option>
         </select>
-        <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" style="margin-top:0;" data-zh="放入沙畫 →">放入沙畫 →</button>
+        <button class="send-btn" id="a-submit-btn" onclick="window.submitA()" style="margin-top:0;" data-zh="交給時間帶走" data-en="Let Time Carry It Away" data-ja="時に委ねる" data-es="Deja que el Tiempo se lo Lleve" data-fr="Le confier au temps" data-de="Überlass es der Zeit" data-zh-cn="交给时间带走">交給時間帶走</button>
       <!-- 物理陀螺儀感測開關 (因 Apple 隱私政策，必須由使用者點擊同意才能取得傾斜數據) -->
 <button class="send-btn" id="gravity-btn" onclick="window.enableGravity()" style="border-color:var(--a); color:var(--a); margin-top:12px; width:100%;" data-zh="開啟物理重力感測 📳">開啟物理重力感測 📳</button>
       <!-- 物理吹息感測開關 -->
@@ -3381,7 +3450,7 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
           placeholder="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"></textarea>
         <div class="e-char-count" id="t-char">0 / 500</div>
         <br>
-        <button class="send-btn" id="t-submit-btn" onclick="window.submitT()" data-zh="傳出去 →" data-en="Send it Out →" data-ja="送る →" data-es="Enviar →" data-fr="Envoyer →" data-de="Senden →" data-zh-cn="传出去 →">傳出去 →</button>
+        <button class="send-btn" id="t-submit-btn" onclick="window.submitT()" data-zh="把溫暖送出去" data-en="Send the Warmth Out" data-ja="温もりを送り出す" data-es="Envía la Calidez" data-fr="Envoyer la chaleur" data-de="Sende die Wärme hinaus" data-zh-cn="把温暖送出去">把溫暖送出去</button>
       </div>
       <div class="t-panel" style="text-align:center;">
         <p class="t-panel-title" style="text-align:center;">Echo Pulse</p>
