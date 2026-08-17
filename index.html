@@ -2854,6 +2854,51 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 .empath-contrast-flash.is-active{animation:empathContrastFlash 300ms cubic-bezier(.22,.61,.36,1) both!important}
 @keyframes empathContrastFlash{0%{opacity:0}28%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.empath-contrast-flash{display:none!important}}
+
+/* ===== EMPATH SESSION NARRATIVE · 一段真正可見的旅程 ===== */
+.cosmic-presence{
+  min-height:18px!important;margin:10px 0 0!important;
+  color:rgba(232,230,225,.42)!important;font:400 10px/1.8 'Noto Sans TC',sans-serif!important;
+  letter-spacing:.18em!important;text-align:center!important;
+}
+#room-h .h-session-echo{
+  position:absolute!important;left:50%!important;top:23%!important;width:min(92vw,1120px)!important;
+  transform:translateX(-50%)!important;pointer-events:none!important;overflow:hidden!important;
+  color:rgba(242,232,217,.025)!important;font:italic clamp(72px,13vw,190px)/.88 'Noto Serif TC',serif!important;
+  letter-spacing:.08em!important;white-space:nowrap!important;text-align:center!important;
+  filter:blur(.35px)!important;z-index:0!important;
+}
+#room-h>.room-tag,#room-h>.room-title-wrap,#room-h>.desc-wrap,#room-h>.h-journey-arc,#room-h>.h-journey{position:relative!important;z-index:1!important}
+#room-h .h-journey-arc{
+  width:min(100%,1040px)!important;margin:24px auto 112px!important;padding:48px 0 40px!important;
+  border-top:1px solid rgba(242,232,217,.12)!important;border-bottom:1px solid rgba(242,232,217,.07)!important;
+  text-align:left!important;
+}
+.h-journey-arc-head{display:grid!important;grid-template-columns:150px minmax(0,1fr)!important;column-gap:32px!important;align-items:baseline!important;margin-bottom:44px!important}
+.h-journey-arc-index{grid-row:1/3!important;margin:0!important;color:rgba(201,168,76,.48)!important;font:10px 'Cormorant Garamond',serif!important;letter-spacing:.32em!important}
+.h-journey-arc-head h3{margin:0!important;color:rgba(242,232,217,.9)!important;font:400 clamp(30px,4vw,48px)/1.1 'Noto Serif TC',serif!important;letter-spacing:.1em!important}
+.h-journey-arc-head>p:last-child{margin:12px 0 0!important;color:rgba(242,232,217,.38)!important;font-size:12px!important;letter-spacing:.08em!important}
+.h-journey-arc-canvas{min-height:210px!important;position:relative!important}
+.h-journey-arc-canvas svg{display:block!important;width:100%!important;height:auto!important;overflow:visible!important}
+.h-arc-path{fill:none!important;stroke:rgba(201,168,76,.28)!important;stroke-width:1.2!important;vector-effect:non-scaling-stroke!important}
+.h-arc-node-ring{fill:#070810!important;stroke:rgba(242,232,217,.28)!important;stroke-width:1!important;vector-effect:non-scaling-stroke!important}
+.h-arc-node-core{fill:var(--gold)!important;opacity:.72!important}
+.h-arc-node-label{fill:rgba(242,232,217,.84)!important;font:30px 'Cormorant Garamond',serif!important;text-anchor:middle!important}
+.h-arc-node-order{fill:rgba(242,232,217,.35)!important;font:9px 'Noto Sans TC',sans-serif!important;letter-spacing:.14em!important;text-anchor:middle!important}
+.h-arc-empty{height:170px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px dashed rgba(242,232,217,.08)!important;color:rgba(242,232,217,.3)!important;font:italic 13px/2 'Noto Serif TC',serif!important;letter-spacing:.1em!important;text-align:center!important}
+.footer-farewell{margin:0 auto 48px!important;color:rgba(232,230,225,.62)!important;font:italic 400 clamp(20px,3vw,32px)/1.8 'Noto Serif TC',serif!important;letter-spacing:.12em!important;text-align:center!important;opacity:.25!important;transform:translateY(10px)!important;transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.23,1,.32,1)!important}
+footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!important}
+@media(max-width:680px){
+  .cosmic-presence{max-width:290px!important;letter-spacing:.1em!important}
+  #room-h .h-session-echo{top:19%!important;font-size:26vw!important}
+  #room-h .h-journey-arc{margin:8px auto 80px!important;padding:40px 0 28px!important}
+  .h-journey-arc-head{display:block!important;margin-bottom:30px!important}
+  .h-journey-arc-index{margin-bottom:14px!important}
+  .h-journey-arc-head h3{font-size:30px!important}
+  .h-journey-arc-canvas{min-height:170px!important;overflow-x:auto!important;padding-bottom:10px!important}
+  .h-journey-arc-canvas svg{min-width:620px!important}
+}
+@media(prefers-reduced-motion:reduce){.footer-farewell{opacity:1!important;transform:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -3046,6 +3091,7 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 
   <div class="hero-opening">
     <p class="hero-kicker">DIGITAL SANCTUARY · EST. 2026</p>
+    <p class="cosmic-presence" id="cosmic-presence" aria-live="polite"></p>
     <div class="hero-bg-text">EMPATH</div>
     <h1 class="hero-title">EMPATH</h1>
     <p class="hero-sub">Every Moment As Truth Heals</p>
@@ -3499,6 +3545,16 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
       <button class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
   </div>
 
+  <div class="h-session-echo" id="h-session-echo" aria-hidden="true"></div>
+  <section class="h-journey-arc" id="h-journey-arc" aria-labelledby="h-journey-arc-title">
+    <header class="h-journey-arc-head">
+      <p class="h-journey-arc-index">SESSION / TONIGHT</p>
+      <h3 id="h-journey-arc-title" data-zh="你今晚的旅程" data-en="Your Journey Tonight" data-ja="今夜のあなたの旅" data-es="Tu viaje de esta noche" data-fr="Votre voyage de ce soir" data-de="Deine heutige Reise" data-zh-cn="你今晚的旅程">你今晚的旅程</h3>
+      <p id="h-journey-arc-note" data-zh="每一個節點，都是你曾經停留的地方。" data-en="Each node is somewhere you chose to stay." data-ja="すべての点は、あなたが立ち止まった場所です。" data-es="Cada nodo es un lugar donde decidiste quedarte." data-fr="Chaque point est un lieu où vous vous êtes arrêté." data-de="Jeder Punkt ist ein Ort, an dem du verweilt hast." data-zh-cn="每一个节点，都是你曾经停留的地方。">每一個節點，都是你曾經停留的地方。</p>
+    </header>
+    <div class="h-journey-arc-canvas" id="h-journey-arc-canvas"></div>
+  </section>
+
   <div class="h-journey">
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;" data-zh="GLOBAL RESONANCE — 全網靈魂共鳴軌跡" data-en="GLOBAL RESONANCE — The World's Footprints" data-ja="GLOBAL RESONANCE — 全世界の魂の共鳴" data-es="GLOBAL RESONANCE — Huellas del Mundo" data-fr="RÉSONANCE MONDIALE — Empreintes du Monde" data-de="GLOBALE RESONANZ — Fußspuren der Welt" data-zh-cn="GLOBAL RESONANCE — 全网灵魂共鸣轨迹">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <!-- 新增：靈魂氣象局動態標籤 -->
@@ -3586,6 +3642,7 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 </section>
 
 <footer>
+  <p class="footer-farewell" data-zh="你帶走的，比你放下的更多。" data-en="You carry away more than you left behind." data-ja="手放したものより、多くのものを持ち帰る。" data-es="Te llevas más de lo que dejaste atrás." data-fr="Vous repartez avec plus que ce que vous avez déposé." data-de="Du nimmst mehr mit, als du zurückgelassen hast." data-zh-cn="你带走的，比你放下的更多。">你帶走的，比你放下的更多。</p>
   <div class="footer-main">
     <div class="footer-left" data-zh="Every Moment As Truth Heals" data-en="Every Moment As Truth Heals" data-ja="Every Moment As Truth Heals" data-es="Every Moment As Truth Heals" data-fr="Every Moment As Truth Heals" data-de="Every Moment As Truth Heals" data-zh-cn="Every Moment As Truth Heals">Every Moment As Truth Heals</div>
     <div class="footer-letters"><span class="footer-l">E</span><span class="footer-l">M</span><span class="footer-l">P</span><span class="footer-l">A</span><span class="footer-l">T</span><span class="footer-l">H</span></div>
@@ -3923,7 +3980,7 @@ window.switchLang = function(lang) {
   document.querySelectorAll('[data-zh-title]').forEach(el => { el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title')); });
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") { for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } } }
-  updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); if(typeof window.renderEFeed === 'function') window.renderEFeed();
+  updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed();
   let crisisTel = '1925';
   if (lang === 'uk') crisisTel = '7333';
   else if (lang === 'pl') crisisTel = '116123';
@@ -3993,6 +4050,83 @@ window.addEventListener('scroll', () => { const btt = document.getElementById('b
 
 function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) { console.error("發生錯誤:", err); } } }
 loadLocalJourney();
+
+const SESSION_ROUTE_KEY = 'empath_session_route';
+const SESSION_ECHO_KEY = 'empath_session_echo';
+const sessionRoomNames = { E:'情緒出口', M:'思念映射', P:'碎片修補', A:'神聖避難所', T:'能量共振', H:'靈魂歸宿' };
+
+function readSessionRoute() {
+    try {
+        const route = JSON.parse(sessionStorage.getItem(SESSION_ROUTE_KEY) || '[]');
+        return Array.isArray(route) ? route.filter(room => sessionRoomNames[room]) : [];
+    } catch(error) { return []; }
+}
+
+window.renderSessionJourney = function() {
+    const host = document.getElementById('h-journey-arc-canvas');
+    if (!host) return;
+    const route = readSessionRoute();
+    if (!route.length) {
+        host.innerHTML = `<div class="h-arc-empty">${t('當你走進第一個房間，旅程會從這裡開始。','Your path will begin when you enter your first room.','最初の部屋に入ると、ここから旅が始まります。')}</div>`;
+        return;
+    }
+    const width = 1000, height = 220;
+    const points = route.map((room,index) => {
+        const progress = route.length === 1 ? .5 : index / (route.length - 1);
+        return { room, x:100 + progress * 800, y:142 - Math.sin(progress * Math.PI) * 66 };
+    });
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let index=1; index<points.length; index++) {
+        const previous = points[index-1], current = points[index], middle = (previous.x + current.x) / 2;
+        path += ` C ${middle} ${previous.y}, ${middle} ${current.y}, ${current.x} ${current.y}`;
+    }
+    const nodes = points.map((point,index) => `
+      <g class="h-arc-node" transform="translate(${point.x} ${point.y})">
+        <circle class="h-arc-node-ring" r="25"></circle>
+        <circle class="h-arc-node-core" r="2.5"></circle>
+        <text class="h-arc-node-label" y="-38">${point.room}</text>
+        <text class="h-arc-node-order" y="47">${String(index+1).padStart(2,'0')}</text>
+        <title>${sessionRoomNames[point.room]}</title>
+      </g>`).join('');
+    host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${t('你今晚走過的房間路徑','The rooms you visited tonight','今夜訪れた部屋の道のり')}"><path class="h-arc-path" d="${path}"></path>${nodes}</svg>`;
+};
+
+function recordSessionRoom(room) {
+    const route = readSessionRoute();
+    if (route[route.length-1] === room || route.includes(room)) return;
+    route.push(room);
+    sessionStorage.setItem(SESSION_ROUTE_KEY,JSON.stringify(route));
+    window.renderSessionJourney();
+}
+
+window.storeSessionEcho = function(text) {
+    if (!text) return;
+    const fragments = text.split(/[，。！？!?；;、\n]+/).map(part => part.trim()).filter(Boolean);
+    let fragment = fragments.find(part => Array.from(part).length >= 2) || '';
+    if (/\s/.test(fragment)) fragment = fragment.split(/\s+/).find(word => word.length >= 3) || fragment;
+    fragment = Array.from(fragment.replace(/[<>]/g,'')).slice(0,6).join('');
+    if (!fragment) return;
+    sessionStorage.setItem(SESSION_ECHO_KEY,fragment);
+    const echo = document.getElementById('h-session-echo');
+    if (echo) echo.textContent = fragment;
+};
+
+function initSessionNarrative() {
+    window.renderSessionJourney();
+    const echo = document.getElementById('h-session-echo');
+    if (echo) echo.textContent = sessionStorage.getItem(SESSION_ECHO_KEY) || '';
+    const roomObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            recordSessionRoom(entry.target.id.replace('room-','').toUpperCase());
+        });
+    },{threshold:.32,rootMargin:'-8% 0px -18%'});
+    document.querySelectorAll('.room[id^="room-"]').forEach(room => roomObserver.observe(room));
+    const footer = document.querySelector('footer');
+    if (footer) new IntersectionObserver(entries => {
+        footer.classList.toggle('is-farewell-visible',entries[0]?.isIntersecting ?? false);
+    },{threshold:.28}).observe(footer);
+}
 
 // ==========================================
 // 音訊引擎 (療癒頻率 432Hz + 平滑漸變)
@@ -4731,6 +4865,7 @@ window.submitE = async function(){
         if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_submit');
         
         logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]');
+        if (text) window.storeSessionEcho?.(text);
         window.empathContrastMoment?.();
 
         // --- 🌟 父親節溫柔彩蛋邏輯 開始 ---
@@ -5654,9 +5789,37 @@ window.initTimeAndCosmic = function() {
     const newMoon1970 = 947182440;
     const currentUnix = now.getTime() / 1000;
     const phase = ((currentUnix - newMoon1970) % lunarPeriod) / lunarPeriod;
+    const normalizedPhase = (phase + 1) % 1;
+    const phaseIndex = Math.floor(normalizedPhase * 8 + 0.5) % 8;
+    const moonPhases = [
+        { icon:'●', zh:'新月', en:'new moon', ja:'新月' },
+        { icon:'◔', zh:'眉月', en:'waxing crescent', ja:'三日月' },
+        { icon:'◐', zh:'上弦月', en:'first-quarter moon', ja:'上弦の月' },
+        { icon:'◕', zh:'盈凸月', en:'waxing gibbous moon', ja:'満ちてゆく月' },
+        { icon:'○', zh:'滿月', en:'full moon', ja:'満月' },
+        { icon:'◕', zh:'虧凸月', en:'waning gibbous moon', ja:'欠けてゆく月' },
+        { icon:'◑', zh:'下弦月', en:'last-quarter moon', ja:'下弦の月' },
+        { icon:'◔', zh:'殘月', en:'waning crescent', ja:'有明の月' }
+    ];
+    const moon = moonPhases[phaseIndex];
+    window.empathMoonPhase = { phase:normalizedPhase, index:phaseIndex, ...moon };
     
     // 判斷是否為滿月 (月相落在 0.47 到 0.53 之間)
     window.isFullMoon = (phase > 0.47 && phase < 0.53);
+
+    const presence = document.getElementById('cosmic-presence');
+    if (presence) {
+        const hhmm = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+        const periodZh = hour < 5 ? '深夜' : hour < 9 ? '清晨' : hour < 12 ? '上午' : hour < 17 ? '午後' : hour < 20 ? '傍晚' : '夜晚';
+        const zh = `現在是${periodZh} ${hhmm}。你不孤單。 · ${moon.icon} 今晚是${moon.zh}`;
+        const en = `It is ${hhmm}. You are not alone. · ${moon.icon} Tonight: ${moon.en}`;
+        const ja = `今は ${hhmm}。あなたはひとりではありません。 · ${moon.icon} 今夜は${moon.ja}`;
+        presence.setAttribute('data-zh',zh);
+        presence.setAttribute('data-zh-cn',zh);
+        presence.setAttribute('data-en',en);
+        presence.setAttribute('data-ja',ja);
+        presence.textContent = t(zh,en,ja,en,en,en,zh);
+    }
     
     if (window.isFullMoon) {
         const mDesc = document.querySelector('#room-m .room-desc');
@@ -5851,6 +6014,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
   // 啟動時間與宇宙感知
   window.initTimeAndCosmic();
+  initSessionNarrative();
 
   // 啟動情感閉環引擎
   window.checkRoomAEcho();
