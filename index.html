@@ -2690,34 +2690,26 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 #room-e{
   display:grid!important;grid-template-columns:minmax(320px,.82fr) minmax(390px,1.18fr)!important;
   grid-template-areas:
-    "tag archive"
-    "title archive"
-    "desc archive"
-    "warning archive"
-    "anon archive"
-    "mode archive"
-    "input archive"
-    "draw archive"
-    "send archive"
-    "crisis archive"!important;
-  column-gap:clamp(64px,9vw,150px)!important;align-content:center!important;
+    "compose archive"!important;
+  column-gap:clamp(64px,9vw,150px)!important;align-items:start!important;align-content:center!important;
   padding:clamp(120px,12vw,184px) clamp(32px,8vw,132px)!important;
   background:
     radial-gradient(circle at 78% 44%,rgba(123,143,161,.07),transparent 33%),
     linear-gradient(115deg,#09131d 0 48%,#071019 48% 100%)!important;
 }
 #room-e::after{content:'ARCHIVE OF UNFINISHED LETTERS';position:absolute;right:clamp(28px,4vw,64px);top:50%;writing-mode:vertical-rl;transform:translateY(-50%);font:10px 'Cormorant Garamond',serif;letter-spacing:.32em;color:rgba(232,230,225,.15)}
-#room-e>.room-tag{grid-area:tag!important}
-#room-e>.room-title-wrap{grid-area:title!important}
-#room-e>.desc-wrap{grid-area:desc!important}
-#room-e>.e-warning{grid-area:warning!important}
-#room-e>.e-anon-label{grid-area:anon!important}
-#room-e>.e-mode-toggle{grid-area:mode!important}
-#room-e>#e-input{grid-area:input!important}
-#room-e>#e-char{grid-area:input!important;align-self:end!important;justify-self:end!important;margin-bottom:8px!important}
-#room-e>#e-draw-wrap{grid-area:draw!important}
-#room-e>br{display:none!important}
-#room-e>#e-submit-btn{grid-area:send!important;justify-self:start!important;margin:24px 0 0!important}
+#room-e>.e-compose-panel{grid-area:compose!important;position:relative!important;width:100%!important;min-width:0!important;align-self:start!important}
+#room-e .e-compose-panel>.room-title-wrap{margin-bottom:32px!important}
+#room-e .e-compose-panel>.desc-wrap{margin-bottom:24px!important}
+#room-e .e-compose-panel>.e-warning{margin:0 0 24px!important}
+#room-e .e-compose-panel>.e-anon-label{margin:0 0 16px!important}
+#room-e .e-compose-panel>.e-mode-toggle{margin:0 0 8px!important;display:flex!important;gap:8px!important}
+#room-e .e-compose-panel>.e-mode-hint{margin:0 0 20px!important;color:rgba(232,230,225,.4)!important;font-size:11px!important;line-height:1.8!important;letter-spacing:.08em!important}
+#room-e .e-compose-panel>#e-input{width:100%!important;margin:0!important;min-height:168px!important}
+#room-e .e-compose-panel>#e-char{display:block!important;margin:8px 0 0!important;text-align:right!important}
+#room-e .e-compose-panel>#e-draw-wrap{width:100%!important;margin:0!important}
+#room-e .e-compose-panel>br{display:none!important}
+#room-e .e-compose-panel>#e-submit-btn{margin:24px 0 0!important}
 #room-e>.e-feed-container{grid-area:archive!important;align-self:center!important;width:100%!important;max-width:none!important;height:min(66vh,660px);overflow:hidden;padding:64px 0 92px 54px!important;border-top:0!important;border-left:1px solid rgba(123,143,161,.18)!important}
 #room-e>.e-feed-container.is-expanded{height:auto!important;max-height:none!important;overflow:visible!important;align-self:start!important}
 #room-e>.e-feed-container::before{content:'RECEIVED / ANONYMOUS';position:absolute;left:54px;top:16px;font:10px 'Cormorant Garamond',serif;letter-spacing:.34em;color:rgba(123,143,161,.56)}
@@ -2725,7 +2717,7 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 #room-e .e-msg{position:relative!important;padding:24px 24px 26px 40px!important;border:0!important;border-bottom:1px solid rgba(123,143,161,.11)!important;background:transparent!important;box-shadow:none!important}
 #room-e .e-msg::before{content:'—';position:absolute;left:0;top:26px;color:rgba(123,143,161,.5)}
 #room-e>.e-expand-btn{grid-area:archive!important;align-self:end!important;justify-self:center!important;z-index:4}
-#room-e>.crisis-support{grid-area:crisis!important;margin-top:42px!important}
+#room-e .e-compose-panel>.crisis-support{margin-top:42px!important}
 
 /* M — the sky is the interface */
 #room-m{min-height:100svh!important;padding:0!important;background:#030914!important}
@@ -2823,6 +2815,7 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 @media(max-width:900px){
   .nav-utility-toggle{display:none!important}nav .nav-controls{position:static!important;min-width:0!important;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important}
   #room-e{display:block!important;padding:112px 24px 80px!important;background:#09131d!important}
+  #room-e>.e-compose-panel{display:block!important}
   #room-e>.e-feed-container{height:auto!important;margin-top:88px!important;padding:64px 0 48px 24px!important}
   #room-e::after{display:none}
   #room-m .room-content{display:block!important;padding:112px 24px 64px!important}
@@ -3144,6 +3137,7 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 
 <section id="room-e" class="room">
   <div class="room-letter">E</div>
+  <div class="e-compose-panel">
   <p class="room-tag">E — Emptiness / Exit</p>
   <div class="room-title-wrap">
       <h2 class="room-title" data-zh="情緒出口" data-en="Emotional Exit" data-ja="感情の出口" data-es="Salida Emocional" data-fr="Sortie Émotionnelle" data-de="Emotionaler Ausgang" data-zh-cn="情绪出口">情緒出口</h2>
@@ -3174,8 +3168,9 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
   
   <div class="e-mode-toggle">
       <button class="e-mode-btn active" id="btn-mode-text" onclick="window.setEMode('text')" data-zh="⌨️ 敲打文字" data-en="⌨️ Type Text" data-ja="⌨️ 文字を打つ" data-es="⌨️ Escribir Texto" data-zh-cn="⌨️ 敲打文字">⌨️ 敲打文字</button>
-      <button class="e-mode-btn" id="btn-mode-draw" onclick="window.setEMode('draw')" data-zh="✍️ 肌肉釋放 (塗鴉)" data-en="✍️ Draw / Release" data-ja="✍️ 描いて解放" data-es="✍️ Dibujar / Liberar" data-zh-cn="✍️ 肌肉释放 (涂鸦)">✍️ 肌肉釋放 (塗鴉)</button>
+      <button class="e-mode-btn" id="btn-mode-draw" onclick="window.setEMode('draw')" data-zh="✍️ 改用畫畫" data-en="✍️ Draw Instead" data-ja="✍️ 絵で描く" data-es="✍️ Dibujar" data-zh-cn="✍️ 改用画画">✍️ 改用畫畫</button>
   </div>
+  <p class="e-mode-hint" data-zh="選擇用文字，或直接畫出現在的感受。" data-en="Choose words, or draw the feeling directly." data-ja="言葉で綴るか、今の気持ちをそのまま描いてください。" data-es="Elige palabras o dibuja directamente lo que sientes." data-zh-cn="选择用文字，或直接画出现在的感受。">選擇用文字，或直接畫出現在的感受。</p>
 
   <textarea class="input-area" id="e-input" rows="5" maxlength="500" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 500'"
     data-zh-ph="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。" 
@@ -3199,6 +3194,11 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 
   <br>
   <button class="send-btn" id="e-submit-btn" onclick="window.submitE()" data-zh="把它留在這裡" data-en="Leave It Here" data-ja="ここに置いていく" data-es="Déjalo Aquí" data-fr="Le laisser ici" data-de="Lass es hier" data-zh-cn="把它留在这里">把它留在這裡</button>
+
+  <div class="crisis-support">
+    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
+  </div>
+  </div>
   
   <div class="e-feed-container">
     <div class="e-feed" id="e-feed"></div>
@@ -3206,9 +3206,6 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
   </div>
   <button id="e-expand-btn" class="e-expand-btn" onclick="window.toggleEFeed()"></button>
 
-  <div class="crisis-support">
-    <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
-  </div>
 </section>
 
 <section id="room-m" class="room">
