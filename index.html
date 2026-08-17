@@ -922,6 +922,7 @@ textarea:focus-visible, input:focus-visible { outline: none !important; }
   #hero .door-btn{grid-template-columns:40px 58px 1fr 20px;padding:22px;}
   #hero .door-btn .dl{font-size:48px;}
 }
+
 @media(max-width:680px){
   .hero-opening{min-height:680px;padding:108px 22px 64px;}
   .hero-opening .hero-title{font-size:clamp(52px,18vw,82px);letter-spacing:.12em;text-indent:.12em;}
@@ -2839,6 +2840,20 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
   #room-h::after{display:none!important}
 }
 @media(max-width:560px){#room-p .kintsugi-board{grid-template-columns:1fr!important}#room-m .m-stats{position:static!important;margin:24px 0!important;padding-left:16px!important}#room-m .m-input-wrap{margin-top:28vh!important}}
+
+/* ===== EMPATH MOTION DIRECTION · 靜止是預設，動態是例外 ===== */
+.aw-site-noise,.cinematic-stars-a,.cinematic-stars-b,.cinematic-meteor-one,.cinematic-meteor-two{animation:none!important}
+.room .room-letter,.scroll-hint,.behance-float,.opening-scroll i,.warmth-pulse,.echo-heart,.lighthouse-flame,.presence-spark.show,.lux-input-spark::after{animation-play-state:paused!important}
+body.empath-motion-idle #room-e .room-letter,
+body.empath-motion-idle #room-p .room-letter,
+body.empath-motion-idle #room-t .warmth-item:first-child .warmth-pulse,
+body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!important}
+#room-t .warmth-item:not(:first-child) .warmth-pulse{animation:none!important;opacity:.24!important;transform:none!important;box-shadow:0 0 5px rgba(232,168,124,.28)!important}
+.lux-input-host.has-input-energy .lux-input-spark::after{left:calc(100% - 5px)!important;opacity:.72!important;transform:none!important}
+.empath-contrast-flash{position:fixed!important;inset:0!important;z-index:9999999!important;pointer-events:none!important;opacity:0!important;background:rgba(232,230,225,.115)!important;mix-blend-mode:screen!important}
+.empath-contrast-flash.is-active{animation:empathContrastFlash 300ms cubic-bezier(.22,.61,.36,1) both!important}
+@keyframes empathContrastFlash{0%{opacity:0}28%{opacity:1}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.empath-contrast-flash{display:none!important}}
 </style>
 </head>
 <body>
@@ -4715,7 +4730,8 @@ window.submitE = async function(){
         await addDoc(collection(db, "emotions"), docData); 
         if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_submit');
         
-        logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]'); 
+        logJourney('e', text ? text : '[已釋放的無言重量 / A silent weight released]');
+        window.empathContrastMoment?.();
 
         // --- 🌟 父親節溫柔彩蛋邏輯 開始 ---
         const checkText = text || '';
@@ -4982,6 +4998,7 @@ window.updateMStats = function() {
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ 
     if(!canvas || !ctx || !roomM || !isAnimating) return;
+    const ambientMotion = document.body.classList.contains('empath-motion-idle');
     if(!canvas.width || !canvas.height) {
         if(typeof window.resizeCanvas === 'function') window.resizeCanvas();
         if(!canvas.width || !canvas.height) return;
@@ -5015,7 +5032,6 @@ window.drawStars = function(){
     // 1. 畫背景星星
     bgStars.forEach(s => {
         if (insideUiSafeRect(s.x, s.y)) return;
-        s.a+=s.da; if(s.a>0.8||s.a<0.1) s.da*=-1; 
         ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
         ctx.fillStyle=`rgba(${s.c.r},${s.c.g},${s.c.b},${s.a})`; 
         if(s.r > 0.7) { ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${s.c.r},${s.c.g},${s.c.b},0.8)`; } 
@@ -5051,18 +5067,14 @@ window.drawStars = function(){
     }
     safeW = Math.max(safeW, 100);
 
-    // 3.1 彈簧拉力
+    const needsStarLayout = starMessages.some(s => !Number.isFinite(s.x) || !Number.isFinite(s.y));
+    if (needsStarLayout) {
+    // 3.1 首次定位；完成後所有次要星星保持靜止
     starMessages.forEach(s => { 
         let targetX = safeX + (s.relX * safeW); 
         let targetY = safeY + (s.relY * safeH); 
         if (s.x === undefined || isNaN(s.x) || s.y === undefined || isNaN(s.y)) {
             s.x = targetX; s.y = targetY;
-        } else {
-            const springX = targetX - s.x;
-            const springY = targetY - s.y;
-            // 接近目標時停止細微修正，避免像素級來回抖動。
-            if (Math.abs(springX) > 0.35) s.x += Math.max(-2.5, Math.min(2.5, springX * 0.025));
-            if (Math.abs(springY) > 0.35) s.y += Math.max(-2.5, Math.min(2.5, springY * 0.025));
         }
     });
 
@@ -5105,6 +5117,7 @@ window.drawStars = function(){
             else s1.y = r.bottom;
         });
     }
+    }
 
     // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後)
     if (window.activeConstellations && window.activeConstellations.length > 0) {
@@ -5129,15 +5142,17 @@ window.drawStars = function(){
     }
 
     // 5. 再畫出留言星星本體
+    const brightestStar = starMessages.reduce((best,s) => !best || s.brightness > best.brightness ? s : best,null);
+    const pulse = ambientMotion ? (1 + Math.sin(performance.now() / 760) * .085) : 1;
     starMessages.forEach(s => { 
-        const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const coreR = 1.5 + (b * 0.4); const glowR = coreR * 5; 
+        const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const focusScale = s === brightestStar ? pulse : 1; const coreR = (1.5 + (b * 0.4)) * focusScale; const glowR = coreR * 5; 
         const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); 
         grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
         ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
         drawSparkle(ctx, s.x, s.y, coreR * 3 + b * 2.5, c.r, c.g, c.b, 0.95); 
     }); 
 
-    starsRafId = requestAnimationFrame(window.drawStars); 
+    starsRafId = ambientMotion ? requestAnimationFrame(window.drawStars) : null; 
 }
 
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
@@ -5195,7 +5210,7 @@ roomM.addEventListener('click', async e => {
     } 
 });
   
-window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); } }
+window.submitM = async function(){ if(!canSubmit()) return; const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); } }
 
 let pCanvas, pCtx;
 window.pHealedTotal = 0;
@@ -5382,7 +5397,7 @@ window.drawKintsugiVessel = function(){
     c.restore();
 };
   
-window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
+window.submitP = async function(){ if(!canSubmit()) return; const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
@@ -5464,6 +5479,7 @@ window.enableBlow = async function() {
 window.drawSand = function() { 
     const c = document.getElementById('sand-canvas'); 
     if(!c || !c.width || !isAnimating) return; 
+    if(!document.body.classList.contains('empath-motion-idle')) { sandRafId = null; return; }
     const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
 
@@ -5522,6 +5538,7 @@ window.submitA = async function(){
     localStorage.setItem('empath_a_submit_time', Date.now());
 
     input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
+    window.empathContrastMoment?.();
     window.showToast('放入沙畫 ✦'); 
 }
 
@@ -5538,7 +5555,7 @@ window.submitT = async function(){
     localStorage.setItem('empath_my_warmth_id', docRef.id);
     localStorage.setItem('empath_my_warmth_echos', '0');
 
-    input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
+    input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); 
 }
   
 window.createEchoRipple = function(e) {
@@ -6512,11 +6529,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         context.shadowBlur = particle.radius > 1.35 ? 7 : 3;
         context.fill();
       });
-      if (visible && !document.hidden && !document.body.classList.contains('hsp-mode')) {
+      if (visible && !document.hidden && !document.body.classList.contains('hsp-mode') && document.body.classList.contains('empath-motion-idle')) {
         raf = requestAnimationFrame(frame);
       } else raf = 0;
     };
-    const start = () => { if (!raf && visible && !document.hidden && !document.body.classList.contains('hsp-mode')) raf=requestAnimationFrame(frame); };
+    const start = () => { if (!raf && visible && !document.hidden && !document.body.classList.contains('hsp-mode') && document.body.classList.contains('empath-motion-idle')) raf=requestAnimationFrame(frame); };
     hero.addEventListener('pointermove',event => {
       if (!finePointer.matches) return;
       const rect = hero.getBoundingClientRect();
@@ -6532,6 +6549,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       else if (raf) { cancelAnimationFrame(raf); raf=0; }
     },{threshold:.01}).observe(hero);
     document.addEventListener('visibilitychange',start,{passive:true});
+    document.addEventListener('empath:motion-idle',start,{passive:true});
     document.getElementById('hsp-btn')?.addEventListener('click',() => window.setTimeout(start,1550),{passive:true});
     resize();
     start();
@@ -6780,6 +6798,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     initEditorialRhythm();
   }
+})();
+</script>
+<script id="empath-motion-direction">
+(() => {
+  'use strict';
+  if (window.__EMPATH_MOTION_DIRECTION__) return;
+  window.__EMPATH_MOTION_DIRECTION__ = true;
+
+  const IDLE_DELAY = 3000;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion:reduce)');
+  let idleTimer = 0;
+
+  const enterIdle = () => {
+    idleTimer = 0;
+    if (reduceMotion.matches || document.hidden) return;
+    document.body.classList.add('empath-motion-idle');
+    document.dispatchEvent(new CustomEvent('empath:motion-idle'));
+    if (typeof window.drawStars === 'function') window.drawStars();
+    if (typeof window.drawSand === 'function') window.drawSand();
+  };
+
+  const registerActivity = () => {
+    document.body.classList.remove('empath-motion-idle');
+    document.dispatchEvent(new CustomEvent('empath:motion-active'));
+    window.clearTimeout(idleTimer);
+    if (!reduceMotion.matches && !document.hidden) idleTimer = window.setTimeout(enterIdle,IDLE_DELAY);
+  };
+
+  ['pointerdown','pointermove','keydown','touchstart','wheel','scroll','input'].forEach(type => {
+    window.addEventListener(type,registerActivity,{passive:true});
+  });
+  document.addEventListener('visibilitychange',registerActivity,{passive:true});
+  reduceMotion.addEventListener?.('change',registerActivity);
+
+  window.empathContrastMoment = () => {
+    if (reduceMotion.matches) return;
+    let flash = document.querySelector('.empath-contrast-flash');
+    if (!flash) {
+      flash = document.createElement('div');
+      flash.className = 'empath-contrast-flash';
+      flash.setAttribute('aria-hidden','true');
+      document.body.appendChild(flash);
+    }
+    flash.classList.remove('is-active');
+    void flash.offsetWidth;
+    flash.classList.add('is-active');
+    window.setTimeout(() => flash.classList.remove('is-active'),320);
+  };
+
+  registerActivity();
 })();
 </script>
 <script id="empath-art-direction-controls">
