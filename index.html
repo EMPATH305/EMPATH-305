@@ -2861,6 +2861,23 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
   color:rgba(232,230,225,.42)!important;font:400 10px/1.8 'Noto Sans TC',sans-serif!important;
   letter-spacing:.18em!important;text-align:center!important;
 }
+.return-memory{
+  position:absolute!important;left:50%!important;bottom:92px!important;z-index:3!important;
+  width:min(88vw,680px)!important;margin:0!important;transform:translate(-50%,6px)!important;
+  color:rgba(232,230,225,.3)!important;font:400 11px/1.8 'Noto Sans TC',sans-serif!important;
+  letter-spacing:3px!important;text-align:center!important;opacity:0!important;pointer-events:none!important;
+  transition:opacity 900ms ease,transform 900ms cubic-bezier(.23,1,.32,1)!important;
+}
+.return-memory.is-visible{opacity:1!important;transform:translate(-50%,0)!important}
+.return-memory.is-fading{opacity:0!important;transform:translate(-50%,-4px)!important}
+.h-return-memory{
+  min-height:18px!important;margin:0 0 16px!important;color:rgba(232,230,225,.3)!important;
+  font:400 11px/1.8 'Noto Sans TC',sans-serif!important;letter-spacing:3px!important;
+  opacity:0!important;transform:translateY(5px)!important;pointer-events:none!important;
+  transition:opacity 900ms ease,transform 900ms cubic-bezier(.23,1,.32,1)!important;
+}
+.h-return-memory.is-visible{opacity:1!important;transform:none!important}
+.h-return-memory.is-fading{opacity:0!important;transform:translateY(-4px)!important}
 #room-h .h-session-echo{
   position:absolute!important;left:50%!important;top:23%!important;width:min(92vw,1120px)!important;
   transform:translateX(-50%)!important;pointer-events:none!important;overflow:hidden!important;
@@ -2890,6 +2907,7 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!important}
 @media(max-width:680px){
   .cosmic-presence{max-width:290px!important;letter-spacing:.1em!important}
+  .return-memory{bottom:86px!important;width:82vw!important;letter-spacing:2px!important}
   #room-h .h-session-echo{top:19%!important;font-size:26vw!important}
   #room-h .h-journey-arc{margin:8px auto 80px!important;padding:40px 0 28px!important}
   .h-journey-arc-head{display:block!important;margin-bottom:30px!important}
@@ -3100,6 +3118,7 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
       <a class="cinema-cta cinema-cta-primary" href="#journey" data-zh="進入星空" data-en="Enter the night">進入星空</a>
       <button class="cinema-cta cinema-cta-quiet" onclick="window.openGuide()" data-zh="讓 EMPATH 為我引路" data-en="Let EMPATH guide me">讓 EMPATH 為我引路</button>
     </div>
+    <p class="return-memory" id="return-memory" aria-live="polite"></p>
     <span class="opening-scroll">SCROLL TO BEGIN <i></i></span>
   </div>
 
@@ -3619,6 +3638,7 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
     </div>
     
     <div class="h-timeline">
+      <p class="h-return-memory" id="h-return-memory" aria-live="polite"></p>
       <p class="h-timeline-title" data-zh="YOUR JOURNEY — 你的旅程" data-en="YOUR JOURNEY" data-ja="YOUR JOURNEY — あなたの旅" data-es="YOUR JOURNEY — Tu Viaje" data-fr="VOTRE VOYAGE" data-de="DEINE REISE" data-zh-cn="YOUR JOURNEY — 你的旅程">YOUR JOURNEY — 你的旅程</p>
       <div class="h-events-wrapper" style="position: relative;">
         <div class="h-events" id="h-events" style="max-height: 280px; overflow: hidden; transition: max-height 0.5s ease;"></div>
@@ -4050,6 +4070,123 @@ window.addEventListener('scroll', () => { const btt = document.getElementById('b
 
 function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) { console.error("發生錯誤:", err); } } }
 loadLocalJourney();
+
+// ==========================================
+// 這個空間記得你 · 僅存在此裝置的回訪記憶
+// ==========================================
+const RETURN_MEMORY_LAST_VISIT_KEY = 'empath_last_visit';
+
+function setReturnMemoryTranslations(element, translations) {
+    if (!element) return;
+    Object.entries(translations).forEach(([language, message]) => {
+        element.setAttribute(`data-${language}`, message);
+    });
+    const targetLanguage = window.currentLang === 'en-uk' ? 'en' : window.currentLang;
+    element.textContent = translations[targetLanguage] || translations.en || translations.zh;
+}
+
+function revealReturnMemory(element) {
+    if (!element) return;
+    clearTimeout(element._empathMemoryTimer);
+    element.classList.remove('is-fading');
+    requestAnimationFrame(() => element.classList.add('is-visible'));
+    element._empathMemoryTimer = setTimeout(() => {
+        element.classList.remove('is-visible');
+        element.classList.add('is-fading');
+    }, 3000);
+}
+
+function returnVisitMessages(previousVisit, now) {
+    if (!previousVisit) {
+        return {
+            zh:'你是第一次來。歡迎。', en:'This is your first visit. Welcome.', ja:'初めて来てくれたあなたへ。ようこそ。',
+            es:'Es tu primera vez aquí. Bienvenido.', fr:'C’est votre première visite. Bienvenue.', de:'Du bist zum ersten Mal hier. Willkommen.',
+            'zh-cn':'你是第一次来。欢迎。', uk:'Ви тут уперше. Ласкаво просимо.', pl:'Jesteś tu po raz pierwszy. Witaj.'
+        };
+    }
+    const today = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const previousDate = new Date(previousVisit);
+    const previousDay = new Date(previousDate.getFullYear(),previousDate.getMonth(),previousDate.getDate());
+    const days = Math.max(0,Math.round((today - previousDay) / 86400000));
+    if (days === 0) {
+        return {
+            zh:'你今天已經來過這裡了。', en:'You have already been here today.', ja:'今日はもう、ここに来ています。',
+            es:'Ya has estado aquí hoy.', fr:'Vous êtes déjà venu ici aujourd’hui.', de:'Du warst heute schon hier.',
+            'zh-cn':'你今天已经来过这里了。', uk:'Ви вже були тут сьогодні.', pl:'Byłeś już tutaj dzisiaj.'
+        };
+    }
+    return {
+        zh:`你上次來這裡，是 ${days} 天前。`, en:`Your last visit was ${days} ${days === 1 ? 'day' : 'days'} ago.`, ja:`前にここへ来たのは、${days}日前です。`,
+        es:`La última vez que estuviste aquí fue hace ${days} ${days === 1 ? 'día' : 'días'}.`, fr:`Votre dernière visite remonte à ${days} jour${days === 1 ? '' : 's'}.`, de:`Du warst zuletzt vor ${days} Tag${days === 1 ? '' : 'en'} hier.`,
+        'zh-cn':`你上次来这里，是 ${days} 天前。`, uk:`Ви були тут востаннє ${days} дн. тому.`, pl:`Ostatnio byłeś tutaj ${days} dni temu.`
+    };
+}
+
+function returnCountMessages(count) {
+    return {
+        zh:`你已經來過這裡 ${count} 次了。`, en:`You have been here ${count} ${count === 1 ? 'time' : 'times'}.`, ja:`あなたはここへ ${count} 回来ています。`,
+        es:`Has estado aquí ${count} ${count === 1 ? 'vez' : 'veces'}.`, fr:`Vous êtes venu ici ${count} fois.`, de:`Du warst schon ${count}-mal hier.`,
+        'zh-cn':`你已经来过这里 ${count} 次了。`, uk:`Ви вже приходили сюди ${count} раз(и).`, pl:`Byłeś tutaj już ${count} razy.`
+    };
+}
+
+function applyReturningPlaceholder() {
+    const input = document.getElementById('e-input');
+    if (!input || !window.empathReturnMemory?.isReturning) return;
+    const messages = {
+        zh:'你又回來了。今晚帶著什麼？', en:'You came back. What are you carrying tonight?', ja:'また来てくれたのですね。今夜は何を抱えていますか？',
+        es:'Has vuelto. ¿Qué traes contigo esta noche?', fr:'Vous êtes revenu. Qu’apportez-vous ce soir ?', de:'Du bist zurück. Was trägst du heute Abend mit dir?',
+        'zh-cn':'你又回来了。今晚带着什么？', uk:'Ви повернулися. Що ви принесли із собою сьогодні ввечері?', pl:'Wróciłeś. Co przynosisz ze sobą tego wieczoru?'
+    };
+    Object.entries(messages).forEach(([language,message]) => input.setAttribute(`data-${language}-ph`,message));
+    const targetLanguage = window.currentLang === 'en-uk' ? 'en' : window.currentLang;
+    input.setAttribute('placeholder',messages[targetLanguage] || messages.en);
+}
+
+function initReturnMemory() {
+    const now = new Date();
+    const rawPreviousVisit = localStorage.getItem(RETURN_MEMORY_LAST_VISIT_KEY);
+    const parsedPreviousVisit = Number(rawPreviousVisit);
+    const hasValidPreviousVisit = Number.isFinite(parsedPreviousVisit) && parsedPreviousVisit > 0 && parsedPreviousVisit <= now.getTime() + 300000;
+    const previousVisit = hasValidPreviousVisit ? parsedPreviousVisit : null;
+    const visitCount = Math.max(0,Number(journeyData.visitCount) || 0) + 1;
+
+    journeyData.visitCount = visitCount;
+    localStorage.setItem('empath_user_journey',JSON.stringify(journeyData));
+    localStorage.setItem(RETURN_MEMORY_LAST_VISIT_KEY,String(now.getTime()));
+    window.empathReturnMemory = { isReturning:Boolean(previousVisit), previousVisit, visitCount };
+
+    const heroMemory = document.getElementById('return-memory');
+    setReturnMemoryTranslations(heroMemory,returnVisitMessages(previousVisit,now));
+    const revealHeroMemory = () => revealReturnMemory(heroMemory);
+    if (document.documentElement.classList.contains('empath-entry-pending')) {
+        const entryObserver = new MutationObserver(() => {
+            if (document.documentElement.classList.contains('empath-entry-pending')) return;
+            entryObserver.disconnect();
+            revealHeroMemory();
+        });
+        entryObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+    } else {
+        setTimeout(revealHeroMemory,180);
+    }
+
+    applyReturningPlaceholder();
+
+    const hMemory = document.getElementById('h-return-memory');
+    const soulKey = localStorage.getItem('empath_soul_key');
+    if (hMemory && soulKey) {
+        setReturnMemoryTranslations(hMemory,returnCountMessages(visitCount));
+        const roomH = document.getElementById('room-h');
+        if (roomH) {
+            const hObserver = new IntersectionObserver(entries => {
+                if (!entries.some(entry => entry.isIntersecting)) return;
+                revealReturnMemory(hMemory);
+                hObserver.disconnect();
+            },{threshold:0,rootMargin:'-16px 0px -16px 0px'});
+            hObserver.observe(roomH);
+        }
+    }
+}
 
 const SESSION_ROUTE_KEY = 'empath_session_route';
 const SESSION_ECHO_KEY = 'empath_session_echo';
@@ -4829,7 +4966,7 @@ function initTimeline(){
   
 window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙生成成功 ✦')); }
 window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
-window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [] }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) { console.error("發生錯誤:", err); } }
+window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) { console.error("發生錯誤:", err); } }
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
 async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }, { merge: true }); } catch(err) { console.error("發生錯誤:", err); } }
 function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex';
@@ -6018,6 +6155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
   // 啟動時間與宇宙感知
   window.initTimeAndCosmic();
+  initReturnMemory();
   initSessionNarrative();
 
   // 啟動情感閉環引擎
@@ -6101,7 +6239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [] }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
+  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
   const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
           if (!document.body.classList.contains('hsp-mode')) {
