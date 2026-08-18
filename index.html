@@ -3025,7 +3025,72 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   #room-h #g-summary .visitor-card{padding-left:12px!important;padding-right:12px!important}
   .empath-entry-question,.empath-room-ritual-line{max-width:calc(100vw - 28px)!important;padding-left:8px!important;padding-right:8px!important;overflow-wrap:anywhere!important}
 }
-</style>
+/* ===== MOBILE ART DIRECTION RESET · compact, deliberate, never clipped ===== */
+@media(max-width:768px){
+  nav{
+    top:0!important;right:0!important;bottom:auto!important;left:0!important;
+    width:100%!important;height:calc(64px + var(--empath-safe-top))!important;
+    min-height:calc(64px + var(--empath-safe-top))!important;
+    padding:var(--empath-safe-top) max(18px,var(--empath-safe-right)) 0 max(18px,var(--empath-safe-left))!important;
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    background:rgba(2,7,11,.94)!important;border-bottom:1px solid rgba(255,255,255,.07)!important;
+    backdrop-filter:blur(18px) saturate(110%)!important;-webkit-backdrop-filter:blur(18px) saturate(110%)!important;
+  }
+  .nav-logo{font-size:18px!important;line-height:1!important;letter-spacing:5px!important;white-space:nowrap!important}
+  .hamburger{width:44px!important;height:44px!important;padding:10px 8px!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;flex-shrink:0!important}
+  .hamburger span{width:28px!important;height:1px!important;flex:none!important}
+
+  .nav-menu{
+    position:fixed!important;top:calc(64px + var(--empath-safe-top))!important;right:0!important;bottom:auto!important;left:0!important;
+    width:100vw!important;height:calc(var(--empath-vh) - 64px - var(--empath-safe-top))!important;
+    max-width:none!important;max-height:none!important;margin:0!important;
+    padding:34px max(22px,var(--empath-safe-right)) calc(34px + var(--empath-safe-bottom)) max(22px,var(--empath-safe-left))!important;
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:30px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+    background:rgba(2,7,11,.985)!important;border:0!important;border-top:1px solid rgba(255,255,255,.06)!important;
+    opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+    transform:translate3d(0,-18px,0)!important;
+    transition:opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s linear .45s!important;
+  }
+  .nav-menu.show{
+    opacity:1!important;visibility:visible!important;pointer-events:auto!important;transform:none!important;
+    transition:opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s!important;
+  }
+  .nav-letters{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;width:100%!important}
+  .nav-letter{width:100%!important;height:58px!important;border:1px solid rgba(255,255,255,.09)!important;font-size:17px!important;background:rgba(255,255,255,.018)!important}
+  .nav-letter::after{left:30%!important;right:30%!important;bottom:8px!important}
+  .nav-controls{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
+  .nav-controls>*{width:100%!important;min-width:0!important}
+  .nav-controls .func-btn{width:100%!important;height:48px!important;padding:0 10px!important;border-radius:2px!important;font-size:11px!important;white-space:normal!important}
+  .lang-dropdown-wrapper{grid-column:1/-1!important;width:100%!important}
+  .lang-dropdown-wrapper>.func-btn{width:100%!important}
+  .lang-dropdown-list{position:static!important;width:100%!important;max-height:240px!important;margin-top:8px!important;overflow-y:auto!important;box-shadow:none!important}
+  .hsp-first-visit-tooltip{display:none!important}
+
+  #hero{padding-top:calc(64px + var(--empath-safe-top))!important}
+  .hero-opening{padding-top:64px!important;padding-bottom:calc(128px + var(--empath-safe-bottom))!important;justify-content:center!important}
+  .hero-actions{margin-bottom:28px!important}
+  .opening-scroll{display:none!important}
+
+  #room-m{padding:0!important;padding-bottom:0!important;min-height:auto!important;overflow:hidden!important}
+  #room-m .room-content{min-height:var(--empath-vh)!important;padding:calc(92px + var(--empath-safe-top)) 20px calc(72px + var(--empath-safe-bottom))!important}
+  #room-m .m-input-wrap{margin-top:clamp(140px,20svh,190px)!important}
+  #room-m .m-stats{margin-top:18px!important}
+
+  a[title="CSS Light"]{
+    top:calc(72px + var(--empath-safe-top))!important;right:6px!important;bottom:auto!important;left:auto!important;
+    width:72px!important;height:25px!important;opacity:.22!important;
+    transform:scale(.74)!important;transform-origin:top right!important;z-index:480!important;
+  }
+}
+
+@media(max-width:390px){
+  .nav-menu{padding-left:18px!important;padding-right:18px!important}
+  .nav-controls{grid-template-columns:1fr!important}
+  .lang-dropdown-wrapper{grid-column:auto!important}
+  .hero-opening{padding-left:16px!important;padding-right:16px!important}
+  #room-m .room-content{padding-left:18px!important;padding-right:18px!important}
+}\n</style>
 </head>
 <body>
 
