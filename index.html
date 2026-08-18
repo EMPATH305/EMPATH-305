@@ -2903,6 +2903,32 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 .h-arc-node-label{fill:rgba(242,232,217,.84)!important;font:30px 'Cormorant Garamond',serif!important;text-anchor:middle!important}
 .h-arc-node-order{fill:rgba(242,232,217,.35)!important;font:9px 'Noto Sans TC',sans-serif!important;letter-spacing:.14em!important;text-anchor:middle!important}
 .h-arc-empty{height:170px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px dashed rgba(242,232,217,.08)!important;color:rgba(242,232,217,.3)!important;font:italic 13px/2 'Noto Serif TC',serif!important;letter-spacing:.1em!important;text-align:center!important}
+.data-state{
+  width:100%!important;min-height:112px!important;display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;gap:16px!important;padding:24px!important;
+  color:rgba(232,230,225,.38)!important;font:400 12px/2 'Noto Serif TC',serif!important;
+  letter-spacing:.12em!important;text-align:center!important;border-top:1px solid rgba(232,230,225,.06)!important;
+}
+.data-state[hidden]{display:none!important}
+.data-state::before{content:'✦';font:14px/1 'Cormorant Garamond',serif;color:rgba(201,168,76,.42)}
+.data-state[data-status="loading"]::before{animation:dataStateBreath 2.8s ease-in-out infinite}
+.data-state[data-status="error"]{color:rgba(232,230,225,.58)!important}
+.data-state[data-status="error"]::before{content:'—';color:rgba(201,168,76,.58)}
+.data-state-retry{
+  min-height:44px!important;padding:0 18px!important;border:1px solid rgba(201,168,76,.28)!important;
+  border-radius:2px!important;background:transparent!important;color:rgba(232,230,225,.68)!important;
+  font:500 10px/1 'Noto Sans TC',sans-serif!important;letter-spacing:.22em!important;cursor:pointer!important;
+  transition:border-color .45s ease,color .45s ease,background .45s ease!important;
+}
+.data-state-retry:hover,.data-state-retry:focus-visible{border-color:rgba(201,168,76,.58)!important;color:#fff!important;background:rgba(201,168,76,.06)!important}
+#room-m .data-state{position:absolute!important;left:50%!important;top:50%!important;z-index:4!important;width:min(78vw,460px)!important;transform:translate(-50%,-50%)!important;border:0!important;pointer-events:none!important}
+#room-m .data-state-retry{pointer-events:auto!important}
+@keyframes dataStateBreath{0%,100%{opacity:.28;transform:scale(.82)}50%{opacity:.85;transform:scale(1.08)}}
+@media(max-width:680px){
+  .data-state{min-height:96px!important;padding:24px 16px!important;letter-spacing:.08em!important}
+  #room-m .data-state{top:46%!important;width:86vw!important}
+}
+@media(prefers-reduced-motion:reduce){.data-state[data-status="loading"]::before{animation:none!important}}
 .footer-farewell{margin:0 auto 48px!important;color:rgba(232,230,225,.62)!important;font:italic 400 clamp(20px,3vw,32px)/1.8 'Noto Serif TC',serif!important;letter-spacing:.12em!important;text-align:center!important;opacity:.25!important;transform:translateY(10px)!important;transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.23,1,.32,1)!important}
 footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!important}
 @media(max-width:680px){
@@ -4639,7 +4665,86 @@ window.clearEDraw = function() {
     eCanvasHasDrawn = false; // 清除畫布時，重置標記
 }
 
-let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = [];
+let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = []; let otherRoomsTimerId = 0;
+
+const DATA_STATE_COPY = {
+    loading: {
+        zh:'正在聽見遠方的聲音……', en:'Listening for distant voices…', ja:'遠くの声に耳を澄ませています……',
+        es:'Escuchando voces lejanas…', fr:'À l’écoute des voix lointaines…', de:'Wir lauschen fernen Stimmen…',
+        'zh-cn':'正在听见远方的声音……', uk:'Прислухаємося до далеких голосів…', pl:'Wsłuchujemy się w odległe głosy…'
+    },
+    empty: {
+        zh:'今晚，這裡還沒有留下新的情緒。', en:'Nothing new has been left here tonight.', ja:'今夜、ここにはまだ新しい感情が残されていません。',
+        es:'Esta noche aún no se ha dejado ninguna emoción aquí.', fr:'Ce soir, aucune nouvelle émotion n’a encore été déposée ici.', de:'Heute Abend wurde hier noch kein neues Gefühl hinterlassen.',
+        'zh-cn':'今晚，这里还没有留下新的情绪。', uk:'Сьогодні тут ще не залишили нових почуттів.', pl:'Dziś wieczorem nie pozostawiono tu jeszcze nowych emocji.'
+    },
+    error: {
+        zh:'這些文字暫時迷失在路上。', en:'These words are temporarily lost along the way.', ja:'これらの言葉は、今だけ道に迷っています。',
+        es:'Estas palabras se han perdido temporalmente en el camino.', fr:'Ces mots se sont momentanément égarés en chemin.', de:'Diese Worte haben sich vorübergehend verirrt.',
+        'zh-cn':'这些文字暂时迷失在路上。', uk:'Ці слова тимчасово загубилися в дорозі.', pl:'Te słowa chwilowo zgubiły się po drodze.'
+    },
+    retry: {
+        zh:'再試著呼喚一次', en:'CALL ONCE MORE', ja:'もう一度呼びかける', es:'VOLVER A LLAMAR', fr:'RAPPELER ENCORE', de:'NOCH EINMAL RUFEN',
+        'zh-cn':'再试着呼唤一次', uk:'ПОКЛИКАТИ ЩЕ РАЗ', pl:'ZAWOŁAJ JESZCZE RAZ'
+    }
+};
+
+function dataStateText(status) {
+    const language = window.currentLang === 'en-uk' ? 'en' : (window.currentLang || 'zh');
+    return DATA_STATE_COPY[status]?.[language] || DATA_STATE_COPY[status]?.en || '';
+}
+
+function applyDataStateTranslations(element,status) {
+    if (!element || !DATA_STATE_COPY[status]) return;
+    Object.entries(DATA_STATE_COPY[status]).forEach(([language,message]) => element.setAttribute(`data-${language}`,message));
+    element.textContent = dataStateText(status);
+}
+
+function dataStateHost(room) {
+    if (room === 'e') return document.querySelector('#room-e .e-feed-container');
+    if (room === 'm') return document.getElementById('room-m');
+    if (room === 'p') return document.getElementById('p-board')?.parentElement;
+    if (room === 'a') return document.getElementById('a-feed-wrapper');
+    if (room === 't') return document.getElementById('t-feed')?.parentElement;
+    return null;
+}
+
+function setDataState(room,status,onRetry) {
+    const host = dataStateHost(room); if (!host) return;
+    let stateEl = host.querySelector(`:scope > .data-state[data-room="${room}"]`);
+    if (!stateEl) {
+        stateEl = document.createElement('div');
+        stateEl.className = 'data-state';
+        stateEl.dataset.room = room;
+        stateEl.setAttribute('role','status');
+        stateEl.setAttribute('aria-live','polite');
+        host.appendChild(stateEl);
+    }
+    if (!status) { stateEl.hidden = true; stateEl.replaceChildren(); return; }
+    if (room === 'm') { const legacyLoading = document.getElementById('star-loading'); if (legacyLoading) legacyLoading.style.display = 'none'; }
+    stateEl.hidden = false;
+    stateEl.dataset.status = status;
+    const message = document.createElement('span');
+    applyDataStateTranslations(message,status);
+    stateEl.replaceChildren(message);
+    if (status === 'error' && typeof onRetry === 'function') {
+        const retry = document.createElement('button');
+        retry.type = 'button'; retry.className = 'data-state-retry'; applyDataStateTranslations(retry,'retry');
+        retry.addEventListener('click',onRetry,{once:true});
+        stateEl.appendChild(retry);
+    }
+}
+
+function retryDataSubscriptions() {
+    unsubscribeAll();
+    ['e','m','p','a','t'].forEach(room => setDataState(room,'loading'));
+    subscribeAll();
+}
+
+function handleDataError(room,error) {
+    console.error(`Firestore ${room.toUpperCase()} feed failed:`,error);
+    setDataState(room,'error',retryDataSubscriptions);
+}
 
 async function fetchRealCounts() {
     try {
@@ -4656,11 +4761,16 @@ async function fetchRealCounts() {
         globalCounts.a = aSnap.data().count;
         globalCounts.t = tSnap.data().count;
         updateCountersUI();
-    } catch(e) { console.error(e); }
+    } catch(e) {
+        console.error(e);
+        // 計數失敗不覆寫已知數字，避免介面出現 undefined 或誤導性的 0。
+        updateCountersUI();
+    }
 }
   
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
+    ['e','m','p','a','t'].forEach(room => setDataState(room,'loading'));
     fetchRealCounts();
 
     // 1. 監聽情緒出口 (Room E 優先載入，並將上限提高至 300)
@@ -4668,11 +4778,13 @@ function subscribeAll() {
         allEmotions = [];
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
+        setDataState('e',snapshot.empty ? 'empty' : null);
         updateCountersUI();
-    }));
+    },error => handleDataError('e',error)));
 
     // 神奇魔法：網頁載入 3 秒後，才在背景偷偷載入其他房間的資料
-    setTimeout(subscribeOtherRooms, 3000);
+    clearTimeout(otherRoomsTimerId);
+    otherRoomsTimerId = window.setTimeout(subscribeOtherRooms, 3000);
 }
 
 // 📦 負責載入其他房間的資料
@@ -4690,9 +4802,10 @@ function subscribeOtherRooms() {
         if(starsRafId) cancelAnimationFrame(starsRafId);
         starsRafId = null;
         const _sl = document.getElementById('star-loading'); if(_sl) _sl.style.display = 'none';
+        setDataState('m',snapshot.empty ? 'empty' : null);
         if(typeof window.drawStars === 'function') window.drawStars();
         updateCountersUI();
-    }));
+    },error => { const _sl = document.getElementById('star-loading'); if(_sl) _sl.style.display = 'none'; handleDataError('m',error); }));
 
     // 3. 監聽星系金線
     firestoreUnsubs.push(onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), firestoreLimit(50)), (snapshot) => {
@@ -4754,7 +4867,8 @@ function subscribeOtherRooms() {
                 window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
             }, 2000);
         }
-    }));
+        setDataState('p',snapshot.empty ? 'empty' : null);
+    },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
     firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
@@ -4773,8 +4887,9 @@ function subscribeOtherRooms() {
             div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap notranslate"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
             feed.appendChild(div);
         });
+        setDataState('a',feed.children.length ? null : 'empty');
         updateCountersUI();
-    }));
+    },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
     firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
@@ -4794,11 +4909,12 @@ function subscribeOtherRooms() {
             });
             feed.appendChild(div);
         });
+        setDataState('t',snapshot.empty ? 'empty' : null);
         updateCountersUI();
-    }));
+    },error => handleDataError('t',error)));
 }
   
-function unsubscribeAll() { firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
+function unsubscribeAll() { clearTimeout(otherRoomsTimerId); otherRoomsTimerId = 0; firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
 window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
