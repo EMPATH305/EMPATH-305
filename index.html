@@ -3077,7 +3077,7 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
 
   #room-m{padding:0!important;padding-bottom:0!important;min-height:auto!important;overflow:clip!important}
   #room-m .room-content{min-height:var(--empath-vh)!important;padding:calc(92px + var(--empath-safe-top)) 20px calc(72px + var(--empath-safe-bottom))!important}
-  #room-m .m-input-wrap{margin-top:clamp(240px,34svh,320px)!important}
+  #room-m .m-input-wrap{margin-top:clamp(380px,46svh,500px)!important}
   #room-m .m-stats{margin-top:18px!important}
 
   a[title="CSS Light"]{
@@ -5575,7 +5575,8 @@ window.drawStars = function(){
         });
     const insideUiSafeRect = (x, y) => uiSafeRects.some(r => x > r.left && x < r.right && y > r.top && y < r.bottom);
     // 窄視窗採代表性抽樣，避免大量星星在有限空間持續互相排斥。
-    const visibleLimit = w < 600 ? 32 : (w < 900 ? 42 : allStarMessages.length);
+    // 手機保留較少的代表星，完整資料仍存在；避免小螢幕把星系壓成一團。
+    const visibleLimit = w < 600 ? 18 : (w < 900 ? 32 : allStarMessages.length);
     const starMessages = allStarMessages.slice(0, visibleLimit);
     ctx.clearRect(0,0,w,h); 
 
@@ -5613,8 +5614,8 @@ window.drawStars = function(){
         const inputEl = roomM.querySelector('.m-input-wrap');
         const descBottom = descEl ? descEl.getBoundingClientRect().bottom - roomRect.top : 220;
         const inputTop = inputEl ? inputEl.getBoundingClientRect().top - roomRect.top : descBottom + 300;
-        safeX = 22;
-        safeW = Math.max(w - 44, 100);
+        safeX = 30;
+        safeW = Math.max(w - 60, 100);
         safeY = Math.max(24, descBottom + 26);
         const safeBottom = Math.min(h - 32, inputTop - 26);
         safeH = Math.max(80, safeBottom - safeY);
