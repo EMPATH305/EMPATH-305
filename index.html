@@ -4720,7 +4720,7 @@ function setDataState(room,status,onRetry) {
         stateEl.setAttribute('aria-live','polite');
         host.appendChild(stateEl);
     }
-    if (!status) { stateEl.hidden = true; stateEl.replaceChildren(); return; }
+    if (!status) { stateEl.hidden = true; delete stateEl.dataset.status; stateEl.replaceChildren(); return; }
     if (room === 'm') { const legacyLoading = document.getElementById('star-loading'); if (legacyLoading) legacyLoading.style.display = 'none'; }
     stateEl.hidden = false;
     stateEl.dataset.status = status;
