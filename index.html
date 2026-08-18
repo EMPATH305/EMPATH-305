@@ -2942,7 +2942,9 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   .h-journey-arc-canvas{min-height:170px!important;overflow-x:auto!important;padding-bottom:10px!important}
   .h-journey-arc-canvas svg{min-width:620px!important}
 }
-@media(prefers-reduced-motion:reduce){.footer-farewell{opacity:1!important;transform:none!important;transition:none!important}}\n\n/* ===== INSTAGRAM / iOS IN-APP BROWSER · MOBILE VIEWPORT SAFETY ===== */
+@media(prefers-reduced-motion:reduce){.footer-farewell{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* ===== INSTAGRAM / iOS IN-APP BROWSER · MOBILE VIEWPORT SAFETY ===== */
 @media(max-width:900px){
   :root{--empath-vh:100svh;--empath-safe-top:env(safe-area-inset-top,0px);--empath-safe-right:env(safe-area-inset-right,0px);--empath-safe-bottom:env(safe-area-inset-bottom,0px);--empath-safe-left:env(safe-area-inset-left,0px)}
   html,body{width:100%!important;max-width:100%!important;overflow-x:clip!important;-webkit-text-size-adjust:100%!important}
@@ -3025,6 +3027,7 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   #room-h #g-summary .visitor-card{padding-left:12px!important;padding-right:12px!important}
   .empath-entry-question,.empath-room-ritual-line{max-width:calc(100vw - 28px)!important;padding-left:8px!important;padding-right:8px!important;overflow-wrap:anywhere!important}
 }
+
 /* ===== MOBILE ART DIRECTION RESET · compact, deliberate, never clipped ===== */
 @media(max-width:768px){
   nav{
@@ -3072,9 +3075,9 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   .hero-actions{margin-bottom:28px!important}
   .opening-scroll{display:none!important}
 
-  #room-m{padding:0!important;padding-bottom:0!important;min-height:auto!important;overflow:hidden!important}
+  #room-m{padding:0!important;padding-bottom:0!important;min-height:auto!important;overflow:clip!important}
   #room-m .room-content{min-height:var(--empath-vh)!important;padding:calc(92px + var(--empath-safe-top)) 20px calc(72px + var(--empath-safe-bottom))!important}
-  #room-m .m-input-wrap{margin-top:clamp(140px,20svh,190px)!important}
+  #room-m .m-input-wrap{margin-top:clamp(240px,34svh,320px)!important}
   #room-m .m-stats{margin-top:18px!important}
 
   a[title="CSS Light"]{
@@ -3090,7 +3093,8 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   .lang-dropdown-wrapper{grid-column:auto!important}
   .hero-opening{padding-left:16px!important;padding-right:16px!important}
   #room-m .room-content{padding-left:18px!important;padding-right:18px!important}
-}\n</style>
+}
+</style>
 </head>
 <body>
 
@@ -5471,6 +5475,10 @@ window.resizeCanvas = function(){
         canvas.style.height = h + 'px'; 
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0); 
         initBgStars(w, h); 
+        // 旋轉裝置或行動瀏覽器改變可視高度時，依新星空區重新定位。
+        if(Array.isArray(window.starMessages)) {
+            window.starMessages.forEach(star => { star.x = undefined; star.y = undefined; });
+        }
     } 
     
     const sCanvas = document.getElementById('sand-canvas'); 
@@ -5546,8 +5554,11 @@ window.drawStars = function(){
         ? window.starMessages.map(normalizeStar)
         : [];
     window.starMessages = allStarMessages;
-    const w = roomM.offsetWidth; 
-    const h = roomM.offsetHeight;
+    // 必須和 resizeCanvas 使用同一組 CSS 像素尺寸；手機上 scrollHeight
+    // 往往大於 offsetHeight，混用會讓星星被畫到房間邊界之外。
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr;
+    const h = canvas.height / dpr;
     const canvasRect = canvas.getBoundingClientRect();
     // 依照介面實際位置建立星星禁入區，避免星星被文字或數據面板蓋住。
     const uiSafeRects = [...roomM.querySelectorAll('.room-title-wrap, .desc-wrap, .m-input-wrap, .m-stats')]
@@ -5595,14 +5606,18 @@ window.drawStars = function(){
     if (w > 768) {
         safeX = 580; safeW = w - 620; safeY = 120; safeH = h - 200;
     } else {
-        const statsEl = roomM.querySelector('.m-stats');
-        let uiBottom = 500; 
-        if (statsEl) {
-            const rRect = roomM.getBoundingClientRect();
-            uiBottom = statsEl.getBoundingClientRect().bottom - rRect.top;
-        }
-        safeX = 15; safeW = w - 30; safeY = uiBottom + 40; 
-        safeH = Math.max(h - safeY - 10, 250); 
+        // 手機的星空舞台位於說明與輸入區之間，不能放在統計資料之後；
+        // 後者已接近 section 底部，舊寫法會把星星推到下一個房間並被裁切。
+        const roomRect = roomM.getBoundingClientRect();
+        const descEl = roomM.querySelector('.desc-wrap');
+        const inputEl = roomM.querySelector('.m-input-wrap');
+        const descBottom = descEl ? descEl.getBoundingClientRect().bottom - roomRect.top : 220;
+        const inputTop = inputEl ? inputEl.getBoundingClientRect().top - roomRect.top : descBottom + 300;
+        safeX = 22;
+        safeW = Math.max(w - 44, 100);
+        safeY = Math.max(24, descBottom + 26);
+        const safeBottom = Math.min(h - 32, inputTop - 26);
+        safeH = Math.max(80, safeBottom - safeY);
     }
     safeW = Math.max(safeW, 100);
 
@@ -7456,5 +7471,6 @@ document.addEventListener('keydown', function(event) {
   window.visualViewport?.addEventListener('resize',scheduleSync,{passive:true});
   window.visualViewport?.addEventListener('scroll',scheduleSync,{passive:true});
 })();
-</script>\n</body>
+</script>
+</body>
 </html>
