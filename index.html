@@ -4115,12 +4115,16 @@ function initSessionNarrative() {
     window.renderSessionJourney();
     const echo = document.getElementById('h-session-echo');
     if (echo) echo.textContent = sessionStorage.getItem(SESSION_ECHO_KEY) || '';
+    // 以「房間確實進入視窗」判定，不再用房間總高度比例。
+    // Room P 內容很長；舊 threshold:.32 會要求超過一個視窗的可見高度，
+    // 因此在任何螢幕上都可能永遠無法觸發。固定像素內縮也避免
+    // 百分比 rootMargin 在寬螢幕上把有效觀察區壓得過小。
     const roomObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (!entry.isIntersecting) return;
             recordSessionRoom(entry.target.id.replace('room-','').toUpperCase());
         });
-    },{threshold:.32,rootMargin:'-8% 0px -18%'});
+    },{threshold:0,rootMargin:'-16px 0px -16px 0px'});
     document.querySelectorAll('.room[id^="room-"]').forEach(room => roomObserver.observe(room));
     const footer = document.querySelector('footer');
     if (footer) new IntersectionObserver(entries => {
