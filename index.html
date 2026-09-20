@@ -3094,6 +3094,97 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   .hero-opening{padding-left:16px!important;padding-right:16px!important}
   #room-m .room-content{padding-left:18px!important;padding-right:18px!important}
 }
+
+/* ===== INTERACTION RELIABILITY · journey, skip, native pointer ===== */
+/* Room H expands after it has entered the viewport. Keeping that large, dynamic
+   region on a transformed/filter compositing layer makes iOS WebKit retain the
+   old paint bounds, so the newly revealed content can exist without rendering. */
+#room-h {
+  overflow: visible !important;
+}
+#room-h .h-journey.aw-stage,
+#room-h .h-journey.aw-stage.aw-in {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+.h-detail-panel[hidden] {
+  display: none !important;
+}
+.h-detail-panel.is-open:not([hidden]) {
+  display: block !important;
+  animation: hDetailReveal .45s cubic-bezier(.23,1,.32,1) both;
+}
+@keyframes hDetailReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.h-details-toggle,
+#timeline-toggle-btn {
+  min-height: 48px !important;
+  touch-action: manipulation;
+}
+.h-detail-panel {
+  scroll-margin-top: 88px;
+}
+
+/* The intro exit is a primary control, not decorative microcopy. */
+.empath-entry-skip {
+  right: max(20px, env(safe-area-inset-right, 0px)) !important;
+  bottom: max(24px, calc(18px + env(safe-area-inset-bottom, 0px))) !important;
+  min-width: 132px !important;
+  min-height: 48px !important;
+  padding: 0 20px !important;
+  border: 1px solid rgba(232,230,225,.48) !important;
+  border-radius: 999px !important;
+  background: rgba(8,12,18,.72) !important;
+  color: rgba(255,255,255,.92) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  line-height: 1 !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.28) !important;
+}
+.empath-entry-skip:hover,
+.empath-entry-skip:focus-visible {
+  color: #fff !important;
+  border-color: rgba(232,230,225,.9) !important;
+  background: rgba(232,230,225,.12) !important;
+  outline: 2px solid rgba(201,168,76,.9) !important;
+  outline-offset: 3px !important;
+}
+@media(max-width:680px) {
+  .empath-entry-skip {
+    left: 50% !important;
+    right: auto !important;
+    bottom: max(22px, calc(16px + env(safe-area-inset-bottom, 0px))) !important;
+    width: min(220px, calc(100vw - 40px)) !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* Keep the system pointer: it is faster, clearer and preserves OS accessibility
+   settings. EMPATH's hover feedback remains, but no longer replaces the cursor. */
+@media (hover:hover) and (pointer:fine) {
+  html.aw-custom-cursor,
+  html.aw-custom-cursor body { cursor: auto !important; }
+  html.aw-custom-cursor a,
+  html.aw-custom-cursor button,
+  html.aw-custom-cursor [role="button"],
+  html.aw-custom-cursor .shard,
+  html.aw-custom-cursor .echo-btn { cursor: pointer !important; }
+  html.aw-custom-cursor input,
+  html.aw-custom-cursor textarea,
+  html.aw-custom-cursor [contenteditable="true"] { cursor: text !important; }
+  #cursor-glow { display: none !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .h-detail-panel.is-open:not([hidden]) { animation: none !important; }
+}
 </style>
 </head>
 <body>
@@ -3821,7 +3912,7 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
         <div class="h-events" id="h-events" style="max-height: 280px; overflow: hidden; transition: max-height 0.5s ease;"></div>
         <div id="h-events-fade" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; transition: opacity 0.5s ease;"></div>
       </div>
-      <button id="timeline-toggle-btn" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size:12px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓" data-fr="Voir le parcours complet ↓" data-de="Gesamte Reise anzeigen ↓" data-zh-cn="展开完整旅程 ↓">展開完整旅程 ↓</button>
+      <button id="timeline-toggle-btn" type="button" aria-expanded="false" aria-controls="h-events" onclick="window.toggleTimeline()" style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 12px 24px; font-size:12px; letter-spacing: 2px; cursor: pointer; border-radius: 4px; margin-top: 16px; transition: all 0.3s; font-family:'Noto Serif TC',serif;" data-zh="展開完整旅程 ↓" data-en="Show Full Journey ↓" data-ja="すべての旅を見る ↓" data-es="Ver Viaje Completo ↓" data-fr="Voir le parcours complet ↓" data-de="Gesamte Reise anzeigen ↓" data-zh-cn="展开完整旅程 ↓">展開完整旅程 ↓</button>
     </div>
     
     <div class="lighthouse">
@@ -4221,7 +4312,7 @@ function updateDynamicTexts() {
   document.querySelectorAll('.e-msg-anon').forEach(el => el.textContent = t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS'));
   document.querySelectorAll('.sand-timer-label').forEach(el => el.textContent = t('消散中', 'DISSOLVING', '消散中', 'DISOLVIENDO', 'DISSOLUTION', 'AUFLÖSEND', '消散中'));
   const toggleBtn = document.getElementById('timeline-toggle-btn');
-  if(toggleBtn) { const isExpanded = document.getElementById('h-events').style.maxHeight === '5000px'; toggleBtn.innerHTML = isExpanded ? t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑', 'Réduire ↑', 'Einklappen ↑', '收起旅程 ↑') : t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓', 'Voir le parcours complet ↓', 'Gesamte Reise anzeigen ↓', '展开完整旅程 ↓'); }
+  if(toggleBtn) { const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true'; toggleBtn.innerHTML = isExpanded ? t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑', 'Réduire ↑', 'Einklappen ↑', '收起旅程 ↑') : t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓', 'Voir le parcours complet ↓', 'Gesamte Reise anzeigen ↓', '展开完整旅程 ↓'); }
   const quotesBtn = document.getElementById('hero-quotes-toggle');
   if(quotesBtn) { const isExpandedQuotes = document.getElementById('hero-quotes').classList.contains('show-quotes'); quotesBtn.innerHTML = isExpandedQuotes ? t('📖 收起理念 ↑', '📖 Collapse ↑', '📖 閉じる ↑', '📖 Ocultar ↑', '📖 Réduire ↑', '📖 Einklappen ↑', '📖 收起理念 ↑') : t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓', '📖 Lire la philosophie ↓', '📖 Philosophie lesen ↓', '📖 阅读设计理念 ↓'); }
 }
@@ -4240,7 +4331,21 @@ function formatTimeLeft(secs){
 
 function cleanText(text) { const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '死', '媽的', '幹你娘', '廢物', '破病', '做愛', '腦殘', '噁心', '滾', '外勞', '幹你']; let cleaned = text; badWords.forEach(word => { const regex = new RegExp(word.split('').join('\\s*'), 'gi'); cleaned = cleaned.replace(regex, '***'); }); return cleaned; }
 
-window.toggleTimeline = function() { const wrapper = document.getElementById('h-events'); const btn = document.getElementById('timeline-toggle-btn'); const fade = document.getElementById('h-events-fade'); if (wrapper.style.maxHeight === '280px' || wrapper.style.maxHeight === '') { wrapper.style.maxHeight = '5000px'; fade.style.opacity = '0'; btn.innerHTML = t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑', 'Réduire ↑', 'Einklappen ↑', '收起旅程 ↑'); } else { wrapper.style.maxHeight = '280px'; fade.style.opacity = '1'; btn.innerHTML = t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓', 'Voir le parcours complet ↓', 'Gesamte Reise anzeigen ↓', '展开完整旅程 ↓'); } }
+window.toggleTimeline = function() {
+  const wrapper = document.getElementById('h-events');
+  const btn = document.getElementById('timeline-toggle-btn');
+  const fade = document.getElementById('h-events-fade');
+  if (!wrapper || !btn || !fade) return;
+  const open = btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', String(open));
+  wrapper.classList.toggle('is-expanded', open);
+  wrapper.style.maxHeight = open ? `${wrapper.scrollHeight}px` : '280px';
+  fade.style.opacity = open ? '0' : '1';
+  fade.hidden = open;
+  btn.innerHTML = open
+    ? t('收起旅程 ↑', 'Collapse ↑', '折りたたむ ↑', 'Ocultar ↑', 'Réduire ↑', 'Einklappen ↑', '收起旅程 ↑')
+    : t('展開完整旅程 ↓', 'Show Full Journey ↓', 'すべての旅を見る ↓', 'Ver Viaje Completo ↓', 'Voir le parcours complet ↓', 'Gesamte Reise anzeigen ↓', '展开完整旅程 ↓');
+}
 window.toggleHeroQuotes = function() { const el = document.getElementById('hero-quotes'); const btn = document.getElementById('hero-quotes-toggle'); el.classList.toggle('show-quotes'); if(el.classList.contains('show-quotes')){ btn.innerHTML = t('📖 收起理念 ↑', '📖 Collapse ↑', '📖 閉じる ↑', '📖 Ocultar ↑', '📖 Réduire ↑', '📖 Einklappen ↑', '📖 收起理念 ↑'); } else { btn.innerHTML = t('📖 閱讀設計理念 ↓', '📖 Read Philosophy ↓', '📖 コンセプトを読む ↓', '📖 Leer Filosofía ↓', '📖 Lire la philosophie ↓', '📖 Philosophie lesen ↓', '📖 阅读设计理念 ↓'); } }
 
 window.addEventListener('scroll', () => { const btt = document.getElementById('btt-btn'); if(window.scrollY > 500) { btt.style.display = 'flex'; } else { btt.style.display = 'none'; } });
@@ -6696,19 +6801,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function setupCursorStates() {
-    if (!finePointer.matches || reduceMotion.matches) return;
+    document.documentElement.classList.remove('aw-custom-cursor');
     const cursor = document.querySelector('#cursor-glow');
-    if (!cursor) return;
-    document.documentElement.classList.add('aw-custom-cursor');
-    const interactive = 'a, button, input, textarea, select, [role="button"], .door-card, .shard';
-    document.addEventListener('pointerover', event => {
-      cursor.classList.toggle('is-interactive', Boolean(event.target.closest?.(interactive)));
-    }, { passive: true });
-    document.addEventListener('pointerout', event => {
-      if (!event.relatedTarget) cursor.classList.remove('is-interactive');
-    }, { passive: true });
-    document.addEventListener('pointerdown', () => cursor.classList.add('is-pressing'), { passive: true });
-    document.addEventListener('pointerup', () => cursor.classList.remove('is-pressing'), { passive: true });
+    if (cursor) cursor.hidden = true;
   }
 
   function init() {
@@ -7007,10 +7102,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const skip = document.createElement('button');
     skip.type = 'button';
     skip.className = 'empath-entry-skip';
-    skip.textContent = '跳過';
+    skip.textContent = '略過動畫';
     skip.setAttribute('aria-label','跳過進場動畫');
+    skip.title = '略過進場動畫';
     overlay.append(question,skip);
     document.body.appendChild(overlay);
+    window.setTimeout(() => skip.focus({ preventScroll: true }), 80);
 
     return new Promise(resolve => {
       let finished = false;
@@ -7343,6 +7440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const panel = document.createElement('div');
     panel.className = 'h-detail-panel';
     panel.id = 'h-detail-panel';
+    panel.hidden = true;
     panel.appendChild(secondary);
 
     let next = summary.nextSibling;
@@ -7363,12 +7461,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     summary.after(toggle,panel);
     toggle.addEventListener('click',() => {
-      const open = !panel.classList.contains('is-open');
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
       panel.classList.toggle('is-open',open);
+      panel.hidden = !open;
       toggle.setAttribute('aria-expanded',String(open));
       toggle.textContent = open
         ? copy('收起完整旅程','CLOSE THE JOURNEY','旅を閉じる')
         : copy('查看完整靈魂旅程','VIEW THE FULL JOURNEY','魂の旅をすべて見る');
+      if (open) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          panel.scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
+            block: 'start'
+          });
+        }));
+      }
     });
   }
 
