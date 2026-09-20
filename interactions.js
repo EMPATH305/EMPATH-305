@@ -654,7 +654,6 @@
     const PAGE_SIZE = 12;
     const STEP = 8;
     let visibleCount = PAGE_SIZE;
-    let refreshTimer = 0;
 
     const loading = document.createElement('p');
     loading.className = 'kintsugi-loading';
@@ -700,20 +699,24 @@
     }
 
     function refresh() {
-      const cards = Array.from(board.querySelectorAll(':scope > .shard'));
-      if (!cards.length) {
+      if (!window.pShardDataReady || typeof window.renderPShards !== 'function') {
         loading.hidden = false;
         controls.hidden = true;
         return;
       }
+
+      const total = Array.isArray(window.pShardRecords) ? window.pShardRecords.length : 0;
       loading.hidden = true;
-      if (visibleCount < 1) visibleCount = Math.min(PAGE_SIZE,cards.length);
-      visibleCount = Math.min(visibleCount,cards.length);
-      cards.forEach((card,index) => {
-        card.classList.toggle('is-pagination-hidden',index >= visibleCount);
-        addExpandControl(card);
-      });
-      const remaining = Math.max(0,cards.length-visibleCount);
+      if (!total) {
+        board.replaceChildren();
+        controls.hidden = true;
+        return;
+      }
+
+      visibleCount = Math.min(Math.max(PAGE_SIZE,visibleCount),total);
+      const result = window.renderPShards(visibleCount);
+      Array.from(board.querySelectorAll(':scope > .shard')).forEach(addExpandControl);
+      const remaining = Math.max(0,total-result.rendered);
       controls.hidden = false;
       more.hidden = remaining === 0;
       more.textContent = copy(
@@ -722,23 +725,20 @@
         remaining ? 'もう少しかけらを拾う' : 'すべてのかけらを見ました'
       );
       status.textContent = copy(
-        '已看見 ' + visibleCount + '／' + cards.length + ' 片',
-        visibleCount + ' of ' + cards.length + ' fragments',
-        visibleCount + '／' + cards.length + ' 個'
+        '已看見 ' + result.rendered + '／' + total + ' 片',
+        result.rendered + ' of ' + total + ' fragments',
+        result.rendered + '／' + total + ' 個'
       );
     }
 
     more.addEventListener('click',() => {
-      const total = board.querySelectorAll(':scope > .shard').length;
+      const total = Array.isArray(window.pShardRecords) ? window.pShardRecords.length : 0;
       if (!total) return;
       visibleCount = Math.min(total,Math.max(PAGE_SIZE,visibleCount)+STEP);
       refresh();
     });
 
-    new MutationObserver(() => {
-      clearTimeout(refreshTimer);
-      refreshTimer = window.setTimeout(refresh,60);
-    }).observe(board,{childList:true});
+    document.addEventListener('empath:p-shards-updated',refresh);
     refresh();
   }
 
