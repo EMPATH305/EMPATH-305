@@ -1139,6 +1139,21 @@ function scheduleOtherRoomSubscriptions() {
 window.pShardRecords = window.pShardRecords || [];
 window.pShardDataReady = false;
 
+// 首次以 #room-* 深連結進站時，非同步資料會改變前方房間高度。
+// 在首批資料安定後重新對齊一次，避免使用者被推離目標房間。
+const initialRoomHash = /^#room-[empath]$/.test(window.location.hash)
+    ? window.location.hash.slice(1)
+    : '';
+let deepLinkStabilizeTimer = null;
+function scheduleInitialDeepLinkStabilization() {
+    if (!initialRoomHash || performance.now() > 15000) return;
+    clearTimeout(deepLinkStabilizeTimer);
+    deepLinkStabilizeTimer = setTimeout(() => {
+        const target = document.getElementById(initialRoomHash);
+        if (target) target.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }, 220);
+}
+
 function createPShardCard(record) {
     const { id, data } = record;
     const div = document.createElement('div');
@@ -1261,6 +1276,7 @@ function subscribeOtherRooms() {
             detail: { total: window.pTotalShards }
         }));
         setDataState('p',snapshot.empty ? 'empty' : null);
+        scheduleInitialDeepLinkStabilization();
     },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
@@ -1276,12 +1292,21 @@ function subscribeOtherRooms() {
             if(leftSecs <= 0) return;
             const div = document.createElement('div'); div.className = 'sand-msg';
             div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs;
-            const pct = (leftSecs / (lifespanMs / 1000)) * 100;
-            div.innerHTML = `<div class="sand-dissolve-overlay"></div><div class="sand-msg-text">${data.text}</div><div class="sand-timer-wrap notranslate"><div class="sand-timer-label">DISSOLVING</div><div class="sand-timer-bar"><div class="sand-timer-fill" style="width:${pct}%"></div></div><div class="sand-time-left">${formatTimeLeft(Math.floor(leftSecs))}</div></div>`;
+            const pct = Math.max(0, Math.min(100, (leftSecs / (lifespanMs / 1000)) * 100));
+            const overlay = document.createElement('div'); overlay.className = 'sand-dissolve-overlay';
+            const message = document.createElement('div'); message.className = 'sand-msg-text';
+            message.textContent = typeof data.text === 'string' ? data.text : '';
+            const timer = document.createElement('div'); timer.className = 'sand-timer-wrap notranslate';
+            const timerLabel = document.createElement('div'); timerLabel.className = 'sand-timer-label'; timerLabel.textContent = 'DISSOLVING';
+            const timerBar = document.createElement('div'); timerBar.className = 'sand-timer-bar';
+            const timerFill = document.createElement('div'); timerFill.className = 'sand-timer-fill'; timerFill.style.width = pct + '%';
+            const timeLeft = document.createElement('div'); timeLeft.className = 'sand-time-left'; timeLeft.textContent = formatTimeLeft(Math.floor(leftSecs));
+            timerBar.appendChild(timerFill); timer.append(timerLabel, timerBar, timeLeft); div.append(overlay, message, timer);
             feed.appendChild(div);
         });
         setDataState('a',feed.children.length ? null : 'empty');
         updateCountersUI();
+        scheduleInitialDeepLinkStabilization();
     },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
@@ -1291,8 +1316,13 @@ function subscribeOtherRooms() {
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id;
             const div = document.createElement('div'); div.className = 'warmth-item';
-            div.innerHTML = `<div class="warmth-pulse"></div> <div>${data.text}</div> <button type="button" class="echo-btn ${localStorage.getItem('echoed_'+id)?'pulsed':''}" id="btn-${id}"> <span class="heart">🕯️</span> Echo Pulse </button>`;
-            div.querySelector('.echo-btn').addEventListener('click', async function(e){
+            const pulse = document.createElement('div'); pulse.className = 'warmth-pulse';
+            const message = document.createElement('div'); message.textContent = typeof data.text === 'string' ? data.text : '';
+            const echoButton = document.createElement('button'); echoButton.type = 'button'; echoButton.className = 'echo-btn'; echoButton.id = `btn-${id}`;
+            if (localStorage.getItem('echoed_'+id)) echoButton.classList.add('pulsed');
+            const heart = document.createElement('span'); heart.className = 'heart'; heart.textContent = '🕯️';
+            echoButton.append(heart, document.createTextNode(' Echo Pulse ')); div.append(pulse, message, echoButton);
+            echoButton.addEventListener('click', async function(e){
                 if(this.classList.contains('pulsed')) return;
                 this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
                 await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 });
@@ -1304,6 +1334,7 @@ function subscribeOtherRooms() {
         });
         setDataState('t',snapshot.empty ? 'empty' : null);
         updateCountersUI();
+        scheduleInitialDeepLinkStabilization();
     },error => handleDataError('t',error)));
 }
   
@@ -1466,7 +1497,21 @@ window.showToast = function(msg, dur=2400){ const t = document.getElementById('t
 function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 
 function logJourney(type, text){ const time = nowStr(); journeyData.counters[type] = (journeyData.counters[type] || 0) + 1; journeyData.events.push({ type, text, time }); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud(); updateCountersUI(); }
-function renderTimelineHTML(type, text, time){ const container = document.getElementById('h-events'); const div = document.createElement('div'); div.className = 'h-event ' + type + '-event'; const labels = { 'zh': {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'}, 'en': {e:'Exit', m:'Stars', p:'Mended', a:'Asylum', t:'Resonance'}, 'ja': {e:'出口', m:'星空', p:'修復', a:'避難所', t:'共鳴'}, 'es': {e:'Salida', m:'Estrellas', p:'Reparado', a:'Asilo', t:'Resonancia'}, 'fr': {e:'Sortie', m:'Étoiles', p:'Réparé', a:'Asile', t:'Résonance'}, 'de': {e:'Ausgang', m:'Sterne', p:'Geflickt', a:'Asyl', t:'Resenz'}, 'zh-cn': {e:'情绪出口', m:'思念映射', p:'碎片修补', a:'避难所', t:'能量共振'} }; const currentKey = window.currentLang === 'en-uk' ? 'en' : window.currentLang; div.innerHTML = `<div><div class="h-event-label">${labels[currentKey]?.[type]||''}</div><div class="h-event-text">${text.length>40?text.slice(0,40)+'…':text}</div><div class="h-event-time">${time}</div></div>`; container.appendChild(div); }
+function renderTimelineHTML(type, text, time){
+    const container = document.getElementById('h-events');
+    if (!container) return;
+    const safeType = ['e','m','p','a','t'].includes(type) ? type : 'e';
+    const div = document.createElement('div'); div.className = 'h-event ' + safeType + '-event';
+    const labels = { 'zh': {e:'情緒出口', m:'思念映射', p:'碎片修補', a:'避難所', t:'能量共振'}, 'en': {e:'Exit', m:'Stars', p:'Mended', a:'Asylum', t:'Resonance'}, 'ja': {e:'出口', m:'星空', p:'修復', a:'避難所', t:'共鳴'}, 'es': {e:'Salida', m:'Estrellas', p:'Reparado', a:'Asilo', t:'Resonancia'}, 'fr': {e:'Sortie', m:'Étoiles', p:'Réparé', a:'Asile', t:'Résonance'}, 'de': {e:'Ausgang', m:'Sterne', p:'Geflickt', a:'Asyl', t:'Resonanz'}, 'zh-cn': {e:'情绪出口', m:'思念映射', p:'碎片修补', a:'避难所', t:'能量共振'} };
+    const currentKey = window.currentLang === 'en-uk' ? 'en' : window.currentLang;
+    const body = document.createElement('div');
+    const label = document.createElement('div'); label.className = 'h-event-label'; label.textContent = labels[currentKey]?.[safeType] || '';
+    const eventText = document.createElement('div'); eventText.className = 'h-event-text';
+    const safeText = typeof text === 'string' ? text : '';
+    eventText.textContent = safeText.length > 40 ? safeText.slice(0,40) + '…' : safeText;
+    const eventTime = document.createElement('div'); eventTime.className = 'h-event-time'; eventTime.textContent = typeof time === 'string' ? time : '';
+    body.append(label, eventText, eventTime); div.appendChild(body); container.appendChild(div);
+}
 function initTimeline(){ 
     const container = document.getElementById('h-events'); 
     container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:13px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`; 
@@ -1545,7 +1590,10 @@ window.submitE = async function(){
             starText.className = 'star-message';
             // 擷取前 30 個字，讓畫面保持詩意
             let showText = text.length > 30 ? text.substring(0, 30) + '...' : text;
-            starText.innerHTML = `「 ${showText} 」<br><span style="font-size:12px; opacity:0.6; margin-top:16px; display:block; letter-spacing:4px;">宇宙收到了 ✦</span>`; 
+            const received = document.createElement('span');
+            received.style.cssText = 'font-size:12px; opacity:0.6; margin-top:16px; display:block; letter-spacing:4px;';
+            received.textContent = '宇宙收到了 ✦';
+            starText.append(document.createTextNode(`「 ${showText} 」`), document.createElement('br'), received);
             starText.style.textAlign = 'center';
             starText.style.lineHeight = '2';
             document.body.appendChild(starText);
@@ -1631,14 +1679,25 @@ window.renderEFeed = function() {
         const div = document.createElement('div'); 
         div.className = 'e-msg'; 
         
-        let contentHtml = '';
-        if (data.text) {
-            contentHtml = `<div>${data.text}</div>`;
-        } else if (data.image) {
-            contentHtml = `<img src="${data.image}" class="e-msg-img" alt="Emotional Scribble">`;
+        const anon = document.createElement('div');
+        anon.className = 'e-msg-anon';
+        anon.textContent = t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS');
+        div.appendChild(anon);
+        if (typeof data.text === 'string' && data.text) {
+            const message = document.createElement('div');
+            message.textContent = data.text;
+            div.appendChild(message);
+        } else if (typeof data.image === 'string' && /^data:image\/(?:png|jpeg|webp);base64,/i.test(data.image)) {
+            const image = document.createElement('img');
+            image.src = data.image;
+            image.className = 'e-msg-img';
+            image.alt = 'Emotional Scribble';
+            div.appendChild(image);
         }
-
-        div.innerHTML = `<div class="e-msg-anon">${t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS')}</div>${contentHtml}<div class="e-msg-time">${timeStr}</div>`; 
+        const time = document.createElement('div');
+        time.className = 'e-msg-time';
+        time.textContent = timeStr;
+        div.appendChild(time);
         feed.appendChild(div); 
     }); 
     
@@ -1983,7 +2042,16 @@ roomM.addEventListener('click', async e => {
                 if (tx + 260 > window.innerWidth) tx = e.clientX - 280; 
                 tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px'; tooltip.style.bottom = 'auto'; 
             } 
-            tooltip.innerHTML = `${t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')}<br>${star.text}<br><span style="font-size:10px;color:var(--gold);margin-top:10px;display:block;">✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}</span>`; 
+            const prompt = document.createElement('span');
+            prompt.style.cssText = 'font-size:10px;color:var(--gold);margin-top:10px;display:block;';
+            prompt.textContent = `✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}`;
+            tooltip.replaceChildren(
+                document.createTextNode(t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')),
+                document.createElement('br'),
+                document.createTextNode(typeof star.text === 'string' ? star.text : ''),
+                document.createElement('br'),
+                prompt
+            ); 
         } else { 
             try { 
                 await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); 
@@ -2613,7 +2681,7 @@ window.checkRoomTWarmth = function() {
                         msgBox.style.cssText = 'color:var(--amber); font-size:13px; margin-top:24px; text-align:center; font-weight:bold; letter-spacing:1px; border-top:1px dashed rgba(232,168,124,0.3); padding-top:16px; animation: pulse-spark 3s infinite;';
                         document.querySelector('.t-send-panel').appendChild(msgBox);
                     }
-                    msgBox.innerHTML = `✦ 宇宙回聲：你上次送出的溫暖，已被陌生人共鳴了 ${echos} 次。`;
+                    msgBox.textContent = `✦ 宇宙回聲：你上次送出的溫暖，已被陌生人共鳴了 ${Math.max(0, Number(echos) || 0)} 次。`;
                 }
             }
         });
