@@ -50,7 +50,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -397,7 +397,7 @@ try {
   </div>
   <p class="e-mode-hint" data-zh="選擇用文字，或直接畫出現在的感受。" data-en="Choose words, or draw the feeling directly." data-ja="言葉で綴るか、今の気持ちをそのまま描いてください。" data-es="Elige palabras o dibuja directamente lo que sientes." data-zh-cn="选择用文字，或直接画出现在的感受。">選擇用文字，或直接畫出現在的感受。</p>
 
-  <textarea class="input-area" id="e-input" rows="5" maxlength="500" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 500'"
+  <textarea class="input-area" id="e-input" rows="5" maxlength="500" aria-label="匿名情緒文字" oninput="document.getElementById('e-char').textContent = this.value.length + ' / 500'"
     data-zh-ph="在這裡寫下你說不出口的話……&#10;可以是憤怒、委屈、悲傷、或任何你想放下的重量。&#10;沒有人知道是你。" 
     data-en-ph="Write down what you cannot say...&#10;Anger, grievance, sorrow, or any weight you want to let go of.&#10;No one knows it is you."
     data-ja-ph="言えなかった言葉をここに書いてください...&#10;怒り、悲しみ、または手放したいあらゆる重荷を。&#10;あなたが書いたことは誰にもわかりません。"
@@ -461,7 +461,7 @@ try {
     </div>
     
     <div class="m-input-wrap">
-      <textarea class="input-area" id="m-input" rows="4" maxlength="500" oninput="document.getElementById('m-char').textContent = this.value.length + ' / 500'"
+      <textarea class="input-area" id="m-input" rows="4" maxlength="500" aria-label="想念的文字" oninput="document.getElementById('m-char').textContent = this.value.length + ' / 500'"
         data-zh-ph="今晚，你突然想起了誰？&#10;你可以直接寫下他的名字縮寫，或者試著接下去寫：&#10;『很想念那時候的……』&#10;『不知道在另一個學校的你，現在……』"
         data-en-ph="Who came to your mind tonight?&#10;Write their initials, or continue:&#10;'I miss the days when...'&#10;'I wonder how you are doing now...'"
         data-ja-ph="今夜、誰を思い出しましたか？&#10;イニシャルを書くか、こう続けてみてください：&#10;『あの時のことを想うと...』&#10;『今、どうしているのかな...』"
@@ -509,7 +509,7 @@ try {
 
   <div class="step-wrapper">
       <div class="p-step-label" data-zh="STEP 1. 交付破碎" data-en="STEP 1. Cast Brokenness" data-ja="STEP 1. 欠片を預ける" data-es="PASO 1. Entregar Ruptura" data-fr="ÉTAPE 1. Jeter la Brisure" data-de="SCHRITT 1. Zerbrochenheit abgeben" data-zh-cn="STEP 1. 交付破碎">STEP 1. 交付破碎</div>
-      <textarea class="input-area" id="p-input" rows="3" maxlength="500" oninput="document.getElementById('p-char').textContent = this.value.length + ' / 500'"
+      <textarea class="input-area" id="p-input" rows="3" maxlength="500" aria-label="想交付修補的碎片" oninput="document.getElementById('p-char').textContent = this.value.length + ' / 500'"
         data-zh-ph="寫下你心中一塊碎片——一段傷痛、一個遺憾、一次失落……"
         data-en-ph="Write down a piece of your shattered heart—a pain, a regret, a loss..."
         data-ja-ph="心の欠片を書き残してください — 痛み、後悔、あるいは喪失..."
@@ -580,7 +580,7 @@ try {
 
     <p class="a-fade-hint" data-zh="你的話語將在 24 小時後消失於風中。" data-en="Your words will disappear in the wind after 24 hours." data-ja="あなたの言葉は24時間後に風に消えていきます。" data-es="Tus palabras desaparecerán en el viento después de 24 horas." data-fr="Tes mots disparaîtront dans le vent après 24 heures." data-de="Deine Worte werden nach 24 Stunden im Wind verblassen." data-zh-cn="你的话语将在 24 小时后消失于风中。">你的話語將在 24 小時後消失於風中。</p>
     
-    <textarea class="input-area" id="a-input" rows="4" maxlength="500" oninput="document.getElementById('a-char').textContent = this.value.length + ' / 500'"
+    <textarea class="input-area" id="a-input" rows="4" maxlength="500" aria-label="交給時間帶走的文字" oninput="document.getElementById('a-char').textContent = this.value.length + ' / 500'"
       data-zh-ph="在這裡說出今天最深的痛苦或秘密……&#10;24 小時後，這段文字將自動消失。&#10;沒有永遠，只有此刻被接住的感覺。"
       data-en-ph="Whisper your deepest pain or secret here...&#10;After 24 hours, these words will fade away.&#10;Nothing is forever, only the feeling of being caught in this moment."
       data-ja-ph="今日の深い苦しみや秘密をここで吐き出してください...&#10;24時間後、このテキストは完全に消滅します。&#10;永遠はありません。ただ今、受け止められているという感覚だけです。"
@@ -659,7 +659,7 @@ try {
     <div style="display:flex;flex-direction:column;gap:24px;">
       <div class="t-send-panel">
         <p class="t-panel-title" data-zh="傳送你的溫暖" data-en="Send Your Warmth" data-ja="温もりを送る" data-es="Envía tu Calidez" data-fr="Envoyez votre Chaleur" data-de="Sende deine Wärme" data-zh-cn="传送你的温暖">傳送你的溫暖</p>
-        <textarea class="input-area" id="t-input" rows="4" maxlength="500" oninput="document.getElementById('t-char').textContent = this.value.length + ' / 500'"
+        <textarea class="input-area" id="t-input" rows="4" maxlength="500" aria-label="要送給他人的溫暖" oninput="document.getElementById('t-char').textContent = this.value.length + ' / 500'"
           data-zh-ph="寫下一句溫暖的話、一個鼓勵、一個擁抱的文字……&#10;它會漂浮到某個需要的人身邊。"
           data-en-ph="Write a warm word, an encouragement, a virtual hug...&#10;It will float to someone who needs it."
           data-ja-ph="温かい言葉、励まし、または抱擁の言葉を書き残してください...&#10;それは、必要としている誰かのもとへ漂っていきます。"
@@ -767,7 +767,7 @@ try {
     <!-- 時空信箱 UI -->
       <div id="future-letter-box" style="display:none; margin-top:32px; border-top:1px dashed rgba(255,255,255,0.2); padding-top:24px;">
           <p style="font-family:'Noto Serif TC',serif; font-size:14px; color:var(--gold); margin-bottom:12px; font-weight:bold;">✉️ 給未來的自己</p>
-          <textarea id="future-letter-input" class="sync-input" style="width:100%; height:80px; resize:none; margin-bottom:12px;" 
+          <textarea id="future-letter-input" class="sync-input" aria-label="給未來自己的信" style="width:100%; height:80px; resize:none; margin-bottom:12px;" 
             data-zh-ph="寫下現在的感受，留給三個月後的自己..." 
             data-en-ph="Write down your feelings now, for your future self..." 
             data-ja-ph="今の気持ちを書いて、3ヶ月後の自分へ..." 
@@ -824,7 +824,7 @@ try {
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
-<script type="module" src="firebase-app.js?v=8"></script>
+<script type="module" src="firebase-app.js?v=9"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -848,7 +848,7 @@ try {
 <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 
-<script src="interactions.js?v=8"></script>
+<script src="interactions.js?v=9"></script>
 
 
 
