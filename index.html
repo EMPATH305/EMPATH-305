@@ -4339,7 +4339,7 @@ window.toggleTimeline = function() {
   const open = btn.getAttribute('aria-expanded') !== 'true';
   btn.setAttribute('aria-expanded', String(open));
   wrapper.classList.toggle('is-expanded', open);
-  wrapper.style.maxHeight = open ? `${wrapper.scrollHeight}px` : '280px';
+  wrapper.style.maxHeight = open ? `${Math.max(280, wrapper.scrollHeight)}px` : '280px';
   fade.style.opacity = open ? '0' : '1';
   fade.hidden = open;
   btn.innerHTML = open
