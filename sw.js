@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v5'; // Firebase 穩定性修正版
+const CACHE_NAME = 'empath-cache-v6'; // Firebase 穩定性修正版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -8,6 +8,8 @@ self.addEventListener('install', (event) => {
                 './',
                 './index.html',
                 './styles.css',
+                './firebase-app.js',
+                './interactions.js',
                 './og-image.png'
             ]);
         })
