@@ -986,7 +986,14 @@ window.clearEDraw = function() {
     eCanvasHasDrawn = false; // 清除畫布時，重置標記
 }
 
-let isAnimating = true; let starsRafId = null; let sandRafId = null; let firestoreUnsubs = []; let otherRoomsTimerId = 0;
+let isAnimating = true;
+let starsRafId = null;
+let sandRafId = null;
+let roomMVisible = false;
+let roomAVisible = false;
+let firestoreUnsubs = [];
+let otherRoomsObserver = null;
+let otherRoomsSubscribed = false;
 
 const DATA_STATE_COPY = {
     loading: {
@@ -1091,8 +1098,7 @@ async function fetchRealCounts() {
   
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
-    ['e','m','p','a','t'].forEach(room => setDataState(room,'loading'));
-    fetchRealCounts();
+    setDataState('e','loading');
 
     // 1. 監聽情緒出口 (Room E 優先載入，並將上限提高至 300)
     firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(300)), (snapshot) => {
@@ -1103,12 +1109,84 @@ function subscribeAll() {
         updateCountersUI();
     },error => handleDataError('e',error)));
 
-    // 神奇魔法：網頁載入 3 秒後，才在背景偷偷載入其他房間的資料
-    clearTimeout(otherRoomsTimerId);
-    otherRoomsTimerId = window.setTimeout(subscribeOtherRooms, 3000);
+    scheduleOtherRoomSubscriptions();
 }
 
-// 📦 負責載入其他房間的資料
+function scheduleOtherRoomSubscriptions() {
+    if (otherRoomsSubscribed || otherRoomsObserver) return;
+    const targets = ['room-m','room-p','room-a','room-t']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+    const start = () => {
+        if (otherRoomsSubscribed) return;
+        otherRoomsSubscribed = true;
+        if (otherRoomsObserver) otherRoomsObserver.disconnect();
+        otherRoomsObserver = null;
+        ['m','p','a','t'].forEach(room => setDataState(room,'loading'));
+        fetchRealCounts();
+        subscribeOtherRooms();
+    };
+    if (!('IntersectionObserver' in window) || !targets.length) {
+        start();
+        return;
+    }
+    otherRoomsObserver = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) start();
+    }, { rootMargin: '900px 0px', threshold: 0.01 });
+    targets.forEach(target => otherRoomsObserver.observe(target));
+}
+
+window.pShardRecords = window.pShardRecords || [];
+window.pShardDataReady = false;
+
+function createPShardCard(record) {
+    const { id, data } = record;
+    const div = document.createElement('div');
+    div.className = 'shard' + (data.healed ? ' healed' : '');
+    if (!data.healed) {
+        div.tabIndex = 0;
+        div.setAttribute('role','button');
+        div.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                div.click();
+            }
+        });
+    }
+
+    const text = document.createElement('div');
+    text.className = 'shard-text';
+    text.textContent = typeof data.text === 'string' ? data.text : '';
+    const healedTag = document.createElement('div');
+    healedTag.className = 'shard-healed-tag';
+    healedTag.textContent = `✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}`;
+    const glow = document.createElement('div');
+    glow.className = 'shard-glow';
+    div.append(text, healedTag, glow);
+
+    div.addEventListener('click', async () => {
+        if (data.healed) return;
+        await updateDoc(doc(db, 'shards', id), { healed: true });
+        if (typeof window.playChime === 'function') window.playChime();
+        logJourney('p', data.text);
+        window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
+    });
+    return div;
+}
+
+window.renderPShards = function(limit = 12) {
+    const board = document.getElementById('p-board');
+    if (!board) return { rendered: 0, total: 0 };
+    const records = Array.isArray(window.pShardRecords) ? window.pShardRecords : [];
+    const count = Math.min(Math.max(0, Number(limit) || 0), records.length);
+    const fragment = document.createDocumentFragment();
+    records.slice(0,count).forEach(record => fragment.appendChild(createPShardCard(record)));
+    board.replaceChildren(fragment);
+    updateDynamicTexts();
+    return { rendered: count, total: records.length };
+};
+
+// 📦 接近互動房間後才載入其即時資料
 function subscribeOtherRooms() {
     // 2. 監聽星星 (修正全域變數綁定)
     firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
@@ -1142,27 +1220,18 @@ function subscribeOtherRooms() {
         });
     }));
 
-    // 4. 監聽碎片與金繼進度 (修正全域變數綁定)
+    // 4. 監聽碎片與金繼進度；畫面只渲染目前需要的批次
     firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
-        board.innerHTML = ''; 
+        window.pShardRecords = [];
+        window.pShardDataReady = true;
         window.pHealedTotal = 0; 
         window.pTotalShards = snapshot.size;
         
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id; 
             if(data.healed) window.pHealedTotal++;
-            
-            const div = document.createElement('div');
-            div.className = 'shard' + (data.healed ? ' healed' : '');
-            if(!data.healed) { div.tabIndex = 0; div.addEventListener('keydown', e => { if(e.key === 'Enter') div.click(); }); }
-            div.innerHTML = `<div class="shard-text">${data.text}</div><div class="shard-healed-tag">✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}</div><div class="shard-glow"></div>`;
-            div.addEventListener('click', async () => {
-                if(data.healed) return; await updateDoc(doc(db, "shards", id), { healed: true });
-                if(typeof window.playChime === 'function') window.playChime(); logJourney('p', data.text);
-                window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
-            });
-            board.appendChild(div);
+            window.pShardRecords.push({ id, data });
         });
         
         globalCounts.p = window.pHealedTotal;
@@ -1188,6 +1257,9 @@ function subscribeOtherRooms() {
                 window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
             }, 2000);
         }
+        document.dispatchEvent(new CustomEvent('empath:p-shards-updated', {
+            detail: { total: window.pTotalShards }
+        }));
         setDataState('p',snapshot.empty ? 'empty' : null);
     },error => handleDataError('p',error)));
 
@@ -1235,7 +1307,13 @@ function subscribeOtherRooms() {
     },error => handleDataError('t',error)));
 }
   
-function unsubscribeAll() { clearTimeout(otherRoomsTimerId); otherRoomsTimerId = 0; firestoreUnsubs.forEach(unsub => unsub()); firestoreUnsubs = []; }
+function unsubscribeAll() {
+    if (otherRoomsObserver) otherRoomsObserver.disconnect();
+    otherRoomsObserver = null;
+    otherRoomsSubscribed = false;
+    firestoreUnsubs.forEach(unsub => unsub());
+    firestoreUnsubs = [];
+}
 document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
 
 window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
@@ -1633,10 +1711,10 @@ try {
     window.starMessages = [];
     localStorage.removeItem('empath_stars_cache');
 }
-window.resizeCanvas = function(){ 
+window.resizeCanvas = function(target = 'all'){ 
     const dpr = window.devicePixelRatio || 1; 
     
-    if(canvas && roomM) { 
+    if((target === 'all' || target === 'm') && canvas && roomM) { 
         const w = roomM.clientWidth;
         const h = Math.max(roomM.scrollHeight, roomM.offsetHeight, 600);
         canvas.width = w * dpr; 
@@ -1653,7 +1731,7 @@ window.resizeCanvas = function(){
     
     const sCanvas = document.getElementById('sand-canvas'); 
     const roomA = document.getElementById('room-a'); 
-    if(sCanvas && roomA) { 
+    if((target === 'all' || target === 'a') && sCanvas && roomA) { 
         const sw = roomA.scrollWidth; 
         const sh = roomA.scrollHeight; 
         sCanvas.width = sw * dpr; 
@@ -1675,12 +1753,18 @@ window.addEventListener('resize', () => {
     lastWidth = window.innerWidth;
     
     clearTimeout(resizeTimer); // 踩煞車，取消前一次的倒數
-    resizeTimer = setTimeout(window.resizeCanvas, 300);
+    resizeTimer = setTimeout(() => {
+        if (roomMVisible) window.resizeCanvas('m');
+        if (roomAVisible) window.resizeCanvas('a');
+    }, 300);
 });
 
 window.addEventListener('orientationchange', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(window.resizeCanvas, 300);
+    resizeTimer = setTimeout(() => {
+        if (roomMVisible) window.resizeCanvas('m');
+        if (roomAVisible) window.resizeCanvas('a');
+    }, 300);
 });
   
 function initBgStars(w, h){ 
@@ -1714,10 +1798,10 @@ window.updateMStats = function() {
 
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
 window.drawStars = function(){ 
-    if(!canvas || !ctx || !roomM || !isAnimating) return;
+    if(!canvas || !ctx || !roomM || !isAnimating || !roomMVisible) return;
     const ambientMotion = document.body.classList.contains('empath-motion-idle');
     if(!canvas.width || !canvas.height) {
-        if(typeof window.resizeCanvas === 'function') window.resizeCanvas();
+        if(typeof window.resizeCanvas === 'function') window.resizeCanvas('m');
         if(!canvas.width || !canvas.height) return;
     }
     const allStarMessages = Array.isArray(window.starMessages)
@@ -2203,7 +2287,7 @@ window.enableBlow = async function() {
 
 window.drawSand = function() { 
     const c = document.getElementById('sand-canvas'); 
-    if(!c || !c.width || !isAnimating) return; 
+    if(!c || !c.width || !isAnimating || !roomAVisible) return; 
     if(!document.body.classList.contains('empath-motion-idle')) { sandRafId = null; return; }
     const ctx = c.getContext('2d'); const w = c.offsetWidth; const h = c.offsetHeight; 
     ctx.clearRect(0,0,w,h); 
@@ -2691,9 +2775,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
   const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
+          if (entry.target.id === 'room-m') roomMVisible = entry.isIntersecting;
+          if (entry.target.id === 'room-a') roomAVisible = entry.isIntersecting;
           if (!document.body.classList.contains('hsp-mode')) {
               if (entry.target.id === 'room-m') { 
                   if (entry.isIntersecting && isAnimating) { 
+                      window.resizeCanvas('m');
                       if (!starsRafId) window.drawStars(); 
                   } else if (!entry.isIntersecting) { 
                       if (starsRafId) { cancelAnimationFrame(starsRafId); starsRafId = null; } 
@@ -2701,6 +2788,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               }
               if (entry.target.id === 'room-a') { 
                   if (entry.isIntersecting && isAnimating) { 
+                      window.resizeCanvas('a');
                       if (!sandRafId) window.drawSand(); 
                   } else if (!entry.isIntersecting) { 
                       if (sandRafId) { cancelAnimationFrame(sandRafId); sandRafId = null; } 
@@ -2715,7 +2803,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, { threshold: 0.15 });
 
   document.querySelectorAll('.room, #hero').forEach(el => observer.observe(el));
-  observer.observe(document.getElementById('room-m'));
-  observer.observe(document.getElementById('room-a'));
-  setTimeout(() => { window.resizeCanvas(); window.drawStars(); window.drawSand(); updateCountersUI(); }, 800);
+  setTimeout(updateCountersUI, 800);
 });
