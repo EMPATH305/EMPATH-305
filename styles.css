@@ -333,6 +333,11 @@ nav{
 .echo-btn{ display:flex;align-items:center;gap:8px;margin-top:14px;padding:8px 16px;background:rgba(0,0,0,0.4);border:1px solid rgba(232,168,124,0.4); border-radius:4px; cursor:pointer;font-size:12px;color:var(--muted);letter-spacing:1px;transition:all .3s;font-family:'Noto Sans TC',sans-serif; font-weight:bold;}
 .echo-btn:hover{color:var(--amber); border-color:var(--amber); background:rgba(232,168,124,0.1);} .echo-btn.pulsed{color:var(--amber); border-color:var(--amber); cursor:default;}
 .echo-btn .heart{transition:transform .2s;} .echo-btn:hover .heart,.echo-btn.pulsed .heart{transform:scale(1.3);}
+.t-pagination{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px;}
+.t-pagination[hidden]{display:none;}
+.t-load-more{min-width:210px;padding:12px 22px;border:1px solid rgba(232,168,124,.36);background:rgba(232,168,124,.04);color:var(--amber);font:300 12px 'Noto Sans TC',sans-serif;letter-spacing:2px;cursor:pointer;transition:border-color .3s ease,background .3s ease,transform .3s ease;}
+.t-load-more:hover,.t-load-more:focus-visible{border-color:rgba(232,168,124,.8);background:rgba(232,168,124,.1);transform:translateY(-2px);outline:2px solid rgba(232,168,124,.35);outline-offset:3px;}
+.t-page-status{margin:0;color:rgba(232,230,225,.48);font-size:11px;letter-spacing:1.5px;}
 .echo-count{ font-family:'Cormorant Garamond',serif;font-size:17px;color:rgba(232,168,124,.6);margin-top:24px; }
 .t-send-panel{background:rgba(0,0,0,.35);padding:32px;border:1px solid rgba(232,168,124,.3); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);} .t-send-panel .t-panel-title{margin-bottom:20px;}
 .echo-pulse-ring{ width:100px;height:100px;border-radius:50%;border:1px solid rgba(232,168,124,.5);display:flex;align-items:center;justify-content:center;margin:32px auto 16px;position:relative; box-shadow: inset 0 0 25px rgba(232,168,124,0.2); }
@@ -2937,6 +2942,7 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   #room-t .t-layout{height:auto!important;overflow:visible!important}
   #room-t .t-feed{width:100%!important;max-width:100%!important;max-height:none!important;overflow:visible!important;padding-right:0!important}
   #room-t .warmth-item{max-width:100%!important;overflow-wrap:anywhere!important}
+  #room-t .t-load-more{width:100%;min-width:0;min-height:48px}
 
   #room-h{padding-left:max(20px,var(--empath-safe-left))!important;padding-right:max(20px,var(--empath-safe-right))!important;padding-bottom:calc(80px + var(--empath-safe-bottom))!important}
   #room-h #g-summary,#room-h .visitor-card,#room-h .h-timeline,#room-h .home-quote{width:100%!important;max-width:100%!important}
