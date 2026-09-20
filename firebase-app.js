@@ -333,7 +333,7 @@ window.switchLang = function(lang) {
   document.querySelectorAll('[data-zh-title]').forEach(el => { el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title')); });
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") { for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } } }
-  updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed();
+  updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed(); if(typeof window.renderTWarmthFeed === 'function') window.renderTWarmthFeed();
   let crisisTel = '1925';
   if (lang === 'uk') crisisTel = '7333';
   else if (lang === 'pl') crisisTel = '116123';
@@ -1201,6 +1201,67 @@ window.renderPShards = function(limit = 12) {
     return { rendered: count, total: records.length };
 };
 
+window.tWarmthRecords = window.tWarmthRecords || [];
+let tWarmthRenderLimit = 6;
+
+function createTWarmthItem(record) {
+    const { id, data } = record;
+    const div = document.createElement('div');
+    div.className = 'warmth-item';
+    const pulse = document.createElement('div'); pulse.className = 'warmth-pulse';
+    const message = document.createElement('div'); message.textContent = typeof data.text === 'string' ? data.text : '';
+    const echoButton = document.createElement('button'); echoButton.type = 'button'; echoButton.className = 'echo-btn'; echoButton.id = `btn-${id}`;
+    echoButton.setAttribute('aria-label', t('為這則溫暖送出共鳴', 'Send an echo for this message', 'このメッセージに共鳴を送る', 'Enviar un eco para este mensaje', 'Envoyer un écho pour ce message', 'Ein Echo für diese Nachricht senden', '为这则温暖送出共鸣'));
+    if (localStorage.getItem('echoed_'+id)) echoButton.classList.add('pulsed');
+    const heart = document.createElement('span'); heart.className = 'heart'; heart.textContent = '🕯️';
+    echoButton.append(heart, document.createTextNode(' Echo Pulse ')); div.append(pulse, message, echoButton);
+    echoButton.addEventListener('click', async function(e){
+        if(this.classList.contains('pulsed')) return;
+        this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
+        try {
+            // 使用伺服器原子遞增，避免多人同時點擊時彼此覆蓋計數。
+            await updateDoc(doc(db, 'warmth', id), { echos: increment(1) });
+            window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
+            if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
+            if (typeof window.playChime === 'function') window.playChime();
+        } catch (error) {
+            this.classList.remove('pulsed'); localStorage.removeItem('echoed_'+id);
+            window.showToast(t('共鳴沒有送出，請稍後再試', 'Echo was not sent. Please try again.', '共鳴を送信できませんでした。', 'No se envió el eco. Inténtalo de nuevo.', "L'écho n'a pas été envoyé. Réessayez.", 'Echo wurde nicht gesendet. Bitte erneut versuchen.', '共鸣没有送出，请稍后再试'));
+            console.error('Echo Pulse failed:', error);
+        }
+    });
+    return div;
+}
+
+window.renderTWarmthFeed = function() {
+    const feed = document.getElementById('t-feed');
+    if (!feed) return;
+    const records = Array.isArray(window.tWarmthRecords) ? window.tWarmthRecords : [];
+    const visibleCount = Math.min(tWarmthRenderLimit, records.length);
+    const fragment = document.createDocumentFragment();
+    records.slice(0, visibleCount).forEach(record => fragment.appendChild(createTWarmthItem(record)));
+    feed.replaceChildren(fragment);
+
+    let pager = document.getElementById('t-pagination');
+    if (!pager) {
+        pager = document.createElement('div'); pager.id = 't-pagination'; pager.className = 't-pagination';
+        const button = document.createElement('button'); button.type = 'button'; button.className = 't-load-more'; button.setAttribute('aria-controls','t-feed');
+        const status = document.createElement('p'); status.className = 't-page-status'; status.setAttribute('aria-live','polite');
+        pager.append(button, status); feed.insertAdjacentElement('afterend', pager);
+        button.addEventListener('click', () => {
+            tWarmthRenderLimit = tWarmthRenderLimit < window.tWarmthRecords.length ? tWarmthRenderLimit + 6 : 6;
+            window.renderTWarmthFeed();
+        });
+    }
+    const button = pager.querySelector('.t-load-more');
+    const status = pager.querySelector('.t-page-status');
+    pager.hidden = records.length <= 6;
+    if (button) button.textContent = visibleCount < records.length
+        ? t('再接住一些溫暖 ↓', 'Receive more warmth ↓', 'さらに温もりを受け取る ↓', 'Recibir más calidez ↓', 'Recevoir plus de chaleur ↓', 'Mehr Wärme empfangen ↓', '再接住一些温暖 ↓')
+        : t('收起訊息 ↑', 'Collapse messages ↑', 'メッセージを閉じる ↑', 'Ocultar mensajes ↑', 'Réduire les messages ↑', 'Nachrichten einklappen ↑', '收起信息 ↑');
+    if (status) status.textContent = t(`已看見 ${visibleCount}／${records.length} 則`, `Showing ${visibleCount} of ${records.length}`, `${records.length}件中${visibleCount}件を表示`, `Mostrando ${visibleCount} de ${records.length}`, `${visibleCount} sur ${records.length} affichés`, `${visibleCount} von ${records.length} angezeigt`, `已看见 ${visibleCount}／${records.length} 则`);
+};
+
 // 📦 接近互動房間後才載入其即時資料
 function subscribeOtherRooms() {
     // 2. 監聽星星 (修正全域變數綁定)
@@ -1312,26 +1373,12 @@ function subscribeOtherRooms() {
     // 6. 監聽溫暖共振
     firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return;
-        feed.innerHTML = '';
+        window.tWarmthRecords = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id;
-            const div = document.createElement('div'); div.className = 'warmth-item';
-            const pulse = document.createElement('div'); pulse.className = 'warmth-pulse';
-            const message = document.createElement('div'); message.textContent = typeof data.text === 'string' ? data.text : '';
-            const echoButton = document.createElement('button'); echoButton.type = 'button'; echoButton.className = 'echo-btn'; echoButton.id = `btn-${id}`;
-            if (localStorage.getItem('echoed_'+id)) echoButton.classList.add('pulsed');
-            const heart = document.createElement('span'); heart.className = 'heart'; heart.textContent = '🕯️';
-            echoButton.append(heart, document.createTextNode(' Echo Pulse ')); div.append(pulse, message, echoButton);
-            echoButton.addEventListener('click', async function(e){
-                if(this.classList.contains('pulsed')) return;
-                this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
-                await updateDoc(doc(db, "warmth", id), { echos: (data.echos||0)+1 });
-                window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
-                if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
-                if (typeof window.playChime === 'function') window.playChime();
-            });
-            feed.appendChild(div);
+            window.tWarmthRecords.push({ id, data });
         });
+        window.renderTWarmthFeed();
         setDataState('t',snapshot.empty ? 'empty' : null);
         updateCountersUI();
         scheduleInitialDeepLinkStabilization();
