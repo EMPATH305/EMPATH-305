@@ -1100,8 +1100,8 @@ function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
     setDataState('e','loading');
 
-    // 1. 監聽情緒出口 (Room E 優先載入，並將上限提高至 300)
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(300)), (snapshot) => {
+    // 1. 監聽情緒出口：首頁只保留近期 30 筆，避免為初始 3 張卡下載整批歷史資料。
+    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
