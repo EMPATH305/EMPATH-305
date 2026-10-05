@@ -50,7 +50,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=14">
+<link rel="stylesheet" href="styles.css?v=15">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -66,11 +66,11 @@ try {
 <a class="skip-link" href="#main-content">跳至主要內容</a>
 
 <!-- 創作者公告按鈕與 Modal -->
-<div id="creator-btn" tabindex="0" onclick="window.openCreator()" onkeydown="if(event.key==='Enter') window.openCreator()" style="position:fixed; bottom:90px; left:40px; z-index:900; font-size:24px; cursor:pointer; opacity:0.6; transition:all 0.3s; filter:grayscale(100%);">✉️</div>
+<button type="button" id="creator-btn" aria-label="開啟創作者公告" title="創作者公告" onclick="window.openCreator()" style="position:fixed; bottom:90px; left:40px; z-index:900; font-size:24px; cursor:pointer; opacity:0.6; transition:all 0.3s; filter:grayscale(100%);">✉️</button>
 
-<div id="creator-modal" class="share-modal" onclick="if(event.target===this) window.closeCreator()">
+<div id="creator-modal" class="share-modal" role="dialog" aria-modal="true" aria-labelledby="creator-modal-title" aria-hidden="true" tabindex="-1" onclick="if(event.target===this) window.closeCreator()">
   <div class="wrapped-card" style="max-width: 500px; text-align: left; padding: 40px 32px;">
-    <div class="wrapped-title" style="font-size:20px; margin-bottom:24px; text-align:center; letter-spacing: 4px;">✉️ 創作者公告</div>
+    <div class="wrapped-title" id="creator-modal-title" style="font-size:20px; margin-bottom:24px; text-align:center; letter-spacing: 4px;">✉️ 創作者公告</div>
     
     <div style="font-family:'Noto Serif TC',serif; font-size:15px; line-height:2.2; color:var(--fog); letter-spacing:1.5px; max-height: 400px; overflow-y: auto; padding-right: 8px;">
       
@@ -129,20 +129,20 @@ try {
 <a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(https://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
 
 <!-- 新增：星雲檔案館 (隱藏彩蛋) -->
-<div id="nebula-overlay" onclick="window.closeNebula()">
+<div id="nebula-overlay" role="dialog" aria-modal="true" aria-label="星雲檔案館" aria-hidden="true" tabindex="-1" onclick="window.closeNebula()">
   <canvas id="nebula-canvas"></canvas>
   <div id="nebula-text"></div>
 </div>
 <!-- 隱私哲學 Modal -->
-<div id="privacy-modal" class="share-modal" onclick="if(event.target===this) window.closePrivacy()">
+<div id="privacy-modal" class="share-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title" aria-hidden="true" tabindex="-1" onclick="if(event.target===this) window.closePrivacy()">
   <div class="wrapped-card" style="max-width: 480px; text-align: left; padding: 40px 32px;">
-    <div class="wrapped-title" style="font-size:24px; margin-bottom:24px; text-align:center;">PRIVACY PHILOSOPHY</div>
+    <div class="wrapped-title" id="privacy-modal-title" style="font-size:24px; margin-bottom:24px; text-align:center;">PRIVACY PHILOSOPHY</div>
     <div style="font-family:'Noto Serif TC',serif; font-size:14px; line-height:2; color:var(--fog); letter-spacing:1.5px;">
       <p style="color:var(--gold); font-weight:bold; margin-bottom:16px;" data-zh="你的脆弱，只屬於你自己。" data-en="Your vulnerability belongs only to you.">你的脆弱，只屬於你自己。</p>
       <ul style="margin-left: 20px; margin-bottom: 24px; color:rgba(255,255,255,0.7);">
-        <li style="margin-bottom:12px;" data-zh="【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器（Google Cloud）徹底且永久刪除。" data-en="[Forgotten] Room A messages are permanently deleted from servers after 24 hours.">【流放與遺忘】Room A 的沙畫留言，將在 24 小時後從伺服器（Google Cloud）徹底且永久刪除。</li>
-        <li style="margin-bottom:12px;" data-zh="【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。" data-en="[Anonymity] No accounts needed. Without a Soul Key, your footprints cannot be traced back to you.">【絕對匿名】這裡不需要帳號。只要不使用「靈魂鑰匙」備份，沒有任何人能將足跡追溯到你。</li>
-        <li style="margin-bottom:12px;" data-zh="【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。" data-en="[Pure Sanctuary] We promise never to sell, analyze, or monetize your emotional data.">【純粹的庇護】我們承諾永遠不會販售、分析或利用你的情緒數據進行商業行為。</li>
+        <li style="margin-bottom:12px;" data-zh="【限時顯示】Room A 留言會依選擇的時間到期，系統會嘗試移除過期內容；請勿把這裡當作緊急或高度機密的通訊工具。" data-en="[Time-limited] Room A messages expire at the selected time and the system attempts to remove expired content. Do not use this as an emergency or highly confidential channel.">【限時顯示】Room A 留言會依選擇的時間到期，系統會嘗試移除過期內容；請勿把這裡當作緊急或高度機密的通訊工具。</li>
+        <li style="margin-bottom:12px;" data-zh="【匿名使用】這裡不要求建立公開帳號；網站基礎設施與分析服務仍可能產生一般技術紀錄。請不要輸入可識別個資。" data-en="[Anonymous use] No public account is required. Site infrastructure and analytics may still generate ordinary technical logs. Do not enter identifying information.">【匿名使用】這裡不要求建立公開帳號；網站基礎設施與分析服務仍可能產生一般技術紀錄。請不要輸入可識別個資。</li>
+        <li style="margin-bottom:12px;" data-zh="【使用承諾】我們不販售留言內容，也不使用留言進行廣告定向。" data-en="[Our commitment] We do not sell message content or use it for advertising targeting.">【使用承諾】我們不販售留言內容，也不使用留言進行廣告定向。</li>
       </ul>
       <p data-zh="這是一個安全的樹洞，請安心放下。" data-en="This is a safe treehole. Feel free to let go.">這是一個安全的樹洞，請安心放下。</p>
     </div>
@@ -151,7 +151,7 @@ try {
     </div>
   </div>
 </div>
-<div id="share-modal" class="share-modal">
+<div id="share-modal" class="share-modal" role="dialog" aria-modal="true" aria-label="我的靈魂足跡卡" aria-hidden="true" tabindex="-1">
   <div class="wrapped-card" id="wrapped-card-content">
     <div class="wrapped-title">EMPATH</div>
     <div class="wrapped-sub" data-zh="我的靈魂足跡" data-en="My Soul Footprints" data-ja="私の魂の足跡" data-es="Mis Huellas del Alma" data-fr="Mes Empreintes de l'Âme" data-de="Meine Seelenfußspuren" data-zh-cn="我的灵魂足迹">我的靈魂足跡</div>
@@ -169,24 +169,35 @@ try {
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="crisis-support-notice" class="crisis-support-notice" role="alertdialog" aria-modal="true" aria-labelledby="crisis-support-title" aria-hidden="true" tabindex="-1" hidden>
+  <div class="crisis-support-card">
+    <p class="crisis-support-kicker" data-zh="先停一下" data-en="Pause for a moment">先停一下</p>
+    <h2 id="crisis-support-title" data-zh="你不必一個人承受" data-en="You do not have to carry this alone">你不必一個人承受</h2>
+    <p data-zh="如果你可能傷害自己，或正處於立即危險，請聯絡當地緊急服務。EMPATH 無法提供即時救援，但你值得現在就得到真人協助。" data-en="If you may hurt yourself or are in immediate danger, contact local emergency services. EMPATH cannot provide emergency help, but you deserve support from a real person now.">如果你可能傷害自己，或正處於立即危險，請聯絡當地緊急服務。EMPATH 無法提供即時救援，但你值得現在就得到真人協助。</p>
+    <div class="crisis-support-actions">
+      <a id="crisis-support-link" class="close-modal-btn crisis-link" href="tel:1925">撥打安心專線 1925</a>
+      <button type="button" class="close-modal-btn" onclick="window.closeCrisisSupportNotice()" data-zh="先留在這裡" data-en="Stay here for now">先留在這裡</button>
+    </div>
+  </div>
+</div>
 <div class="star-tooltip" id="star-tooltip"></div>
 <button type="button" id="btt-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
 <!-- 幸運微光彩蛋 (左下角) -->
-<div id="fortune-spark" tabindex="0" onclick="window.crackFortune()" onkeydown="if(event.key==='Enter') window.crackFortune()" title="點擊接收宇宙的低語">✦</div>
+<button type="button" id="fortune-spark" aria-label="接收宇宙的低語" onclick="window.crackFortune()" title="點擊接收宇宙的低語">✦</button>
   
 <!-- 1. 靈魂跟隨 (游標專屬微光) -->
 <div id="cursor-glow"></div>
 
 <!-- 2. 同步呼吸引導 (右下角按鈕與全螢幕畫布) -->
-<div id="breathe-btn" tabindex="0" onclick="window.startBreathe()" onkeydown="if(event.key==='Enter') window.startBreathe()" title="深呼吸">🌀</div>
-<div id="breathe-overlay" onclick="window.stopBreathe()">
+<button type="button" id="breathe-btn" aria-label="開始深呼吸引導" onclick="window.startBreathe()" title="深呼吸">🌀</button>
+<div id="breathe-overlay" role="dialog" aria-modal="true" aria-label="深呼吸引導" aria-hidden="true" tabindex="-1" onclick="window.stopBreathe()">
     <div class="breathe-circle"></div>
     <div class="breathe-text" id="breathe-text">吸氣...</div>
     <div class="fortune-hint" style="opacity:1; margin-top:120px;" data-zh="點擊畫面任何一處結束" data-en="Click anywhere to close">點擊畫面任何一處結束</div>
 </div>
 
 <!-- 微光展開後的顯示畫布 -->
-<div id="fortune-display" class="fortune-modal" onclick="this.classList.remove('show')">
+<div id="fortune-display" class="fortune-modal" role="dialog" aria-modal="true" aria-label="宇宙的低語" aria-hidden="true" tabindex="-1" onclick="window.closeFortune()">
   <div class="fortune-text" id="fortune-text"></div>
   <div class="fortune-hint" data-zh="點擊畫面任何一處關閉" data-en="Click anywhere to close">點擊畫面任何一處關閉</div>
 </div>
@@ -217,22 +228,22 @@ try {
           <button type="button" class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
           <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
               <span data-zh="給高感官敏感者的靜心模式" data-en="Calm Mode for Highly Sensitive Persons" data-ja="HSPのための静寂モード" data-es="Modo Calma para Personas Altamente Sensibles" data-fr="Mode Calme pour personnes hypersensibles" data-de="Ruhemodus für hochsensible Personen" data-zh-cn="给高感官敏感者的静心模式">給高感官敏感者的靜心模式</span>
-              <span class="hsp-tooltip-close" onclick="this.parentElement.classList.remove('show')">×</span>
+              <button type="button" class="hsp-tooltip-close" aria-label="關閉說明" onclick="this.parentElement.classList.remove('show')">×</button>
           </div>
         </div>
         <div class="lang-dropdown-wrapper">
-            <button type="button" class="func-btn lang-select-btn" onclick="window.toggleLangDropdown()">🌐 <span id="current-lang-display">繁體中文</span></button>
-            <div class="lang-dropdown-list" id="lang-dropdown-list">
-                <div class="lang-option active-lang" data-lang="zh" onclick="window.switchLang('zh')">繁體中文</div>
-                <div class="lang-option" data-lang="zh-cn" onclick="window.switchLang('zh-cn')">简体中文</div>
-                <div class="lang-option" data-lang="en" onclick="window.switchLang('en')">English (US)</div>
-                <div class="lang-option" data-lang="en-uk" onclick="window.switchLang('en-uk')">English (UK)</div>
-                <div class="lang-option" data-lang="fr" onclick="window.switchLang('fr')">Français</div>
-                <div class="lang-option" data-lang="de" onclick="window.switchLang('de')">Deutsch</div>
-                <div class="lang-option" data-lang="es" onclick="window.switchLang('es')">Español</div>
-                <div class="lang-option" data-lang="ja" onclick="window.switchLang('ja')">日本語</div>
-                <div class="lang-option" data-lang="uk" onclick="window.switchLang('uk')">Українська</div>
-                <div class="lang-option" data-lang="pl" onclick="window.switchLang('pl')">Polski</div>
+            <button type="button" class="func-btn lang-select-btn" id="lang-select-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="lang-dropdown-list" onclick="window.toggleLangDropdown()">🌐 <span id="current-lang-display">繁體中文</span></button>
+            <div class="lang-dropdown-list" id="lang-dropdown-list" role="listbox" aria-label="選擇語言">
+                <button type="button" class="lang-option active-lang" role="option" aria-selected="true" data-lang="zh" onclick="window.switchLang('zh')">繁體中文</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="zh-cn" onclick="window.switchLang('zh-cn')">简体中文</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="en" onclick="window.switchLang('en')">English (US)</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="en-uk" onclick="window.switchLang('en-uk')">English (UK)</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="fr" onclick="window.switchLang('fr')">Français</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="de" onclick="window.switchLang('de')">Deutsch</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="es" onclick="window.switchLang('es')">Español</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="ja" onclick="window.switchLang('ja')">日本語</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="uk" onclick="window.switchLang('uk')">Українська</button>
+                <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="pl" onclick="window.switchLang('pl')">Polski</button>
             </div>
         </div>
       </div>
@@ -793,7 +804,7 @@ try {
     </div>
     
     <div class="lighthouse">
-      <span class="lighthouse-flame" tabindex="0" onclick="window.openNebula()" onkeydown="if(event.key==='Enter') window.openNebula()" title="點擊火焰...">🕯️</span>
+      <button type="button" class="lighthouse-flame" aria-label="開啟星雲檔案館" onclick="window.openNebula()" title="點擊火焰...">🕯️</button>
       <p data-zh="Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。" data-en="Holocene<br><br>Every pain is proof of your existence.<br>You don't have to be better to be worthy of acceptance." data-ja="Holocene — 完新世<br><br>すべての痛みは、あなたがそこにいた証明です。<br>受け入れられるために、完璧になる必要はありません。" data-es="Holocene<br><br>Cada dolor es prueba de tu existencia.<br>No tienes que ser mejor para ser digno de aceptación." data-fr="Holocène<br><br>Chaque douleur est la preuve de votre existence.<br>Vous n'avez pas besoin d'être meilleur pour être digne d'être accepté." data-de="Holozän<br><br>Jeder Schmerz ist ein Beweis für deine Existenz.<br>Du musst nicht besser sein, um Akzeptanz zu verdienen." data-zh-cn="Holocene — 全新世<br><br>每一次伤痛，都是你存在过的证明。<br>你不需要变得更好，才值得被接纳。">Holocene — 全新世<br><br>每一次傷痛，都是你存在過的證明。<br>你不需要變得更好，才值得被接納。</p>
     </div>
 
@@ -818,13 +829,13 @@ try {
   <!-- 新增：About 與 Privacy 連結 -->
   <div style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom: 24px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; flex-wrap:wrap; justify-content:center;">
       <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">About EMPATH (Behance)</a>
-      <span style="cursor:pointer; text-decoration:underline; transition:color 0.3s;" tabindex="0" onclick="window.openPrivacy()" onkeydown="if(event.key==='Enter') window.openPrivacy()" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</span>
+      <button type="button" class="footer-privacy-btn" onclick="window.openPrivacy()" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</button>
   </div>
 
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
-<script type="module" src="firebase-app.js?v=14"></script>
+<script type="module" src="firebase-app.js?v=15"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -873,7 +884,7 @@ try {
 </script>
 
 
-<script src="interactions.js?v=14"></script>
+<script src="interactions.js?v=15"></script>
 
 
 
