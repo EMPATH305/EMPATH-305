@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v15'; // 語意控制、焦點管理與危機支援提示版
+const CACHE_NAME = 'empath-cache-v15-1'; // 語意控制、焦點管理與房間導覽競態修正版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
