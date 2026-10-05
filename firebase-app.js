@@ -1139,20 +1139,36 @@ function scheduleOtherRoomSubscriptions() {
 window.pShardRecords = window.pShardRecords || [];
 window.pShardDataReady = false;
 
-// 首次以 #room-* 深連結進站時，非同步資料會改變前方房間高度。
-// 在首批資料安定後重新對齊一次，避免使用者被推離目標房間。
-const initialRoomHash = /^#room-[empath]$/.test(window.location.hash)
+// 深連結或站內房間導覽後，非同步資料可能改變前方房間高度。
+// 暫時鎖定使用者最近選擇的房間，在首批資料安定後重新對齊。
+let activeRoomTargetId = /^#room-[empath]$/.test(window.location.hash)
     ? window.location.hash.slice(1)
     : '';
+let activeRoomTargetUntil = activeRoomTargetId ? performance.now() + 15000 : 0;
 let deepLinkStabilizeTimer = null;
-function scheduleInitialDeepLinkStabilization() {
-    if (!initialRoomHash || performance.now() > 15000) return;
-    clearTimeout(deepLinkStabilizeTimer);
-    deepLinkStabilizeTimer = setTimeout(() => {
-        const target = document.getElementById(initialRoomHash);
-        if (target) target.scrollIntoView({ behavior: 'auto', block: 'start' });
-    }, 220);
+function alignActiveRoomTarget() {
+    if (!activeRoomTargetId || performance.now() > activeRoomTargetUntil) return;
+    const target = document.getElementById(activeRoomTargetId);
+    if (target) target.scrollIntoView({ behavior: 'auto', block: 'start' });
 }
+function scheduleRoomTargetStabilization() {
+    if (!activeRoomTargetId || performance.now() > activeRoomTargetUntil) return;
+    clearTimeout(deepLinkStabilizeTimer);
+    deepLinkStabilizeTimer = setTimeout(alignActiveRoomTarget, 220);
+}
+
+document.addEventListener('click', event => {
+    const link = event.target.closest?.('a[href^="#room-"]');
+    const hash = link?.getAttribute('href') || '';
+    if (!/^#room-[empath]$/.test(hash)) return;
+    activeRoomTargetId = hash.slice(1);
+    activeRoomTargetUntil = performance.now() + 4000;
+    const selectedTarget = activeRoomTargetId;
+    // 房間轉場本身約 2.6 秒；分段校正可吸收 P/T 等資料造成的版面位移。
+    [650, 1200, 2100].forEach(delay => setTimeout(() => {
+        if (activeRoomTargetId === selectedTarget) alignActiveRoomTarget();
+    }, delay));
+}, true);
 
 function createPShardCard(record) {
     const { id, data } = record;
@@ -1337,7 +1353,7 @@ function subscribeOtherRooms() {
             detail: { total: window.pTotalShards }
         }));
         setDataState('p',snapshot.empty ? 'empty' : null);
-        scheduleInitialDeepLinkStabilization();
+        scheduleRoomTargetStabilization();
     },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
@@ -1367,7 +1383,7 @@ function subscribeOtherRooms() {
         });
         setDataState('a',feed.children.length ? null : 'empty');
         updateCountersUI();
-        scheduleInitialDeepLinkStabilization();
+        scheduleRoomTargetStabilization();
     },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
@@ -1381,7 +1397,7 @@ function subscribeOtherRooms() {
         window.renderTWarmthFeed();
         setDataState('t',snapshot.empty ? 'empty' : null);
         updateCountersUI();
-        scheduleInitialDeepLinkStabilization();
+        scheduleRoomTargetStabilization();
     },error => handleDataError('t',error)));
 }
   
