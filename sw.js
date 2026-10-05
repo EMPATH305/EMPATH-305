@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v13'; // 導覽收斂與翻譯延遲載入版
+const CACHE_NAME = 'empath-cache-v14'; // 跨裝置版面節奏與可讀性優化版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
