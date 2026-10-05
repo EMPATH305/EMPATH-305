@@ -205,40 +205,6 @@
     });
   }
 
-  function setupRoomCurtain() {
-    const curtain = document.createElement('div');
-    curtain.className = 'lux-room-curtain';
-    curtain.setAttribute('aria-hidden','true');
-    document.body.appendChild(curtain);
-    let transitioning = false;
-    document.querySelectorAll('nav a[href^="#room-"]').forEach(link => {
-      link.addEventListener('click', event => {
-        const hash = link.getAttribute('href');
-        const target = hash && document.querySelector(hash);
-        if (!target || reducedMotion.matches || transitioning) return;
-        event.preventDefault();
-        transitioning = true;
-        curtain.classList.remove('is-leaving');
-        curtain.classList.add('is-entering');
-        window.setTimeout(() => {
-          const oldBehavior = document.documentElement.style.scrollBehavior;
-          document.documentElement.style.scrollBehavior = 'auto';
-          target.scrollIntoView({block:'start',behavior:'auto'});
-          history.replaceState(null,'',hash);
-          document.documentElement.style.scrollBehavior = oldBehavior;
-          requestAnimationFrame(() => {
-            curtain.classList.remove('is-entering');
-            curtain.classList.add('is-leaving');
-          });
-          window.setTimeout(() => {
-            curtain.classList.remove('is-leaving');
-            transitioning = false;
-          },320);
-        },110);
-      },true);
-    });
-  }
-
   function setupInputEnergy() {
     const syncSpark = textarea => {
       const host = textarea.parentElement;
@@ -356,7 +322,6 @@
   function initLuxuryLevel2() {
     setupLiquidRipples();
     setupFeedRhythm();
-    setupRoomCurtain();
     setupInputEnergy();
     setupRollingCounters();
     setupRoomBoundaries();
