@@ -232,6 +232,7 @@ window.startBreathe = function() {
     const overlay = document.getElementById('breathe-overlay');
     const textEl = document.getElementById('breathe-text');
     overlay.classList.add('show');
+    activateEmpathDialog(overlay);
     
     // 如果有開啟音頻，觸發一聲水晶音
     if(typeof window.playChime === 'function') window.playChime();
@@ -250,11 +251,60 @@ window.startBreathe = function() {
 window.stopBreathe = function() {
     const overlay = document.getElementById('breathe-overlay');
     overlay.classList.remove('show');
+    deactivateEmpathDialog(overlay);
     clearInterval(breatheInterval);
 };
 
 window.currentLang = 'zh';
 function t(zh, en, ja, es, fr, de, zh_cn, uk, pl) { let target = window.currentLang; if(target === 'en-uk') target = 'en'; if (target === 'en') return en || zh; if (target === 'ja') return ja || en || zh; if (target === 'es') return es || en || zh; if (target === 'fr') return fr || en || zh; if (target === 'de') return de || en || zh; if (target === 'zh-cn') return zh_cn || zh; if (target === 'uk') return uk || en || zh; if (target === 'pl') return pl || en || zh; return zh; }
+
+const empathDialogReturnFocus = new WeakMap();
+const empathDialogSelector = '.share-modal.show, #breathe-overlay.show, #nebula-overlay.show, #fortune-display.show, #onboarding-box.is-open, #crisis-support-notice:not([hidden])';
+const empathFocusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function activateEmpathDialog(dialog, preferredFocus) {
+    if (!dialog) return;
+    empathDialogReturnFocus.set(dialog, document.activeElement);
+    dialog.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('empath-dialog-open');
+    window.setTimeout(() => {
+        const focusTarget = preferredFocus || Array.from(dialog.querySelectorAll(empathFocusableSelector)).find(el => el.getClientRects().length) || dialog;
+        focusTarget?.focus?.({ preventScroll: true });
+    }, 40);
+}
+
+function deactivateEmpathDialog(dialog) {
+    if (!dialog) return;
+    dialog.setAttribute('aria-hidden', 'true');
+    window.setTimeout(() => {
+        if (!document.querySelector(empathDialogSelector)) document.body.classList.remove('empath-dialog-open');
+    }, 0);
+    const returnTarget = empathDialogReturnFocus.get(dialog);
+    if (returnTarget?.isConnected) returnTarget.focus({ preventScroll: true });
+    empathDialogReturnFocus.delete(dialog);
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const dialogs = Array.from(document.querySelectorAll(empathDialogSelector));
+    const dialog = dialogs.at(-1);
+    if (!dialog) return;
+    const focusable = Array.from(dialog.querySelectorAll(empathFocusableSelector)).filter(el => el.getClientRects().length);
+    if (!focusable.length) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+    }
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+});
 
 window.toggleMobileNav = function() {
   const button = document.getElementById('hamburger-btn');
@@ -272,8 +322,20 @@ window.closeMobileNav = function() {
   button.setAttribute('aria-expanded', 'false');
   button.setAttribute('aria-label', '開啟導覽選單');
 }
-window.toggleLangDropdown = function() { document.getElementById('lang-dropdown-list').classList.toggle('show'); }
-document.addEventListener('click', function(e) { if(!e.target.closest('.lang-dropdown-wrapper')) { const list = document.getElementById('lang-dropdown-list'); if(list) list.classList.remove('show'); } });
+window.toggleLangDropdown = function() {
+  const list = document.getElementById('lang-dropdown-list');
+  const button = document.getElementById('lang-select-btn');
+  const open = list.classList.toggle('show');
+  button?.setAttribute('aria-expanded', String(open));
+  if (open) list.querySelector('.active-lang')?.focus();
+}
+document.addEventListener('click', function(e) {
+  if(!e.target.closest('.lang-dropdown-wrapper')) {
+    const list = document.getElementById('lang-dropdown-list');
+    list?.classList.remove('show');
+    document.getElementById('lang-select-btn')?.setAttribute('aria-expanded', 'false');
+  }
+});
 
 const guideData = {
     'E': { title: {zh: '房間 E — 情緒出口', en: 'Room E — Emotional Exit', ja: '部屋 E — 感情の出口', es: 'Habitación E — Salida Emocional', fr: 'Salle E — Sortie Émotionnelle', de: 'Raum E — Emotionaler Ausgang', 'zh-cn': '房间 E — 情绪出口', 'uk': 'Кімната E — Емоційний вихід', 'pl': 'Pokój E — Emocjonalne Wyjście'}, desc: {zh: '有些話堵在心口太久會生病。在這裡，你可以完全匿名地把那些沉重、憤怒或委屈倒出來，黑暗會安全地接住它們。', en: 'Words kept inside can make you sick. Here, you can pour out your heaviness anonymously. The dark will hold it safely.', ja: '胸に秘めた言葉を吐き出してください。暗闇がそれを安全に受け止めます。', es: 'Aquí puedes desahogarte de forma anónima. La oscuridad lo sostendrá.', fr: 'Ici, vous pouvez vous épancher anonymement. L\'obscurité le gardera en sécurité.', de: 'Hier kannst du dich anonym ausschütten. Die Dunkelheit wird es sicher halten.', 'zh-cn': '有些话堵在心口太久会生病。在这里，你可以完全匿名地把那些沉重、愤怒或委屈倒出来，黑暗会安全地接住它们。', 'uk': 'Слова, які ви тримаєте в собі, можуть зробити вас хворими. Темрява безпечно їх сховає.', 'pl': 'Słowa, które w sobie trzymasz, mogą sprawić, że zachorujesz. Ciemność bezpiecznie je przechowa.'}, link: '#room-e' },
@@ -295,7 +357,7 @@ window.openGuide = function() {
     document.getElementById('hero')?.classList.add('guide-active');
     document.body.style.overflow = 'hidden';
     window.startGuide();
-    setTimeout(() => obBox.querySelector('.guide-close')?.focus(), 50);
+    activateEmpathDialog(obBox, obBox.querySelector('.guide-close'));
 };
 window.startGuide = function() { document.getElementById('ob-state-0').style.display = 'none'; document.getElementById('ob-state-2').style.display = 'none'; document.getElementById('ob-state-1').style.display = 'block'; }
 window.showGuideResult = function(roomKey) {
@@ -317,6 +379,7 @@ window.closeGuide = function() {
             document.getElementById('hero')?.classList.remove('guide-active');
             obBox.style.display = 'none';
             obBox.style.opacity = '1';
+            deactivateEmpathDialog(obBox);
         }, 350);
     }
 }
@@ -326,7 +389,12 @@ window.switchLang = function(lang) {
   const langNames = { 'zh': '繁體中文', 'zh-cn': '简体中文', 'en': 'English (US)', 'en-uk': 'English (UK)', 'ja': '日本語', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch', 'uk': 'Українська', 'pl': 'Polski' };
   document.getElementById('current-lang-display').textContent = langNames[lang];
   document.getElementById('lang-dropdown-list').classList.remove('show');
-  document.querySelectorAll('.lang-option').forEach(btn => { if(btn.dataset.lang === lang) btn.classList.add('active-lang'); else btn.classList.remove('active-lang'); });
+  document.getElementById('lang-select-btn')?.setAttribute('aria-expanded', 'false');
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    const selected = btn.dataset.lang === lang;
+    btn.classList.toggle('active-lang', selected);
+    btn.setAttribute('aria-selected', String(selected));
+  });
   const targetLang = (lang === 'en-uk') ? 'en' : lang;
   document.querySelectorAll('[data-zh]').forEach(el => { el.innerHTML = el.getAttribute('data-' + targetLang) || el.getAttribute('data-en') || el.getAttribute('data-zh'); });
   document.querySelectorAll('[data-zh-ph]').forEach(el => { el.setAttribute('placeholder', el.getAttribute('data-' + targetLang + '-ph') || el.getAttribute('data-en-ph') || el.getAttribute('data-zh-ph')); });
@@ -338,6 +406,8 @@ window.switchLang = function(lang) {
   if (lang === 'uk') crisisTel = '7333';
   else if (lang === 'pl') crisisTel = '116123';
   document.querySelectorAll('.crisis-link').forEach(el => { el.href = 'tel:' + crisisTel; });
+  const crisisSupportLink = document.getElementById('crisis-support-link');
+  if (crisisSupportLink) crisisSupportLink.textContent = lang === 'zh' || lang === 'zh-cn' ? `撥打安心專線 ${crisisTel}` : `Call ${crisisTel}`;
   const syncGoogleTranslation = () => {
     const googleSelect = document.querySelector('.goog-te-combo');
     if (!googleSelect) return;
@@ -399,7 +469,24 @@ function formatTimeLeft(secs){
   return h>0 ? `${h}小時 ${m}分鐘 後消散` : `${m}分鐘 後消散`;
 }
 
-function cleanText(text) { const badWords = ['去死', '智障', '白痴', '幹你娘', 'bitch', 'fuck', '賤人', '靠北', '垃圾', '死', '媽的', '幹你娘', '廢物', '破病', '做愛', '腦殘', '噁心', '滾', '外勞', '幹你']; let cleaned = text; badWords.forEach(word => { const regex = new RegExp(word.split('').join('\\s*'), 'gi'); cleaned = cleaned.replace(regex, '***'); }); return cleaned; }
+function cleanText(text) {
+  const targetedAbuse = ['去死', '智障', '白痴', '幹你娘', '幹你', '賤人', '腦殘', 'bitch'];
+  let cleaned = text;
+  targetedAbuse.forEach(word => {
+    const regex = new RegExp(word.split('').join('\\s*'), 'gi');
+    cleaned = cleaned.replace(regex, '***');
+  });
+  return cleaned;
+}
+
+function containsCrisisSignal(text) {
+  return /(想死|不想活|活不下去|結束生命|自殺|傷害自己|不想存在|死にたい|自殺|want\s+to\s+die|kill\s+myself|end\s+my\s+life|hurt\s+myself|suicid)/i.test(text);
+}
+
+function prepareSubmittedText(text) {
+  if (containsCrisisSignal(text)) window.setTimeout(() => window.showCrisisSupportNotice?.(), 450);
+  return cleanText(text);
+}
 
 window.toggleTimeline = function() {
   const wrapper = document.getElementById('h-events');
@@ -864,6 +951,7 @@ window.openNebula = function() {
     textEl.innerHTML = `${t('這裡曾經有過', 'There have been', 'ここには', 'Aquí ha habido', 'Il y a eu', 'Hier gab es', '这里曾经有过')} <span class="n-num">${totalSouls}</span> ${t('個破碎的靈魂<br>在此得到平靜，並回到生活。', 'shattered souls<br>who found peace here and returned to life.', 'の砕けた魂があり、<br>ここで平穏を得て生活に戻っていきました。', 'almas rotas<br>que encontraron paz aquí y regresaron a la vida.', 'âmes brisées<br>qui ont trouvé la paix ici et sont retournées à la vie.', 'zerbrochene Seelen,<br>die hier Frieden fanden und ins Leben zurückkehrten.', '个破碎的灵魂<br>在此得到平静，并回到生活。')}`;
     
     overlay.classList.add('show');
+    activateEmpathDialog(overlay);
     setTimeout(() => textEl.classList.add('show'), 100); // 觸發文字淡入
 
     // 暫停背景原本的動畫與聲音，讓效能完全讓給星雲
@@ -947,6 +1035,7 @@ window.crackFortune = function() {
     
     // 顯示全螢幕溫柔畫布
     modal.classList.add('show');
+    activateEmpathDialog(modal);
     
     // 觸發音效與震動 (如果有的話)
     if(typeof window.playChime === 'function') window.playChime();
@@ -961,11 +1050,18 @@ window.crackFortune = function() {
     }, 10000); // 10秒後微光才會再次亮起
 }
 
+window.closeFortune = function() {
+    const modal = document.getElementById('fortune-display');
+    modal?.classList.remove('show');
+    deactivateEmpathDialog(modal);
+}
+
 window.closeNebula = function() {
     const overlay = document.getElementById('nebula-overlay');
     const textEl = document.getElementById('nebula-text');
     textEl.classList.remove('show');
     overlay.classList.remove('show');
+    deactivateEmpathDialog(overlay);
     
     // 停止星雲動畫並清空畫布 (等待淡出動畫 2.5 秒結束後)
     setTimeout(() => {
@@ -1486,7 +1582,16 @@ window.shareSite = function() {
     } 
 };
   
-window.openShareCard = function() { document.getElementById('sc-e').textContent = state.eCount; document.getElementById('sc-m').textContent = state.mCount; document.getElementById('sc-p').textContent = state.pCount; document.getElementById('sc-a').textContent = state.aCount; document.getElementById('sc-t').textContent = state.tCount; document.getElementById('share-modal').classList.add('show'); }
+window.openShareCard = function() {
+    document.getElementById('sc-e').textContent = state.eCount;
+    document.getElementById('sc-m').textContent = state.mCount;
+    document.getElementById('sc-p').textContent = state.pCount;
+    document.getElementById('sc-a').textContent = state.aCount;
+    document.getElementById('sc-t').textContent = state.tCount;
+    const modal = document.getElementById('share-modal');
+    modal.classList.add('show');
+    activateEmpathDialog(modal, document.getElementById('download-card-btn'));
+}
   window.downloadShareCard = async function() { 
        if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'generate_soul_card');
   const btn = document.getElementById('download-card-btn'); 
@@ -1546,21 +1651,33 @@ window.openShareCard = function() { document.getElementById('sc-e').textContent 
     } 
 }
   
-window.closeShareModal = function() { document.getElementById('share-modal').classList.remove('show'); setTimeout(() => { document.getElementById('wrapped-card-content').style.display = 'block'; const img = document.getElementById('generated-card-img'); if(img) img.remove(); document.getElementById('download-card-btn').style.display = 'inline-block'; document.getElementById('download-card-btn').textContent = t('⬇️ 下載為專屬圖片檔案', '⬇️ Download Exclusive Card', '⬇️ 専用画像としてダウンロード', '⬇️ Descargar Tarjeta Exclusiva', '⬇️ Télécharger la carte', '⬇️ Exklusive Karte herunterladen', '⬇️ 下载为专属图片档案'); const hint = document.getElementById('save-hint'); if(hint) hint.style.display = 'none'; }, 400); }
+window.closeShareModal = function() { const modal = document.getElementById('share-modal'); modal.classList.remove('show'); deactivateEmpathDialog(modal); setTimeout(() => { document.getElementById('wrapped-card-content').style.display = 'block'; const img = document.getElementById('generated-card-img'); if(img) img.remove(); document.getElementById('download-card-btn').style.display = 'inline-block'; document.getElementById('download-card-btn').textContent = t('⬇️ 下載為專屬圖片檔案', '⬇️ Download Exclusive Card', '⬇️ 専用画像としてダウンロード', '⬇️ Descargar Tarjeta Exclusiva', '⬇️ Télécharger la carte', '⬇️ Exklusive Karte herunterladen', '⬇️ 下载为专属图片档案'); const hint = document.getElementById('save-hint'); if(hint) hint.style.display = 'none'; }, 400); }
 window.openPrivacy = function() { 
-    window.lastFocusBeforePrivacy = document.activeElement; // 記錄點開前的按鈕
-    document.getElementById('privacy-modal').classList.add('show'); 
-    // 延遲一點點，將焦點移入「我明白了」按鈕
-    setTimeout(() => { const btn = document.getElementById('privacy-close-btn'); if(btn) btn.focus(); }, 100); 
+    const modal = document.getElementById('privacy-modal');
+    modal.classList.add('show');
+    activateEmpathDialog(modal, document.getElementById('privacy-close-btn'));
 }
 window.closePrivacy = function() { 
-    document.getElementById('privacy-modal').classList.remove('show'); 
-    // 關閉時，把焦點還給頁尾的隱私連結
-    if(window.lastFocusBeforePrivacy) window.lastFocusBeforePrivacy.focus(); 
+    const modal = document.getElementById('privacy-modal');
+    modal.classList.remove('show');
+    deactivateEmpathDialog(modal);
 }
 
-window.openCreator = function() { document.getElementById('creator-modal').classList.add('show'); }
-window.closeCreator = function() { document.getElementById('creator-modal').classList.remove('show'); }
+window.openCreator = function() { const modal = document.getElementById('creator-modal'); modal.classList.add('show'); activateEmpathDialog(modal); }
+window.closeCreator = function() { const modal = document.getElementById('creator-modal'); modal.classList.remove('show'); deactivateEmpathDialog(modal); }
+
+window.showCrisisSupportNotice = function() {
+    const notice = document.getElementById('crisis-support-notice');
+    if (!notice) return;
+    notice.hidden = false;
+    activateEmpathDialog(notice, document.getElementById('crisis-support-link'));
+}
+window.closeCrisisSupportNotice = function() {
+    const notice = document.getElementById('crisis-support-notice');
+    if (!notice) return;
+    notice.hidden = true;
+    deactivateEmpathDialog(notice);
+}
 
 // ♿ 無障礙最高境界：全局監聽 ESC 鍵，一鍵關閉所有彈窗
 document.addEventListener('keydown', (e) => {
@@ -1570,8 +1687,13 @@ document.addEventListener('keydown', (e) => {
         if (document.getElementById('breathe-overlay')?.classList.contains('show')) window.stopBreathe();
         if (document.getElementById('nebula-overlay')?.classList.contains('show')) window.closeNebula();
         if (document.getElementById('creator-modal')?.classList.contains('show')) window.closeCreator(); // 👈 這裡就是新增的 ESC 關閉公告
-        const fortune = document.getElementById('fortune-display');
-        if (fortune?.classList.contains('show')) fortune.classList.remove('show');
+        if (document.getElementById('fortune-display')?.classList.contains('show')) window.closeFortune();
+        if (!document.getElementById('crisis-support-notice')?.hidden) window.closeCrisisSupportNotice();
+        const langList = document.getElementById('lang-dropdown-list');
+        if (langList?.classList.contains('show')) {
+            langList.classList.remove('show');
+            document.getElementById('lang-select-btn')?.setAttribute('aria-expanded', 'false');
+        }
     }
 });
   
@@ -1627,7 +1749,7 @@ window.submitE = async function(){
         const input = document.getElementById('e-input'); 
         text = input.value.trim(); 
         if(!text) return; 
-        text = cleanText(text); 
+        text = prepareSubmittedText(text); 
     } else {
         if(!eDrawCanvas || !eCanvasHasDrawn) return;
         imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
@@ -2171,7 +2293,7 @@ roomM.addEventListener('click', async e => {
     } 
 });
   
-window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = cleanText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
+window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
 
 let pCanvas, pCtx;
 window.pHealedTotal = 0;
@@ -2358,7 +2480,7 @@ window.drawKintsugiVessel = function(){
     c.restore();
 };
   
-window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = cleanText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
+window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
@@ -2488,7 +2610,7 @@ window.submitA = async function(){
     const input = document.getElementById('a-input'); 
     let text = input.value.trim(); 
     if(!text || !canSubmit()) return; 
-    text = cleanText(text); 
+    text = prepareSubmittedText(text); 
     const minutes = parseInt(document.getElementById('a-timer-select').value);
     const lifespan = minutes * 60 * 1000;
     const origText = document.getElementById('a-submit-btn').innerHTML; 
@@ -2506,7 +2628,7 @@ window.submitT = async function(){
     const input = document.getElementById('t-input'); 
     let text = input.value.trim(); 
     if(!text || !canSubmit()) return; 
-    text = cleanText(text); 
+    text = prepareSubmittedText(text); 
     const origText = document.getElementById('t-submit-btn').innerHTML; 
     
     // 🌟 取得這則溫暖的專屬 ID，用來監聽它未來的命運
