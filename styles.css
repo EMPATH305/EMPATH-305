@@ -3151,3 +3151,220 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   outline: 2px solid #fff;
   outline-offset: 3px;
 }
+
+/* ===== LAYOUT POLISH · v14 =====
+   Preserve the cinematic identity while making long-form rooms easier to scan. */
+:root {
+  --empath-reading-measure: 48ch;
+  --empath-mobile-gutter: 20px;
+}
+
+.room-title,
+#journey .journey-heading h2,
+.h-journey-arc-head h3 {
+  text-wrap: balance;
+}
+
+.room-desc {
+  max-width: var(--empath-reading-measure) !important;
+  color: rgba(232,230,225,.68) !important;
+  line-height: 2.05 !important;
+  text-wrap: pretty;
+}
+
+.desc-wrap {
+  max-width: var(--empath-reading-measure) !important;
+}
+
+textarea,
+.e-msg,
+.sand-msg,
+.warmth-item,
+.shard-text,
+.sync-box p {
+  line-height: 1.9 !important;
+}
+
+#journey .journey-heading > p:last-child {
+  max-width: 54ch;
+  color: rgba(232,230,225,.64) !important;
+}
+
+#journey .door-btn {
+  border-color: rgba(232,230,225,.13) !important;
+  background: linear-gradient(145deg,rgba(255,255,255,.028),rgba(255,255,255,.008)) !important;
+}
+
+#journey .door-btn:hover,
+#journey .door-btn:focus-visible {
+  border-color: rgba(201,168,76,.48) !important;
+  background: rgba(201,168,76,.045) !important;
+}
+
+#room-e .e-msg {
+  max-width: 64ch !important;
+}
+
+#room-p .shard-text,
+#room-t .warmth-item,
+#room-a .sand-msg {
+  text-wrap: pretty;
+}
+
+#room-h .h-detail-panel {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+#room-h .h-secondary-summary .g-card,
+#room-h #h-summary .j-card {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .room-desc {
+    font-size: 14px !important;
+    line-height: 1.95 !important;
+  }
+
+  #journey .door-btn {
+    min-height: 116px !important;
+  }
+
+  #room-e > .e-feed-container {
+    margin-top: 64px !important;
+  }
+
+  #room-m .m-input-wrap {
+    margin-top: clamp(220px,32svh,300px) !important;
+  }
+
+  #room-p,
+  #room-t,
+  #room-h {
+    padding: 104px var(--empath-mobile-gutter) 76px !important;
+  }
+
+  #room-p > .step-wrapper:has(#p-input) {
+    margin: 52px 0 68px !important;
+    padding-left: 18px !important;
+  }
+
+  #room-p .p-vessel {
+    padding: 28px 18px !important;
+    gap: 30px !important;
+  }
+
+  #room-p .kintsugi-board {
+    margin-top: 48px !important;
+  }
+
+  #room-a .room-content {
+    padding: 104px var(--empath-mobile-gutter) 76px !important;
+  }
+
+  #room-a #a-input {
+    margin-top: 34px !important;
+  }
+
+  #room-a #a-feed-wrapper {
+    margin-top: 64px !important;
+  }
+
+  #room-a .a-warning-mask {
+    padding: 30px 20px !important;
+  }
+
+  #room-t .t-layout {
+    gap: 56px !important;
+    margin-top: 56px !important;
+  }
+
+  #room-h > .desc-wrap {
+    margin-bottom: 64px !important;
+  }
+
+  #room-h .h-journey-arc {
+    margin-bottom: 60px !important;
+  }
+
+  #room-h .h-detail-panel {
+    padding-top: 40px !important;
+  }
+
+  #room-h .h-timeline-title {
+    margin-top: 64px !important;
+    margin-bottom: 24px !important;
+    line-height: 1.7 !important;
+    letter-spacing: .22em !important;
+  }
+
+  #room-h .h-secondary-summary,
+  #room-h #h-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 56px !important;
+  }
+
+  #room-h #h-summary .j-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  #room-h .h-secondary-summary .g-card,
+  #room-h #h-summary .j-card {
+    min-height: 142px !important;
+    padding: 22px 12px !important;
+  }
+
+  #room-h .sync-box {
+    margin: 52px 0 !important;
+  }
+
+  #room-h .home-quote {
+    margin: 64px auto 48px !important;
+    padding: 40px 16px !important;
+  }
+
+  #room-h .h-timeline {
+    margin-top: 64px !important;
+  }
+
+  #room-h .lighthouse {
+    margin: 56px auto !important;
+  }
+
+  #room-h .share-action-box {
+    gap: 12px !important;
+    margin-top: 40px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #journey.journey-map {
+    padding-inline: var(--empath-mobile-gutter) !important;
+  }
+
+  #journey .journey-heading h2 {
+    font-size: clamp(29px,9vw,36px) !important;
+    line-height: 1.35 !important;
+  }
+
+  #journey .door-btn {
+    min-height: 108px !important;
+    padding: 16px !important;
+  }
+
+  .room-title {
+    font-size: clamp(32px,10vw,40px) !important;
+  }
+
+  #room-h #g-summary .visitor-card {
+    min-height: 190px !important;
+  }
+
+  #room-h #g-summary .visitor-card .g-num,
+  #room-h #g-summary .visitor-card .g-num.lux-counter {
+    min-height: 84px !important;
+    font-size: clamp(58px,20vw,82px) !important;
+  }
+}
