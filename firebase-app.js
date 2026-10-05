@@ -338,18 +338,17 @@ window.switchLang = function(lang) {
   if (lang === 'uk') crisisTel = '7333';
   else if (lang === 'pl') crisisTel = '116123';
   document.querySelectorAll('.crisis-link').forEach(el => { el.href = 'tel:' + crisisTel; });
-  // 🌍 【核彈級連動】觸發地下室的 Google 翻譯引擎，翻譯全部使用者留言！
-  const googleSelect = document.querySelector(".goog-te-combo");
-  if (googleSelect) {
+  const syncGoogleTranslation = () => {
+    const googleSelect = document.querySelector('.goog-te-combo');
+    if (!googleSelect) return;
       let googleLang = lang;
       if (lang === 'zh') googleLang = 'zh-TW';
       if (lang === 'zh-cn') googleLang = 'zh-CN';
       if (lang === 'en-uk') googleLang = 'en';
-      
+
       googleSelect.value = googleLang;
       googleSelect.dispatchEvent(new Event('change'));
 
-      // 🧹 終極白邊清道夫 (MutationObserver)：只要 Google 敢加白邊，瞬間摧毀！
       if (!window.empathGoogleObserver) {
           window.empathGoogleObserver = new MutationObserver(() => {
               if (document.body.style.top !== '0px' && document.body.style.top !== '') {
@@ -358,14 +357,20 @@ window.switchLang = function(lang) {
               if (document.documentElement.style.top !== '0px' && document.documentElement.style.top !== '') {
                   document.documentElement.style.setProperty('top', '0px', 'important');
               }
-              // 摧毀所有偷渡進來的白邊佔位符
               document.querySelectorAll('div.skiptranslate').forEach(el => {
                   if (el.id !== 'google_translate_element') el.style.display = 'none';
               });
           });
-          // 啟動永久監控，至死方休
           window.empathGoogleObserver.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
       }
+  };
+
+  if (document.querySelector('.goog-te-combo')) {
+    syncGoogleTranslation();
+  } else if (lang !== 'zh' && typeof window.ensureGoogleTranslate === 'function') {
+    window.ensureGoogleTranslate()
+      .then(() => window.setTimeout(syncGoogleTranslation, 0))
+      .catch(error => console.warn('Google Translate unavailable:', error));
   }
 
   window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦', 'Мову змінено ✦', 'Język zmieniony ✦'));
@@ -1195,12 +1200,26 @@ function createPShardCard(record) {
     glow.className = 'shard-glow';
     div.append(text, healedTag, glow);
 
+    if (!data.healed) {
+        div.setAttribute('aria-label', t('修補這道裂紋', 'Mend this crack', 'このひび割れを修復', 'Reparar esta grieta', 'Réparer cette fissure', 'Diesen Riss flicken', '修补这道裂纹', 'Відновити цю тріщину', 'Napraw to pęknięcie'));
+    }
+
     div.addEventListener('click', async () => {
-        if (data.healed) return;
-        await updateDoc(doc(db, 'shards', id), { healed: true });
-        if (typeof window.playChime === 'function') window.playChime();
-        logJourney('p', data.text);
-        window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
+        if (data.healed || div.dataset.healing === 'true') return;
+        div.dataset.healing = 'true';
+        div.setAttribute('aria-busy','true');
+        try {
+            await updateDoc(doc(db, 'shards', id), { healed: true });
+            if (typeof window.playChime === 'function') window.playChime();
+            logJourney('p', data.text);
+            window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
+        } catch (error) {
+            console.error('無法修補碎片:', error);
+            window.showToast(t('暫時無法修補，請稍後再試', 'Could not mend this yet. Please try again.', '修復できませんでした。後でもう一度お試しください。', 'No se pudo reparar. Inténtalo de nuevo.', 'Réparation impossible. Réessayez plus tard.', 'Reparatur fehlgeschlagen. Bitte erneut versuchen.', '暂时无法修补，请稍后再试', 'Не вдалося відновити. Спробуйте ще раз.', 'Nie udało się naprawić. Spróbuj ponownie.'));
+        } finally {
+            delete div.dataset.healing;
+            div.removeAttribute('aria-busy');
+        }
     });
     return div;
 }
