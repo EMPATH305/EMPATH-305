@@ -542,11 +542,12 @@
     overlay.appendChild(line);
     document.body.appendChild(overlay);
     let active = false;
+    let transitionId = 0;
 
     const enterRoom = (hash,roomKey) => {
-      if (active) return;
       const target = document.querySelector(hash);
       if (!target) return;
+      const currentTransition = ++transitionId;
       active = true;
       const lang = window.currentLang === 'ja' ? 'ja' : (window.currentLang === 'zh' || window.currentLang === 'zh-cn' ? 'zh' : 'en');
       const text = roomLines[roomKey]?.[lang] || roomLines[roomKey].en;
@@ -556,18 +557,24 @@
       document.body.classList.remove('empath-room-arrived');
       requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('is-speaking')));
       window.setTimeout(() => {
+        if (currentTransition !== transitionId) return;
         const previous = document.documentElement.style.scrollBehavior;
         document.documentElement.style.scrollBehavior = 'auto';
         target.scrollIntoView({block:'start',behavior:'auto'});
         history.replaceState(null,'',hash);
         document.documentElement.style.scrollBehavior = previous;
       },420);
-      window.setTimeout(() => overlay.classList.add('is-dispersing'),1500);
       window.setTimeout(() => {
+        if (currentTransition !== transitionId) return;
+        overlay.classList.add('is-dispersing');
+      },1500);
+      window.setTimeout(() => {
+        if (currentTransition !== transitionId) return;
         overlay.classList.add('is-releasing');
         document.body.classList.add('empath-room-arrived');
       },1900);
       window.setTimeout(() => {
+        if (currentTransition !== transitionId) return;
         overlay.className = 'empath-room-ritual';
         active = false;
       },2600);
