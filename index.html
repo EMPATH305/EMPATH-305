@@ -3,6 +3,25 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
+<meta name="format-detection" content="telephone=no"/>
+<script>
+/* Detect social in-app browsers before first paint so the correct mobile shell is used immediately. */
+(() => {
+  const ua = navigator.userAgent || '';
+  let platform = '';
+  try {
+    const preview = new URLSearchParams(location.search).get('inapp');
+    if (['line','instagram','facebook','x'].includes(preview)) platform = preview;
+  } catch (error) {}
+  if (!platform && /Line\//i.test(ua)) platform = 'line';
+  else if (!platform && /Instagram/i.test(ua)) platform = 'instagram';
+  else if (!platform && /(FBAN|FBAV|FB_IAB|\[FB)/i.test(ua)) platform = 'facebook';
+  else if (!platform && /(Twitter|TwitterAndroid|X-iOS)/i.test(ua)) platform = 'x';
+  if (!platform) return;
+  document.documentElement.classList.add('empath-inapp', `empath-inapp-${platform}`);
+  document.documentElement.dataset.inapp = platform;
+})();
+</script>
 <title>EMPATH — Every Moment As Truth Heals</title>
 <!-- PWA 核心連結與蘋果 iOS 專屬設定 -->
 <link rel="manifest" href="manifest.json">
@@ -50,7 +69,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="styles.css?v=16">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -884,7 +903,7 @@ try {
 </script>
 
 
-<script src="interactions.js?v=15.1"></script>
+<script src="interactions.js?v=16"></script>
 
 
 
