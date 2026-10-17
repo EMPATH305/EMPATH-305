@@ -3511,3 +3511,231 @@ body.empath-dialog-open { overflow: hidden; }
   color: #07101a;
   font-weight: 700;
 }
+
+/* ===== EMPATH v16 · SOCIAL IN-APP BROWSER UI/UX ===== */
+:root {
+  --empath-vv-top: 0px;
+  --empath-vv-bottom: 0px;
+  --empath-inapp-bottom: 0px;
+  --empath-inapp-tip-reserve: 0px;
+  --empath-inapp-accent: var(--gold);
+}
+
+.empath-inapp-tip { display: none; }
+
+@media (max-width: 900px) {
+  html.empath-inapp,
+  html.empath-inapp body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  html.empath-inapp body {
+    touch-action: pan-y pinch-zoom;
+    -webkit-tap-highlight-color: rgba(201,168,76,.16);
+  }
+
+  html.empath-inapp a[title="CSS Light"] { display: none !important; }
+
+  html.empath-inapp nav {
+    background: rgba(2,7,11,.975) !important;
+    border-bottom-color: color-mix(in srgb, var(--empath-inapp-accent) 22%, transparent) !important;
+  }
+
+  html.empath-inapp .hero-opening,
+  html.empath-inapp .room,
+  html.empath-inapp .room-content {
+    max-width: 100% !important;
+  }
+
+  html.empath-inapp .hero-title {
+    max-width: 100% !important;
+    font-size: clamp(48px,15.5vw,68px) !important;
+    letter-spacing: clamp(2px,1.2vw,5px) !important;
+    text-indent: 0 !important;
+  }
+
+  html.empath-inapp .empath-entry-overlay,
+  html.empath-inapp .empath-room-ritual,
+  html.empath-inapp .share-modal,
+  html.empath-inapp #breathe-overlay,
+  html.empath-inapp #nebula-overlay,
+  html.empath-inapp #fortune-display {
+    top: var(--empath-vv-top) !important;
+    bottom: auto !important;
+    height: var(--empath-vh) !important;
+    max-height: var(--empath-vh) !important;
+  }
+
+  html.empath-inapp :where(button,a,.door-btn,.echo-btn,.shard) {
+    touch-action: manipulation;
+  }
+
+  html.empath-inapp .empath-entry-skip {
+    bottom: calc(22px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom)) !important;
+  }
+
+  html.empath-inapp #creator-btn {
+    bottom: calc(76px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom) + var(--empath-inapp-tip-reserve)) !important;
+  }
+
+  html.empath-inapp #breathe-btn {
+    bottom: calc(76px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom) + var(--empath-inapp-tip-reserve)) !important;
+  }
+
+  html.empath-inapp #btt-btn {
+    bottom: calc(18px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom) + var(--empath-inapp-tip-reserve)) !important;
+  }
+
+  html.empath-inapp body.empath-inapp-tip-open {
+    --empath-inapp-tip-reserve: 166px;
+  }
+
+  .empath-inapp-tip {
+    position: fixed;
+    right: max(12px,var(--empath-safe-right));
+    bottom: calc(12px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom));
+    left: max(12px,var(--empath-safe-left));
+    z-index: 1200;
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 16px;
+    width: auto;
+    max-width: 720px;
+    margin-inline: auto;
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,.13);
+    border-top-color: color-mix(in srgb, var(--empath-inapp-accent) 70%, white 10%);
+    border-radius: 14px;
+    background: rgba(7,13,21,.97);
+    color: var(--fog);
+    box-shadow: 0 20px 60px rgba(0,0,0,.58);
+    backdrop-filter: blur(18px) saturate(115%);
+    -webkit-backdrop-filter: blur(18px) saturate(115%);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate3d(0,22px,0);
+    transition: opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s linear .45s;
+  }
+
+  .empath-inapp-tip.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s;
+  }
+
+  .empath-inapp-tip-copy { min-width: 0; }
+  .empath-inapp-tip-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--empath-inapp-accent);
+    font: 600 9px/1 'Noto Sans TC',sans-serif;
+    letter-spacing: .24em;
+  }
+  .empath-inapp-tip strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #fff;
+    font: 600 15px/1.45 'Noto Serif TC',serif;
+    letter-spacing: .08em;
+  }
+  .empath-inapp-tip p {
+    margin: 0;
+    color: rgba(232,230,225,.68);
+    font-size: 12px;
+    line-height: 1.75;
+    letter-spacing: .035em;
+  }
+  .empath-inapp-tip-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    width: 112px;
+  }
+  .empath-inapp-tip-actions button {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(255,255,255,.8);
+    font: 500 11px/1.25 'Noto Sans TC',sans-serif;
+    letter-spacing: .06em;
+  }
+  .empath-inapp-tip-actions .empath-inapp-dismiss {
+    border-color: color-mix(in srgb, var(--empath-inapp-accent) 68%, transparent);
+    background: color-mix(in srgb, var(--empath-inapp-accent) 13%, transparent);
+    color: #fff;
+  }
+
+  /* LINE: reserve extra room for its persistent bottom toolbar. */
+  html.empath-inapp-line {
+    --empath-inapp-accent: #06c755;
+    --empath-inapp-bottom: 18px;
+  }
+  html.empath-inapp-line .hero-opening { padding-bottom: calc(138px + var(--empath-safe-bottom)) !important; }
+  html.empath-inapp-line .cinema-cta { min-height: 50px !important; }
+
+  /* Instagram: its WebView is animation-heavy, so prefer crisp layers over blur. */
+  html.empath-inapp-instagram {
+    --empath-inapp-accent: #e65083;
+    --empath-inapp-bottom: 12px;
+  }
+  html.empath-inapp-instagram nav,
+  html.empath-inapp-instagram .nav-menu,
+  html.empath-inapp-instagram .empath-inapp-tip {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  html.empath-inapp-instagram .empath-entry-char,
+  html.empath-inapp-instagram .empath-ritual-char { filter: none !important; }
+
+  /* Facebook: older embedded WebViews behave better with hidden overflow than clip. */
+  html.empath-inapp-facebook {
+    --empath-inapp-accent: #4f8df7;
+    --empath-inapp-bottom: 15px;
+  }
+  html.empath-inapp-facebook,
+  html.empath-inapp-facebook body,
+  html.empath-inapp-facebook #hero,
+  html.empath-inapp-facebook .room { overflow-x: hidden !important; }
+  html.empath-inapp-facebook body { -webkit-text-size-adjust: 100% !important; }
+  html.empath-inapp-facebook .room-title { overflow-wrap: break-word !important; }
+
+  /* X: protect vertical exploration from the app's horizontal back gesture. */
+  html.empath-inapp-x {
+    --empath-inapp-accent: #f2f2f2;
+    --empath-inapp-bottom: 12px;
+  }
+  html.empath-inapp-x :where(.door-btn,.nav-letter,.action-btn,.send-btn) {
+    touch-action: pan-y !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html.empath-inapp body.empath-inapp-tip-open { --empath-inapp-tip-reserve: 204px; }
+  .empath-inapp-tip {
+    grid-template-columns: 1fr;
+    gap: 13px;
+    padding: 16px;
+  }
+  .empath-inapp-tip-actions {
+    width: 100%;
+    flex-direction: row;
+  }
+  .empath-inapp-tip-actions button { min-height: 44px; }
+}
+
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  html.empath-inapp .hero-opening { min-height: var(--empath-vh) !important; padding-top: 78px !important; padding-bottom: 48px !important; }
+  html.empath-inapp .hero-title { font-size: clamp(42px,11vw,62px) !important; }
+  .empath-inapp-tip { grid-template-columns: minmax(0,1fr) auto; padding: 12px 14px; }
+  .empath-inapp-tip p { display: none; }
+  .empath-inapp-tip-actions { width: 210px; flex-direction: row; }
+  html.empath-inapp body.empath-inapp-tip-open { --empath-inapp-tip-reserve: 104px; }
+}
