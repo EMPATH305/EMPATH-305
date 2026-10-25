@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 // 🌟 新增載入 GA4 引擎
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
 
@@ -450,7 +450,7 @@ window.switchLang = function(lang) {
 }
 
 function updateDynamicTexts() {
-  if(document.getElementById('p-healed-count')) { document.getElementById('p-healed-count').textContent = t( `已有 ${pHealedTotal} 道裂紋，以金修補。`, `${pHealedTotal} cracks mended with gold.`, `${pHealedTotal} 個のひび割れが金で修復されました。`, `${pHealedTotal} grietas reparadas con oro.`, `${pHealedTotal} fissures réparées avec de l'or.`, `${pHealedTotal} Risse mit Gold geflickt.`, `已有 ${pHealedTotal} 道裂纹，以金修补。` ); }
+  if(document.getElementById('p-healed-count')) { const healed = window.pHealedTotal || 0; document.getElementById('p-healed-count').textContent = t( `已有 ${healed} 道裂紋，以金修補。`, `${healed} cracks mended with gold.`, `${healed} 個のひび割れが金で修復されました。`, `${healed} grietas reparadas con oro.`, `${healed} fissures réparées avec de l'or.`, `${healed} Risse mit Gold geflickt.`, `已有 ${healed} 道裂纹，以金修补。` ); }
   document.querySelectorAll('.shard-healed-tag').forEach(el => el.innerHTML = t('✦ 已修補', '✦ Healed', '✦ 修復済', '✦ Reparado', '✦ Réparé', '✦ Geheilt', '✦ 已修补'));
   document.querySelectorAll('.e-msg-anon').forEach(el => el.textContent = t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS'));
   document.querySelectorAll('.sand-timer-label').forEach(el => el.textContent = t('消散中', 'DISSOLVING', '消散中', 'DISOLVIENDO', 'DISSOLUTION', 'AUFLÖSEND', '消散中'));
@@ -1187,7 +1187,7 @@ async function fetchRealCounts() {
         const [eSnap, mSnap, pSnap, aSnap, tSnap] = await Promise.all([
             getCountFromServer(collection(db, "emotions")),
             getCountFromServer(collection(db, "stars")),
-            getCountFromServer(collection(db, "shards")),
+            getCountFromServer(query(collection(db, "shards"), where("healed", "==", true))),
             getCountFromServer(collection(db, "sand")),
             getCountFromServer(collection(db, "warmth")),
         ]);
@@ -1201,6 +1201,40 @@ async function fetchRealCounts() {
         console.error(e);
         // 計數失敗不覆寫已知數字，避免介面出現 undefined 或誤導性的 0。
         updateCountersUI();
+    }
+}
+
+async function refreshRoomCount(room) {
+    const collections = { e:'emotions', m:'stars', a:'sand', t:'warmth' };
+    try {
+        if (room === 'p') {
+            const [totalSnap, healedSnap] = await Promise.all([
+                getCountFromServer(collection(db, 'shards')),
+                getCountFromServer(query(collection(db, 'shards'), where('healed', '==', true)))
+            ]);
+            window.pTotalShards = totalSnap.data().count;
+            window.pHealedTotal = healedSnap.data().count;
+            globalCounts.p = window.pHealedTotal;
+            const baseTotal = 300;
+            const baseHealed = 142;
+            const ratio = (window.pTotalShards + baseTotal) > 0
+                ? (window.pHealedTotal + baseHealed) / (window.pTotalShards + baseTotal)
+                : 0;
+            const pct = (ratio * 100).toFixed(1);
+            const bar = document.getElementById('global-healing-bar');
+            const pctText = document.getElementById('global-healing-pct');
+            if (bar) bar.style.width = pct + '%';
+            if (pctText) pctText.textContent = pct + '%';
+            window.drawKintsugiVessel?.();
+            updateDynamicTexts();
+        } else if (collections[room]) {
+            const snap = await getCountFromServer(collection(db, collections[room]));
+            globalCounts[room] = snap.data().count;
+            if (room === 'm') window.updateMStats?.();
+        }
+        updateCountersUI();
+    } catch (error) {
+        console.error(`Room ${room.toUpperCase()} count refresh failed:`, error);
     }
 }
   
@@ -1222,6 +1256,7 @@ function subscribeAll() {
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
         setDataState('e',snapshot.empty ? 'empty' : null);
+        refreshRoomCount('e');
         updateCountersUI();
     },error => handleDataError('e',error)));
 
@@ -1423,6 +1458,7 @@ function subscribeOtherRooms() {
         starMessages = window.starMessages;
         
         if(typeof window.updateMStats === 'function') window.updateMStats();
+        refreshRoomCount('m');
         if(starsRafId) cancelAnimationFrame(starsRafId);
         starsRafId = null;
         const _sl = document.getElementById('star-loading'); if(_sl) _sl.style.display = 'none';
@@ -1460,8 +1496,6 @@ function subscribeOtherRooms() {
         });
         
         globalCounts.p = window.pHealedTotal;
-        pHealedTotal = window.pHealedTotal; 
-        pTotalShards = window.pTotalShards;
         
         if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
         updateDynamicTexts();
@@ -1486,12 +1520,13 @@ function subscribeOtherRooms() {
             detail: { total: window.pTotalShards }
         }));
         setDataState('p',snapshot.empty ? 'empty' : null);
+        refreshRoomCount('p');
         scheduleRoomTargetStabilization();
     },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
     if (ACTIVE_ROOM === 'a') firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-        globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return;
+        const feed = document.getElementById('a-feed'); if(!feed) return;
         feed.innerHTML = ''; const nowMs = Date.now();
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
@@ -1515,13 +1550,14 @@ function subscribeOtherRooms() {
             feed.appendChild(div);
         });
         setDataState('a',feed.children.length ? null : 'empty');
+        refreshRoomCount('a');
         updateCountersUI();
         scheduleRoomTargetStabilization();
     },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
     if (ACTIVE_ROOM === 't') firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-        globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return;
+        const feed = document.getElementById('t-feed'); if(!feed) return;
         window.tWarmthRecords = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id;
@@ -1529,6 +1565,7 @@ function subscribeOtherRooms() {
         });
         window.renderTWarmthFeed();
         setDataState('t',snapshot.empty ? 'empty' : null);
+        refreshRoomCount('t');
         updateCountersUI();
         scheduleRoomTargetStabilization();
     },error => handleDataError('t',error)));
