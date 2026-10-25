@@ -2835,7 +2835,12 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 
 /* H — the final chapter, not another dashboard */
 #room-h{padding:clamp(136px,13vw,196px) clamp(28px,8vw,132px)!important;text-align:center!important;background:radial-gradient(circle at 50% 20%,rgba(242,232,217,.045),transparent 35%),linear-gradient(180deg,#0b1723,#070810 55%,#030407)!important}
-#room-h::after{content:'THE LAST CHAPTER';position:absolute;left:32px;top:50%;writing-mode:vertical-rl;transform:translateY(-50%);font:10px 'Cormorant Garamond',serif;letter-spacing:.42em;color:rgba(242,232,217,.16)}
+#room-h::after{
+  content:'THE LAST CHAPTER';position:absolute;left:32px;right:auto;top:50%;
+  width:auto;height:auto;background:none!important;
+  writing-mode:vertical-rl;transform:translateY(-50%);
+  font:10px 'Cormorant Garamond',serif;letter-spacing:.42em;color:rgba(242,232,217,.16)
+}
 #room-h>.room-tag{margin-left:auto!important;margin-right:auto!important}
 #room-h>.room-title-wrap{justify-content:center!important;border:0!important;margin:0 auto 24px!important}
 #room-h>.desc-wrap{margin:0 auto 96px!important;max-width:430px!important;text-align:left!important}
