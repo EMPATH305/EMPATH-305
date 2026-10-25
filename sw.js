@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v16'; // 社群內建瀏覽器 UI/UX 適配版
+const CACHE_NAME = 'empath-cache-v17'; // 每日情緒天氣與七日星圖版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
