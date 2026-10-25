@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v17-1'; // 每日情緒天氣與七日星圖版
+const CACHE_NAME = 'empath-cache-v17-2'; // 全螢幕開場與每日情緒星圖版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
