@@ -1992,7 +1992,7 @@ window.toggleEFeed = function() {
     window.renderEFeed(); 
 }
 
-const canvas = document.getElementById('star-canvas'); const ctx = canvas.getContext('2d'); const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
+const canvas = document.getElementById('star-canvas'); const ctx = canvas?.getContext('2d') || null; const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 
 function normalizeStar(star, index = 0) {
     const safeStar = star && typeof star === 'object' ? star : {};
@@ -2285,7 +2285,7 @@ window.drawStars = function(){
 function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
 window.activeConstellations = window.activeConstellations || [];
 
-roomM.addEventListener('click', async e => { 
+roomM?.addEventListener('click', async e => { 
     if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; 
     const rect = canvas.getBoundingClientRect(); 
     const x = e.clientX-rect.left, y = e.clientY-rect.top; 
@@ -2351,7 +2351,7 @@ window.submitM = async function(){ const input = document.getElementById('m-inpu
 let pCanvas, pCtx;
 window.pHealedTotal = 0;
 window.pTotalShards = 0;
-window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); pCtx = pCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 380; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
+window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); if(!pCanvas) return; pCtx = pCanvas.getContext('2d'); if(!pCtx) return; const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 380; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
 window.drawKintsugiVessel = function(){
     const healed = window.pHealedTotal || 0;
     const total = window.pTotalShards || 0;
