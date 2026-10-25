@@ -14,6 +14,29 @@
 
   function roomFile(key) { return `room-${key}.html`; }
 
+  function resetFreshRouteScroll() {
+    try {
+      if (sessionStorage.getItem('empath_fresh_route') !== '1') return;
+      sessionStorage.removeItem('empath_fresh_route');
+      requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+    } catch (error) {}
+  }
+
+  function bindIntentPrefetch() {
+    const prefetched = new Set();
+    const prefetch = link => {
+      const href = link?.getAttribute?.('href') || '';
+      if (!/^room-[empath]\.html(?:$|[?#])/.test(href) || prefetched.has(href)) return;
+      prefetched.add(href);
+      const hint = document.createElement('link');
+      hint.rel = 'prefetch';
+      hint.href = href;
+      document.head.appendChild(hint);
+    };
+    document.addEventListener('pointerover', event => prefetch(event.target.closest?.('a[href]')), { passive: true });
+    document.addEventListener('focusin', event => prefetch(event.target.closest?.('a[href]')));
+  }
+
   function setupRoomPage() {
     if (!currentRoom) return;
     const meta = rooms[currentRoom];
@@ -47,6 +70,7 @@
       const href = link.getAttribute('href') || '';
       if (!/^(?:index|room-[empath])\.html(?:$|[?#])/.test(href)) return;
       event.preventDefault();
+      try { sessionStorage.setItem('empath_fresh_route', '1'); } catch (error) {}
       document.body.classList.add('empath-page-leaving');
       window.setTimeout(() => { location.href = href; }, 280);
     });
@@ -54,9 +78,11 @@
 
   if (migrateLegacyHash()) return;
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { setupRoomPage(); bindPageTransitions(); }, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { setupRoomPage(); resetFreshRouteScroll(); bindIntentPrefetch(); bindPageTransitions(); }, { once: true });
   } else {
     setupRoomPage();
+    resetFreshRouteScroll();
+    bindIntentPrefetch();
     bindPageTransitions();
   }
 })();
