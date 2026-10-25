@@ -259,7 +259,7 @@ window.currentLang = 'zh';
 function t(zh, en, ja, es, fr, de, zh_cn, uk, pl) { let target = window.currentLang; if(target === 'en-uk') target = 'en'; if (target === 'en') return en || zh; if (target === 'ja') return ja || en || zh; if (target === 'es') return es || en || zh; if (target === 'fr') return fr || en || zh; if (target === 'de') return de || en || zh; if (target === 'zh-cn') return zh_cn || zh; if (target === 'uk') return uk || en || zh; if (target === 'pl') return pl || en || zh; return zh; }
 
 const empathDialogReturnFocus = new WeakMap();
-const empathDialogSelector = '.share-modal.show, #breathe-overlay.show, #nebula-overlay.show, #fortune-display.show, #onboarding-box.is-open, #crisis-support-notice:not([hidden])';
+const empathDialogSelector = '.share-modal.show, #breathe-overlay.show, #nebula-overlay.show, #fortune-display.show, #onboarding-box.is-open, #crisis-support-notice:not([hidden]), #tonight-echo.show';
 const empathFocusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function activateEmpathDialog(dialog, preferredFocus) {
@@ -484,7 +484,11 @@ function containsCrisisSignal(text) {
 }
 
 function prepareSubmittedText(text) {
-  if (containsCrisisSignal(text)) window.setTimeout(() => window.showCrisisSupportNotice?.(), 450);
+  if (containsCrisisSignal(text)) {
+    window.empathSkipNextEcho = true;
+    window.setTimeout(() => window.showCrisisSupportNotice?.(), 450);
+    window.setTimeout(() => { window.empathSkipNextEcho = false; }, 12000);
+  }
   return cleanText(text);
 }
 
@@ -1679,6 +1683,38 @@ window.closeCrisisSupportNotice = function() {
     deactivateEmpathDialog(notice);
 }
 
+const tonightEchoCopy = {
+    e: '你不需要現在就整理好它。能說出來，已經讓重量有了出口。',
+    m: '思念沒有消失，但它已經有了一顆可以安放的星。',
+    p: '裂痕還在，但你已經開始決定，它不只代表破碎。',
+    a: '你不需要再替這段重量保管到永遠。',
+    t: '你交出去的溫暖，會在某個陌生人的夜裡留下光。'
+};
+
+window.showTonightEcho = function(room) {
+    if (window.empathSkipNextEcho || !document.getElementById('crisis-support-notice')?.hidden) {
+        window.empathSkipNextEcho = false;
+        return;
+    }
+    const dialog = document.getElementById('tonight-echo');
+    const copy = document.getElementById('tonight-echo-copy');
+    if (!dialog || !copy) return;
+    copy.textContent = tonightEchoCopy[room] || '能在這裡停一下，本身就是一種照顧。';
+    dialog.classList.add('show');
+    activateEmpathDialog(dialog, document.getElementById('tonight-echo-close'));
+};
+
+window.closeTonightEcho = function() {
+    const dialog = document.getElementById('tonight-echo');
+    if (!dialog) return;
+    dialog.classList.remove('show');
+    deactivateEmpathDialog(dialog);
+};
+
+function queueTonightEcho(room) {
+    window.setTimeout(() => window.showTonightEcho?.(room), 850);
+}
+
 // ♿ 無障礙最高境界：全局監聽 ESC 鍵，一鍵關閉所有彈窗
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1689,6 +1725,7 @@ document.addEventListener('keydown', (e) => {
         if (document.getElementById('creator-modal')?.classList.contains('show')) window.closeCreator(); // 👈 這裡就是新增的 ESC 關閉公告
         if (document.getElementById('fortune-display')?.classList.contains('show')) window.closeFortune();
         if (!document.getElementById('crisis-support-notice')?.hidden) window.closeCrisisSupportNotice();
+        if (document.getElementById('tonight-echo')?.classList.contains('show')) window.closeTonightEcho();
         const langList = document.getElementById('lang-dropdown-list');
         if (langList?.classList.contains('show')) {
             langList.classList.remove('show');
@@ -1858,6 +1895,7 @@ window.submitE = async function(){
             window.showToast(t('已投入黑暗', 'Cast into the dark', '闇に投じました', 'Lanzado a la oscuridad', 'Jeté dans l\'obscurité', 'In die Dunkelheit geworfen', '已投入黑暗')); 
         }
         // --- 🌟 父親節溫柔彩蛋邏輯 結束 ---
+        queueTonightEcho('e');
 
     } catch(e) { 
         console.error("Firestore 寫入失敗：", e); 
@@ -2293,7 +2331,7 @@ roomM.addEventListener('click', async e => {
     } 
 });
   
-window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
+window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); queueTonightEcho('m'); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
 
 let pCanvas, pCtx;
 window.pHealedTotal = 0;
@@ -2480,7 +2518,7 @@ window.drawKintsugiVessel = function(){
     c.restore();
 };
   
-window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
+window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); queueTonightEcho('p'); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
@@ -2621,6 +2659,7 @@ window.submitA = async function(){
         input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
         window.empathContrastMoment?.();
         window.showToast('放入沙畫 ✦');
+        queueTonightEcho('a');
     } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); }
 }
 
@@ -2636,7 +2675,7 @@ window.submitT = async function(){
         const docRef = await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); 
         localStorage.setItem('empath_my_warmth_id', docRef.id);
         localStorage.setItem('empath_my_warmth_echos', '0');
-        input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮'));
+        input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); queueTonightEcho('t');
     } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); }
 }
   
