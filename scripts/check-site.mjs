@@ -27,7 +27,8 @@ for (const page of pages) {
 }
 
 const appSource = readFileSync('firebase-app.js', 'utf8');
-assert(/where\(["']expireAt["'],\s*["']>["'],\s*Timestamp\.now\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
+assert(/where\(["']expireAt["'],\s*["']>["'],\s*roomAQueryCutoff\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
+assert(appSource.includes('Date.now() + 10000'), 'Room A query cutoff must stay ahead of Firestore request.time');
 assert(appSource.includes('expireAt: Timestamp.fromMillis'), 'Room A writes must include a Firestore TTL timestamp');
 assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consent gated');
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
