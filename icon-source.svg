@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">EMPATH app icon</title>
+  <desc id="desc">A quiet ivory E and a small gold star on a deep midnight field.</desc>
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="43%" r="58%">
+      <stop offset="0" stop-color="#253047"/>
+      <stop offset="0.52" stop-color="#111d2c"/>
+      <stop offset="1" stop-color="#07111d"/>
+    </radialGradient>
+    <radialGradient id="warmth" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#c9a84c" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#c9a84c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#halo)"/>
+  <circle cx="256" cy="226" r="176" fill="url(#warmth)"/>
+  <path d="M169 132h184v35H214v70h116v35H214v73h143v35H169z" fill="#f2efe8"/>
+  <path d="M378 112l8 20 20 8-20 8-8 20-8-20-20-8 20-8z" fill="#c9a84c"/>
+  <circle cx="256" cy="426" r="4" fill="#c9a84c"/>
+</svg>

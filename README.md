@@ -35,6 +35,30 @@
 
 ---
 
+## ✦ v20.1 信任與穩定性升級 (Trust & Stability)
+
+1. **Room A 真正具備生命週期**：每則流沙秘密都寫入 Firestore `expireAt`；前端查詢與安全規則會即時排除過期內容，Firestore TTL 則負責後端自動清除。
+2. **隱私預設更保守**：Firebase Analytics 預設關閉，只有使用者在隱私設定明確同意後才載入；選擇可隨時撤回。
+3. **危機支援不再由語言推測地點**：使用者可獨立選擇所在地區；未選擇時導向國際支援目錄。
+4. **無障礙與 SEO 修正**：獨立房間使用唯一 `h1`、語言偏好可保存並同步 `<html lang>`、互動控制符合 44px 觸控尺寸，外部連結補上安全屬性。
+5. **PWA 與工程護欄**：補齊正確尺寸及 maskable 圖示、更新離線快取版本，新增零依賴自動檢查與 GitHub Actions。
+
+### 資料與隱私說明
+
+- 使用者不需要建立公開帳號；基礎設施仍可能產生維持服務與防止濫用所需的技術紀錄。
+- Room A 到期內容會立即從網站查詢與安全規則中排除；Firestore TTL 的實體刪除是非即時的後端清理程序。
+- 使用分析預設關閉，選擇儲存在目前瀏覽器的 `localStorage`。
+- EMPATH 不是緊急服務或醫療替代方案；危機支援依使用者明確選擇的地區提供。
+
+### 開發與部署
+
+```bash
+npm test
+npx firebase-tools deploy --only firestore:rules,firestore:indexes --project empath-62582
+```
+
+Firebase App Check 需要在專案主控台建立 reCAPTCHA Enterprise 金鑰並分階段觀察指標後再啟用強制執行；金鑰不應提交至此儲存庫。
+
 ## ✦ v19.3 成長與體驗升級紀錄 (Changelog)
 
 1. **全房間獨立 SEO 與社群預覽標籤**：為 `room-e.html`～`room-h.html` 補齊獨立 `<title>`、`description`、`canonical` 與 Open Graph 標籤，並將 7 個頁面完整寫入 `sitemap.xml`。
