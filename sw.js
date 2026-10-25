@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v17-2'; // 全螢幕開場與每日情緒星圖版
+const CACHE_NAME = 'empath-cache-v18'; // 六個獨立情緒空間版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -10,6 +10,13 @@ self.addEventListener('install', (event) => {
                 './styles.css',
                 './firebase-app.js',
                 './interactions.js',
+                './room-router.js',
+                './room-e.html',
+                './room-m.html',
+                './room-p.html',
+                './room-a.html',
+                './room-t.html',
+                './room-h.html',
                 './og-image.png'
             ]);
         })
