@@ -40,6 +40,7 @@
   function setupRoomPage() {
     if (!currentRoom) return;
     const meta = rooms[currentRoom];
+    try { localStorage.setItem('empath_last_room', currentRoom); } catch (error) {}
     document.title = `Room ${meta.letter} — ${meta.name} | EMPATH`;
     const logo = document.querySelector('.nav-logo');
     if (logo) logo.href = 'index.html';

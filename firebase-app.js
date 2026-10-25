@@ -602,6 +602,15 @@ function initReturnMemory() {
     localStorage.setItem(RETURN_MEMORY_LAST_VISIT_KEY,String(now.getTime()));
     window.empathReturnMemory = { isReturning:Boolean(previousVisit), previousVisit, visitCount };
 
+    const primaryEntry = document.getElementById('primary-entry-cta');
+    const lastRoom = localStorage.getItem('empath_last_room');
+    if (previousVisit && primaryEntry && ['e','m','p','a','t','h'].includes(lastRoom)) {
+        primaryEntry.href = `room-${lastRoom}.html`;
+        primaryEntry.textContent = t(`繼續上次的 Room ${lastRoom.toUpperCase()}`, `Continue Room ${lastRoom.toUpperCase()}`);
+        primaryEntry.removeAttribute('data-zh');
+        primaryEntry.removeAttribute('data-en');
+    }
+
     const heroMemory = document.getElementById('return-memory');
     setReturnMemoryTranslations(heroMemory,returnVisitMessages(previousVisit,now));
     const revealHeroMemory = () => revealReturnMemory(heroMemory);
@@ -1838,11 +1847,102 @@ function initTimeline(){
     }
 }
   
-window.createSoulKey = async function() { const soulKey = `EMP-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`; localStorage.setItem('empath_soul_key', soulKey); await autoBackupToCloud(); updateSyncUI(); window.showToast(t('靈魂鑰匙生成成功 ✦', 'Key generated!', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙生成成功 ✦')); }
+function normalizeJourney(source = {}) {
+    const counters = {};
+    ['e','m','p','a','t'].forEach(type => {
+        counters[type] = Math.max(0, Number(source?.counters?.[type]) || 0);
+    });
+    const events = Array.isArray(source.events)
+        ? source.events.filter(event => event && ['e','m','p','a','t'].includes(event.type)).map(event => ({
+            type:event.type,
+            text:typeof event.text === 'string' ? event.text.slice(0, 500) : '',
+            time:typeof event.time === 'string' ? event.time.slice(0, 20) : ''
+        }))
+        : [];
+    return { counters, events, visitCount:Math.max(0, Number(source.visitCount) || 0) };
+}
+
+function mergeJourneys(localSource, cloudSource) {
+    const local = normalizeJourney(localSource);
+    const cloud = normalizeJourney(cloudSource);
+    const counters = {};
+    ['e','m','p','a','t'].forEach(type => { counters[type] = Math.max(local.counters[type], cloud.counters[type]); });
+    const seen = new Set();
+    const events = [...cloud.events, ...local.events].filter(event => {
+        const signature = `${event.type}\u0000${event.time}\u0000${event.text}`;
+        if (seen.has(signature)) return false;
+        seen.add(signature);
+        return true;
+    }).slice(-500);
+    return { counters, events, visitCount:Math.max(local.visitCount, cloud.visitCount) };
+}
+
+function applyJourney(nextJourney) {
+    journeyData = normalizeJourney(nextJourney);
+    localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
+    ['e','m','p','a','t'].forEach(type => { state[type + 'Count'] = journeyData.counters[type] || 0; });
+    const timeline = document.getElementById('h-events');
+    if (timeline) { timeline.innerHTML = ''; initTimeline(); }
+    updateCountersUI();
+}
+
+function generateSoulKey() {
+    const bytes = new Uint8Array(8);
+    if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(bytes);
+    else bytes.forEach((_, index) => { bytes[index] = Math.floor(Math.random() * 256); });
+    const token = Array.from(bytes, byte => byte.toString(36).toUpperCase().padStart(2, '0')).join('');
+    return `EMP-${token.slice(0, 8)}-${token.slice(8, 16)}`;
+}
+
+window.createSoulKey = async function() {
+    const soulKey = generateSoulKey();
+    localStorage.setItem('empath_soul_key', soulKey);
+    await autoBackupToCloud();
+    updateSyncUI();
+    window.showToast(t('靈魂鑰匙已生成，請妥善保存 ✦', 'Key generated — keep it somewhere safe ✦', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙已生成，请妥善保存 ✦'));
+    return soulKey;
+}
 window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
-window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) { console.error("發生錯誤:", err); } }
+window.loadExistingSoulKey = async function() {
+    const input = document.getElementById('sync-key-input');
+    const key = input?.value.trim().toUpperCase() || '';
+    if(!/^EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}$/.test(key)) {
+        window.showToast(t('鑰匙格式不正確', 'That key format is not valid', '鍵の形式が正しくありません', 'Formato de llave inválido', 'Format de clé invalide', 'Ungültiges Schlüsselformat', '钥匙格式不正确'));
+        return;
+    }
+    try {
+        const docSnap = await getDoc(doc(db, "user_journeys", key));
+        if(!docSnap.exists()) {
+            window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙'));
+            return;
+        }
+        applyJourney(mergeJourneys(journeyData, docSnap.data()));
+        localStorage.setItem('empath_soul_key', key);
+        await autoBackupToCloud();
+        updateSyncUI();
+        window.showToast(t('足跡已安全合併，沒有覆蓋本機紀錄 ✦', 'Footprints merged without replacing this device ✦', '足跡が安全に統合されました ✦', 'Huellas combinadas con seguridad ✦', 'Empreintes fusionnées en sécurité ✦', 'Spuren wurden sicher zusammengeführt ✦', '足迹已安全合并，没有覆盖本机记录 ✦'));
+        input.value='';
+    } catch(err) {
+        console.error("發生錯誤:", err);
+        window.showToast(t('同步暫時失敗，原有足跡仍保留', 'Sync failed for now; your local footprints are still safe'));
+    }
+}
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
-async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }, { merge: true }); } catch(err) { console.error("發生錯誤:", err); } }
+async function autoBackupToCloud() {
+    const key = localStorage.getItem('empath_soul_key');
+    if(!key) return false;
+    try {
+        const safeJourney = normalizeJourney(journeyData);
+        await setDoc(doc(db, "user_journeys", key), {
+            counters:safeJourney.counters,
+            events:safeJourney.events,
+            schemaVersion:2,
+            clientUpdatedAt:Date.now(),
+            updatedAt:serverTimestamp()
+        }, { merge:true });
+        return true;
+    } catch(err) { console.error("發生錯誤:", err); return false; }
+}
 function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = localStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
 const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); const display = document.getElementById('active-key-display'); if(display) display.textContent=key; } else { initial.style.display='flex'; active.style.display='none'; } }
 
@@ -2932,7 +3032,7 @@ window.submitFutureLetter = async function() {
         let letters = [];
         if(docSnap.exists() && docSnap.data().letters) letters = docSnap.data().letters;
         letters.push({ content: text, unlockDate: unlockDate, createdAt: Date.now() });
-        await updateDoc(docRef, { letters: letters });
+        await setDoc(docRef, { letters, schemaVersion:2, clientUpdatedAt:Date.now(), updatedAt:serverTimestamp() }, { merge:true });
         document.getElementById('future-letter-input').value = '';
         window.showToast('✉️ 信件已封存。三個月後，帶著鑰匙回來這裡。', 4000);
     } catch(e) { console.error(e); }
@@ -3175,7 +3275,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey && document.getElementById('h-events')) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
+  if(existingKey && document.getElementById('h-events')) {
+      try {
+          const docSnap = await getDoc(doc(db, "user_journeys", existingKey));
+          if(docSnap.exists()) {
+              applyJourney(mergeJourneys(journeyData, docSnap.data()));
+              await autoBackupToCloud();
+          }
+      } catch(err) { console.error("發生錯誤:", err); }
+  }
   const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
           if (entry.target.id === 'room-m') roomMVisible = entry.isIntersecting;

@@ -70,7 +70,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=18.3">
+<link rel="stylesheet" href="styles.css?v=20.0">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -317,6 +317,12 @@ try {
       <button type="button" class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
   </div>
 
+  <nav class="h-path-nav" aria-label="靈魂歸宿內容導覽">
+    <a href="#h-journey-arc"><span>01</span><b data-zh="今晚" data-en="Tonight">今晚</b><small data-zh="剛剛走過的路" data-en="The path you just walked">剛剛走過的路</small></a>
+    <a href="#emotion-week"><span>02</span><b data-zh="這七天" data-en="Seven days">這七天</b><small data-zh="看見情緒的形狀" data-en="See the shape of your feelings">看見情緒的形狀</small></a>
+    <a href="#h-long-term"><span>03</span><b data-zh="長期保存" data-en="Keep it">長期保存</b><small data-zh="足跡、鑰匙與未來信" data-en="Footprints, key and future letters">足跡、鑰匙與未來信</small></a>
+  </nav>
+
   <div class="h-session-echo" id="h-session-echo" aria-hidden="true"></div>
   <section class="h-journey-arc" id="h-journey-arc" aria-labelledby="h-journey-arc-title">
     <header class="h-journey-arc-head">
@@ -339,7 +345,12 @@ try {
     <p class="emotion-week-insight" id="emotion-week-insight" aria-live="polite"></p>
   </section>
 
-  <div class="h-journey">
+  <section class="h-journey" id="h-long-term" aria-labelledby="h-long-term-title">
+    <header class="h-long-term-head">
+      <p>LONGER VIEW · 03</p>
+      <h3 id="h-long-term-title" data-zh="把想留下的，好好收著" data-en="Keep what matters">把想留下的，好好收著</h3>
+      <span data-zh="這一區才會處理長期足跡、跨裝置同步與給未來的信。" data-en="This is where long-term footprints, device sync and future letters live.">這一區才會處理長期足跡、跨裝置同步與給未來的信。</span>
+    </header>
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;" data-zh="GLOBAL RESONANCE — 全網靈魂共鳴軌跡" data-en="GLOBAL RESONANCE — The World's Footprints" data-ja="GLOBAL RESONANCE — 全世界の魂の共鳴" data-es="GLOBAL RESONANCE — Huellas del Mundo" data-fr="RÉSONANCE MONDIALE — Empreintes du Monde" data-de="GLOBALE RESONANZ — Fußspuren der Welt" data-zh-cn="GLOBAL RESONANCE — 全网灵魂共鸣轨迹">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <!-- 新增：靈魂氣象局動態標籤 -->
 <div class="weather-badge-wrap">
@@ -367,8 +378,8 @@ try {
 
     <div class="sync-box">
       <div class="sync-title" data-zh="SOUL SYNC — 靈魂共振同步" data-en="SOUL SYNC — Cloud Sync" data-ja="SOUL SYNC — クラウド同期" data-es="SOUL SYNC — Sincronización" data-fr="SOUL SYNC — Synchronisation" data-de="SOUL SYNC — Synchronisierung" data-zh-cn="SOUL SYNC — 灵魂共振同步">SOUL SYNC — 靈魂共振同步</div>
-      <p style="font-size:13px; color:var(--muted); line-height:1.8;" data-zh="無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。" data-en="No personal data required. Generate a unique 'Soul Key' to back up your journey to the cloud. Enter this key on other devices to restore your footprint." data-ja="個人情報は不要です。「魂の鍵」を生成して足跡をクラウドにバックアップし、他のデバイスで入力することで履歴を復元できます。" data-es="No se requieren datos personales. Genera una 'Llave del Alma' para respaldar tu viaje en la nube. Introdúcela en otros dispositivos para restaurar tu huella." data-fr="Aucune donnée personnelle requise. Générez une 'Clé de l'Âme' pour sauvegarder votre voyage. Entrez cette clé sur d'autres appareils pour restaurer votre empreinte." data-de="Keine persönlichen Daten erforderlich. Generiere einen 'Seelenschlüssel', um deine Reise zu sichern. Gib diesen Schlüssel auf anderen Geräten ein, um deine Fußspuren wiederherzustellen." data-zh-cn="无需绑定任何隐私个资。生成一串专属的「灵魂钥匙」即可将旅程足迹备份至云端保险箱；在其他装置（如手机）输入既有钥匙，即可完美共振、完整呼唤回你的历史纪录。">
-        無需綁定任何隱私個資。生成一串專屬的「靈魂鑰匙」即可將旅程足跡備份至雲端保險箱；在其他裝置（如手機）輸入既有鑰匙，即可完美共振、完整呼喚回你的歷史紀錄。
+      <p style="font-size:13px; color:var(--muted); line-height:1.8;" data-zh="無需建立公開帳號。靈魂鑰匙可在其他裝置合併足跡；任何取得鑰匙的人都能讀取這份備份，因此請自行妥善保存。EMPATH 不會替你找回遺失的鑰匙。" data-en="No public account is required. A Soul Key can merge your footprints on another device. Anyone who has the key can read that backup, so keep it private; EMPATH cannot recover a lost key." data-ja="公開アカウントは不要です。魂の鍵は大切に保管してください。" data-es="No se requiere una cuenta pública. Guarda tu Llave del Alma de forma privada." data-fr="Aucun compte public n'est requis. Gardez votre Clé de l'Âme privée." data-de="Kein öffentliches Konto erforderlich. Bewahre deinen Seelenschlüssel sicher auf." data-zh-cn="无需建立公开账号。灵魂钥匙可在其他设备合并足迹；任何取得钥匙的人都能读取这份备份，请妥善保存。EMPATH 无法找回遗失的钥匙。">
+        無需建立公開帳號。靈魂鑰匙可在其他裝置合併足跡；任何取得鑰匙的人都能讀取這份備份，因此請自行妥善保存。EMPATH 不會替你找回遺失的鑰匙。
       </p>
       <div class="sync-actions" id="sync-initial-actions">
         <button type="button" class="sync-btn-small" onclick="window.createSoulKey()" data-zh="生成我的靈魂鑰匙" data-en="Generate Soul Key" data-ja="魂の鍵を生成する" data-es="Generar Llave del Alma" data-fr="Générer la Clé de l'Âme" data-de="Seelenschlüssel generieren" data-zh-cn="生成我的灵魂钥匙">生成我的靈魂鑰匙</button>
@@ -423,7 +434,7 @@ try {
       </button>
       <button type="button" class="action-btn" onclick="window.shareSite()" data-zh="把這個空間傳給需要的人">把這個空間傳給需要的人</button>
     </div>
-  </div>
+  </section>
 </section>
 </main>
 
@@ -444,7 +455,7 @@ try {
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
-<script type="module" src="firebase-app.js?v=19.2"></script>
+<script type="module" src="firebase-app.js?v=20.0"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -493,8 +504,8 @@ try {
 </script>
 
 
-<script src="interactions.js?v=18"></script>
-<script src="room-router.js?v=18.2"></script>
+<script src="interactions.js?v=20.0"></script>
+<script src="room-router.js?v=20.0"></script>
 
 
 
