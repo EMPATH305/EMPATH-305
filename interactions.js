@@ -586,8 +586,8 @@
       if (reduceMotion.matches) {
         window.setTimeout(finish,900);
       } else {
-        window.setTimeout(() => overlay.classList.add('is-dispersing'),2850);
-        window.setTimeout(finish,4100);
+        window.setTimeout(() => overlay.classList.add('is-dispersing'),1200);
+        window.setTimeout(finish,1850);
       }
     });
   }
@@ -915,6 +915,7 @@
     while (next) {
       const current = next;
       next = next.nextSibling;
+      if (current.nodeType === 1 && current.classList.contains('share-action-box')) continue;
       remaining.push(current);
     }
     remaining.forEach(node => panel.appendChild(node));
