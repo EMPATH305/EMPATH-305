@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" class="empath-home-page">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
@@ -69,11 +69,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=17.2">
+<link rel="stylesheet" href="styles.css?v=18">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
-  if (!sessionStorage.getItem('empath_concept_entry_seen')) {
+  if (!document.documentElement.classList.contains('empath-room-page') && !sessionStorage.getItem('empath_concept_entry_seen')) {
     document.documentElement.classList.add('empath-entry-pending');
   }
 } catch (error) {}
@@ -206,7 +206,7 @@ try {
     <p id="tonight-echo-copy">能在這裡停一下，本身就是一種照顧。</p>
     <div class="tonight-echo-actions">
       <button type="button" class="close-modal-btn" id="tonight-echo-close" onclick="window.closeTonightEcho()">先留在這裡</button>
-      <a class="close-modal-btn tonight-echo-home" href="#room-h" onclick="window.closeTonightEcho()">帶我回家</a>
+      <a class="close-modal-btn tonight-echo-home" href="room-h.html" onclick="window.closeTonightEcho()">帶我回家</a>
     </div>
   </div>
 </div>
@@ -239,12 +239,12 @@ try {
   </button>
   <div class="nav-menu" id="nav-menu">
       <div class="nav-letters">
-        <a class="nav-letter" data-l="E" href="#room-e" onclick="window.closeMobileNav()">E</a>
-        <a class="nav-letter" data-l="M" href="#room-m" onclick="window.closeMobileNav()">M</a>
-        <a class="nav-letter" data-l="P" href="#room-p" onclick="window.closeMobileNav()">P</a>
-        <a class="nav-letter" data-l="A" href="#room-a" onclick="window.closeMobileNav()">A</a>
-        <a class="nav-letter" data-l="T" href="#room-t" onclick="window.closeMobileNav()">T</a>
-        <a class="nav-letter" data-l="H" href="#room-h" onclick="window.closeMobileNav()">H</a>
+        <a class="nav-letter" data-l="E" href="room-e.html" onclick="window.closeMobileNav()">E</a>
+        <a class="nav-letter" data-l="M" href="room-m.html" onclick="window.closeMobileNav()">M</a>
+        <a class="nav-letter" data-l="P" href="room-p.html" onclick="window.closeMobileNav()">P</a>
+        <a class="nav-letter" data-l="A" href="room-a.html" onclick="window.closeMobileNav()">A</a>
+        <a class="nav-letter" data-l="T" href="room-t.html" onclick="window.closeMobileNav()">T</a>
+        <a class="nav-letter" data-l="H" href="room-h.html" onclick="window.closeMobileNav()">H</a>
       </div>
       <button class="nav-utility-toggle" id="nav-utility-toggle" type="button" aria-expanded="false" aria-controls="nav-controls" onclick="window.toggleUtilityPanel()">
         <span>SETTINGS</span><i aria-hidden="true"></i>
@@ -328,7 +328,7 @@ try {
         <strong id="daily-result-title"></strong>
         <p id="daily-result-copy"></p>
       </div>
-      <a class="daily-result-link" id="daily-result-link" href="#room-h">走進這個房間 <span aria-hidden="true">→</span></a>
+      <a class="daily-result-link" id="daily-result-link" href="room-h.html">走進這個房間 <span aria-hidden="true">→</span></a>
     </div>
     <p class="daily-local-note"><span aria-hidden="true">◌</span> 不需登入；你的選擇只保存在這台裝置。</p>
   </section>
@@ -376,10 +376,10 @@ try {
       <section class="journey-act">
         <div class="act-meta"><span>ACT I</span><strong data-zh="說出與懷念" data-en="Speak & Remember">說出與懷念</strong></div>
         <div class="act-rooms">
-          <a class="door-btn" data-d="E" href="#room-e" aria-label="前往 Room E — 情緒出口">
+          <a class="door-btn" data-d="E" href="room-e.html" aria-label="前往 Room E — 情緒出口">
             <span class="room-no">01</span><span class="dl">E</span><span class="door-copy"><b data-zh="情緒出口" data-en="Emotional Exit">情緒出口</b><small data-zh="讓沒有名字的重量，被聽見" data-en="Let the unnamed weight be heard">讓沒有名字的重量，被聽見</small></span><span class="door-arrow">↗</span>
           </a>
-          <a class="door-btn" data-d="M" href="#room-m" aria-label="前往 Room M — 思念映射">
+          <a class="door-btn" data-d="M" href="room-m.html" aria-label="前往 Room M — 思念映射">
             <span class="room-no">02</span><span class="dl">M</span><span class="door-copy"><b data-zh="思念映射" data-en="Memory Mapping">思念映射</b><small data-zh="把想念放上夜空" data-en="Place your memory among the stars">把想念放上夜空</small></span><span class="door-arrow">↗</span>
           </a>
         </div>
@@ -388,10 +388,10 @@ try {
       <section class="journey-act">
         <div class="act-meta"><span>ACT II</span><strong data-zh="修補與釋放" data-en="Repair & Release">修補與釋放</strong></div>
         <div class="act-rooms">
-          <a class="door-btn" data-d="P" href="#room-p" aria-label="前往 Room P — 碎片修補">
+          <a class="door-btn" data-d="P" href="room-p.html" aria-label="前往 Room P — 碎片修補">
             <span class="room-no">03</span><span class="dl">P</span><span class="door-copy"><b data-zh="碎片修補" data-en="Kintsugi Repair">碎片修補</b><small data-zh="讓裂痕成為光的入口" data-en="Let the fracture become an opening for light">讓裂痕成為光的入口</small></span><span class="door-arrow">↗</span>
           </a>
-          <a class="door-btn" data-d="A" href="#room-a" aria-label="前往 Room A — 神聖避難所">
+          <a class="door-btn" data-d="A" href="room-a.html" aria-label="前往 Room A — 神聖避難所">
             <span class="room-no">04</span><span class="dl">A</span><span class="door-copy"><b data-zh="神聖避難所" data-en="Sacred Asylum">神聖避難所</b><small data-zh="讓痛苦隨時間消散" data-en="Let pain dissolve with time">讓痛苦隨時間消散</small></span><span class="door-arrow">↗</span>
           </a>
         </div>
@@ -400,10 +400,10 @@ try {
       <section class="journey-act">
         <div class="act-meta"><span>ACT III</span><strong data-zh="交換與回家" data-en="Exchange & Return">交換與回家</strong></div>
         <div class="act-rooms">
-          <a class="door-btn" data-d="T" href="#room-t" aria-label="前往 Room T — 能量共振">
+          <a class="door-btn" data-d="T" href="room-t.html" aria-label="前往 Room T — 能量共振">
             <span class="room-no">05</span><span class="dl">T</span><span class="door-copy"><b data-zh="能量共振" data-en="Energy Resonance">能量共振</b><small data-zh="把溫暖交給另一個靈魂" data-en="Pass warmth to another soul">把溫暖交給另一個靈魂</small></span><span class="door-arrow">↗</span>
           </a>
-          <a class="door-btn" data-d="H" href="#room-h" aria-label="前往 Room H — 靈魂歸宿">
+          <a class="door-btn" data-d="H" href="room-h.html" aria-label="前往 Room H — 靈魂歸宿">
             <span class="room-no">06</span><span class="dl">H</span><span class="door-copy"><b data-zh="靈魂歸宿" data-en="Soul's Home">靈魂歸宿</b><small data-zh="保存走過的情緒足跡" data-en="Keep the traces of your journey">保存走過的情緒足跡</small></span><span class="door-arrow">↗</span>
           </a>
         </div>
@@ -902,7 +902,7 @@ try {
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
-<script type="module" src="firebase-app.js?v=17"></script>
+<script type="module" src="firebase-app.js?v=18"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -951,7 +951,8 @@ try {
 </script>
 
 
-<script src="interactions.js?v=17.1"></script>
+<script src="interactions.js?v=18"></script>
+<script src="room-router.js?v=18"></script>
 
 
 
