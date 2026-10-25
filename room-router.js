@@ -52,7 +52,15 @@
     back.href = 'index.html';
     back.setAttribute('aria-label', '回到 EMPATH 大廳');
     back.innerHTML = '<span aria-hidden="true">←</span><span>回到大廳</span>';
-    document.body.appendChild(back);
+    const nav = logo?.closest('nav');
+    if (logo && nav) {
+      const origin = document.createElement('div');
+      origin.className = 'room-nav-origin';
+      nav.insertBefore(origin, logo);
+      origin.append(logo, back);
+    } else {
+      document.body.appendChild(back);
+    }
   }
 
   function migrateLegacyHash() {
