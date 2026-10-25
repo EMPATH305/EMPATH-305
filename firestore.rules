@@ -72,8 +72,12 @@ service cloud.firestore {
 
     match /sand/{id} {
       // Expired messages cannot be read even while the managed TTL deletion is pending.
-      allow read: if resource.data.expireAt is timestamp
+      allow get: if resource.data.expireAt is timestamp
         && resource.data.expireAt > request.time;
+      // Firestore cannot prove a client timestamp against request.time for a
+      // collection query. Keep list access bounded; the site query also filters
+      // on expireAt, while managed TTL performs the physical deletion.
+      allow list: if request.query.limit != null && request.query.limit <= 30;
       allow create: if request.resource.data.keys().hasOnly([
           'text', 'absoluteTime', 'lifespan', 'expireAt', 'createdAt'
         ])

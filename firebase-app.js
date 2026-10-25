@@ -1329,7 +1329,7 @@ async function fetchRealCounts() {
             getCountFromServer(collection(db, "emotions")),
             getCountFromServer(collection(db, "stars")),
             getCountFromServer(query(collection(db, "shards"), where("healed", "==", true))),
-            getCountFromServer(query(collection(db, "sand"), where("expireAt", ">", roomAQueryCutoff()))),
+            getCountFromServer(query(collection(db, "sand"), where("expireAt", ">", roomAQueryCutoff()), firestoreLimit(30))),
             getCountFromServer(collection(db, "warmth")),
         ]);
         globalCounts.e = eSnap.data().count;
@@ -1370,7 +1370,7 @@ async function refreshRoomCount(room) {
             updateDynamicTexts();
         } else if (collections[room]) {
             const countTarget = room === 'a'
-                ? query(collection(db, collections[room]), where("expireAt", ">", roomAQueryCutoff()))
+                ? query(collection(db, collections[room]), where("expireAt", ">", roomAQueryCutoff()), firestoreLimit(30))
                 : collection(db, collections[room]);
             const snap = await getCountFromServer(countTarget);
             globalCounts[room] = snap.data().count;

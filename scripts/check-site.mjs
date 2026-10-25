@@ -34,7 +34,8 @@ assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consen
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
 
 const rules = readFileSync('firestore.rules', 'utf8');
-assert(rules.includes('resource.data.expireAt > request.time'), 'Rules must deny reads of expired Room A records');
+assert(rules.includes('allow get: if resource.data.expireAt is timestamp'), 'Rules must deny direct reads of expired Room A records');
+assert(rules.includes('request.query.limit <= 30'), 'Room A collection reads must be bounded');
 assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclared collections by default');
 
 const indexes = JSON.parse(readFileSync('firestore.indexes.json', 'utf8'));
