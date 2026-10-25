@@ -450,7 +450,7 @@ window.switchLang = function(lang) {
 }
 
 function updateDynamicTexts() {
-  if(document.getElementById('p-healed-count')) { const healed = window.pHealedTotal || 0; document.getElementById('p-healed-count').textContent = t( `已有 ${healed} 道裂紋，以金修補。`, `${healed} cracks mended with gold.`, `${healed} 個のひび割れが金で修復されました。`, `${healed} grietas reparadas con oro.`, `${healed} fissures réparées avec de l'or.`, `${healed} Risse mit Gold geflickt.`, `已有 ${healed} 道裂纹，以金修补。` ); }
+  if(document.getElementById('p-healed-count')) { const healed = window.pHealedTotal || globalCounts.p || 0; document.getElementById('p-healed-count').textContent = t( `已有 ${healed} 道裂紋，以金修補。`, `${healed} cracks mended with gold.`, `${healed} 個のひび割れが金で修復されました。`, `${healed} grietas reparadas con oro.`, `${healed} fissures réparées avec de l'or.`, `${healed} Risse mit Gold geflickt.`, `已有 ${healed} 道裂纹，以金修补。` ); }
   document.querySelectorAll('.shard-healed-tag').forEach(el => el.innerHTML = t('✦ 已修補', '✦ Healed', '✦ 修復済', '✦ Reparado', '✦ Réparé', '✦ Geheilt', '✦ 已修补'));
   document.querySelectorAll('.e-msg-anon').forEach(el => el.textContent = t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS'));
   document.querySelectorAll('.sand-timer-label').forEach(el => el.textContent = t('消散中', 'DISSOLVING', '消散中', 'DISOLVIENDO', 'DISSOLUTION', 'AUFLÖSEND', '消散中'));
@@ -1359,6 +1359,13 @@ function createPShardCard(record) {
         div.setAttribute('aria-busy','true');
         try {
             await updateDoc(doc(db, 'shards', id), { healed: true });
+            data.healed = true;
+            div.classList.add('healed');
+            window.pHealedTotal = (window.pHealedTotal || globalCounts.p || 0) + 1;
+            globalCounts.p = window.pHealedTotal;
+            updateDynamicTexts();
+            updateCountersUI();
+            refreshRoomCount('p');
             if (typeof window.playChime === 'function') window.playChime();
             logJourney('p', data.text);
             window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
@@ -1486,38 +1493,29 @@ function subscribeOtherRooms() {
         const board = document.getElementById('p-board'); if(!board) return;
         window.pShardRecords = [];
         window.pShardDataReady = true;
-        window.pHealedTotal = 0; 
-        window.pTotalShards = snapshot.size;
+        let sampleHealed = 0;
         
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id; 
-            if(data.healed) window.pHealedTotal++;
+            if(data.healed) sampleHealed++;
             window.pShardRecords.push({ id, data });
         });
         
+        // 避免 60 筆局部快取覆蓋全網真實修補總數
+        if (!window.pHealedTotal || window.pHealedTotal < sampleHealed) {
+            window.pHealedTotal = Math.max(sampleHealed, globalCounts.p || 0);
+        }
+        if (!window.pTotalShards || window.pTotalShards < snapshot.size) {
+            window.pTotalShards = Math.max(snapshot.size, window.pHealedTotal);
+        }
         globalCounts.p = window.pHealedTotal;
         
         if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
         updateDynamicTexts();
         updateCountersUI();
 
-        const baseTotal = 300;
-        const baseHealed = 142;
-        const ratio = (window.pTotalShards + baseTotal) > 0 ? (window.pHealedTotal + baseHealed) / (window.pTotalShards + baseTotal) : 0;
-        const pct = (ratio * 100).toFixed(1);
-        const bar = document.getElementById('global-healing-bar');
-        const pctText = document.getElementById('global-healing-pct');
-        if (bar) bar.style.width = pct + '%';
-        if (pctText) pctText.textContent = pct + '%';
-
-        if (ratio >= 0.5 && !localStorage.getItem('empath_p_50_reached')) {
-            localStorage.setItem('empath_p_50_reached', 'true');
-            setTimeout(() => {
-                window.showToast(t('✦ 世界上被修補的傷痛，已超過一半了', '✦ More than half of the world\'s pain has been mended', '✦ 世界の痛みの半分以上が修復されました', '✦ Más de la mitad del dolor ha sido reparado', '✦ Plus de la moitié de la douleur a été réparée', '✦ Mehr als die Hälfte des Schmerzes wurde geflickt', '✦ 世界上被修补的伤痛，已超过一半了'), 6000);
-            }, 2000);
-        }
         document.dispatchEvent(new CustomEvent('empath:p-shards-updated', {
-            detail: { total: window.pTotalShards }
+            detail: { total: window.pShardRecords.length }
         }));
         setDataState('p',snapshot.empty ? 'empty' : null);
         refreshRoomCount('p');
