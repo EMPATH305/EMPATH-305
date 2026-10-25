@@ -1,7 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-// 🌟 新增載入 GA4 引擎
-import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
@@ -16,9 +14,44 @@ const db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 
-// Analytics 保留使用；Measurement ID 與 Firebase 後台實際設定一致。
-window.empathAnalytics = getAnalytics(app);
-window.empathLogEvent = logEvent;
+// Analytics 預設關閉。只有使用者在「隱私與承諾」明確同意後才動態載入。
+window.empathAnalytics = null;
+window.empathLogEvent = () => {};
+window.empathSetAnalyticsCollectionEnabled = () => {};
+let analyticsInitPromise = null;
+async function initializeConsentedAnalytics() {
+    if (localStorage.getItem('empath_analytics_consent') !== 'granted') return null;
+    if (window.empathAnalytics) {
+        window.empathSetAnalyticsCollectionEnabled(window.empathAnalytics, true);
+        return window.empathAnalytics;
+    }
+    if (!analyticsInitPromise) {
+        analyticsInitPromise = import("https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js")
+            .then(({ getAnalytics, logEvent, setAnalyticsCollectionEnabled }) => {
+                window.empathAnalytics = getAnalytics(app);
+                window.empathLogEvent = logEvent;
+                window.empathSetAnalyticsCollectionEnabled = setAnalyticsCollectionEnabled;
+                setAnalyticsCollectionEnabled(window.empathAnalytics, true);
+                return window.empathAnalytics;
+            })
+            .catch(error => {
+                console.warn('Analytics unavailable:', error);
+                analyticsInitPromise = null;
+                return null;
+            });
+    }
+    return analyticsInitPromise;
+}
+
+window.setAnalyticsConsent = async function(granted) {
+    localStorage.setItem('empath_analytics_consent', granted ? 'granted' : 'denied');
+    if (granted) await initializeConsentedAnalytics();
+    else if (window.empathAnalytics) window.empathSetAnalyticsCollectionEnabled(window.empathAnalytics, false);
+    renderAnalyticsConsentControls();
+    window.showToast?.(granted
+        ? t('已啟用匿名使用分析 ✦', 'Anonymous usage analytics enabled ✦')
+        : t('已關閉使用分析', 'Usage analytics disabled'));
+};
 
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
@@ -258,8 +291,100 @@ window.stopBreathe = function() {
     clearInterval(breatheInterval);
 };
 
-window.currentLang = 'zh';
+const SUPPORTED_LANGUAGES = new Set(['zh','zh-cn','en','en-uk','ja','es','fr','de','uk','pl']);
+let savedLanguage = 'zh';
+try {
+    const storedLanguage = localStorage.getItem('empath_language');
+    if (SUPPORTED_LANGUAGES.has(storedLanguage)) savedLanguage = storedLanguage;
+} catch (error) {}
+window.currentLang = savedLanguage;
 function t(zh, en, ja, es, fr, de, zh_cn, uk, pl) { let target = window.currentLang; if(target === 'en-uk') target = 'en'; if (target === 'en') return en || zh; if (target === 'ja') return ja || en || zh; if (target === 'es') return es || en || zh; if (target === 'fr') return fr || en || zh; if (target === 'de') return de || en || zh; if (target === 'zh-cn') return zh_cn || zh; if (target === 'uk') return uk || en || zh; if (target === 'pl') return pl || en || zh; return zh; }
+
+const CRISIS_REGIONS = {
+    global: { href:'https://findahelpline.com/', zh:'尋找所在地支援', en:'Find support where you are' },
+    tw: { href:'tel:1925', zh:'撥打台灣安心專線 1925', en:'Call Taiwan Lifeline 1925' },
+    ua: { href:'tel:7333', zh:'撥打烏克蘭 LifeLine 7333', en:'Call LifeLine Ukraine 7333' },
+    pl: { href:'tel:116123', zh:'撥打波蘭危機支援 116 123', en:'Call Poland crisis support 116 123' }
+};
+
+function currentCrisisRegion() {
+    try {
+        const saved = localStorage.getItem('empath_crisis_region');
+        return CRISIS_REGIONS[saved] ? saved : 'global';
+    } catch (error) { return 'global'; }
+}
+
+function updateCrisisLinks() {
+    const regionKey = currentCrisisRegion();
+    const region = CRISIS_REGIONS[regionKey];
+    const copy = window.currentLang === 'zh' || window.currentLang === 'zh-cn' ? region.zh : region.en;
+    document.querySelectorAll('.crisis-link').forEach(link => {
+        link.href = region.href;
+        link.textContent = copy;
+        if (regionKey === 'global') {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+        } else {
+            link.removeAttribute('target');
+            link.removeAttribute('rel');
+        }
+    });
+    const select = document.getElementById('crisis-region-select');
+    if (select) select.value = regionKey;
+}
+
+window.setCrisisRegion = function(regionKey) {
+    if (!CRISIS_REGIONS[regionKey]) return;
+    localStorage.setItem('empath_crisis_region', regionKey);
+    updateCrisisLinks();
+};
+
+function renderCrisisRegionControls() {
+    const card = document.querySelector('#crisis-support-notice .crisis-support-card');
+    const actions = card?.querySelector('.crisis-support-actions');
+    if (!card || !actions || document.getElementById('crisis-region-select')) return;
+    const field = document.createElement('label');
+    field.className = 'crisis-region-field';
+    const fieldLabel = document.createElement('span');
+    fieldLabel.setAttribute('data-zh', '選擇你目前所在的地區');
+    fieldLabel.setAttribute('data-en', 'Choose the region you are currently in');
+    fieldLabel.textContent = t('選擇你目前所在的地區', 'Choose the region you are currently in');
+    const select = document.createElement('select');
+    select.id = 'crisis-region-select';
+    select.innerHTML = `
+        <option value="global">其他地區 / Other region</option>
+        <option value="tw">台灣 / Taiwan</option>
+        <option value="ua">烏克蘭 / Ukraine</option>
+        <option value="pl">波蘭 / Poland</option>`;
+    select.addEventListener('change', () => window.setCrisisRegion(select.value));
+    field.append(fieldLabel, select);
+    actions.before(field);
+    updateCrisisLinks();
+}
+
+function renderAnalyticsConsentControls() {
+    const privacyCard = document.querySelector('#privacy-modal .wrapped-card');
+    if (!privacyCard) return;
+    let panel = document.getElementById('analytics-consent-controls');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'analytics-consent-controls';
+        panel.className = 'analytics-consent-controls';
+        privacyCard.querySelector('#privacy-close-btn')?.parentElement?.before(panel);
+    }
+    const granted = localStorage.getItem('empath_analytics_consent') === 'granted';
+    panel.replaceChildren();
+    const status = document.createElement('p');
+    status.textContent = granted
+        ? t('匿名使用分析：已啟用', 'Anonymous usage analytics: enabled')
+        : t('匿名使用分析：已關閉', 'Anonymous usage analytics: disabled');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'close-modal-btn';
+    button.textContent = granted ? t('關閉使用分析', 'Disable analytics') : t('同意啟用分析', 'Allow analytics');
+    button.addEventListener('click', () => window.setAnalyticsConsent(!granted));
+    panel.append(status, button);
+}
 
 const empathDialogReturnFocus = new WeakMap();
 const empathDialogSelector = '.share-modal.show, #breathe-overlay.show, #nebula-overlay.show, #fortune-display.show, #onboarding-box.is-open, #crisis-support-notice:not([hidden]), #tonight-echo.show';
@@ -387,11 +512,19 @@ window.closeGuide = function() {
     }
 }
 
-window.switchLang = function(lang) {
+window.switchLang = function(lang, options = {}) {
+  if (!SUPPORTED_LANGUAGES.has(lang)) lang = 'zh';
+  const { silent = false, persist = true } = options;
   window.currentLang = lang;
+  if (persist) {
+    try { localStorage.setItem('empath_language', lang); } catch (error) {}
+  }
+  const documentLanguages = { 'zh':'zh-Hant', 'zh-cn':'zh-Hans', 'en':'en', 'en-uk':'en-GB', 'ja':'ja', 'es':'es', 'fr':'fr', 'de':'de', 'uk':'uk', 'pl':'pl' };
+  document.documentElement.lang = documentLanguages[lang] || 'zh-Hant';
   const langNames = { 'zh': '繁體中文', 'zh-cn': '简体中文', 'en': 'English (US)', 'en-uk': 'English (UK)', 'ja': '日本語', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch', 'uk': 'Українська', 'pl': 'Polski' };
-  document.getElementById('current-lang-display').textContent = langNames[lang];
-  document.getElementById('lang-dropdown-list').classList.remove('show');
+  const currentLangDisplay = document.getElementById('current-lang-display');
+  if (currentLangDisplay) currentLangDisplay.textContent = langNames[lang];
+  document.getElementById('lang-dropdown-list')?.classList.remove('show');
   document.getElementById('lang-select-btn')?.setAttribute('aria-expanded', 'false');
   document.querySelectorAll('.lang-option').forEach(btn => {
     const selected = btn.dataset.lang === lang;
@@ -402,15 +535,11 @@ window.switchLang = function(lang) {
   document.querySelectorAll('[data-zh]').forEach(el => { el.innerHTML = el.getAttribute('data-' + targetLang) || el.getAttribute('data-en') || el.getAttribute('data-zh'); });
   document.querySelectorAll('[data-zh-ph]').forEach(el => { el.setAttribute('placeholder', el.getAttribute('data-' + targetLang + '-ph') || el.getAttribute('data-en-ph') || el.getAttribute('data-zh-ph')); });
   document.querySelectorAll('[data-zh-title]').forEach(el => { el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title')); });
-  const activeTitle = document.getElementById('ob-res-title').textContent;
+  const activeTitle = document.getElementById('ob-res-title')?.textContent || '';
   if(activeTitle !== "") { for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } } }
   updateDynamicTexts(); const timeline = document.getElementById('h-events'); if(timeline) { timeline.innerHTML = ''; initTimeline(); } window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed(); if(typeof window.renderTWarmthFeed === 'function') window.renderTWarmthFeed();
-  let crisisTel = '1925';
-  if (lang === 'uk') crisisTel = '7333';
-  else if (lang === 'pl') crisisTel = '116123';
-  document.querySelectorAll('.crisis-link').forEach(el => { el.href = 'tel:' + crisisTel; });
-  const crisisSupportLink = document.getElementById('crisis-support-link');
-  if (crisisSupportLink) crisisSupportLink.textContent = lang === 'zh' || lang === 'zh-cn' ? `撥打安心專線 ${crisisTel}` : `Call ${crisisTel}`;
+  updateCrisisLinks();
+  renderAnalyticsConsentControls();
   const syncGoogleTranslation = () => {
     const googleSelect = document.querySelector('.goog-te-combo');
     if (!googleSelect) return;
@@ -446,7 +575,7 @@ window.switchLang = function(lang) {
       .catch(error => console.warn('Google Translate unavailable:', error));
   }
 
-  window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦', 'Мову змінено ✦', 'Język zmieniony ✦'));
+  if (!silent) window.showToast(t('已切換語言 ✦', 'Language Switched ✨', '言語を切り替えました ✦', 'Idioma Cambiado ✨', 'Langue changée ✨', 'Sprache geändert ✨', '已切换语言 ✦', 'Мову змінено ✦', 'Język zmieniony ✦'));
 }
 
 function updateDynamicTexts() {
@@ -1197,7 +1326,7 @@ async function fetchRealCounts() {
             getCountFromServer(collection(db, "emotions")),
             getCountFromServer(collection(db, "stars")),
             getCountFromServer(query(collection(db, "shards"), where("healed", "==", true))),
-            getCountFromServer(collection(db, "sand")),
+            getCountFromServer(query(collection(db, "sand"), where("expireAt", ">", Timestamp.now()))),
             getCountFromServer(collection(db, "warmth")),
         ]);
         globalCounts.e = eSnap.data().count;
@@ -1237,7 +1366,10 @@ async function refreshRoomCount(room) {
             window.drawKintsugiVessel?.();
             updateDynamicTexts();
         } else if (collections[room]) {
-            const snap = await getCountFromServer(collection(db, collections[room]));
+            const countTarget = room === 'a'
+                ? query(collection(db, collections[room]), where("expireAt", ">", Timestamp.now()))
+                : collection(db, collections[room]);
+            const snap = await getCountFromServer(countTarget);
             globalCounts[room] = snap.data().count;
             if (room === 'm') window.updateMStats?.();
         }
@@ -1532,14 +1664,19 @@ function subscribeOtherRooms() {
     },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
-    if (ACTIVE_ROOM === 'a') firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 'a') firestoreUnsubs.push(onSnapshot(query(
+        collection(db, "sand"),
+        where("expireAt", ">", Timestamp.now()),
+        orderBy("expireAt", "asc"),
+        firestoreLimit(30)
+    ), (snapshot) => {
         const feed = document.getElementById('a-feed'); if(!feed) return;
         feed.innerHTML = ''; const nowMs = Date.now();
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
             const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000);
-            const expiresAt = msgTime + lifespanMs;
+            const expiresAt = data.expireAt?.toMillis?.() || (msgTime + lifespanMs);
             const leftSecs = (expiresAt - nowMs) / 1000;
             if(leftSecs <= 0) return;
             const div = document.createElement('div'); div.className = 'sand-msg';
@@ -2826,7 +2963,14 @@ window.submitA = async function(){
     const lifespan = minutes * 60 * 1000;
     const origText = document.getElementById('a-submit-btn').innerHTML; 
     try {
-        await addDoc(collection(db, "sand"), { text, absoluteTime: Date.now(), lifespan: lifespan, createdAt: serverTimestamp() }); 
+        const submittedAt = Date.now();
+        await addDoc(collection(db, "sand"), {
+            text,
+            absoluteTime: submittedAt,
+            lifespan,
+            expireAt: Timestamp.fromMillis(submittedAt + lifespan),
+            createdAt: serverTimestamp()
+        });
         // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
         localStorage.setItem('empath_a_submit_time', Date.now());
         input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
@@ -3183,6 +3327,10 @@ document.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
+  window.switchLang(window.currentLang, { silent:true, persist:false });
+  renderCrisisRegionControls();
+  renderAnalyticsConsentControls();
+  initializeConsentedAnalytics();
   setupRoomPresence('roomE', 'e-input');
   setupRoomPresence('roomM', 'm-input');
   setupRoomPresence('roomP', 'p-input');
@@ -3306,7 +3454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   } 
               }
           }
-          if (entry.isIntersecting) { 
+          if (!ACTIVE_ROOM && entry.isIntersecting) {
               if (entry.target.id === 'hero') { document.title = 'EMPATH — Every Moment As Truth Heals'; } 
               else { const roomLetter = entry.target.querySelector('.room-letter')?.textContent; if (roomLetter) document.title = `Room ${roomLetter} — EMPATH`; } 
           }

@@ -801,6 +801,70 @@ body.anniversary-mode .sand-timer-fill {
     }
 }
 
+/* v20.1 · trust, accessibility and explicit consent */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+:where(#creator-btn, #fortune-spark, #breathe-btn) {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+:where(.room-back-lobby, .nav-utility-toggle, .footer-privacy-btn, footer a) {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.crisis-region-field {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0 4px;
+  color: rgba(232,230,225,.78);
+  font: 12px/1.6 'Noto Sans TC', sans-serif;
+  letter-spacing: 1px;
+  text-align: left;
+}
+
+.crisis-region-field select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(201,168,76,.45);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--white);
+  background: #0b1623;
+  font: inherit;
+}
+
+.analytics-consent-controls {
+  margin: 22px 0 6px;
+  padding: 16px;
+  border: 1px solid rgba(201,168,76,.22);
+  border-radius: 6px;
+  background: rgba(201,168,76,.035);
+  text-align: center;
+}
+
+.analytics-consent-controls p {
+  margin: 0 0 12px;
+  color: rgba(232,230,225,.76);
+  font: 12px/1.7 'Noto Sans TC', sans-serif;
+}
+
+body.hsp-mode :where(.room-desc, .e-mode-hint, .daily-local-note, .cosmic-presence, .h-event, footer) {
+  color: rgba(232,230,225,.78) !important;
+}
+
 /* =========================================================
    v18 — The six sanctuaries live on separate URLs
    ========================================================= */
