@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v19.2'; // 房間實體拆分版
+const CACHE_NAME = 'empath-cache-v19.3'; // 房間實體拆分版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -42,12 +42,12 @@ self.addEventListener('fetch', (event) => {
         fetch(event.request).then((response) => {
             if (response && response.ok && event.request.mode === 'navigate') {
                 const copy = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));
+                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
             }
             return response;
         }).catch(async () => {
             if (event.request.mode === 'navigate') {
-                return (await caches.match('./index.html')) || (await caches.match('./'));
+                return (await caches.match(event.request, { ignoreSearch: true })) || (await caches.match('./index.html')) || (await caches.match('./'));
             }
             return caches.match(event.request, { ignoreSearch: true });
         })
