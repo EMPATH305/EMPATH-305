@@ -804,10 +804,20 @@ body.anniversary-mode .sand-timer-fill {
 /* =========================================================
    v18 — The six sanctuaries live on separate URLs
    ========================================================= */
-html.empath-home-page .room { display: none !important; }
+html.empath-home-page #room-e,
+html.empath-home-page #room-m,
+html.empath-home-page #room-p,
+html.empath-home-page #room-a,
+html.empath-home-page #room-t,
+html.empath-home-page #room-h { display: none !important; }
 
 html.empath-room-page #hero,
-html.empath-room-page .room { display: none !important; }
+html.empath-room-page #room-e,
+html.empath-room-page #room-m,
+html.empath-room-page #room-p,
+html.empath-room-page #room-a,
+html.empath-room-page #room-t,
+html.empath-room-page #room-h { display: none !important; }
 html.empath-room-e #room-e,
 html.empath-room-m #room-m,
 html.empath-room-p #room-p,
