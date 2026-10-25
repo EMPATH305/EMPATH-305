@@ -70,7 +70,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=18.3">
+<link rel="stylesheet" href="styles.css?v=20.0">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -152,7 +152,7 @@ try {
 </script>
 
 <!-- 🏆 CSSLight 國際畫廊榮譽勳章 🏆 -->
-<a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(https://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
+<a href="https://www.csslight.com/website/74264/EMPATH" title="CSS Light" class="csslight-ribbon" style="width:84px;height:29px;position:fixed;top:100px;left:0px;z-index:99999;text-indent:-9999px;background: url(https://www.csslight.com/ribbons/small-csslight-ribbon-black-left.png) no-repeat;" target="_blank">CSS Light Web Gallery</a>
 
 <!-- 新增：星雲檔案館 (隱藏彩蛋) -->
 <div id="nebula-overlay" role="dialog" aria-modal="true" aria-label="星雲檔案館" aria-hidden="true" tabindex="-1" onclick="window.closeNebula()">
@@ -314,7 +314,7 @@ try {
     <p class="hero-sub">Every Moment As Truth Heals</p>
     <p class="hero-lead" data-zh="有些情緒不需要被解決，只需要一個地方，被好好看見。" data-en="Some feelings do not need to be solved. They only need a place to be seen.">有些情緒不需要被解決，只需要一個地方，被好好看見。</p>
     <div class="hero-actions">
-      <a class="cinema-cta cinema-cta-primary" href="#journey" data-zh="進入星空" data-en="Enter the night">進入星空</a>
+      <a class="cinema-cta cinema-cta-primary" id="primary-entry-cta" href="#journey" data-zh="進入星空" data-en="Enter the night">進入星空</a>
       <button type="button" class="cinema-cta cinema-cta-quiet" onclick="window.openGuide()" data-zh="讓 EMPATH 為我引路" data-en="Let EMPATH guide me">讓 EMPATH 為我引路</button>
     </div>
     <p class="return-memory" id="return-memory" aria-live="polite"></p>
@@ -452,13 +452,15 @@ try {
   <!-- 新增：About 與 Privacy 連結 -->
   <div style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom: 24px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; flex-wrap:wrap; justify-content:center;">
       <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">About EMPATH (Behance)</a>
+      <a href="https://www.csslight.com/website/74264/EMPATH" target="_blank" rel="noopener" style="text-decoration:underline; transition:color 0.3s;">CSS Light Recognition</a>
+      <button type="button" class="footer-privacy-btn" onclick="window.openCreator()" data-zh="創作者公告" data-en="Creator Notes">創作者公告</button>
       <button type="button" class="footer-privacy-btn" onclick="window.openPrivacy()" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</button>
   </div>
 
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
-<script type="module" src="firebase-app.js?v=19.2"></script>
+<script type="module" src="firebase-app.js?v=20.0"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -507,8 +509,8 @@ try {
 </script>
 
 
-<script src="interactions.js?v=18"></script>
-<script src="room-router.js?v=18.2"></script>
+<script src="interactions.js?v=20.0"></script>
+<script src="room-router.js?v=20.0"></script>
 
 
 
