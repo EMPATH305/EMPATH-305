@@ -22,6 +22,9 @@ window.empathLogEvent = logEvent;
 
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
+const ACTIVE_ROOM = ['e','m','p','a','t','h'].find(key =>
+    document.documentElement.classList.contains(`empath-room-${key}`)
+) || '';
 try {
     const cachedCounts = JSON.parse(localStorage.getItem('empath_global_counts') || '{}');
     ['e','m','p','a','t'].forEach(key => {
@@ -401,7 +404,7 @@ window.switchLang = function(lang) {
   document.querySelectorAll('[data-zh-title]').forEach(el => { el.setAttribute('title', el.getAttribute('data-' + targetLang + '-title') || el.getAttribute('data-en-title') || el.getAttribute('data-zh-title')); });
   const activeTitle = document.getElementById('ob-res-title').textContent;
   if(activeTitle !== "") { for(let key in guideData) { if(Object.values(guideData[key].title).includes(activeTitle)) { window.showGuideResult(key); break; } } }
-  updateDynamicTexts(); document.getElementById('h-events').innerHTML = ''; initTimeline(); window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed(); if(typeof window.renderTWarmthFeed === 'function') window.renderTWarmthFeed();
+  updateDynamicTexts(); const timeline = document.getElementById('h-events'); if(timeline) { timeline.innerHTML = ''; initTimeline(); } window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed(); if(typeof window.renderTWarmthFeed === 'function') window.renderTWarmthFeed();
   let crisisTel = '1925';
   if (lang === 'uk') crisisTel = '7333';
   else if (lang === 'pl') crisisTel = '116123';
@@ -1203,10 +1206,18 @@ async function fetchRealCounts() {
   
 function subscribeAll() {
     if(firestoreUnsubs.length > 0) return;
-    setDataState('e','loading');
+    if (!ACTIVE_ROOM) {
+        fetchRealCounts();
+        return;
+    }
+    if (ACTIVE_ROOM === 'h') {
+        fetchRealCounts();
+        return;
+    }
+    setDataState(ACTIVE_ROOM,'loading');
 
     // 1. 監聽情緒出口：首頁只保留近期 30 筆，避免為初始 3 張卡下載整批歷史資料。
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 'e') firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
         snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
@@ -1214,7 +1225,10 @@ function subscribeAll() {
         updateCountersUI();
     },error => handleDataError('e',error)));
 
-    scheduleOtherRoomSubscriptions();
+    if (ACTIVE_ROOM !== 'e') {
+        otherRoomsSubscribed = true;
+        subscribeOtherRooms();
+    }
 }
 
 function scheduleOtherRoomSubscriptions() {
@@ -1400,7 +1414,7 @@ window.renderTWarmthFeed = function() {
 // 📦 接近互動房間後才載入其即時資料
 function subscribeOtherRooms() {
     // 2. 監聽星星 (修正全域變數綁定)
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
+    if (ACTIVE_ROOM === 'm') firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
@@ -1418,7 +1432,7 @@ function subscribeOtherRooms() {
     },error => { const _sl = document.getElementById('star-loading'); if(_sl) _sl.style.display = 'none'; handleDataError('m',error); }));
 
     // 3. 監聽星系金線
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), firestoreLimit(50)), (snapshot) => {
+    if (ACTIVE_ROOM === 'm') firestoreUnsubs.push(onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), firestoreLimit(50)), (snapshot) => {
         const nowMs = Date.now();
         window.activeConstellations = [];
         snapshot.forEach(docSnap => {
@@ -1432,7 +1446,7 @@ function subscribeOtherRooms() {
     }));
 
     // 4. 監聽碎片與金繼進度；畫面只渲染目前需要的批次
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
+    if (ACTIVE_ROOM === 'p') firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
         window.pShardRecords = [];
         window.pShardDataReady = true;
@@ -1476,7 +1490,7 @@ function subscribeOtherRooms() {
     },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 'a') firestoreUnsubs.push(onSnapshot(query(collection(db, "sand"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         globalCounts.a = snapshot.size; const feed = document.getElementById('a-feed'); if(!feed) return;
         feed.innerHTML = ''; const nowMs = Date.now();
         snapshot.forEach(docSnap => {
@@ -1506,7 +1520,7 @@ function subscribeOtherRooms() {
     },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
-    firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 't') firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         globalCounts.t = snapshot.size; const feed = document.getElementById('t-feed'); if(!feed) return;
         window.tWarmthRecords = [];
         snapshot.forEach(docSnap => {
@@ -1755,6 +1769,7 @@ function renderTimelineHTML(type, text, time){
 }
 function initTimeline(){ 
     const container = document.getElementById('h-events'); 
+    if (!container) return;
     container.innerHTML = `<div class="h-event" style="color:var(--muted);font-size:13px;padding-left:20px;border-left:1px solid rgba(255,255,255,.07);"><div><div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:4px; font-weight:bold;">START</div><div>${t('你來到了這裡。這已經是一種勇氣。', 'You arrived here. That is already a form of courage.', 'あなたはここに来ました。それ自体が勇気です。', 'Has llegado aquí. Eso ya es una forma de valentía.', 'Vous êtes arrivé ici. C\'est déjà une forme de courage.', 'Du bist hier angekommen. Das ist bereits eine Form von Mut.', '你来到了这里。这已经是一种勇气。')}</div></div></div>`; 
     
     if (journeyData.events.length === 0) {
@@ -1770,8 +1785,8 @@ window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_
 window.loadExistingSoulKey = async function() { const input = document.getElementById('sync-key-input'); const key = input.value.trim().toUpperCase(); if(!key) return; try { const docSnap = await getDoc(doc(db, "user_journeys", key)); if(docSnap.exists()) { const cd = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cd.counters || {e:0,m:0,p:0,a:0,t:0}, events: cd.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_soul_key', key); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount = journeyData.counters.e||0; state.mCount = journeyData.counters.m||0; state.pCount = journeyData.counters.p||0; state.aCount = journeyData.counters.a||0; state.tCount = journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateSyncUI(); updateCountersUI(); window.showToast(t('靈魂共振成功！足跡已喚回 ✦', 'Sync successful!', '同期成功！足跡が復元されました ✦', '¡Sincronización exitosa!', 'Synchronisation réussie !', 'Synchronisierung erfolgreich!', '灵魂共振成功！足迹已唤回 ✦')); input.value=''; } else { window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙')); } } catch(err) { console.error("發生錯誤:", err); } }
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
 async function autoBackupToCloud() { const key = localStorage.getItem('empath_soul_key'); if(!key) return; try { await setDoc(doc(db, "user_journeys", key), { counters: journeyData.counters, events: journeyData.events, updatedAt: serverTimestamp() }, { merge: true }); } catch(err) { console.error("發生錯誤:", err); } }
-function updateSyncUI() { const key = localStorage.getItem('empath_soul_key'); if(key) { document.getElementById('sync-initial-actions').style.display='none'; document.getElementById('sync-active-actions').style.display='flex';
-const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); document.getElementById('active-key-display').textContent=key; } else { document.getElementById('sync-initial-actions').style.display='flex'; document.getElementById('sync-active-actions').style.display='none'; } }
+function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = localStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
+const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); const display = document.getElementById('active-key-display'); if(display) display.textContent=key; } else { initial.style.display='flex'; active.style.display='none'; } }
 
 let allEmotions = []; let eFeedExpanded = false;
 
@@ -3004,8 +3019,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSessionNarrative();
 
   // 啟動情感閉環引擎
-  window.checkRoomAEcho();
-  window.checkRoomTWarmth();
+  if (ACTIVE_ROOM === 'a') window.checkRoomAEcho();
+  if (ACTIVE_ROOM === 't') window.checkRoomTWarmth();
 
   // ==========================================
   // 🌍 魔法六：全站情緒脈衝與集體靜默引擎
@@ -3084,7 +3099,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
   initTimeline(); updateSyncUI(); 
   const existingKey = localStorage.getItem('empath_soul_key');
-  if(existingKey) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
+  if(existingKey && document.getElementById('h-events')) { try { const docSnap = await getDoc(doc(db, "user_journeys", existingKey)); if(docSnap.exists()) { const cloudData = docSnap.data(); const localVisitCount = Math.max(0,Number(journeyData.visitCount) || 0); journeyData = { counters: cloudData.counters || {e:0, m:0, p:0, a:0, t:0}, events: cloudData.events || [], visitCount:localVisitCount }; localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state.eCount=journeyData.counters.e||0; state.mCount=journeyData.counters.m||0; state.pCount=journeyData.counters.p||0; state.aCount=journeyData.counters.a||0; state.tCount=journeyData.counters.t||0; document.getElementById('h-events').innerHTML = ''; initTimeline(); updateCountersUI(); } } catch(err) { console.error("發生錯誤:", err); } }
   const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
           if (entry.target.id === 'room-m') roomMVisible = entry.isIntersecting;
