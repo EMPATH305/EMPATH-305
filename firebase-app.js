@@ -55,6 +55,9 @@ window.setAnalyticsConsent = async function(granted) {
 
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
+// Keep the client query slightly ahead of Firestore request.time so the rules
+// can prove every returned Room A document is still unexpired.
+const roomAQueryCutoff = () => Timestamp.fromMillis(Date.now() + 10000);
 const ACTIVE_ROOM = ['e','m','p','a','t','h'].find(key =>
     document.documentElement.classList.contains(`empath-room-${key}`)
 ) || '';
@@ -1326,7 +1329,7 @@ async function fetchRealCounts() {
             getCountFromServer(collection(db, "emotions")),
             getCountFromServer(collection(db, "stars")),
             getCountFromServer(query(collection(db, "shards"), where("healed", "==", true))),
-            getCountFromServer(query(collection(db, "sand"), where("expireAt", ">", Timestamp.now()))),
+            getCountFromServer(query(collection(db, "sand"), where("expireAt", ">", roomAQueryCutoff()))),
             getCountFromServer(collection(db, "warmth")),
         ]);
         globalCounts.e = eSnap.data().count;
@@ -1367,7 +1370,7 @@ async function refreshRoomCount(room) {
             updateDynamicTexts();
         } else if (collections[room]) {
             const countTarget = room === 'a'
-                ? query(collection(db, collections[room]), where("expireAt", ">", Timestamp.now()))
+                ? query(collection(db, collections[room]), where("expireAt", ">", roomAQueryCutoff()))
                 : collection(db, collections[room]);
             const snap = await getCountFromServer(countTarget);
             globalCounts[room] = snap.data().count;
@@ -1666,7 +1669,7 @@ function subscribeOtherRooms() {
     // 5. 監聽沙畫
     if (ACTIVE_ROOM === 'a') firestoreUnsubs.push(onSnapshot(query(
         collection(db, "sand"),
-        where("expireAt", ">", Timestamp.now()),
+        where("expireAt", ">", roomAQueryCutoff()),
         orderBy("expireAt", "asc"),
         firestoreLimit(30)
     ), (snapshot) => {
