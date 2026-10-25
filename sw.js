@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v19.3'; // 房間實體拆分版
+const CACHE_NAME = 'empath-cache-v19.4'; // 房間實體拆分版
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
