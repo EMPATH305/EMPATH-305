@@ -69,7 +69,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=16">
+<link rel="stylesheet" href="styles.css?v=17">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -199,6 +199,17 @@ try {
     </div>
   </div>
 </div>
+<div id="tonight-echo" class="tonight-echo" role="dialog" aria-modal="true" aria-labelledby="tonight-echo-title" aria-hidden="true" tabindex="-1" onclick="if(event.target===this) window.closeTonightEcho()">
+  <div class="tonight-echo-card">
+    <p class="tonight-echo-kicker">TONIGHT'S ECHO · 今晚回聲</p>
+    <h2 id="tonight-echo-title">今晚，你已經做得夠多了</h2>
+    <p id="tonight-echo-copy">能在這裡停一下，本身就是一種照顧。</p>
+    <div class="tonight-echo-actions">
+      <button type="button" class="close-modal-btn" id="tonight-echo-close" onclick="window.closeTonightEcho()">先留在這裡</button>
+      <a class="close-modal-btn tonight-echo-home" href="#room-h" onclick="window.closeTonightEcho()">帶我回家</a>
+    </div>
+  </div>
+</div>
 <div class="star-tooltip" id="star-tooltip"></div>
 <button type="button" id="btt-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
 <!-- 幸運微光彩蛋 (左下角) -->
@@ -296,6 +307,31 @@ try {
     <p class="return-memory" id="return-memory" aria-live="polite"></p>
     <span class="opening-scroll">SCROLL TO BEGIN <i></i></span>
   </div>
+
+  <section class="daily-checkin" id="daily-checkin" aria-labelledby="daily-checkin-title">
+    <div class="daily-checkin-head">
+      <p class="daily-checkin-kicker">A QUIET CHECK-IN · 只需十秒</p>
+      <h2 id="daily-checkin-title">今天的你，現在是什麼天氣？</h2>
+      <p>不用解釋，也沒有好壞。選一個最靠近此刻的感受，讓 EMPATH 為你留一條路。</p>
+    </div>
+    <div class="daily-mood-grid" role="group" aria-label="選擇今天的情緒天氣">
+      <button type="button" class="daily-mood" data-mood="heavy" aria-pressed="false"><span aria-hidden="true">🌧️</span><strong>很沉重</strong><small>有些話想放下</small></button>
+      <button type="button" class="daily-mood" data-mood="confused" aria-pressed="false"><span aria-hidden="true">🌫️</span><strong>有點混亂</strong><small>想把裂痕看清楚</small></button>
+      <button type="button" class="daily-mood" data-mood="missing" aria-pressed="false"><span aria-hidden="true">🌙</span><strong>想念某個人</strong><small>讓思念有地方停留</small></button>
+      <button type="button" class="daily-mood" data-mood="stuck" aria-pressed="false"><span aria-hidden="true">🩹</span><strong>有件事過不去</strong><small>想讓重量慢慢流走</small></button>
+      <button type="button" class="daily-mood" data-mood="company" aria-pressed="false"><span aria-hidden="true">🕯️</span><strong>想被陪一下</strong><small>先回到安靜的地方</small></button>
+      <button type="button" class="daily-mood" data-mood="okay" aria-pressed="false"><span aria-hidden="true">✦</span><strong>今天還不錯</strong><small>想把光交給某個人</small></button>
+    </div>
+    <div class="daily-checkin-result" id="daily-checkin-result" aria-live="polite" hidden>
+      <div>
+        <span class="daily-result-label">為此刻的你推薦</span>
+        <strong id="daily-result-title"></strong>
+        <p id="daily-result-copy"></p>
+      </div>
+      <a class="daily-result-link" id="daily-result-link" href="#room-h">走進這個房間 <span aria-hidden="true">→</span></a>
+    </div>
+    <p class="daily-local-note"><span aria-hidden="true">◌</span> 不需登入；你的選擇只保存在這台裝置。</p>
+  </section>
 
   <div id="guide-backdrop" class="guide-backdrop" onclick="window.closeGuide()" aria-hidden="true"></div>
   <div class="onboarding-box" id="onboarding-box" role="dialog" aria-modal="true" aria-label="EMPATH 情緒引路">
@@ -749,6 +785,18 @@ try {
     <div class="h-journey-arc-canvas" id="h-journey-arc-canvas"></div>
   </section>
 
+  <section class="emotion-week" id="emotion-week" aria-labelledby="emotion-week-title">
+    <header class="emotion-week-head">
+      <div>
+        <p class="emotion-week-kicker">YOUR PRIVATE SKY · 只屬於你</p>
+        <h3 id="emotion-week-title">近七日情緒星圖</h3>
+      </div>
+      <p>不是評分，也不會上傳。只是讓你回頭看見，自己曾經如何經過這七天。</p>
+    </header>
+    <div class="emotion-week-grid" id="emotion-week-grid" aria-label="近七日情緒記錄"></div>
+    <p class="emotion-week-insight" id="emotion-week-insight" aria-live="polite"></p>
+  </section>
+
   <div class="h-journey">
     <p class="h-timeline-title" style="color: var(--gold); font-weight:700; letter-spacing:4px;" data-zh="GLOBAL RESONANCE — 全網靈魂共鳴軌跡" data-en="GLOBAL RESONANCE — The World's Footprints" data-ja="GLOBAL RESONANCE — 全世界の魂の共鳴" data-es="GLOBAL RESONANCE — Huellas del Mundo" data-fr="RÉSONANCE MONDIALE — Empreintes du Monde" data-de="GLOBALE RESONANZ — Fußspuren der Welt" data-zh-cn="GLOBAL RESONANCE — 全网灵魂共鸣轨迹">GLOBAL RESONANCE — 全網靈魂共鳴軌跡</p>
     <!-- 新增：靈魂氣象局動態標籤 -->
@@ -854,7 +902,7 @@ try {
   <div class="footer-copy">&copy; 2026 EMPATH. All rights reserved.</div>
 </footer>
 
-<script type="module" src="firebase-app.js?v=15"></script>
+<script type="module" src="firebase-app.js?v=17"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -903,7 +951,7 @@ try {
 </script>
 
 
-<script src="interactions.js?v=16"></script>
+<script src="interactions.js?v=17"></script>
 
 
 
