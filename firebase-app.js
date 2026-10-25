@@ -2952,10 +2952,20 @@ window.checkFutureLetters = async function() {
             letters.forEach(l => {
                 // 如果時間到了，或開啟了穿越密技
                 if(now >= l.unlockDate || window.isTestingLetter) {
-                    container.innerHTML += `<div style="padding:20px; background:rgba(255,255,255,0.03); border-left:2px solid var(--gold); border-radius:0 4px 4px 0; margin-bottom:16px; font-size:15px; color:var(--fog); line-height:2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                        <span style="font-size:11px; color:var(--gold); display:block; margin-bottom:12px; letter-spacing:3px; font-weight:bold;">✉️ 來自 ${new Date(l.createdAt).toLocaleDateString()} 的信</span>
-                        ${l.content}
-                    </div>`;
+                    const letterDiv = document.createElement('div');
+                    letterDiv.style.cssText = 'padding:20px; background:rgba(255,255,255,0.03); border-left:2px solid var(--gold); border-radius:0 4px 4px 0; margin-bottom:16px; font-size:15px; color:var(--fog); line-height:2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);';
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.style.cssText = 'font-size:11px; color:var(--gold); display:block; margin-bottom:12px; letter-spacing:3px; font-weight:bold;';
+                    dateSpan.textContent = `✉️ 來自 ${new Date(l.createdAt).toLocaleDateString()} 的信`;
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.style.whiteSpace = 'pre-wrap';
+                    contentDiv.textContent = l.content;
+
+                    letterDiv.appendChild(dateSpan);
+                    letterDiv.appendChild(contentDiv);
+                    container.appendChild(letterDiv);
                 }
             });
         }
