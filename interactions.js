@@ -151,6 +151,49 @@
     company: { icon: '🕯️', label: '想被陪一下', room: 'h', title: 'H 房 · 回家', copy: '不需要做任何事。先回到一個不必偽裝的地方。' },
     okay: { icon: '✦', label: '今天還不錯', room: 't', title: 'T 房 · 溫度交換所', copy: '把此刻多出來的一點光，留給另一個夜晚。' }
   };
+  const ECHO_COPY = {
+    e: '你不需要現在就整理好它。能說出來，已經讓重量有了出口。',
+    m: '思念沒有消失，但它已經有了一顆可以安放的星。',
+    p: '裂痕還在，但你已經開始決定，它不只代表破碎。',
+    a: '你不需要再替這段重量保管到永遠。',
+    t: '你交出去的溫暖，會在某個陌生人的夜裡留下光。'
+  };
+  let echoReturnFocus = null;
+
+  // 留在同步載入的互動層，避免社群內建瀏覽器延遲 Firebase 時失去回聲。
+  window.showTonightEcho = function(room) {
+    if (window.empathSkipNextEcho || !document.getElementById('crisis-support-notice')?.hidden) {
+      window.empathSkipNextEcho = false;
+      return;
+    }
+    const dialog = document.getElementById('tonight-echo');
+    const copy = document.getElementById('tonight-echo-copy');
+    if (!dialog || !copy) return;
+    echoReturnFocus = document.activeElement;
+    copy.textContent = ECHO_COPY[room] || '能在這裡停一下，本身就是一種照顧。';
+    dialog.classList.add('show');
+    dialog.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('empath-dialog-open');
+    window.setTimeout(() => document.getElementById('tonight-echo-close')?.focus({ preventScroll: true }), 40);
+  };
+
+  window.closeTonightEcho = function() {
+    const dialog = document.getElementById('tonight-echo');
+    if (!dialog) return;
+    dialog.classList.remove('show');
+    dialog.setAttribute('aria-hidden', 'true');
+    if (!document.querySelector('.share-modal.show, #breathe-overlay.show, #nebula-overlay.show, #fortune-display.show, #onboarding-box.is-open, #crisis-support-notice:not([hidden])')) {
+      document.body.classList.remove('empath-dialog-open');
+    }
+    if (echoReturnFocus?.isConnected) echoReturnFocus.focus({ preventScroll: true });
+    echoReturnFocus = null;
+  };
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.getElementById('tonight-echo')?.classList.contains('show')) {
+      window.closeTonightEcho();
+    }
+  });
 
   function localDateKey(date = new Date()) {
     const year = date.getFullYear();
