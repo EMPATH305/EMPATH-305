@@ -800,6 +800,90 @@ body.anniversary-mode .sand-timer-fill {
         scroll-behavior: auto !important;
     }
 }
+
+/* =========================================================
+   v18 — The six sanctuaries live on separate URLs
+   ========================================================= */
+html.empath-home-page .room { display: none !important; }
+
+html.empath-room-page #hero,
+html.empath-room-page .room { display: none !important; }
+html.empath-room-e #room-e,
+html.empath-room-m #room-m,
+html.empath-room-p #room-p,
+html.empath-room-a #room-a,
+html.empath-room-t #room-t,
+html.empath-room-h #room-h { display: block !important; }
+
+html.empath-room-page main { min-height: 100vh; min-height: 100dvh; }
+html.empath-room-page .room {
+  padding-top: clamp(112px, 12vw, 150px);
+  animation: empathRoomArrival .7s cubic-bezier(.2,.8,.2,1) both;
+}
+html.empath-room-page .nav-logo::after {
+  content: ' / ROOM';
+  margin-left: 10px;
+  color: rgba(255,255,255,.3);
+  font-size: 9px;
+  letter-spacing: .18em;
+}
+html.empath-room-page .nav-letter[aria-current="page"] {
+  border-color: currentColor;
+  background: rgba(255,255,255,.09);
+  box-shadow: 0 0 18px rgba(201,168,76,.13);
+}
+
+.room-back-lobby {
+  position: fixed;
+  z-index: 490;
+  top: 82px;
+  left: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 15px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 999px;
+  color: rgba(255,255,255,.58);
+  background: rgba(3,7,10,.68);
+  backdrop-filter: blur(12px);
+  font-size: 10px;
+  letter-spacing: .16em;
+  transition: color .25s ease, border-color .25s ease, transform .25s ease;
+}
+.room-back-lobby:hover,
+.room-back-lobby:focus-visible {
+  color: var(--gold);
+  border-color: rgba(201,168,76,.55);
+  transform: translateX(-2px);
+}
+.room-back-lobby > span:first-child { font-size: 16px; }
+
+body { transition: opacity .28s ease, background-color .5s ease; }
+body.empath-page-leaving { opacity: 0; }
+
+@keyframes empathRoomArrival {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 760px) {
+  html.empath-room-page .room { padding-top: 104px; }
+  html.empath-room-page .nav-logo::after { display: none; }
+  .room-back-lobby {
+    top: calc(68px + env(safe-area-inset-top));
+    left: 12px;
+    min-height: 40px;
+    padding: 0 12px;
+  }
+  .room-back-lobby > span:last-child { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.empath-room-page .room { animation: none; }
+  body { transition: none; }
+}
 :focus-visible { outline: 2px solid var(--gold) !important; outline-offset: 4px; border-radius: 4px; }
 textarea:focus-visible, input:focus-visible { outline: none !important; }
 
