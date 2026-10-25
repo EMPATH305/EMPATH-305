@@ -844,24 +844,23 @@ html.empath-room-page .nav-letter[aria-current="page"] {
 }
 
 .room-back-lobby {
-  position: fixed;
-  z-index: 490;
-  top: 82px;
-  left: 28px;
+  position: static;
+  z-index: auto;
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  min-height: 42px;
-  padding: 0 15px;
-  border: 1px solid rgba(255,255,255,.13);
+  min-height: 34px;
+  padding: 0 11px;
+  border: 0;
+  border-left: 1px solid rgba(255,255,255,.13);
   border-radius: 999px;
   color: rgba(255,255,255,.58);
-  background: rgba(3,7,10,.68);
-  backdrop-filter: blur(12px);
+  background: transparent;
   font-size: 10px;
   letter-spacing: .16em;
   transition: color .25s ease, border-color .25s ease, transform .25s ease;
 }
+.room-nav-origin { display:flex;align-items:center;gap:14px;min-width:max-content; }
 .room-back-lobby:hover,
 .room-back-lobby:focus-visible {
   color: var(--gold);
@@ -882,10 +881,11 @@ body.empath-page-leaving { opacity: 0; }
   html.empath-room-page .room { padding-top: 104px; }
   html.empath-room-page .nav-logo::after { display: none; }
   .room-back-lobby {
-    top: calc(68px + env(safe-area-inset-top));
-    left: 12px;
-    min-height: 40px;
-    padding: 0 12px;
+    width: 36px;
+    min-height: 36px;
+    padding: 0;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,.12);
   }
   .room-back-lobby > span:last-child { display: none; }
 }
