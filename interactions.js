@@ -236,7 +236,7 @@
     if (title) title.textContent = meta.title;
     if (copy) copy.textContent = meta.copy;
     if (link) {
-      link.href = `#room-${meta.room}`;
+      link.href = `room-${meta.room}.html`;
       link.setAttribute('aria-label', `走進${meta.title}`);
     }
     result.hidden = false;
@@ -540,6 +540,10 @@
   }
 
   function setupConceptEntry() {
+    if (document.documentElement.classList.contains('empath-room-page')) {
+      document.documentElement.classList.remove('empath-entry-pending');
+      return Promise.resolve(false);
+    }
     let hasSeen = false;
     try { hasSeen = sessionStorage.getItem(ENTRY_KEY) === 'true'; } catch (error) {}
     if (hasSeen) {
