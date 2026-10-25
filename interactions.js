@@ -406,7 +406,7 @@
 
   function setupRollingCounters() {
     const selector = [
-      '#m-count','#p-healed-count','#t-echo-count',
+      '#m-count',
       '#g-v-count','#g-e-count','#g-m-count','#g-p-count','#g-t-count',
       '#h-e-count','#h-m-count','#h-p-count','#h-a-count','#h-t-count'
     ].join(',');
