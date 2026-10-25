@@ -1637,16 +1637,39 @@ window.shareSite = function() {
     } 
 };
   
-window.openShareCard = function() {
+window.openShareCard = function(customQuote) {
     document.getElementById('sc-e').textContent = state.eCount;
     document.getElementById('sc-m').textContent = state.mCount;
     document.getElementById('sc-p').textContent = state.pCount;
     document.getElementById('sc-a').textContent = state.aCount;
     document.getElementById('sc-t').textContent = state.tCount;
+    const quoteBox = document.getElementById('sc-quote-box');
+    if (quoteBox) {
+        if (customQuote && typeof customQuote === 'string' && customQuote.trim()) {
+            quoteBox.textContent = `「${customQuote.trim()}」`;
+            quoteBox.style.display = 'block';
+        } else {
+            quoteBox.style.display = 'none';
+            quoteBox.textContent = '';
+        }
+    }
     const modal = document.getElementById('share-modal');
     modal.classList.add('show');
     activateEmpathDialog(modal, document.getElementById('download-card-btn'));
-}
+};
+
+window.shareEchoAsCard = function() {
+    const echoText = document.getElementById('tonight-echo-copy')?.textContent || '';
+    window.closeTonightEcho?.();
+    window.setTimeout(() => window.openShareCard(echoText), 180);
+};
+
+window.shareFortuneAsCard = function() {
+    const rawText = document.getElementById('fortune-text')?.textContent || '';
+    const cleaned = rawText.replace(/[「」]/g, '').trim();
+    window.closeFortune?.();
+    window.setTimeout(() => window.openShareCard(cleaned), 180);
+};
   window.downloadShareCard = async function() { 
        if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'generate_soul_card');
   const btn = document.getElementById('download-card-btn'); 
@@ -2892,9 +2915,17 @@ window.initTimeAndCosmic = function() {
 
 // 1. Room H：給未來的自己
 window.submitFutureLetter = async function() {
-    const key = localStorage.getItem('empath_soul_key');
     const text = document.getElementById('future-letter-input').value.trim();
-    if(!key || !text) return;
+    if(!text) {
+        window.showToast(t('請先寫下你想對未來自己說的話 ✦', 'Please write a message for your future self first ✦'));
+        return;
+    }
+    let key = localStorage.getItem('empath_soul_key');
+    if(!key) {
+        await window.createSoulKey();
+        key = localStorage.getItem('empath_soul_key');
+    }
+    if(!key) return;
     const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); // 預設 90 天後解鎖
     try {
         const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
