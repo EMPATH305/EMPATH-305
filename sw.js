@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v20.2'; // Still Here：全年情緒記憶與無聲陪伴
+const CACHE_NAME = 'empath-cache-v20.3'; // Still Here：全年情緒記憶與無聲陪伴
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -9,6 +9,7 @@ self.addEventListener('install', (event) => {
                 './index.html',
                 './styles.css',
                 './firebase-app.js',
+                './safety-guard.js',
                 './interactions.js',
                 './room-router.js',
                 './room-e.html',

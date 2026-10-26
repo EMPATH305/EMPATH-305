@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.2', 'firebase-app.js?v=20.2', 'interactions.js?v=20.2', 'room-router.js?v=20.2'];
+const requiredAssets = ['styles.css?v=20.3', 'safety-guard.js?v=20.3', 'firebase-app.js?v=20.3', 'interactions.js?v=20.3', 'room-router.js?v=20.3'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -35,6 +35,10 @@ assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an e
 assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired message fragments');
 assert(appSource.includes("doc(db, 'metadata', 'room_a_stats')"), 'Room A must use anonymous aggregate counts');
 assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
+assert(appSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client');
+assert(appSource.includes("collection(db, 'content_reports')"), 'Anonymous content reports must be persisted');
+assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
+assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
 
 const rules = readFileSync('firestore.rules', 'utf8');
 assert(rules.includes('allow get: if resource.data.expireAt is timestamp'), 'Rules must deny direct reads of expired Room A records');
@@ -42,6 +46,9 @@ assert(rules.includes('request.query.limit <= 30'), 'Room A collection reads mus
 assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclared collections by default');
 assert(rules.includes('match /metadata/room_a_stats'), 'Rules must protect the Room A aggregate counter');
 assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect silent companionship counts');
+assert(rules.includes('match /content_reports/{reportId}'), 'Rules must validate anonymous content reports');
+assert(rules.includes("'targetCollection', 'targetId', 'reason', 'createdAt'"), 'Reports must use a minimal schema');
+assert(rules.includes('EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}'), 'Rules must accept v20.3 Soul Keys');
 
 const indexes = JSON.parse(readFileSync('firestore.indexes.json', 'utf8'));
 const ttlField = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'sand' && field.fieldPath === 'expireAt');
@@ -57,7 +64,8 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.2'), 'Service worker cache must be bumped for v20.2');
+assert(serviceWorker.includes('empath-cache-v20.3'), 'Service worker cache must be bumped for v20.3');
+assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
 }
