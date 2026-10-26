@@ -1,10 +1,21 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, runTransaction, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
 
 // ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
 
 const app = initializeApp(firebaseConfig);
+
+// Filled after the production domain is registered in Firebase App Check.
+// App Check stays in monitoring mode until verified traffic is confirmed.
+const APP_CHECK_ENTERPRISE_SITE_KEY = '';
+if (APP_CHECK_ENTERPRISE_SITE_KEY) {
+    initializeAppCheck(app, {
+        provider:new ReCaptchaEnterpriseProvider(APP_CHECK_ENTERPRISE_SITE_KEY),
+        isTokenAutoRefreshEnabled:true
+    });
+}
 
 // 自動偵測長輪詢可避開部分 iOS、校園網路與代理伺服器阻擋 WebChannel。
 // IndexedDB 快取讓曾載入過的房間在短暫離線時仍能先顯示內容。
@@ -53,6 +64,58 @@ window.setAnalyticsConsent = async function(granted) {
         : t('已關閉使用分析', 'Usage analytics disabled'));
 };
 
+window.addEventListener('empath:report-content', async event => {
+    const collectionName = String(event.detail?.collection || '');
+    const targetId = String(event.detail?.id || '');
+    const reason = String(event.detail?.reason || '');
+    const allowedCollections = new Set(['emotions','stars','shards','sand','warmth']);
+    const allowedReasons = new Set(['harassment','hate','personal_info','spam','self_harm','other']);
+    if (!allowedCollections.has(collectionName) || !allowedReasons.has(reason) || !targetId) return;
+    const throttle = window.EmpathSafety?.allowAction('content-report', {
+        cooldownMs:30000,
+        dailyLimit:10
+    }) || { allowed:true };
+    if (!throttle.allowed) {
+        window.showToast?.(t('檢舉送出得太快，請稍後再試。', 'Reports are being sent too quickly. Please try later.'));
+        return;
+    }
+    try {
+        await addDoc(collection(db, 'content_reports'), {
+            targetCollection:collectionName,
+            targetId,
+            reason,
+            createdAt:serverTimestamp()
+        });
+        window.EmpathSafety?.markReported(collectionName, targetId);
+        window.showToast?.(t('已匿名送出檢舉，也在這台裝置隱藏內容。', 'Report sent anonymously and hidden on this device.'));
+        window.EmpathSafety?.hideContent(collectionName, targetId);
+        document.dispatchEvent(new CustomEvent('empath:content-hidden', {
+            detail:{ collection:collectionName, id:targetId }
+        }));
+        if (collectionName === 'emotions') {
+            allEmotions = allEmotions.filter(item => item.id !== targetId);
+            window.renderEFeed?.();
+        } else if (collectionName === 'stars') {
+            starMessages = starMessages.filter(item => item.id !== targetId);
+            window.starMessages = starMessages;
+            document.getElementById('star-tooltip')?.classList.remove('active');
+        } else if (collectionName === 'shards') {
+            window.pShardRecords = (window.pShardRecords || []).filter(item => item.id !== targetId);
+            window.renderPShards?.();
+        } else if (collectionName === 'warmth') {
+            window.tWarmthRecords = (window.tWarmthRecords || []).filter(item => item.id !== targetId);
+            window.renderTWarmthFeed?.();
+        } else if (collectionName === 'sand') {
+            document.querySelectorAll('#a-feed .sand-msg').forEach(item => {
+                if (item.dataset.contentId === targetId) item.remove();
+            });
+        }
+    } catch(error) {
+        console.error('Anonymous content report failed:', error);
+        window.showToast?.(t('檢舉暫時無法送出，請稍後再試。', 'The report could not be sent. Please try later.'));
+    }
+});
+
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
 let roomAReleasedTotal = 0;
@@ -70,13 +133,24 @@ try {
     });
 } catch(err) {}
 let journeyData = { counters: {e:0, m:0, p:0, a:0, t:0}, events: [] };
-let lastSubmitTime = 0; const SUBMIT_COOLDOWN = 3000;
+const SUBMIT_COOLDOWN = 15000;
 document.addEventListener('DOMContentLoaded', () => {
     if(typeof updateCountersUI === 'function') updateCountersUI();
 }, { once:true }); 
 
-function canSubmit() { const now = Date.now(); if (now - lastSubmitTime < SUBMIT_COOLDOWN) { window.showToast(t('請稍候再送出...', 'Please wait...', '少しお待ちください...', 'Espera un momento...', 'Veuillez patienter...', 'Bitte warten...', '请稍候再送出...')); return false; } lastSubmitTime = now; return true; }
-function playRitual(btnId, origText) { const btn = document.getElementById(btnId); if(!btn) return; btn.innerHTML = t('✨ 已接住', '✨ Caught', '✨ 受け止めました', '✨ Atrapado', '✨ Attrapé', '✨ Aufgefangen', '✨ 已接住'); btn.style.pointerEvents = 'none'; btn.style.opacity = '0.6'; setTimeout(() => { btn.innerHTML = origText; btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }, SUBMIT_COOLDOWN); }
+function canSubmit(action = ACTIVE_ROOM || 'site') {
+    const verdict = window.EmpathSafety?.allowAction(`submit:${action}`, {
+        cooldownMs:SUBMIT_COOLDOWN,
+        dailyLimit:20
+    }) || { allowed:true };
+    if (verdict.allowed) return true;
+    const message = verdict.reason === 'daily-limit'
+        ? t('今天已經送出很多次了，先讓這個空間休息一下。', 'You have shared many times today. Please let this space rest for now.')
+        : t(`請再等 ${verdict.retrySeconds || 1} 秒後送出。`, `Please wait ${verdict.retrySeconds || 1} seconds before sending again.`);
+    window.showToast(message);
+    return false;
+}
+function playRitual(btnId, origText) { const btn = document.getElementById(btnId); if(!btn) return; btn.innerHTML = t('✨ 已接住', '✨ Caught', '✨ 受け止めました', '✨ Atrapado', '✨ Attrapé', '✨ Aufgefangen', '✨ 已接住'); btn.style.pointerEvents = 'none'; btn.style.opacity = '0.6'; setTimeout(() => { btn.innerHTML = origText; btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }, 3000); }
 
 function updateCountersUI() {
     try {
@@ -1398,9 +1472,13 @@ function subscribeAll() {
     // 1. 監聽情緒出口：首頁只保留近期 30 筆，避免為初始 3 張卡下載整批歷史資料。
     if (ACTIVE_ROOM === 'e') firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
-        snapshot.forEach(docSnap => allEmotions.push(docSnap.data()));
+        snapshot.forEach(docSnap => {
+            if (!window.EmpathSafety?.isHidden('emotions', docSnap.id)) {
+                allEmotions.push({ id:docSnap.id, data:docSnap.data() });
+            }
+        });
         if(typeof window.renderEFeed === 'function') window.renderEFeed();
-        setDataState('e',snapshot.empty ? 'empty' : null);
+        setDataState('e',allEmotions.length ? null : 'empty');
         refreshRoomCount('e');
         updateCountersUI();
     },error => handleDataError('e',error)));
@@ -1492,7 +1570,11 @@ function createPShardCard(record) {
     healedTag.textContent = `✦ ${t('已修補', 'Healed', '修復済', 'Reparado', 'Réparé', 'Geheilt', '已修补')}`;
     const glow = document.createElement('div');
     glow.className = 'shard-glow';
-    div.append(text, healedTag, glow);
+    const actions = window.EmpathSafety?.createContentActions('shards', id, () => {
+        window.pShardRecords = window.pShardRecords.filter(item => item.id !== id);
+        window.renderPShards();
+    });
+    div.append(text, healedTag, glow, actions || document.createDocumentFragment());
 
     if (!data.healed) {
         div.setAttribute('aria-label', t('修補這道裂紋', 'Mend this crack', 'このひび割れを修復', 'Reparar esta grieta', 'Réparer cette fissure', 'Diesen Riss flicken', '修补这道裂纹', 'Відновити цю тріщину', 'Napraw to pęknięcie'));
@@ -1528,7 +1610,8 @@ function createPShardCard(record) {
 window.renderPShards = function(limit = 12) {
     const board = document.getElementById('p-board');
     if (!board) return { rendered: 0, total: 0 };
-    const records = Array.isArray(window.pShardRecords) ? window.pShardRecords : [];
+    const records = (Array.isArray(window.pShardRecords) ? window.pShardRecords : [])
+        .filter(record => !window.EmpathSafety?.isHidden('shards', record.id));
     const count = Math.min(Math.max(0, Number(limit) || 0), records.length);
     const fragment = document.createDocumentFragment();
     records.slice(0,count).forEach(record => fragment.appendChild(createPShardCard(record)));
@@ -1550,7 +1633,12 @@ function createTWarmthItem(record) {
     echoButton.setAttribute('aria-label', t('為這則溫暖送出共鳴', 'Send an echo for this message', 'このメッセージに共鳴を送る', 'Enviar un eco para este mensaje', 'Envoyer un écho pour ce message', 'Ein Echo für diese Nachricht senden', '为这则温暖送出共鸣'));
     if (localStorage.getItem('echoed_'+id)) echoButton.classList.add('pulsed');
     const heart = document.createElement('span'); heart.className = 'heart'; heart.textContent = '🕯️';
-    echoButton.append(heart, document.createTextNode(' Echo Pulse ')); div.append(pulse, message, echoButton);
+    echoButton.append(heart, document.createTextNode(' Echo Pulse '));
+    const actions = window.EmpathSafety?.createContentActions('warmth', id, () => {
+        window.tWarmthRecords = window.tWarmthRecords.filter(item => item.id !== id);
+        window.renderTWarmthFeed();
+    });
+    div.append(pulse, message, echoButton, actions || document.createDocumentFragment());
     echoButton.addEventListener('click', async function(e){
         if(this.classList.contains('pulsed')) return;
         this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
@@ -1572,7 +1660,8 @@ function createTWarmthItem(record) {
 window.renderTWarmthFeed = function() {
     const feed = document.getElementById('t-feed');
     if (!feed) return;
-    const records = Array.isArray(window.tWarmthRecords) ? window.tWarmthRecords : [];
+    const records = (Array.isArray(window.tWarmthRecords) ? window.tWarmthRecords : [])
+        .filter(record => !window.EmpathSafety?.isHidden('warmth', record.id));
     const visibleCount = Math.min(tWarmthRenderLimit, records.length);
     const fragment = document.createDocumentFragment();
     records.slice(0, visibleCount).forEach(record => fragment.appendChild(createTWarmthItem(record)));
@@ -1605,7 +1694,9 @@ function subscribeOtherRooms() {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
-        window.starMessages = tempStars.map(normalizeStar).sort((a,b) => b.brightness - a.brightness).slice(0, 80);
+        window.starMessages = tempStars
+            .filter(star => !window.EmpathSafety?.isHidden('stars', star.id))
+            .map(normalizeStar).sort((a,b) => b.brightness - a.brightness).slice(0, 80);
         try { localStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks,colorIdx:s.colorIdx,relX:s.relX,relY:s.relY})))); } catch(e) {}
         starMessages = window.starMessages;
         
@@ -1677,6 +1768,7 @@ function subscribeOtherRooms() {
         const feed = document.getElementById('a-feed'); if(!feed) return;
         feed.innerHTML = ''; const nowMs = Date.now();
         snapshot.forEach(docSnap => {
+            if (window.EmpathSafety?.isHidden('sand', docSnap.id)) return;
             const data = docSnap.data();
             const msgTime = data.absoluteTime || (data.createdAt ? data.createdAt.seconds * 1000 : nowMs);
             const lifespanMs = data.lifespan || (24 * 60 * 60 * 1000);
@@ -1684,6 +1776,7 @@ function subscribeOtherRooms() {
             const leftSecs = (expiresAt - nowMs) / 1000;
             if(leftSecs <= 0) return;
             const div = document.createElement('div'); div.className = 'sand-msg';
+            div.dataset.contentId = docSnap.id;
             div.dataset.expires = expiresAt; div.dataset.lifespan = lifespanMs;
             const pct = Math.max(0, Math.min(100, (leftSecs / (lifespanMs / 1000)) * 100));
             const overlay = document.createElement('div'); overlay.className = 'sand-dissolve-overlay';
@@ -1694,7 +1787,8 @@ function subscribeOtherRooms() {
             const timerBar = document.createElement('div'); timerBar.className = 'sand-timer-bar';
             const timerFill = document.createElement('div'); timerFill.className = 'sand-timer-fill'; timerFill.style.width = pct + '%';
             const timeLeft = document.createElement('div'); timeLeft.className = 'sand-time-left'; timeLeft.textContent = formatTimeLeft(Math.floor(leftSecs));
-            timerBar.appendChild(timerFill); timer.append(timerLabel, timerBar, timeLeft); div.append(overlay, message, timer);
+            const actions = window.EmpathSafety?.createContentActions('sand', docSnap.id, () => div.remove());
+            timerBar.appendChild(timerFill); timer.append(timerLabel, timerBar, timeLeft); div.append(overlay, message, timer, actions || document.createDocumentFragment());
             feed.appendChild(div);
         });
         setDataState('a',feed.children.length ? null : 'empty');
@@ -2029,11 +2123,13 @@ function applyJourney(nextJourney) {
 }
 
 function generateSoulKey() {
-    const bytes = new Uint8Array(8);
+    // New keys use 128 bits of browser-generated entropy. Existing two-block
+    // keys remain readable so no one loses a journey created before v20.3.
+    const bytes = new Uint8Array(16);
     if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(bytes);
     else bytes.forEach((_, index) => { bytes[index] = Math.floor(Math.random() * 256); });
     const token = Array.from(bytes, byte => byte.toString(36).toUpperCase().padStart(2, '0')).join('');
-    return `EMP-${token.slice(0, 8)}-${token.slice(8, 16)}`;
+    return `EMP-${token.match(/.{1,8}/g).join('-')}`;
 }
 
 window.createSoulKey = async function() {
@@ -2048,8 +2144,18 @@ window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_
 window.loadExistingSoulKey = async function() {
     const input = document.getElementById('sync-key-input');
     const key = input?.value.trim().toUpperCase() || '';
-    if(!/^EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}$/.test(key)) {
+    const validLegacyKey = /^EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}$/.test(key);
+    const validV203Key = /^EMP-(?:[A-Z0-9]{8}-){3}[A-Z0-9]{8}$/.test(key);
+    if(!validLegacyKey && !validV203Key) {
         window.showToast(t('鑰匙格式不正確', 'That key format is not valid', '鍵の形式が正しくありません', 'Formato de llave inválido', 'Format de clé invalide', 'Ungültiges Schlüsselformat', '钥匙格式不正确'));
+        return;
+    }
+    const lookupThrottle = window.EmpathSafety?.allowAction('soul-key-load', {
+        cooldownMs:3000,
+        dailyLimit:12
+    }) || { allowed:true };
+    if (!lookupThrottle.allowed) {
+        window.showToast(t('嘗試次數較多，請稍後再同步。', 'Too many attempts. Please wait before syncing again.'));
         return;
     }
     try {
@@ -2233,7 +2339,8 @@ window.renderEFeed = function() {
     // 根據目前的顯示上限來切出要顯示的資料
     const dataToShow = allEmotions.slice(0, currentEFeedLimit);
     
-    dataToShow.forEach(data => { 
+    dataToShow.forEach(record => {
+        const { id, data } = record;
         const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); 
         const div = document.createElement('div'); 
         div.className = 'e-msg'; 
@@ -2256,7 +2363,11 @@ window.renderEFeed = function() {
         const time = document.createElement('div');
         time.className = 'e-msg-time';
         time.textContent = timeStr;
-        div.appendChild(time);
+        const actions = window.EmpathSafety?.createContentActions('emotions', id, () => {
+            allEmotions = allEmotions.filter(item => item.id !== id);
+            window.renderEFeed();
+        });
+        div.append(time, actions || document.createDocumentFragment());
         feed.appendChild(div); 
     }); 
     
@@ -2604,12 +2715,22 @@ roomM?.addEventListener('click', async e => {
             const prompt = document.createElement('span');
             prompt.style.cssText = 'font-size:10px;color:var(--gold);margin-top:10px;display:block;';
             prompt.textContent = `✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}`;
+            const actions = window.EmpathSafety?.createContentActions('stars', star.id, () => {
+                starMessages = starMessages.filter(item => item.id !== star.id);
+                window.starMessages = starMessages;
+                tooltip.classList.remove('active');
+                activeStarId = null;
+                if (starsRafId) cancelAnimationFrame(starsRafId);
+                starsRafId = null;
+                window.drawStars();
+            });
             tooltip.replaceChildren(
                 document.createTextNode(t('思念', 'Memory', '想い', 'Recuerdo', 'Souvenir', 'Erinnerung', '思念')),
                 document.createElement('br'),
                 document.createTextNode(typeof star.text === 'string' ? star.text : ''),
                 document.createElement('br'),
-                prompt
+                prompt,
+                actions || document.createDocumentFragment()
             ); 
         } else { 
             try { 

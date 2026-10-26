@@ -150,9 +150,9 @@ service cloud.firestore {
     }
 
     match /user_journeys/{soulKey} {
-      allow get: if soulKey.matches('^EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}$');
+      allow get: if soulKey.matches('^(EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}|EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8})$');
       allow list: if false;
-      allow create, update: if soulKey.matches('^EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}$')
+      allow create, update: if soulKey.matches('^(EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}|EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8})$')
         && request.resource.data.keys().hasOnly([
           'counters', 'events', 'letters', 'visitCount', 'schemaVersion', 'clientUpdatedAt', 'updatedAt'
         ])
@@ -165,6 +165,21 @@ service cloud.firestore {
         && request.resource.data.clientUpdatedAt is int
         && request.resource.data.updatedAt is timestamp;
       allow delete: if false;
+    }
+
+    // Anonymous reports carry no author identity or copied message text.
+    // Only the moderation target, a fixed reason and server time are accepted.
+    match /content_reports/{reportId} {
+      allow read, update, delete: if false;
+      allow create: if request.resource.data.keys().hasOnly([
+          'targetCollection', 'targetId', 'reason', 'createdAt'
+        ])
+        && request.resource.data.targetCollection in ['emotions', 'stars', 'shards', 'sand', 'warmth']
+        && request.resource.data.targetId is string
+        && request.resource.data.targetId.size() >= 1
+        && request.resource.data.targetId.size() <= 160
+        && request.resource.data.reason in ['harassment', 'hate', 'personal_info', 'spam', 'self_harm', 'other']
+        && request.resource.data.createdAt is timestamp;
     }
 
     match /{document=**} {
