@@ -618,6 +618,7 @@ window.switchLang = function(lang, options = {}) {
   updateDynamicTexts(); const timeline = document.getElementById('h-events'); if(timeline) { timeline.innerHTML = ''; initTimeline(); } window.renderSessionJourney?.(); if(typeof window.renderEFeed === 'function') window.renderEFeed(); if(typeof window.renderTWarmthFeed === 'function') window.renderTWarmthFeed();
   updateCrisisLinks();
   renderAnalyticsConsentControls();
+  window.dispatchEvent(new CustomEvent('empath:language-changed', { detail:{ lang } }));
   const syncGoogleTranslation = () => {
     const googleSelect = document.querySelector('.goog-te-combo');
     if (!googleSelect) return;

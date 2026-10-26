@@ -1,6 +1,6 @@
 {
   "name": "empath-305",
-  "version": "20.3.0",
+  "version": "20.4.0",
   "private": true,
   "scripts": {
     "test": "node --check firebase-app.js && node --check safety-guard.js && node --check interactions.js && node --check room-router.js && node --check sw.js && node scripts/check-site.mjs && node scripts/check-safety.mjs"

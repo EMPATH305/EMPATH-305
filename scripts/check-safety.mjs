@@ -11,7 +11,7 @@ const localStorage = {
 class TestDate extends Date {
   static now() { return now; }
 }
-const window = {};
+const window = { addEventListener() {}, currentLang:'en' };
 const context = vm.createContext({
   window,
   localStorage,
@@ -44,6 +44,23 @@ assert.equal(safety.isHidden('stars', 'abc'), false, 'Collection must be part of
 assert.equal(safety.isReported('warmth', 'xyz'), false);
 safety.markReported('warmth', 'xyz');
 assert.equal(safety.isReported('warmth', 'xyz'), true);
+
+const copyNode = { dataset:{ safetyCopy:'report' }, textContent:'' };
+const labelNode = { dataset:{ safetyLabel:'hideLabel' }, setAttribute(name, value) { this[name] = value; } };
+safety.refreshLanguage({
+  querySelectorAll(selector) {
+    if (selector === '[data-safety-copy]') return [copyNode];
+    if (selector === '[data-safety-label]') return [labelNode];
+    return [];
+  }
+});
+assert.equal(copyNode.textContent, 'Report');
+assert.equal(labelNode['aria-label'], 'Hide this content on this device only');
+window.currentLang = 'ja';
+safety.refreshLanguage({
+  querySelectorAll(selector) { return selector === '[data-safety-copy]' ? [copyNode] : []; }
+});
+assert.equal(copyNode.textContent, '報告');
 
 assert.equal(Object.isFrozen(safety), true, 'Safety API must not be mutable');
 console.log('Safety guard checks passed.');

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.3', 'safety-guard.js?v=20.3', 'firebase-app.js?v=20.3', 'interactions.js?v=20.3', 'room-router.js?v=20.3'];
+const requiredAssets = ['styles.css?v=20.4', 'safety-guard.js?v=20.4', 'firebase-app.js?v=20.4', 'interactions.js?v=20.4', 'room-router.js?v=20.4'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -65,10 +65,17 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.3'), 'Service worker cache must be bumped for v20.3');
+assert(serviceWorker.includes('empath-cache-v20.4'), 'Service worker cache must be bumped for v20.4');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
 }
+
+const safetySource = readFileSync('safety-guard.js', 'utf8');
+assert(safetySource.includes("aria-describedby', 'content-report-description"), 'Report dialog must expose its description');
+assert(safetySource.includes("event.key === 'Escape'"), 'Report dialog must support Escape to close');
+assert(safetySource.includes("event.key !== 'Tab'"), 'Report dialog must trap keyboard focus');
+assert(safetySource.includes('reportReturnFocus.focus'), 'Report dialog must restore focus after closing');
+assert(safetySource.includes("empath:language-changed"), 'Safety controls must react to language changes');
 
 console.log(`Site checks passed for ${pages.length} pages.`);
