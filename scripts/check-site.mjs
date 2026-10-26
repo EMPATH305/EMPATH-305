@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.1', 'firebase-app.js?v=20.1', 'interactions.js?v=20.1', 'room-router.js?v=20.1'];
+const requiredAssets = ['styles.css?v=20.2', 'firebase-app.js?v=20.2', 'interactions.js?v=20.2', 'room-router.js?v=20.2'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -32,11 +32,16 @@ assert(appSource.includes('Date.now() + 10000'), 'Room A query cutoff must stay 
 assert(appSource.includes('expireAt: Timestamp.fromMillis'), 'Room A writes must include a Firestore TTL timestamp');
 assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consent gated');
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
+assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired message fragments');
+assert(appSource.includes("doc(db, 'metadata', 'room_a_stats')"), 'Room A must use anonymous aggregate counts');
+assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
 
 const rules = readFileSync('firestore.rules', 'utf8');
 assert(rules.includes('allow get: if resource.data.expireAt is timestamp'), 'Rules must deny direct reads of expired Room A records');
 assert(rules.includes('request.query.limit <= 30'), 'Room A collection reads must be bounded');
 assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclared collections by default');
+assert(rules.includes('match /metadata/room_a_stats'), 'Rules must protect the Room A aggregate counter');
+assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect silent companionship counts');
 
 const indexes = JSON.parse(readFileSync('firestore.indexes.json', 'utf8'));
 const ttlField = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'sand' && field.fieldPath === 'expireAt');
@@ -52,7 +57,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.1'), 'Service worker cache must be bumped for v20.1');
+assert(serviceWorker.includes('empath-cache-v20.2'), 'Service worker cache must be bumped for v20.2');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
 }

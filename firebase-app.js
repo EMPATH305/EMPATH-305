@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, runTransaction, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
@@ -55,6 +55,7 @@ window.setAnalyticsConsent = async function(granted) {
 
 const state = { eCount:0, mCount:0, pCount:0, aCount:0, tCount:0 };
 const globalCounts = { v:0, e:0, m:0, p:0, a:0, t:0 };
+let roomAReleasedTotal = 0;
 // Keep the client query slightly ahead of Firestore request.time so the rules
 // can prove every returned Room A document is still unexpired.
 const roomAQueryCutoff = () => Timestamp.fromMillis(Date.now() + 10000);
@@ -1947,6 +1948,7 @@ document.addEventListener('keydown', (e) => {
         if (document.getElementById('fortune-display')?.classList.contains('show')) window.closeFortune();
         if (!document.getElementById('crisis-support-notice')?.hidden) window.closeCrisisSupportNotice();
         if (document.getElementById('tonight-echo')?.classList.contains('show')) window.closeTonightEcho();
+        if (document.getElementById('silent-company-overlay')?.classList.contains('show')) window.stopSilentCompanionship();
         const langList = document.getElementById('lang-dropdown-list');
         if (langList?.classList.contains('show')) {
             langList.classList.remove('show');
@@ -2957,6 +2959,38 @@ window.drawSand = function() {
 
 window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
 window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
+
+function renderRoomACollectiveCount(justReleased = false) {
+    const target = document.getElementById('a-collective-count');
+    if (!target || roomAReleasedTotal <= 0) return;
+    const before = Math.max(0, roomAReleasedTotal - (justReleased ? 1 : 0));
+    const zh = justReleased
+        ? `在你之前，已有 ${before.toLocaleString()} 個人把一份重量交給了時間。這裡只留下數字，不留下原文。`
+        : `至今已有 ${roomAReleasedTotal.toLocaleString()} 份重量被交給時間。這裡只留下數字，不留下原文。`;
+    const en = justReleased
+        ? `Before you, ${before.toLocaleString()} people gave a weight to time. Only the number remains, never their words.`
+        : `${roomAReleasedTotal.toLocaleString()} weights have been given to time. Only the number remains, never the words.`;
+    target.setAttribute('data-zh', zh);
+    target.setAttribute('data-zh-cn', zh);
+    target.setAttribute('data-en', en);
+    target.textContent = t(zh, en, en, en, en, en, zh);
+    target.classList.toggle('is-new-release', justReleased);
+}
+
+function subscribeRoomAReleaseStats() {
+    if (ACTIVE_ROOM !== 'a' || !document.getElementById('a-collective-count')) return;
+    const statsRef = doc(db, 'metadata', 'room_a_stats');
+    firestoreUnsubs.push(onSnapshot(statsRef, snapshot => {
+        roomAReleasedTotal = Math.max(0, Number(snapshot.data()?.totalReleased) || 0);
+        const justReleased = sessionStorage.getItem('empath_a_just_released') === 'true';
+        renderRoomACollectiveCount(justReleased);
+        if (justReleased) {
+            sessionStorage.removeItem('empath_a_just_released');
+            setTimeout(() => document.getElementById('a-collective-count')?.classList.remove('is-new-release'), 5000);
+        }
+    }, error => console.error('Room A anonymous total failed:', error)));
+}
+
 window.submitA = async function(){ 
     const input = document.getElementById('a-input'); 
     let text = input.value.trim(); 
@@ -2974,6 +3008,14 @@ window.submitA = async function(){
             expireAt: Timestamp.fromMillis(submittedAt + lifespan),
             createdAt: serverTimestamp()
         });
+        sessionStorage.setItem('empath_a_just_released', 'true');
+        try {
+            await setDoc(doc(db, 'metadata', 'room_a_stats'), {
+                totalReleased: increment(1)
+            }, { merge:true });
+        } catch(statsError) {
+            console.error('Room A anonymous total update failed:', statsError);
+        }
         // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
         localStorage.setItem('empath_a_submit_time', Date.now());
         input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
@@ -3064,17 +3106,193 @@ function setupRoomPresence(roomKey, inputId) {
     });
 }
 
+// ==========================================
+// Room H：五分鐘無聲陪伴
+// 使用五分鐘時間桶記錄「這段時間選擇進來的人數」，不儲存文字、IP 或個人資料。
+// ==========================================
+const SILENT_COMPANY_SECONDS = 5 * 60;
+const SILENT_BUCKET_MS = SILENT_COMPANY_SECONDS * 1000;
+let silentCompanyTimer = null;
+let silentCompanyUnsubscribe = null;
+
+function ensureSilentCompanyOverlay() {
+    if (document.getElementById('silent-company-overlay')) return;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="silent-company-overlay" id="silent-company-overlay" role="dialog" aria-modal="true" aria-labelledby="silent-company-title" aria-hidden="true">
+        <div class="silent-company-inner">
+          <p class="silent-company-kicker">SILENT COMPANY · EMPATH</p>
+          <h2 id="silent-company-title" data-zh="現在，不必說任何話" data-en="No words are needed now">現在，不必說任何話</h2>
+          <div class="silent-breathing-light" aria-hidden="true"><span></span></div>
+          <p class="silent-company-count" id="silent-company-count" aria-live="polite">此刻，你正在這裡安靜著。</p>
+          <p class="silent-company-note" data-zh="這裡不記錄你的內容。五分鐘後，空間會溫柔地送你回去。" data-en="Nothing you say is recorded here. In five minutes, this space will gently return you.">這裡不記錄你的內容。五分鐘後，空間會溫柔地送你回去。</p>
+          <div class="silent-company-progress" aria-hidden="true"><span id="silent-company-progress"></span></div>
+          <p class="silent-company-time" id="silent-company-time">05:00</p>
+          <button type="button" class="silent-exit-btn" id="silent-company-exit" onclick="window.stopSilentCompanionship()" data-zh="我想先離開" data-en="Leave quietly">我想先離開</button>
+        </div>
+      </div>
+    `);
+}
+
+function renderSilentCompanyCount(count) {
+    const target = document.getElementById('silent-company-count');
+    if (!target) return;
+    const safeCount = Math.max(1, Math.min(100000, Number(count) || 1));
+    const zh = `這五分鐘，已有 ${safeCount.toLocaleString()} 個人選擇在這裡安靜。`;
+    const en = `In these five minutes, ${safeCount.toLocaleString()} people chose to be quiet here.`;
+    target.setAttribute('data-zh', zh);
+    target.setAttribute('data-zh-cn', zh);
+    target.setAttribute('data-en', en);
+    target.textContent = t(zh, en, en, en, en, en, zh);
+}
+
+window.startSilentCompanionship = async function() {
+    ensureSilentCompanyOverlay();
+    const overlay = document.getElementById('silent-company-overlay');
+    if (!overlay || overlay.classList.contains('show')) return;
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('empath-dialog-open', 'silent-company-active');
+    document.getElementById('silent-company-exit')?.focus({ preventScroll:true });
+
+    const bucket = Math.floor(Date.now() / SILENT_BUCKET_MS);
+    const bucketKey = String(bucket);
+    const joinedKey = 'empath_silent_company_bucket';
+    const presenceRef = doc(db, 'metadata', 'silent_presence');
+    if (sessionStorage.getItem(joinedKey) !== bucketKey) {
+        try {
+            await runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(presenceRef);
+                const previous = snapshot.data() || {};
+                const sameBucket = Number(previous.bucket) === bucket;
+                const nextCount = sameBucket
+                    ? Math.min(100000, Math.max(0, Number(previous.count) || 0) + 1)
+                    : 1;
+                transaction.set(presenceRef, {
+                    bucket,
+                    count:nextCount,
+                    updatedAt:serverTimestamp()
+                });
+            });
+            sessionStorage.setItem(joinedKey, bucketKey);
+        } catch(error) {
+            console.error('Silent company count failed:', error);
+            renderSilentCompanyCount(1);
+        }
+    }
+
+    silentCompanyUnsubscribe?.();
+    silentCompanyUnsubscribe = onSnapshot(presenceRef, snapshot => {
+        const data = snapshot.data() || {};
+        renderSilentCompanyCount(Number(data.bucket) === bucket ? data.count : 1);
+    }, error => console.error('Silent company presence failed:', error));
+
+    const startedAt = Date.now();
+    clearInterval(silentCompanyTimer);
+    const tick = () => {
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        const remaining = Math.max(0, SILENT_COMPANY_SECONDS - elapsed);
+        const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const seconds = String(remaining % 60).padStart(2, '0');
+        const time = document.getElementById('silent-company-time');
+        const progress = document.getElementById('silent-company-progress');
+        if (time) time.textContent = `${minutes}:${seconds}`;
+        if (progress) progress.style.width = `${(remaining / SILENT_COMPANY_SECONDS) * 100}%`;
+        if (remaining === 0) {
+            window.stopSilentCompanionship(true);
+            window.showToast(t('五分鐘到了。謝謝你陪自己停在這裡。', 'Five minutes have passed. Thank you for staying with yourself.'));
+        }
+    };
+    tick();
+    silentCompanyTimer = setInterval(tick, 1000);
+};
+
+window.stopSilentCompanionship = function() {
+    const overlay = document.getElementById('silent-company-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('silent-company-active');
+    if (!document.querySelector('.share-modal.show, #breathe-overlay.show, #nebula-overlay.show, #fortune-display.show, #onboarding-box.is-open, #crisis-support-notice:not([hidden]), #tonight-echo.show')) {
+        document.body.classList.remove('empath-dialog-open');
+    }
+    clearInterval(silentCompanyTimer);
+    silentCompanyTimer = null;
+    silentCompanyUnsubscribe?.();
+    silentCompanyUnsubscribe = null;
+    document.querySelector('.silent-enter-btn')?.focus({ preventScroll:true });
+};
+
 // 🌟 拔掉原本的 load 煞車，改用 DOMContentLoaded 讓它瞬間起跑
 
 // ==========================================
 // 🌌 魔法五：時間維度引擎 (時刻感知、月相、紀念日)
 // ==========================================
+function getCollectiveDateWhisper(now) {
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const solarKey = `${month}-${day}`;
+    const solarWhispers = {
+        '2-14': {
+            zh:'有人期待今天，也有人正在學著，和沒有抵達的愛共處。',
+            en:'Some welcome today; others are learning to live beside love that never arrived.'
+        },
+        '4-4': {
+            zh:'對某些人而言，今天的思念會重新有名字。',
+            en:'For some, remembrance finds its name again today.'
+        },
+        '4-5': {
+            zh:'對某些人而言，今天的思念會重新有名字。',
+            en:'For some, remembrance finds its name again today.'
+        },
+        '8-8': {
+            zh:'對某些人而言，今天比平常更像一段安靜的缺口。',
+            en:'For some, today may feel more like a quiet absence than usual.'
+        },
+        '12-31': {
+            zh:'一年將盡。不是所有事情，都需要在今晚得到答案。',
+            en:'The year is ending. Not everything needs an answer tonight.'
+        }
+    };
+    if (solarWhispers[solarKey]) return solarWhispers[solarKey];
+
+    // 七夕依農曆判斷；不支援農曆的瀏覽器會安靜略過。
+    try {
+        const parts = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
+            month:'numeric', day:'numeric'
+        }).formatToParts(now);
+        const lunarMonth = parts.find(part => part.type === 'month')?.value || '';
+        const lunarDay = parts.find(part => part.type === 'day')?.value || '';
+        if (/^(7|七)$/.test(lunarMonth) && /^(7|七)$/.test(lunarDay)) {
+            return {
+                zh:'有人在今天靠近，也有人正練習放下沒有抵達的愛。',
+                en:'Some draw closer today; others are learning to release a love that never arrived.'
+            };
+        }
+    } catch(error) {}
+    return null;
+}
+
+function renderCollectiveDateWhisper(now) {
+    const whisper = getCollectiveDateWhisper(now);
+    if (!whisper || document.getElementById('collective-date-whisper')) return;
+    const element = document.createElement('p');
+    element.id = 'collective-date-whisper';
+    element.className = 'collective-date-whisper';
+    element.setAttribute('data-zh', whisper.zh);
+    element.setAttribute('data-zh-cn', whisper.zh);
+    element.setAttribute('data-en', whisper.en);
+    element.textContent = t(whisper.zh, whisper.en, whisper.en, whisper.en, whisper.en, whisper.en, whisper.zh);
+    const anchor = document.getElementById('cosmic-presence') || document.querySelector('.room .desc-wrap');
+    anchor?.insertAdjacentElement('afterend', element);
+}
+
 window.initTimeAndCosmic = function() {
     const now = new Date();
     const hour = now.getHours();
     
     // 🌙 1. 深夜與破曉感知
     const body = document.body;
+    renderCollectiveDateWhisper(now);
     const eInput = document.getElementById('e-input');
     if (hour >= 0 && hour <= 4) {
         body.classList.add('night-mode');
@@ -3219,25 +3437,23 @@ window.checkFutureLetters = async function() {
     } catch(e) {}
 };
 
-// 2. Room A：24小時宇宙回聲
+// 2. Room A：24 小時後只回傳匿名總量，不重播任何已消散原文。
 window.checkRoomAEcho = async function() {
     const aSubmitTime = localStorage.getItem('empath_a_submit_time');
-    // 如果距離上次投遞超過 24 小時，或開啟了穿越密技
     if (aSubmitTime && (Date.now() - parseInt(aSubmitTime) > 24 * 60 * 60 * 1000 || window.isTestingEcho)) {
         try {
-            const { getDocs, query, limit } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-            const q = query(collection(db, "sand"), firestoreLimit(10));
-            const querySnapshot = await getDocs(q);
-            const msgs = [];
-            querySnapshot.forEach((doc) => msgs.push(doc.data().text));
-            if(msgs.length > 0) {
-                const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-                setTimeout(() => {
-                    window.showToast(`✦ 來自宇宙的回聲 ✦\n「${randomMsg.slice(0, 30)}...」\n有人與你同時在這裡，留下了這句話。`, 8000);
-                }, 4000);
-                localStorage.removeItem('empath_a_submit_time'); // 聽過一次就清掉
-            }
-        } catch(e) {}
+            const snapshot = await getDoc(doc(db, 'metadata', 'room_a_stats'));
+            const total = Math.max(0, Number(snapshot.data()?.totalReleased) || 0);
+            if (total > 0) setTimeout(() => {
+                window.showToast(t(
+                    `✦ 到現在，已有 ${total.toLocaleString()} 份重量被交給時間。沒有任何原文被留下。`,
+                    `✦ ${total.toLocaleString()} weights have now been given to time. None of their words were kept.`
+                ), 8000);
+            }, 4000);
+            localStorage.removeItem('empath_a_submit_time');
+        } catch(error) {
+            console.error('Room A anonymous echo failed:', error);
+        }
     }
 };
 
@@ -3339,6 +3555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupRoomPresence('roomP', 'p-input');
   setupRoomPresence('roomA', 'a-input');
   setupRoomPresence('roomT', 't-input');
+  if (ACTIVE_ROOM === 'h') ensureSilentCompanyOverlay();
     
   // 啟動時間與宇宙感知
   window.initTimeAndCosmic();
@@ -3418,6 +3635,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   subscribeAll();
+  subscribeRoomAReleaseStats();
   
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
   firestoreUnsubs.push(onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } }));
