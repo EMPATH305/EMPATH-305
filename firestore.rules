@@ -167,19 +167,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Anonymous reports carry no author identity or copied message text.
-    // Only the moderation target, a fixed reason and server time are accepted.
+    // Reports are accepted only through the rate-limited Cloud Function.
+    // Admin SDK access is checked again by a custom admin claim in each callable.
     match /content_reports/{reportId} {
-      allow read, update, delete: if false;
-      allow create: if request.resource.data.keys().hasOnly([
-          'targetCollection', 'targetId', 'reason', 'createdAt'
-        ])
-        && request.resource.data.targetCollection in ['emotions', 'stars', 'shards', 'sand', 'warmth']
-        && request.resource.data.targetId is string
-        && request.resource.data.targetId.size() >= 1
-        && request.resource.data.targetId.size() <= 160
-        && request.resource.data.reason in ['harassment', 'hate', 'personal_info', 'spam', 'self_harm', 'other']
-        && request.resource.data.createdAt is timestamp;
+      allow read, write: if false;
+    }
+
+    match /moderation_audit/{entryId} {
+      allow read, write: if false;
+    }
+
+    match /rate_limits/{bucketId} {
+      allow read, write: if false;
     }
 
     match /{document=**} {

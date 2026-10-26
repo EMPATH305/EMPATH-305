@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#0d1b2a">
+  <title>EMPATH · Community Care</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=20.5">
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <a class="wordmark" href="index.html" aria-label="返回 EMPATH 首頁">EMPATH</a>
+      <div class="admin-title">
+        <p>COMMUNITY CARE</p>
+        <h1>內容審核室</h1>
+      </div>
+      <button id="sign-out" class="quiet-button" type="button" hidden>登出</button>
+    </header>
+
+    <section id="auth-panel" class="auth-panel" aria-labelledby="auth-title">
+      <span class="soft-orbit" aria-hidden="true"></span>
+      <p class="eyebrow">PRIVATE SPACE · 僅限管理員</p>
+      <h2 id="auth-title">照看這個空間留下的重量</h2>
+      <p>登入後才能閱讀匿名檢舉摘要。系統不會顯示訪客身分，也不會把完整圖片資料載入審核頁面。</p>
+      <button id="google-sign-in" class="primary-button" type="button">使用 Google 管理員帳號登入</button>
+    </section>
+
+    <section id="review-panel" class="review-panel" hidden aria-labelledby="review-title">
+      <div class="review-heading">
+        <div>
+          <p class="eyebrow">OPEN REPORTS</p>
+          <h2 id="review-title">待審核內容</h2>
+        </div>
+        <button id="refresh-reports" class="quiet-button" type="button">重新整理</button>
+      </div>
+      <p id="review-summary" class="review-summary" aria-live="polite"></p>
+      <div id="report-list" class="report-list" aria-live="polite"></div>
+    </section>
+
+    <p id="admin-status" class="admin-status" role="status" aria-live="polite"></p>
+  </main>
+  <script type="module" src="admin-app.js?v=20.5"></script>
+</body>
+</html>

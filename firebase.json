@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22",
+    "codebase": "empath-backend"
+  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"

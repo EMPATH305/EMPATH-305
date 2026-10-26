@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.4', 'safety-guard.js?v=20.4', 'firebase-app.js?v=20.4', 'interactions.js?v=20.4', 'room-router.js?v=20.4'];
+const requiredAssets = ['styles.css?v=20.5', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.5', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -37,7 +37,8 @@ assert(appSource.includes("doc(db, 'metadata', 'room_a_stats')"), 'Room A must u
 assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
 assert(appSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client');
 assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSource), 'Production App Check site key must be configured');
-assert(appSource.includes("collection(db, 'content_reports')"), 'Anonymous content reports must be persisted');
+assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
+assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
 
@@ -48,12 +49,15 @@ assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclare
 assert(rules.includes('match /metadata/room_a_stats'), 'Rules must protect the Room A aggregate counter');
 assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect silent companionship counts');
 assert(rules.includes('match /content_reports/{reportId}'), 'Rules must validate anonymous content reports');
-assert(rules.includes("'targetCollection', 'targetId', 'reason', 'createdAt'"), 'Reports must use a minimal schema');
+assert(rules.includes('match /rate_limits/{bucketId}'), 'Rate-limit documents must be private');
+assert(rules.includes('match /moderation_audit/{entryId}'), 'Moderation audit records must be private');
 assert(rules.includes('EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}'), 'Rules must accept v20.3 Soul Keys');
 
 const indexes = JSON.parse(readFileSync('firestore.indexes.json', 'utf8'));
 const ttlField = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'sand' && field.fieldPath === 'expireAt');
 assert.equal(ttlField?.ttl, true, 'Room A expireAt must be configured as a TTL field');
+const rateLimitTtl = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'rate_limits' && field.fieldPath === 'expiresAt');
+assert.equal(rateLimitTtl?.ttl, true, 'Rate-limit buckets must expire automatically');
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
 for (const icon of manifest.icons) {
@@ -65,7 +69,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.4'), 'Service worker cache must be bumped for v20.4');
+assert(serviceWorker.includes('empath-cache-v20.5'), 'Service worker cache must be bumped for v20.5');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
@@ -77,5 +81,20 @@ assert(safetySource.includes("event.key === 'Escape'"), 'Report dialog must supp
 assert(safetySource.includes("event.key !== 'Tab'"), 'Report dialog must trap keyboard focus');
 assert(safetySource.includes('reportReturnFocus.focus'), 'Report dialog must restore focus after closing');
 assert(safetySource.includes("empath:language-changed"), 'Safety controls must react to language changes');
+
+const adminPage = readFileSync('admin.html', 'utf8');
+const adminSource = readFileSync('admin-app.js', 'utf8');
+assert(adminPage.includes('noindex,nofollow,noarchive'), 'Admin route must not be indexed');
+assert(adminPage.includes('admin-app.js?v=20.5'), 'Admin route must load the current controller');
+assert(adminSource.includes("httpsCallable(functions, 'claimAdminRole')"), 'Admin access must be granted by the backend');
+assert(adminSource.includes("httpsCallable(functions, 'moderateReport')"), 'Moderation actions must use the backend');
+assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded in the client');
+
+const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
+assert.equal(firebaseSettings.functions?.runtime, 'nodejs22', 'Functions must use the supported Node.js 22 runtime');
+const functionsSource = readFileSync('functions/index.js', 'utf8');
+assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity must be stored in Secret Manager');
+assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit salt must be stored in Secret Manager');
+assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side report limit must remain bounded');
 
 console.log(`Site checks passed for ${pages.length} pages.`);
