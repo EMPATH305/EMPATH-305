@@ -9,7 +9,7 @@ const app = initializeApp(firebaseConfig);
 
 // Filled after the production domain is registered in Firebase App Check.
 // App Check stays in monitoring mode until verified traffic is confirmed.
-const APP_CHECK_ENTERPRISE_SITE_KEY = '';
+const APP_CHECK_ENTERPRISE_SITE_KEY = '6LfIqgEuAAAAADuOmZVHbEizh5hw3GAKMcziAcXy';
 if (APP_CHECK_ENTERPRISE_SITE_KEY) {
     initializeAppCheck(app, {
         provider:new ReCaptchaEnterpriseProvider(APP_CHECK_ENTERPRISE_SITE_KEY),
