@@ -36,6 +36,7 @@ assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired
 assert(appSource.includes("doc(db, 'metadata', 'room_a_stats')"), 'Room A must use anonymous aggregate counts');
 assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
 assert(appSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client');
+assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSource), 'Production App Check site key must be configured');
 assert(appSource.includes("collection(db, 'content_reports')"), 'Anonymous content reports must be persisted');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
