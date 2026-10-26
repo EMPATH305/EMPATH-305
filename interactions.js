@@ -219,7 +219,9 @@
     const entries = readEntries().filter(item => item.date !== today);
     entries.push({ date: today, mood, room: meta.room, at: Date.now() });
     entries.sort((a, b) => a.date.localeCompare(b.date));
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(-30))); } catch (error) {}
+    // Keep a little over one full year locally so Room H can draw a private
+    // emotional calendar without uploading a person's daily history.
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(-400))); } catch (error) {}
     window.dispatchEvent(new CustomEvent('empath:checkin-updated', { detail: { mood, room: meta.room } }));
   }
 
@@ -292,9 +294,74 @@
     }
   }
 
+  function renderYearCalendar() {
+    const host = document.getElementById('emotion-year-grid');
+    const yearLabel = document.getElementById('emotion-year-label');
+    const insight = document.getElementById('emotion-year-insight');
+    if (!host || !yearLabel || !insight) return;
+
+    const year = new Date().getFullYear();
+    const entries = readEntries().filter(item => Number(item.date.slice(0, 4)) === year);
+    const byDate = new Map(entries.map(item => [item.date, item]));
+    yearLabel.textContent = String(year);
+    host.replaceChildren();
+
+    const monthNames = Array.from({ length: 12 }, (_, month) =>
+      new Date(year, month, 1).toLocaleDateString('zh-TW', { month: 'long' })
+    );
+
+    monthNames.forEach((monthName, month) => {
+      const panel = document.createElement('section');
+      panel.className = 'emotion-month';
+      panel.setAttribute('aria-label', `${year} 年${monthName}`);
+
+      const title = document.createElement('h4');
+      title.textContent = monthName;
+      const weekdays = document.createElement('div');
+      weekdays.className = 'emotion-month-weekdays';
+      ['日','一','二','三','四','五','六'].forEach(day => {
+        const label = document.createElement('span');
+        label.textContent = day;
+        weekdays.appendChild(label);
+      });
+
+      const days = document.createElement('div');
+      days.className = 'emotion-month-days';
+      const firstWeekday = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let index = 0; index < firstWeekday; index += 1) {
+        const blank = document.createElement('span');
+        blank.className = 'emotion-date is-blank';
+        blank.setAttribute('aria-hidden', 'true');
+        days.appendChild(blank);
+      }
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const date = new Date(year, month, day, 12);
+        const key = localDateKey(date);
+        const entry = byDate.get(key);
+        const meta = entry ? MOODS[entry.mood] : null;
+        const dot = document.createElement('span');
+        dot.className = `emotion-date${meta ? ' has-entry' : ''}${key === localDateKey() ? ' is-today' : ''}`;
+        dot.dataset.room = meta?.room || '';
+        dot.textContent = String(day);
+        dot.tabIndex = meta ? 0 : -1;
+        const spokenDate = date.toLocaleDateString('zh-TW', { month:'long', day:'numeric' });
+        const description = meta ? `${meta.label}，Room ${meta.room.toUpperCase()}` : '沒有記錄';
+        dot.setAttribute('aria-label', `${spokenDate}，${description}`);
+        dot.title = `${spokenDate} · ${description}`;
+        days.appendChild(dot);
+      }
+      panel.append(title, weekdays, days);
+      host.appendChild(panel);
+    });
+
+    insight.textContent = entries.length
+      ? `今年已有 ${entries.length} 天，你曾停下來看見自己的感受。所有記錄只留在這台裝置。`
+      : '當你在首頁留下每日感受，這張只有你看得懂的地圖就會慢慢亮起。';
+  }
+
   function initDailyCheckin() {
     const buttons = document.querySelectorAll('.daily-mood');
-    if (!buttons.length) return;
     buttons.forEach(button => button.addEventListener('click', () => {
       const mood = button.dataset.mood;
       writeEntry(mood);
@@ -303,8 +370,16 @@
     const today = readEntries().find(item => item.date === localDateKey());
     if (today) showRecommendation(today.mood);
     renderWeek();
-    window.addEventListener('empath:checkin-updated', renderWeek);
-    window.addEventListener('storage', event => { if (event.key === STORAGE_KEY) renderWeek(); });
+    renderYearCalendar();
+    window.addEventListener('empath:checkin-updated', () => {
+      renderWeek();
+      renderYearCalendar();
+    });
+    window.addEventListener('storage', event => {
+      if (event.key !== STORAGE_KEY) return;
+      renderWeek();
+      renderYearCalendar();
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDailyCheckin, { once: true });

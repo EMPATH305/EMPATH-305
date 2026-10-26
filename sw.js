@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v20.1'; // 收斂、記憶與資料安全版
+const CACHE_NAME = 'empath-cache-v20.2'; // Still Here：全年情緒記憶與無聲陪伴
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
