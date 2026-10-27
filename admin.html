@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=20.5">
+  <link rel="stylesheet" href="admin.css?v=20.6">
 </head>
 <body>
   <main class="admin-shell">
@@ -38,12 +38,52 @@
         </div>
         <button id="refresh-reports" class="quiet-button" type="button">重新整理</button>
       </div>
+      <div class="security-status" aria-label="後台連線狀態">
+        <span id="auth-health" class="health-chip ready">Google 登入完成</span>
+        <span id="claim-health" class="health-chip ready">管理權限已驗證</span>
+        <span id="app-check-health" class="health-chip waiting">App Check 檢查中</span>
+      </div>
+      <div class="review-tools" aria-label="篩選待審核內容">
+        <label>
+          <span>房間</span>
+          <select id="collection-filter">
+            <option value="">全部房間</option>
+            <option value="emotions">Room E</option>
+            <option value="stars">Room M</option>
+            <option value="shards">Room P</option>
+            <option value="sand">Room A</option>
+            <option value="warmth">Room T</option>
+          </select>
+        </label>
+        <label>
+          <span>原因</span>
+          <select id="reason-filter">
+            <option value="">全部原因</option>
+            <option value="harassment">攻擊或騷擾</option>
+            <option value="hate">仇恨內容</option>
+            <option value="personal_info">可識別個人資料</option>
+            <option value="spam">垃圾或重複內容</option>
+            <option value="self_harm">危機內容</option>
+            <option value="other">其他</option>
+          </select>
+        </label>
+        <label>
+          <span>驗證</span>
+          <select id="verification-filter">
+            <option value="">全部狀態</option>
+            <option value="verified">App Check 已驗證</option>
+            <option value="unverified">未驗證／舊資料</option>
+          </select>
+        </label>
+        <button id="clear-filters" class="quiet-button" type="button">清除篩選</button>
+      </div>
       <p id="review-summary" class="review-summary" aria-live="polite"></p>
       <div id="report-list" class="report-list" aria-live="polite"></div>
+      <button id="load-more-reports" class="load-more-button" type="button" hidden>載入更多檢舉</button>
     </section>
 
     <p id="admin-status" class="admin-status" role="status" aria-live="polite"></p>
   </main>
-  <script type="module" src="admin-app.js?v=20.5"></script>
+  <script type="module" src="admin-app.js?v=20.6"></script>
 </body>
 </html>
