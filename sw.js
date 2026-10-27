@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v20.9.0'; // Server-guarded room posting
+const CACHE_NAME = 'empath-cache-v21.0.0'; // Room E letter drift
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者

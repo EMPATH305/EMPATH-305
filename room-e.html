@@ -70,7 +70,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=20.5.1">
+<link rel="stylesheet" href="styles.css?v=21.0.0">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -351,6 +351,15 @@ try {
       </div>
   </div>
 
+  <div class="e-delivery-choice" id="e-delivery-choice">
+      <p class="e-delivery-label" data-zh="這段文字要去哪裡？" data-en="Where should these words go?" data-ja="この言葉をどこへ送りますか？" data-zh-cn="这段文字要去哪里？">這段文字要去哪裡？</p>
+      <div class="e-delivery-options" role="group" aria-label="選擇文字投遞方式">
+          <button type="button" class="e-delivery-btn active" id="e-delivery-public" aria-pressed="true" onclick="window.setEDelivery('public')" data-zh="留在公開牆" data-en="Leave on the wall" data-ja="公開の壁に残す" data-zh-cn="留在公开墙">留在公開牆</button>
+          <button type="button" class="e-delivery-btn" id="e-delivery-drift" aria-pressed="false" onclick="window.setEDelivery('drift')" data-zh="裝進瓶子，漂向一個人" data-en="Seal in a bottle for one stranger" data-ja="瓶に入れて、ひとりへ流す" data-zh-cn="装进瓶子，漂向一个人">裝進瓶子，漂向一個人</button>
+      </div>
+      <p class="e-delivery-hint" id="e-delivery-hint" aria-live="polite" data-zh="公開牆上的文字會被房間訪客看見。" data-en="Words on the wall can be seen by Room E visitors." data-ja="公開の壁の言葉は Room E の訪問者に表示されます。" data-zh-cn="公开墙上的文字会被房间访客看见。">公開牆上的文字會被房間訪客看見。</p>
+  </div>
+
   <br>
   <button type="button" class="send-btn" id="e-submit-btn" onclick="window.submitE()" data-zh="把它留在這裡" data-en="Leave It Here" data-ja="ここに置いていく" data-es="Déjalo Aquí" data-fr="Le laisser ici" data-de="Lass es hier" data-zh-cn="把它留在这里">把它留在這裡</button>
 
@@ -358,6 +367,19 @@ try {
     <a href="tel:1925" class="crisis-link" data-zh="如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →" data-en="If you are experiencing overwhelming pain, please reach out. Crisis Line: 1925 →" data-ja="耐え難い苦痛を感じている場合は、助けを求めてください。クライシスライン：1925 →" data-es="Si estás experimentando un dolor abrumador, busca ayuda. Línea de crisis: 1925 →" data-fr="Si vous ressentez une douleur accablante, veuillez demander de l'aide. Ligne de crise : 1925 →" data-de="Wenn du überwältigenden Schmerz erlebst, suche bitte Hilfe. Krisentelefon: 1925 →" data-zh-cn="如果你正经历难以承受的痛苦，请让他人协助你承接。安心专线：1925 →" data-uk="Якщо ви відчуваєте нестерпний біль, будь ласка, зверніться по допомогу. Lifeline Ukraine: 7333 →" data-pl="Jeśli doświadczasz przytłaczającego bólu, poszukaj pomocy. Telefon Zaufania: 116 123 →">如果你正經歷難以承受的痛苦，請讓他人協助你承接。安心專線：1925 →</a>
   </div>
   </div>
+
+  <section class="e-drift-dock" aria-labelledby="e-drift-title">
+      <p class="e-drift-kicker">LETTER DRIFT · ONE STRANGER</p>
+      <h2 id="e-drift-title" data-zh="拾起一封漂來的信" data-en="Pick up a drifting letter" data-ja="漂ってきた手紙を拾う" data-zh-cn="拾起一封漂来的信">拾起一封漂來的信</h2>
+      <p class="e-drift-copy" data-zh="它只會抵達一個人。你不會知道寄件者，寄件者也不會知道是你。" data-en="It reaches one person only. You will not know the sender, and they will not know you." data-ja="手紙が届くのは、たったひとり。互いの名前を知ることはありません。" data-zh-cn="它只会抵达一个人。你不会知道寄件者，寄件者也不会知道是你。">它只會抵達一個人。你不會知道寄件者，寄件者也不會知道是你。</p>
+      <button type="button" class="e-drift-receive-btn" id="e-drift-receive-btn" onclick="window.receiveDriftLetter()" data-zh="看看今天有沒有信漂來" data-en="See if a letter has arrived" data-ja="今日、手紙が届いているか見る" data-zh-cn="看看今天有没有信漂来">看看今天有沒有信漂來</button>
+      <p class="e-drift-status" id="e-drift-status" aria-live="polite"></p>
+      <article class="e-drift-letter" id="e-drift-letter" hidden>
+          <p class="e-drift-letter-label" data-zh="一封來自陌生人的信" data-en="A letter from a stranger" data-ja="見知らぬ誰かからの手紙" data-zh-cn="一封来自陌生人的信">一封來自陌生人的信</p>
+          <blockquote id="e-drift-letter-text"></blockquote>
+          <div id="e-drift-letter-actions"></div>
+      </article>
+  </section>
   
   <div class="e-feed-container">
     <div class="e-feed" id="e-feed"></div>
@@ -387,7 +409,7 @@ try {
 </footer>
 
 <script src="safety-guard.js?v=20.5"></script>
-<script type="module" src="firebase-app.js?v=20.9.0"></script>
+<script type="module" src="firebase-app.js?v=21.0.0"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {

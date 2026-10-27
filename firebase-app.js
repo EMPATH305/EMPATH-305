@@ -28,6 +28,30 @@ const db = initializeFirestore(app, {
 const functions = getFunctions(app, 'asia-east1');
 const submitContentReport = httpsCallable(functions, 'submitContentReport');
 const submitRoomContent = httpsCallable(functions, 'submitRoomContent');
+const sendDriftLetterRequest = httpsCallable(functions, 'sendDriftLetter');
+const receiveDriftLetterRequest = httpsCallable(functions, 'receiveDriftLetter');
+let memoryDriftClientId = '';
+
+function generateDriftClientId() {
+    const bytes = new Uint8Array(16);
+    globalThis.crypto?.getRandomValues?.(bytes);
+    if (!bytes.some(Boolean)) bytes.forEach((_, index) => { bytes[index] = Math.floor(Math.random() * 256); });
+    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function getDriftClientId() {
+    if (memoryDriftClientId) return memoryDriftClientId;
+    try {
+        const saved = localStorage.getItem('empath_drift_client_id') || '';
+        if (/^[a-f0-9]{32}$/.test(saved)) return (memoryDriftClientId = saved);
+        memoryDriftClientId = generateDriftClientId();
+        localStorage.setItem('empath_drift_client_id', memoryDriftClientId);
+        return memoryDriftClientId;
+    } catch (error) {
+        memoryDriftClientId = generateDriftClientId();
+        return memoryDriftClientId;
+    }
+}
 
 async function createRoomContent(room, payload = {}) {
     const response = await submitRoomContent({ room, ...payload });
@@ -90,7 +114,7 @@ window.addEventListener('empath:report-content', async event => {
     const collectionName = String(event.detail?.collection || '');
     const targetId = String(event.detail?.id || '');
     const reason = String(event.detail?.reason || '');
-    const allowedCollections = new Set(['emotions','stars','shards','sand','warmth']);
+    const allowedCollections = new Set(['emotions','stars','shards','sand','warmth','drift_letters']);
     const allowedReasons = new Set(['harassment','hate','personal_info','spam','self_harm','other']);
     if (!allowedCollections.has(collectionName) || !allowedReasons.has(reason) || !targetId) return;
     const throttle = window.EmpathSafety?.allowAction('content-report', {
@@ -130,6 +154,14 @@ window.addEventListener('empath:report-content', async event => {
             document.querySelectorAll('#a-feed .sand-msg').forEach(item => {
                 if (item.dataset.contentId === targetId) item.remove();
             });
+        } else if (collectionName === 'drift_letters') {
+            const letter = document.getElementById('e-drift-letter');
+            if (letter?.dataset.letterId === targetId) {
+                letter.hidden = true;
+                letter.removeAttribute('data-letter-id');
+                document.getElementById('e-drift-letter-text')?.replaceChildren();
+                document.getElementById('e-drift-letter-actions')?.replaceChildren();
+            }
         }
     } catch(error) {
         console.error('Anonymous content report failed:', error);
@@ -1049,6 +1081,7 @@ window.setBrushVolume = function(speed) {
 // EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼 (強健修復版)
 // ==========================================
 let eMode = 'text';
+let eDeliveryMode = 'public';
 let eDrawCanvas = null;
 let eCtx = null;
 let isDrawing = false;
@@ -1058,6 +1091,31 @@ let lastY = 0;
 let eDrawEventsBound = false;
 let eDrawResizeTimer = null;
 
+function renderEDeliveryMode() {
+    const publicButton = document.getElementById('e-delivery-public');
+    const driftButton = document.getElementById('e-delivery-drift');
+    const hint = document.getElementById('e-delivery-hint');
+    const submitButton = document.getElementById('e-submit-btn');
+    publicButton?.classList.toggle('active', eDeliveryMode === 'public');
+    driftButton?.classList.toggle('active', eDeliveryMode === 'drift');
+    publicButton?.setAttribute('aria-pressed', String(eDeliveryMode === 'public'));
+    driftButton?.setAttribute('aria-pressed', String(eDeliveryMode === 'drift'));
+    if (hint) hint.textContent = eDeliveryMode === 'drift'
+        ? t('這封信不會出現在公開牆，只會被一位陌生人拾起。', 'This letter will stay off the public wall and reach one stranger only.', 'この手紙は公開されず、ひとりの見知らぬ誰かだけに届きます。', 'Esta carta no aparecerá públicamente y llegará a una sola persona.', 'Cette lettre ne sera pas publique et n’atteindra qu’une seule personne.', 'Dieser Brief bleibt privat und erreicht nur eine fremde Person.', '这封信不会出现在公开墙，只会被一位陌生人拾起。')
+        : t('公開牆上的文字會被房間訪客看見。', 'Words on the wall can be seen by Room E visitors.', '公開の壁の言葉は Room E の訪問者に表示されます。', 'Las palabras del muro son visibles para visitantes de Room E.', 'Les mots du mur sont visibles par les visiteurs de Room E.', 'Worte an der Wand sind für Besucher von Room E sichtbar.', '公开墙上的文字会被房间访客看见。');
+    if (submitButton) submitButton.textContent = eDeliveryMode === 'drift' && eMode === 'text'
+        ? t('把信裝進瓶子', 'Seal the letter in a bottle', '手紙を瓶に入れる', 'Guardar la carta en una botella', 'Mettre la lettre en bouteille', 'Den Brief in eine Flasche legen', '把信装进瓶子')
+        : t('把它留在這裡', 'Leave It Here', 'ここに置いていく', 'Déjalo Aquí', 'Le laisser ici', 'Lass es hier', '把它留在这里');
+}
+
+window.setEDelivery = function(mode) {
+    if (!['public', 'drift'].includes(mode) || (mode === 'drift' && eMode !== 'text')) return;
+    eDeliveryMode = mode;
+    renderEDeliveryMode();
+};
+
+window.addEventListener('empath:language-changed', renderEDeliveryMode);
+
 window.setEMode = function(mode) {
     eMode = mode;
     const textBtn = document.getElementById('btn-mode-text');
@@ -1065,12 +1123,17 @@ window.setEMode = function(mode) {
     const input = document.getElementById('e-input');
     const counter = document.getElementById('e-char');
     const drawWrap = document.getElementById('e-draw-wrap');
+    const deliveryChoice = document.getElementById('e-delivery-choice');
+
+    if (mode === 'draw') eDeliveryMode = 'public';
 
     if(textBtn) textBtn.classList.toggle('active', mode === 'text');
     if(drawBtn) drawBtn.classList.toggle('active', mode === 'draw');
     if(input) input.style.display = mode === 'text' ? 'block' : 'none';
     if(counter) counter.style.display = mode === 'text' ? 'block' : 'none';
     if(drawWrap) drawWrap.style.display = mode === 'draw' ? 'block' : 'none';
+    if(deliveryChoice) deliveryChoice.hidden = mode !== 'text';
+    renderEDeliveryMode();
 
     // iPhone/Safari 需要等 display:block 真正完成排版後才能取得畫布寬度。
     if(mode === 'draw') {
@@ -2266,10 +2329,28 @@ window.submitE = async function(){
         if(!eDrawCanvas || !eCanvasHasDrawn) return;
         imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
     }
-    if(!canSubmit()) return;
+    if (eDeliveryMode === 'drift' && text && containsCrisisSignal(text)) {
+        window.showCrisisSupportNotice?.();
+        window.showToast(t('這段重量不會被隨機交給陌生人；文字仍留在這裡，我們先陪你找到即時支持。', 'This weight will not be sent randomly to a stranger. Your words remain here while we help you find immediate support.'));
+        return;
+    }
+    if(!canSubmit(eDeliveryMode === 'drift' ? 'e-drift-send' : 'e')) return;
 
     try { 
         const origText = document.getElementById('e-submit-btn').innerHTML; 
+        if (eDeliveryMode === 'drift') {
+            await sendDriftLetterRequest({ text, clientId:getDriftClientId() });
+            document.getElementById('e-input').value = '';
+            document.getElementById('e-char').textContent = '0 / 500';
+            if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_drift_send');
+            logJourney('e', text);
+            window.storeSessionEcho?.(text);
+            window.empathContrastMoment?.();
+            playRitual('e-submit-btn', origText);
+            window.showToast(t('信已裝進瓶子，開始漂流 ✦', 'Your letter is drifting now ✦', '手紙は瓶に入り、漂い始めました ✦', 'Tu carta ya está a la deriva ✦', 'Votre lettre dérive maintenant ✦', 'Dein Brief treibt jetzt davon ✦', '信已装进瓶子，开始漂流 ✦'));
+            queueTonightEcho('e');
+            return;
+        }
         const payload = {};
         if (text) payload.text = text;
         if (imageData) payload.image = imageData;
@@ -2373,9 +2454,76 @@ window.submitE = async function(){
         queueTonightEcho('e');
 
     } catch(error) {
-        showRoomSubmissionError(error);
+        if (eDeliveryMode === 'drift' && String(error?.code || '').endsWith('failed-precondition')) {
+            window.showCrisisSupportNotice?.();
+            window.showToast(t('這封信不適合隨機交給陌生人，文字仍為你保留。', 'This letter should not be delivered randomly to a stranger. Your words are still here.'));
+        } else {
+            showRoomSubmissionError(error);
+        }
     }
 }
+
+function clearDisplayedDriftLetter(message = '') {
+    const letter = document.getElementById('e-drift-letter');
+    const text = document.getElementById('e-drift-letter-text');
+    const actions = document.getElementById('e-drift-letter-actions');
+    if (letter) {
+        letter.hidden = true;
+        letter.removeAttribute('data-letter-id');
+    }
+    text?.replaceChildren();
+    actions?.replaceChildren();
+    const status = document.getElementById('e-drift-status');
+    if (status) status.textContent = message;
+}
+
+window.receiveDriftLetter = async function() {
+    const button = document.getElementById('e-drift-receive-btn');
+    const status = document.getElementById('e-drift-status');
+    const letter = document.getElementById('e-drift-letter');
+    const text = document.getElementById('e-drift-letter-text');
+    const actions = document.getElementById('e-drift-letter-actions');
+    if (!button || !status || !letter || !text || !actions || button.disabled) return;
+    const throttle = window.EmpathSafety?.allowAction('drift-receive', {
+        cooldownMs:30000,
+        dailyLimit:8
+    }) || { allowed:true };
+    if (!throttle.allowed) {
+        status.textContent = throttle.reason === 'daily-limit'
+            ? t('今天已經拾起許多信了，讓其他人也遇見一封吧。', 'You have picked up several letters today. Leave some encounters for others.')
+            : t(`海浪還沒回來，請再等 ${throttle.retrySeconds || 1} 秒。`, `The tide has not returned. Please wait ${throttle.retrySeconds || 1} seconds.`);
+        return;
+    }
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    status.textContent = t('正在聽海面上的聲音……', 'Listening across the water…', '水面の声に耳を澄ませています……', 'Escuchando sobre el agua…', 'À l’écoute de l’eau…', 'Wir lauschen über dem Wasser…', '正在听海面上的声音……');
+    try {
+        const response = await receiveDriftLetterRequest({ clientId:getDriftClientId() });
+        const result = response?.data;
+        if (!result?.available || typeof result.id !== 'string' || typeof result.text !== 'string') {
+            clearDisplayedDriftLetter(t('今天海面很安靜。也許下一封信還在路上。', 'The water is quiet today. Perhaps the next letter is still on its way.', '今日は水面が静かです。次の手紙はまだ旅の途中かもしれません。', 'Hoy el agua está tranquila. Quizá la próxima carta siga en camino.', 'L’eau est calme aujourd’hui. La prochaine lettre est peut-être encore en route.', 'Heute ist das Wasser still. Vielleicht ist der nächste Brief noch unterwegs.', '今天海面很安静。也许下一封信还在路上。'));
+            return;
+        }
+        letter.dataset.letterId = result.id;
+        text.textContent = result.text;
+        const safetyActions = window.EmpathSafety?.createContentActions('drift_letters', result.id, () => {
+            clearDisplayedDriftLetter(t('這封信已從你的眼前淡去。', 'The letter has faded from view.'));
+        });
+        actions.replaceChildren(safetyActions || document.createDocumentFragment());
+        letter.hidden = false;
+        status.textContent = '';
+        if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_drift_receive');
+        letter.scrollIntoView({ behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center' });
+    } catch (error) {
+        console.error('Drift letter receive failed:', error);
+        status.textContent = String(error?.code || '').endsWith('resource-exhausted')
+            ? t('今天已經拾起許多信了，晚一點再回來。', 'You have picked up several letters today. Please return later.')
+            : t('暫時聽不見海面上的信，請稍後再試。', 'No letter can be heard right now. Please try again later.');
+    } finally {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+    }
+};
 
 let currentEFeedLimit = 3; // 初始只顯示 3 筆
 
