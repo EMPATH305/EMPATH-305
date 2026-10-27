@@ -57,6 +57,7 @@ assert(roomE.includes('id="e-delivery-drift"'), 'Room E must offer private one-r
 assert(roomE.includes('id="e-drift-receive-btn"'), 'Room E must offer active letter pickup');
 assert(roomE.includes('id="e-drift-letter-text"'), 'Room E must render received text without placing it in the public feed');
 assert(styles.includes('.e-drift-dock'), 'Letter drift must have a responsive, branded presentation');
+assert(/\.collective-grief-close\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;/s.test(styles), 'Collective calendar close control must meet the 44px touch target');
 for (const collectionName of ['emotions', 'stars', 'shards', 'sand', 'warmth']) {
   assert(!appSource.includes(`addDoc(collection(db, "${collectionName}")`), `Clients must not create ${collectionName} directly`);
   const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
