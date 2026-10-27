@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.0.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.0.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.1.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.0.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -30,6 +30,11 @@ const appSource = readFileSync('firebase-app.js', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
 const roomE = readFileSync('room-e.html', 'utf8');
+const collectiveCalendar = readFileSync('collective-calendar.js', 'utf8');
+assert(collectiveCalendar.includes("en-u-ca-chinese"), 'Collective calendar must recognize lunar observances locally');
+assert(collectiveCalendar.includes('empath_collective_grief_seen_'), 'Collective calendar must avoid repeating within a session');
+assert(collectiveCalendar.includes('copy.textContent = messageFor(moment)'), 'Collective calendar copy must use safe DOM text rendering');
+assert(!collectiveCalendar.includes('.innerHTML'), 'Collective calendar must not render HTML strings');
 assert(/#room-a\s+\.a-collective-count\s*\{[^}]*grid-column:\s*7\/13!important;[^}]*grid-row:\s*6!important;/s.test(styles), 'Room A collective count must occupy the right content column');
 assert(/#room-a\s+#a-feed-wrapper\s*\{[^}]*grid-column:\s*1\/13!important;[^}]*grid-row:\s*8!important;/s.test(styles), 'Room A feed must remain below the collective count and safety note');
 assert(/where\(["']expireAt["'],\s*["']>["'],\s*roomAQueryCutoff\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
@@ -97,8 +102,9 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.0.0'), 'Service worker cache must be bumped for v21.0.0');
+assert(serviceWorker.includes('empath-cache-v21.1.0'), 'Service worker cache must be bumped for v21.1.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
+assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
 }
