@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.5.1', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.8.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=20.5.1', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.9.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -28,11 +28,11 @@ for (const page of pages) {
 
 const appSource = readFileSync('firebase-app.js', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
+const rules = readFileSync('firestore.rules', 'utf8');
 assert(/#room-a\s+\.a-collective-count\s*\{[^}]*grid-column:\s*7\/13!important;[^}]*grid-row:\s*6!important;/s.test(styles), 'Room A collective count must occupy the right content column');
 assert(/#room-a\s+#a-feed-wrapper\s*\{[^}]*grid-column:\s*1\/13!important;[^}]*grid-row:\s*8!important;/s.test(styles), 'Room A feed must remain below the collective count and safety note');
 assert(/where\(["']expireAt["'],\s*["']>["'],\s*roomAQueryCutoff\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
 assert(appSource.includes('Date.now() + 10000'), 'Room A query cutoff must stay ahead of Firestore request.time');
-assert(appSource.includes('expireAt: Timestamp.fromMillis'), 'Room A writes must include a Firestore TTL timestamp');
 assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consent gated');
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
 assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired message fragments');
@@ -42,6 +42,14 @@ assert(appSource.includes('initializeAppCheck'), 'Firebase App Check must be wir
 assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSource), 'Production App Check site key must be configured');
 assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
+assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
+for (const collectionName of ['emotions', 'stars', 'shards', 'sand', 'warmth']) {
+  assert(!appSource.includes(`addDoc(collection(db, "${collectionName}")`), `Clients must not create ${collectionName} directly`);
+  const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
+  assert(ruleBlock?.[1].includes('allow create: if false;'), `${collectionName} creates must be server-only`);
+}
+assert(appSource.includes("createRoomContent('a', { text, lifespan })"), 'Room A count and content must share the server transaction');
+assert(appSource.includes("localStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
 assert(appSource.includes('function subscribeRealtimeData()'), 'Realtime feeds and counters must share a restartable lifecycle');
@@ -49,7 +57,6 @@ assert(appSource.includes('subscribeRoomAReleaseStats();'), 'Room A aggregate mu
 assert(appSource.includes('subscribeSiteStats();'), 'Visitor totals must resume after backgrounding');
 assert(/visibilitychange[\s\S]*subscribeRealtimeData\(\)/.test(appSource), 'Returning from a background tab must restore every realtime counter');
 
-const rules = readFileSync('firestore.rules', 'utf8');
 assert(rules.includes('allow get: if resource.data.expireAt is timestamp'), 'Rules must deny direct reads of expired Room A records');
 assert(rules.includes('request.query.limit <= 30'), 'Room A collection reads must be bounded');
 assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclared collections by default');
@@ -76,7 +83,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.8.0'), 'Service worker cache must be bumped for v20.8.0');
+assert(serviceWorker.includes('empath-cache-v20.9.0'), 'Service worker cache must be bumped for v20.9.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
@@ -109,8 +116,9 @@ assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity 
 assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit salt must be stored in Secret Manager');
 assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side report limit must remain bounded');
 assert(functionsSource.includes('CONTENT_LIMIT_PER_HOUR = 12'), 'Server-side room posting limit must remain bounded');
-assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 4'), 'Room posting must have burst protection');
+assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 6'), 'Room posting must have burst protection without blocking a five-room journey');
 assert(functionsSource.includes('exports.submitRoomContent = onCall'), 'Public room submissions must have a callable backend');
+assert(functionsSource.includes('expireAt:Timestamp.fromMillis'), 'Room A server writes must include a Firestore TTL timestamp');
 assert(functionsSource.includes('ADMIN_APP_CHECK_ENFORCED = true'), 'Private moderation functions must enforce App Check');
 assert(functionsSource.includes('PUBLIC_REPORT_APP_CHECK_ENFORCED = false'), 'Public reports must remain in monitored rollout mode');
 assert(functionsSource.includes('enforceAppCheck:ADMIN_APP_CHECK_ENFORCED'), 'Admin callables must use the enforcement flag');

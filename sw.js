@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v20.8.0'; // Mobile reconnection reliability
+const CACHE_NAME = 'empath-cache-v20.9.0'; // Server-guarded room posting
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
