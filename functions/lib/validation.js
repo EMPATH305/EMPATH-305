@@ -1,6 +1,6 @@
 'use strict';
 
-const ALLOWED_COLLECTIONS = new Set(['emotions', 'stars', 'shards', 'sand', 'warmth']);
+const ALLOWED_COLLECTIONS = new Set(['emotions', 'stars', 'shards', 'sand', 'warmth', 'drift_letters']);
 const ALLOWED_REASONS = new Set(['harassment', 'hate', 'personal_info', 'spam', 'self_harm', 'other']);
 const ALLOWED_ACTIONS = new Set(['dismiss', 'remove']);
 const ALLOWED_ROOMS = new Set(['e', 'm', 'p', 'a', 't']);
@@ -43,6 +43,28 @@ function validateRoomSubmissionInput(data) {
   return { room, text };
 }
 
+function validateDriftClientId(value) {
+  const clientId = cleanString(value, 32).toLowerCase();
+  return /^[a-f0-9]{32}$/.test(clientId) ? clientId : '';
+}
+
+function validateDriftLetterInput(data) {
+  const clientId = validateDriftClientId(data?.clientId);
+  if (!clientId || typeof data?.text !== 'string') return null;
+  const text = data.text.trim();
+  if (!text || text.length > 500) return null;
+  return { clientId, text };
+}
+
+function validateDriftReceiveInput(data) {
+  const clientId = validateDriftClientId(data?.clientId);
+  return clientId ? { clientId } : null;
+}
+
+function containsCrisisSignal(text) {
+  return /(想死|不想活|活不下去|結束生命|自殺|傷害自己|不想存在|死にたい|自殺|want\s+to\s+die|kill\s+myself|end\s+my\s+life|hurt\s+myself|suicid)/i.test(String(text || ''));
+}
+
 function validateModerationInput(data) {
   const reportId = cleanString(data?.reportId, 160);
   const action = cleanString(data?.action, 16);
@@ -73,6 +95,9 @@ function summarizeTarget(data) {
 module.exports = {
   ALLOWED_COLLECTIONS,
   validateRoomSubmissionInput,
+  validateDriftLetterInput,
+  validateDriftReceiveInput,
+  containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
   validateListReportsInput,

@@ -11,6 +11,9 @@ const { logger } = require('firebase-functions');
 const {
   ALLOWED_COLLECTIONS,
   validateRoomSubmissionInput,
+  validateDriftLetterInput,
+  validateDriftReceiveInput,
+  containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
   validateListReportsInput,
@@ -28,6 +31,10 @@ const CONTENT_LIMIT_PER_HOUR = 12;
 // Six allows a visitor to complete all five rooms once without tripping the
 // burst guard, while the hourly ceiling still blocks sustained flooding.
 const CONTENT_LIMIT_PER_TEN_MINUTES = 6;
+const DRIFT_SEND_LIMIT_PER_HOUR = 4;
+const DRIFT_RECEIVE_LIMIT_PER_HOUR = 8;
+const DRIFT_WAITING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
 // public reporting remains observable until embedded-browser compatibility is proven.
 const ADMIN_APP_CHECK_ENFORCED = true;
@@ -97,6 +104,32 @@ async function enforceContentSubmissionLimit(request) {
     };
     transaction.set(hourlyRef, { ...shared, window:'hour', count:hourlyCount + 1 }, { merge:true });
     transaction.set(burstRef, { ...shared, window:'ten-minutes', count:burstCount + 1 }, { merge:true });
+  });
+}
+
+function driftParticipantKey(clientId) {
+  return crypto.createHmac('sha256', RATE_LIMIT_SALT.value())
+    .update(`drift-participant:${clientId}`)
+    .digest('hex')
+    .slice(0, 40);
+}
+
+async function enforceDriftLimit(request, clientId, action, limit) {
+  const now = Date.now();
+  const hour = Math.floor(now / 3_600_000);
+  const source = `${requestIp(request)}:${clientId}`;
+  const key = crypto.createHmac('sha256', RATE_LIMIT_SALT.value()).update(source).digest('hex').slice(0, 40);
+  const ref = db.collection('rate_limits').doc(`drift_${action}_${hour}_${key}`);
+  await db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    const count = snapshot.exists ? Number(snapshot.data()?.count || 0) : 0;
+    if (count >= limit) throw new HttpsError('resource-exhausted', 'Too many letter drift actions. Try again later.');
+    transaction.set(ref, {
+      kind:`drift-${action}`,
+      count:count + 1,
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis((hour + 2) * 3_600_000)
+    }, { merge:true });
   });
 }
 
@@ -194,6 +227,73 @@ exports.submitRoomContent = onCall({
     appVerified:Boolean(request.app)
   });
   return { accepted:true, id:contentRef.id };
+});
+
+exports.sendDriftLetter = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateDriftLetterInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid drift letter.');
+  if (containsCrisisSignal(input.text)) {
+    throw new HttpsError('failed-precondition', 'Crisis content should stay in the private release path.');
+  }
+  await enforceDriftLimit(request, input.clientId, 'send', DRIFT_SEND_LIMIT_PER_HOUR);
+  const now = Date.now();
+  const result = await db.collection('drift_letters').add({
+    text:input.text,
+    status:'waiting',
+    senderHash:driftParticipantKey(input.clientId),
+    appVerified:Boolean(request.app),
+    createdAt:FieldValue.serverTimestamp(),
+    expiresAt:Timestamp.fromMillis(now + DRIFT_WAITING_TTL_MS)
+  });
+  logger.info('Anonymous drift letter released', { letterId:result.id, appVerified:Boolean(request.app) });
+  return { accepted:true };
+});
+
+exports.receiveDriftLetter = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateDriftReceiveInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid drift receiver.');
+  await enforceDriftLimit(request, input.clientId, 'receive', DRIFT_RECEIVE_LIMIT_PER_HOUR);
+  const participantHash = driftParticipantKey(input.clientId);
+  const waiting = await db.collection('drift_letters')
+    .where('status', '==', 'waiting')
+    .orderBy('createdAt', 'desc')
+    .limit(30)
+    .get();
+  const candidates = waiting.docs.filter(item => item.data()?.senderHash !== participantHash);
+  for (let index = candidates.length - 1; index > 0; index -= 1) {
+    const swapWith = crypto.randomInt(0, index + 1);
+    [candidates[index], candidates[swapWith]] = [candidates[swapWith], candidates[index]];
+  }
+
+  for (const candidate of candidates.slice(0, 8)) {
+    try {
+      const delivered = await db.runTransaction(async transaction => {
+        const snapshot = await transaction.get(candidate.ref);
+        const data = snapshot.data();
+        if (!snapshot.exists || data?.status !== 'waiting' || data?.senderHash === participantHash) return null;
+        transaction.update(candidate.ref, {
+          status:'delivered',
+          recipientHash:participantHash,
+          deliveredAt:FieldValue.serverTimestamp(),
+          expiresAt:Timestamp.fromMillis(Date.now() + DRIFT_DELIVERED_TTL_MS)
+        });
+        return { id:snapshot.id, text:String(data.text || '').slice(0, 500) };
+      });
+      if (delivered) {
+        logger.info('Anonymous drift letter delivered', { letterId:delivered.id, appVerified:Boolean(request.app) });
+        return { available:true, ...delivered };
+      }
+    } catch (error) {
+      logger.warn('Drift letter delivery contention', { letterId:candidate.id, error:String(error?.message || error) });
+    }
+  }
+  return { available:false };
 });
 
 exports.listReports = onCall({ enforceAppCheck:ADMIN_APP_CHECK_ENFORCED }, async request => {

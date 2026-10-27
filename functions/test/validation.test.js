@@ -4,6 +4,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
   validateRoomSubmissionInput,
+  validateDriftLetterInput,
+  validateDriftReceiveInput,
+  containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
   validateListReportsInput,
@@ -26,6 +29,20 @@ test('accepts only bounded room submissions with server-owned fields', () => {
   assert.equal(validateRoomSubmissionInput({ room:'a', text:'hello', lifespan:1234 }), null);
   assert.equal(validateRoomSubmissionInput({ room:'e', image:'javascript:alert(1)' }), null);
   assert.equal(validateRoomSubmissionInput({ room:'e', image:`data:image/webp;base64,${'A'.repeat(700_000)}` }), null);
+});
+
+test('accepts anonymous drift letters only with a bounded device identifier', () => {
+  const clientId = 'a'.repeat(32);
+  assert.deepEqual(validateDriftLetterInput({ clientId, text:'  a letter for someone  ' }), {
+    clientId,
+    text:'a letter for someone'
+  });
+  assert.deepEqual(validateDriftReceiveInput({ clientId }), { clientId });
+  assert.equal(validateDriftLetterInput({ clientId:'short', text:'hello' }), null);
+  assert.equal(validateDriftLetterInput({ clientId, text:'x'.repeat(501) }), null);
+  assert.equal(validateDriftReceiveInput({ clientId:'not-a-client-id' }), null);
+  assert.equal(containsCrisisSignal('I want to kill myself tonight'), true);
+  assert.equal(containsCrisisSignal('I hope tomorrow feels lighter'), false);
 });
 
 test('accepts only known report targets and reasons', () => {
