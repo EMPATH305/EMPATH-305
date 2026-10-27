@@ -79,6 +79,7 @@ button { font:inherit; }
 .report-action:disabled,.quiet-button:disabled,.primary-button:disabled { opacity:.42; cursor:wait; transform:none; }
 .empty-state { padding:60px 20px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:18px; font:300 15px/1.8 'Noto Serif TC',serif; }
 .load-more-button { display:block; min-width:180px; margin:22px auto 0; padding:11px 20px; border:1px solid var(--line); border-radius:999px; color:var(--paper); background:rgba(255,255,255,.025); cursor:pointer; }
+.load-more-button[hidden] { display:none; }
 .load-more-button:hover,.load-more-button:focus-visible { border-color:rgba(201,168,76,.55); background:rgba(201,168,76,.07); outline:none; }
 .load-more-button:disabled { opacity:.45; cursor:wait; }
 .admin-status { position:fixed; left:50%; bottom:24px; z-index:4; max-width:min(520px,calc(100% - 32px)); margin:0; padding:11px 18px; border:1px solid var(--line); border-radius:999px; background:rgba(6,17,28,.94); color:var(--paper); font-size:12px; opacity:0; transform:translate(-50%,12px); pointer-events:none; transition:.25s; }
