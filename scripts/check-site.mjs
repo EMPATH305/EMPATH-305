@@ -88,12 +88,13 @@ assert(safetySource.includes("empath:language-changed"), 'Safety controls must r
 const adminPage = readFileSync('admin.html', 'utf8');
 const adminSource = readFileSync('admin-app.js', 'utf8');
 assert(adminPage.includes('noindex,nofollow,noarchive'), 'Admin route must not be indexed');
-assert(adminPage.includes('admin-app.js?v=20.6'), 'Admin route must load the current controller');
+assert(adminPage.includes('admin-app.js?v=20.6.1'), 'Admin route must load the current controller');
 assert(adminPage.includes('id="load-more-reports"'), 'Admin route must support paginated review');
 assert(adminPage.includes('id="app-check-health"'), 'Admin route must expose App Check readiness');
 assert(adminSource.includes("httpsCallable(functions, 'claimAdminRole')"), 'Admin access must be granted by the backend');
 assert(adminSource.includes("httpsCallable(functions, 'moderateReport')"), 'Moderation actions must use the backend');
 assert(adminSource.includes('signInWithRedirect'), 'Admin login must fall back to redirect on popup-restricted browsers');
+assert(adminSource.includes('App Check 狀態未確認'), 'Admin route must distinguish an unknown App Check state from a failed token');
 assert(!adminSource.includes('.innerHTML'), 'Admin content must be rendered without innerHTML');
 assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded in the client');
 

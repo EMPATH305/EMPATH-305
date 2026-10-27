@@ -173,8 +173,12 @@ async function review(report, action, card) {
 }
 
 function updateAppCheckStatus(verified) {
-  appCheckHealth.className = `health-chip ${verified ? 'ready' : 'warning'}`;
-  appCheckHealth.textContent = verified ? 'App Check 權杖有效' : 'App Check 尚未驗證';
+  appCheckHealth.className = `health-chip ${verified === true ? 'ready' : 'warning'}`;
+  appCheckHealth.textContent = verified === true
+    ? 'App Check 權杖有效'
+    : verified === false
+      ? 'App Check 尚未驗證'
+      : 'App Check 狀態未確認';
 }
 
 async function loadReports({ append = false } = {}) {
@@ -196,9 +200,10 @@ async function loadReports({ append = false } = {}) {
     renderReports();
   } catch (error) {
     console.error(error);
+    updateAppCheckStatus(null);
     if (!append) {
       reviewSummary.textContent = '無法讀取檢舉。';
-      renderEmptyState('無法讀取待審核內容。', readableError(error));
+      renderEmptyState('無法讀取待審核內容。', '剛部署的索引可能仍在建立，請幾分鐘後重新整理。');
     }
     showStatus(readableError(error));
   } finally {
