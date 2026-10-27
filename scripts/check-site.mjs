@@ -65,6 +65,7 @@ assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect si
 assert(rules.includes('match /content_reports/{reportId}'), 'Rules must validate anonymous content reports');
 assert(rules.includes('match /rate_limits/{bucketId}'), 'Rate-limit documents must be private');
 assert(rules.includes('match /moderation_audit/{entryId}'), 'Moderation audit records must be private');
+assert(rules.includes('match /drift_letters/{id}'), 'Drift letters must remain private to callable functions');
 assert(rules.includes('EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}'), 'Rules must accept v20.3 Soul Keys');
 
 const indexes = JSON.parse(readFileSync('firestore.indexes.json', 'utf8'));
@@ -72,6 +73,10 @@ const ttlField = indexes.fieldOverrides?.find((field) => field.collectionGroup =
 assert.equal(ttlField?.ttl, true, 'Room A expireAt must be configured as a TTL field');
 const rateLimitTtl = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'rate_limits' && field.fieldPath === 'expiresAt');
 assert.equal(rateLimitTtl?.ttl, true, 'Rate-limit buckets must expire automatically');
+const driftIndex = indexes.indexes?.find(index => index.collectionGroup === 'drift_letters');
+assert(driftIndex, 'Waiting drift letters must have a delivery index');
+const driftTtl = indexes.fieldOverrides?.find(field => field.collectionGroup === 'drift_letters' && field.fieldPath === 'expiresAt');
+assert.equal(driftTtl?.ttl, true, 'Delivered and abandoned drift letters must expire automatically');
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
 for (const icon of manifest.icons) {
@@ -118,6 +123,10 @@ assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side repor
 assert(functionsSource.includes('CONTENT_LIMIT_PER_HOUR = 12'), 'Server-side room posting limit must remain bounded');
 assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 6'), 'Room posting must have burst protection without blocking a five-room journey');
 assert(functionsSource.includes('exports.submitRoomContent = onCall'), 'Public room submissions must have a callable backend');
+assert(functionsSource.includes('exports.sendDriftLetter = onCall'), 'Room E must have a private drift-letter sender');
+assert(functionsSource.includes('exports.receiveDriftLetter = onCall'), 'Room E must have a one-recipient drift-letter receiver');
+assert(functionsSource.includes("where('status', '==', 'waiting')"), 'Only waiting drift letters may be delivered');
+assert(functionsSource.includes("status:'delivered'"), 'A received drift letter must be atomically consumed');
 assert(functionsSource.includes('expireAt:Timestamp.fromMillis'), 'Room A server writes must include a Firestore TTL timestamp');
 assert(functionsSource.includes('ADMIN_APP_CHECK_ENFORCED = true'), 'Private moderation functions must enforce App Check');
 assert(functionsSource.includes('PUBLIC_REPORT_APP_CHECK_ENFORCED = false'), 'Public reports must remain in monitored rollout mode');

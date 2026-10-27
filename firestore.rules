@@ -66,6 +66,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Drift letters are sent and received only through callable functions.
+    // Sender and recipient hashes must never be exposed to browsers.
+    match /drift_letters/{id} {
+      allow read, write: if false;
+    }
+
     match /presence/{room} {
       allow read: if true;
       allow create, update: if request.resource.data.keys().hasOnly(['by'])
