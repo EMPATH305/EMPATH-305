@@ -88,7 +88,7 @@ assert(safetySource.includes("empath:language-changed"), 'Safety controls must r
 const adminPage = readFileSync('admin.html', 'utf8');
 const adminSource = readFileSync('admin-app.js', 'utf8');
 assert(adminPage.includes('noindex,nofollow,noarchive'), 'Admin route must not be indexed');
-assert(adminPage.includes('admin-app.js?v=20.6.1'), 'Admin route must load the current controller');
+assert(adminPage.includes('admin-app.js?v=20.7.0'), 'Admin route must load the current controller');
 assert(adminPage.includes('id="load-more-reports"'), 'Admin route must support paginated review');
 assert(adminPage.includes('id="app-check-health"'), 'Admin route must expose App Check readiness');
 assert(adminSource.includes("httpsCallable(functions, 'claimAdminRole')"), 'Admin access must be granted by the backend');
@@ -104,6 +104,9 @@ const functionsSource = readFileSync('functions/index.js', 'utf8');
 assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity must be stored in Secret Manager');
 assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit salt must be stored in Secret Manager');
 assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side report limit must remain bounded');
+assert(functionsSource.includes('ADMIN_APP_CHECK_ENFORCED = true'), 'Private moderation functions must enforce App Check');
+assert(functionsSource.includes('PUBLIC_REPORT_APP_CHECK_ENFORCED = false'), 'Public reports must remain in monitored rollout mode');
+assert(functionsSource.includes('enforceAppCheck:ADMIN_APP_CHECK_ENFORCED'), 'Admin callables must use the enforcement flag');
 assert(functionsSource.includes("where('status', '==', 'open')"), 'Admin report listing must query only open reports');
 assert(functionsSource.includes('FieldPath.documentId()'), 'Admin report pagination must have a stable document cursor');
 
