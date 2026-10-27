@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.0.0'; // Room E letter drift
+const CACHE_NAME = 'empath-cache-v21.1.0'; // Collective grief calendar
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -9,6 +9,7 @@ self.addEventListener('install', (event) => {
                 './index.html',
                 './styles.css',
                 './firebase-app.js',
+                './collective-calendar.js',
                 './safety-guard.js',
                 './interactions.js',
                 './room-router.js',
