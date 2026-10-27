@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.5.1', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.5', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=20.5.1', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.8.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -44,6 +44,10 @@ assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'A
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
+assert(appSource.includes('function subscribeRealtimeData()'), 'Realtime feeds and counters must share a restartable lifecycle');
+assert(appSource.includes('subscribeRoomAReleaseStats();'), 'Room A aggregate must resume after backgrounding');
+assert(appSource.includes('subscribeSiteStats();'), 'Visitor totals must resume after backgrounding');
+assert(/visibilitychange[\s\S]*subscribeRealtimeData\(\)/.test(appSource), 'Returning from a background tab must restore every realtime counter');
 
 const rules = readFileSync('firestore.rules', 'utf8');
 assert(rules.includes('allow get: if resource.data.expireAt is timestamp'), 'Rules must deny direct reads of expired Room A records');
@@ -72,7 +76,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.5.1'), 'Service worker cache must be bumped for v20.5.1');
+assert(serviceWorker.includes('empath-cache-v20.8.0'), 'Service worker cache must be bumped for v20.8.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
