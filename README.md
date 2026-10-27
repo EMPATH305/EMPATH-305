@@ -75,6 +75,12 @@
 4. **手機登入備援**：Google 登入彈窗被瀏覽器封鎖時，會改用重新導向登入，提高 Safari 與 App 內建瀏覽器的相容性。
 5. **安全補強**：授予管理權限時保留既有 custom claims；後台動態內容全部以 DOM API 與 `textContent` 建立，不使用 `innerHTML`。
 
+## ✦ v20.7 Staged App Check Enforcement
+
+1. **後台正式強制保護**：讀取待審核檢舉與執行處置現在必須攜帶有效 App Check 權杖；只有登入與管理員 claim 已不足以呼叫這兩個端點。
+2. **公開功能分階段上線**：匿名檢舉仍保留 App Check 監測與每小時八次的伺服器限流，暫不強制拒絕未驗證流量，以避免 LINE、Instagram 等內建瀏覽器誤傷正常訪客。
+3. **後台狀態可驗證**：管理頁會在端點實際通過強制驗證後顯示「App Check 已強制保護」，不只顯示前端初始化成功。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
