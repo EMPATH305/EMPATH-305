@@ -10,6 +10,7 @@ const { defineSecret } = require('firebase-functions/params');
 const { logger } = require('firebase-functions');
 const {
   ALLOWED_COLLECTIONS,
+  validateRoomSubmissionInput,
   validateReportInput,
   validateModerationInput,
   validateListReportsInput,
@@ -23,6 +24,8 @@ const ADMIN_EMAIL = defineSecret('ADMIN_EMAIL');
 const RATE_LIMIT_SALT = defineSecret('RATE_LIMIT_SALT');
 const REGION = 'asia-east1';
 const REPORT_LIMIT_PER_HOUR = 8;
+const CONTENT_LIMIT_PER_HOUR = 12;
+const CONTENT_LIMIT_PER_TEN_MINUTES = 4;
 // Roll App Check out in stages: protect private moderation immediately while
 // public reporting remains observable until embedded-browser compatibility is proven.
 const ADMIN_APP_CHECK_ENFORCED = true;
@@ -67,6 +70,34 @@ async function enforceReportLimit(request) {
   });
 }
 
+async function enforceContentSubmissionLimit(request) {
+  const now = Date.now();
+  const hour = Math.floor(now / 3_600_000);
+  const tenMinutes = Math.floor(now / 600_000);
+  const key = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const hourlyRef = db.collection('rate_limits').doc(`content_hour_${hour}_${key}`);
+  const burstRef = db.collection('rate_limits').doc(`content_burst_${tenMinutes}_${key}`);
+
+  await db.runTransaction(async transaction => {
+    const [hourlySnapshot, burstSnapshot] = await Promise.all([
+      transaction.get(hourlyRef),
+      transaction.get(burstRef)
+    ]);
+    const hourlyCount = hourlySnapshot.exists ? Number(hourlySnapshot.data()?.count || 0) : 0;
+    const burstCount = burstSnapshot.exists ? Number(burstSnapshot.data()?.count || 0) : 0;
+    if (hourlyCount >= CONTENT_LIMIT_PER_HOUR || burstCount >= CONTENT_LIMIT_PER_TEN_MINUTES) {
+      throw new HttpsError('resource-exhausted', 'Too many submissions. Try again later.');
+    }
+    const shared = {
+      kind:'room-content',
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis((hour + 2) * 3_600_000)
+    };
+    transaction.set(hourlyRef, { ...shared, window:'hour', count:hourlyCount + 1 }, { merge:true });
+    transaction.set(burstRef, { ...shared, window:'ten-minutes', count:burstCount + 1 }, { merge:true });
+  });
+}
+
 exports.claimAdminRole = onCall({ secrets:[ADMIN_EMAIL], enforceAppCheck:false }, async request => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in is required.');
   const tokenEmail = String(request.auth.token.email || '').trim().toLowerCase();
@@ -102,6 +133,65 @@ exports.submitContentReport = onCall({
     appVerified:Boolean(request.app)
   });
   return { accepted:true };
+});
+
+exports.submitRoomContent = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateRoomSubmissionInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid room submission.');
+  await enforceContentSubmissionLimit(request);
+
+  const collectionByRoom = {
+    e:'emotions', m:'stars', p:'shards', a:'sand', t:'warmth'
+  };
+  const now = Date.now();
+  const data = {
+    createdAt:FieldValue.serverTimestamp(),
+    appVerified:Boolean(request.app)
+  };
+  if (input.room === 'e') {
+    if (input.text) data.text = input.text;
+    if (input.image) data.image = input.image;
+  } else if (input.room === 'm') {
+    Object.assign(data, {
+      text:input.text,
+      brightness:1,
+      clicks:0,
+      colorIdx:crypto.randomInt(0, 6),
+      relX:0.05 + (crypto.randomInt(0, 900_001) / 1_000_000),
+      relY:0.05 + (crypto.randomInt(0, 900_001) / 1_000_000)
+    });
+  } else if (input.room === 'p') {
+    Object.assign(data, { text:input.text, healed:false });
+  } else if (input.room === 'a') {
+    Object.assign(data, {
+      text:input.text,
+      absoluteTime:now,
+      lifespan:input.lifespan,
+      expireAt:Timestamp.fromMillis(now + input.lifespan)
+    });
+  } else {
+    Object.assign(data, { text:input.text, echos:0 });
+  }
+
+  const contentRef = db.collection(collectionByRoom[input.room]).doc();
+  if (input.room === 'a') {
+    const statsRef = db.collection('metadata').doc('room_a_stats');
+    await db.runTransaction(async transaction => {
+      transaction.set(contentRef, data);
+      transaction.set(statsRef, { totalReleased:FieldValue.increment(1) }, { merge:true });
+    });
+  } else {
+    await contentRef.set(data);
+  }
+  logger.info('Anonymous room content created', {
+    room:input.room,
+    contentId:contentRef.id,
+    appVerified:Boolean(request.app)
+  });
+  return { accepted:true, id:contentRef.id };
 });
 
 exports.listReports = onCall({ enforceAppCheck:ADMIN_APP_CHECK_ENFORCED }, async request => {

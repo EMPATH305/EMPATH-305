@@ -3,6 +3,8 @@
 const ALLOWED_COLLECTIONS = new Set(['emotions', 'stars', 'shards', 'sand', 'warmth']);
 const ALLOWED_REASONS = new Set(['harassment', 'hate', 'personal_info', 'spam', 'self_harm', 'other']);
 const ALLOWED_ACTIONS = new Set(['dismiss', 'remove']);
+const ALLOWED_ROOMS = new Set(['e', 'm', 'p', 'a', 't']);
+const ALLOWED_LIFESPANS = new Set([60_000, 3_600_000, 86_400_000]);
 
 function cleanString(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -16,6 +18,29 @@ function validateReportInput(data) {
     return null;
   }
   return { targetCollection, targetId, reason };
+}
+
+function validateRoomSubmissionInput(data) {
+  const room = cleanString(data?.room, 1).toLowerCase();
+  if (!ALLOWED_ROOMS.has(room)) return null;
+
+  if (room === 'e' && typeof data?.image === 'string') {
+    const image = data.image.trim();
+    if (!/^data:image\/(?:webp|png|jpeg);base64,[a-z0-9+/=]+$/i.test(image)) return null;
+    if (image.length === 0 || image.length > 700_000) return null;
+    return { room, image };
+  }
+
+  if (typeof data?.text !== 'string') return null;
+  const text = data.text.trim();
+  if (!text || text.length > 500) return null;
+
+  if (room === 'a') {
+    const lifespan = Number(data.lifespan);
+    if (!Number.isInteger(lifespan) || !ALLOWED_LIFESPANS.has(lifespan)) return null;
+    return { room, text, lifespan };
+  }
+  return { room, text };
 }
 
 function validateModerationInput(data) {
@@ -47,6 +72,7 @@ function summarizeTarget(data) {
 
 module.exports = {
   ALLOWED_COLLECTIONS,
+  validateRoomSubmissionInput,
   validateReportInput,
   validateModerationInput,
   validateListReportsInput,
