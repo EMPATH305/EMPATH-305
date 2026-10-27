@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v20.5.1'; // Room A layout hotfix
+const CACHE_NAME = 'empath-cache-v20.8.0'; // Mobile reconnection reliability
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者

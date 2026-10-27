@@ -1393,7 +1393,7 @@ function setDataState(room,status,onRetry) {
 function retryDataSubscriptions() {
     unsubscribeAll();
     ['e','m','p','a','t'].forEach(room => setDataState(room,'loading'));
-    subscribeAll();
+    subscribeRealtimeData();
 }
 
 function handleDataError(room,error) {
@@ -1823,7 +1823,39 @@ function unsubscribeAll() {
     firestoreUnsubs.forEach(unsub => unsub());
     firestoreUnsubs = [];
 }
-document.addEventListener("visibilitychange", () => { if (document.hidden) { isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); unsubscribeAll(); } else { subscribeAll(); if (!document.body.classList.contains('hsp-mode')) { isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); } } });
+
+function subscribeSiteStats() {
+    const metaRef = doc(db, 'metadata', 'site_stats');
+    firestoreUnsubs.push(onSnapshot(metaRef, docSnap => {
+        if (!docSnap.exists()) return;
+        globalCounts.v = docSnap.data().totalVisitors || 0;
+        updateCountersUI();
+    }, error => console.error('Site visitor total failed:', error)));
+}
+
+function subscribeRealtimeData() {
+    // Order matters: subscribeAll uses the shared array as its duplicate guard.
+    // Add room feeds first, then the counters that must survive retry/background cycles.
+    subscribeAll();
+    subscribeRoomAReleaseStats();
+    subscribeSiteStats();
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        isAnimating = false;
+        if (starsRafId) cancelAnimationFrame(starsRafId);
+        if (sandRafId) cancelAnimationFrame(sandRafId);
+        unsubscribeAll();
+        return;
+    }
+    subscribeRealtimeData();
+    if (!document.body.classList.contains('hsp-mode')) {
+        isAnimating = true;
+        if (typeof window.drawStars === 'function') window.drawStars();
+        if (typeof window.drawSand === 'function') window.drawSand();
+    }
+});
 
 window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
 
@@ -3758,11 +3790,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateCountersUI();
   }
 
-  subscribeAll();
-  subscribeRoomAReleaseStats();
+  subscribeRealtimeData();
   
   const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
-  firestoreUnsubs.push(onSnapshot(metaRef, (docSnap) => { if(docSnap.exists()){ globalCounts.v = docSnap.data().totalVisitors || 0; updateCountersUI(); } }));
   if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e) { console.error("發生錯誤:", e); } }
   if(!localStorage.getItem('empath_hsp_hint_shown')) { setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000); }
   if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
