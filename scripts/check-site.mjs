@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.5', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.5', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=20.5.1', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.5', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -72,7 +72,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.5'), 'Service worker cache must be bumped for v20.5');
+assert(serviceWorker.includes('empath-cache-v20.5.1'), 'Service worker cache must be bumped for v20.5.1');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);
