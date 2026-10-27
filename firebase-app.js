@@ -27,6 +27,25 @@ const db = initializeFirestore(app, {
 });
 const functions = getFunctions(app, 'asia-east1');
 const submitContentReport = httpsCallable(functions, 'submitContentReport');
+const submitRoomContent = httpsCallable(functions, 'submitRoomContent');
+
+async function createRoomContent(room, payload = {}) {
+    const response = await submitRoomContent({ room, ...payload });
+    const result = response?.data;
+    if (!result?.accepted || typeof result.id !== 'string' || !result.id) {
+        throw new Error('Room submission was not accepted.');
+    }
+    return result.id;
+}
+
+function showRoomSubmissionError(error) {
+    console.error('Room submission failed:', error);
+    const code = String(error?.code || '');
+    const message = code.endsWith('resource-exhausted')
+        ? t('短時間內已送出較多內容，請稍後再回來。', 'You have shared several times recently. Please try again later.')
+        : t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留');
+    window.showToast(message);
+}
 
 // Analytics 預設關閉。只有使用者在「隱私與承諾」明確同意後才動態載入。
 window.empathAnalytics = null;
@@ -2251,11 +2270,11 @@ window.submitE = async function(){
 
     try { 
         const origText = document.getElementById('e-submit-btn').innerHTML; 
-        const docData = { createdAt: serverTimestamp() };
-        if (text) docData.text = text;
-        if (imageData) docData.image = imageData;
-        
-        await addDoc(collection(db, "emotions"), docData); 
+        const payload = {};
+        if (text) payload.text = text;
+        if (imageData) payload.image = imageData;
+
+        await createRoomContent('e', payload);
         if (eMode === 'text') {
             document.getElementById('e-input').value = '';
             document.getElementById('e-char').textContent = '0 / 500';
@@ -2353,9 +2372,8 @@ window.submitE = async function(){
         // --- 🌟 父親節溫柔彩蛋邏輯 結束 ---
         queueTonightEcho('e');
 
-    } catch(e) { 
-        console.error("Firestore 寫入失敗：", e); 
-        window.showToast('傳送失敗，請稍後再試 ✦');
+    } catch(error) {
+        showRoomSubmissionError(error);
     }
 }
 
@@ -2802,7 +2820,7 @@ roomM?.addEventListener('click', async e => {
     } 
 });
   
-window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await addDoc(collection(db, "stars"), { text, brightness: 1, clicks: 0, colorIdx: Math.floor(Math.random()*STAR_COLORS.length), relX: 0.05+Math.random()*0.9, relY: 0.05+Math.random()*0.9, createdAt: serverTimestamp() }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); queueTonightEcho('m'); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
+window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await createRoomContent('m', { text }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); queueTonightEcho('m'); } catch(error) { showRoomSubmissionError(error); } }
 
 let pCanvas, pCtx;
 window.pHealedTotal = 0;
@@ -2989,7 +3007,7 @@ window.drawKintsugiVessel = function(){
     c.restore();
 };
   
-window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await addDoc(collection(db, "shards"), { text, healed: false, createdAt: serverTimestamp() }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); queueTonightEcho('p'); } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); } }
+window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await createRoomContent('p', { text }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); queueTonightEcho('p'); } catch(error) { showRoomSubmissionError(error); } }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
 function initSandBg(w, h) { sandParticles = []; for(let i=0; i<250; i++){ sandParticles.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.4 + 0.1, color: SAND_COLORS[Math.floor(Math.random()*SAND_COLORS.length)], swirlOffset: Math.random() * Math.PI * 2 }); } }
@@ -3156,29 +3174,15 @@ window.submitA = async function(){
     const lifespan = minutes * 60 * 1000;
     const origText = document.getElementById('a-submit-btn').innerHTML; 
     try {
-        const submittedAt = Date.now();
-        await addDoc(collection(db, "sand"), {
-            text,
-            absoluteTime: submittedAt,
-            lifespan,
-            expireAt: Timestamp.fromMillis(submittedAt + lifespan),
-            createdAt: serverTimestamp()
-        });
+        await createRoomContent('a', { text, lifespan });
         sessionStorage.setItem('empath_a_just_released', 'true');
-        try {
-            await setDoc(doc(db, 'metadata', 'room_a_stats'), {
-                totalReleased: increment(1)
-            }, { merge:true });
-        } catch(statsError) {
-            console.error('Room A anonymous total update failed:', statsError);
-        }
         // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
         localStorage.setItem('empath_a_submit_time', Date.now());
         input.value=''; logJourney('a', text); playRitual('a-submit-btn', origText); 
         window.empathContrastMoment?.();
         window.showToast('放入沙畫 ✦');
         queueTonightEcho('a');
-    } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); }
+    } catch(error) { showRoomSubmissionError(error); }
 }
 
 window.submitT = async function(){ 
@@ -3190,11 +3194,11 @@ window.submitT = async function(){
     
     // 🌟 取得這則溫暖的專屬 ID，用來監聽它未來的命運
     try {
-        const docRef = await addDoc(collection(db, "warmth"), { text, echos: 0, createdAt: serverTimestamp() }); 
-        localStorage.setItem('empath_my_warmth_id', docRef.id);
+        const contentId = await createRoomContent('t', { text });
+        localStorage.setItem('empath_my_warmth_id', contentId);
         localStorage.setItem('empath_my_warmth_echos', '0');
         input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); queueTonightEcho('t');
-    } catch(err) { console.error("發生錯誤:", err); window.showToast(t('暫時無法送出，文字仍為你保留', 'Could not send. Your text is still here.', '送信できませんでした。文章は残っています。', 'No se pudo enviar. Tu texto sigue aquí.', 'Envoi impossible. Votre texte est conservé.', 'Senden fehlgeschlagen. Dein Text bleibt erhalten.', '暂时无法送出，文字仍为你保留')); }
+    } catch(error) { showRoomSubmissionError(error); }
 }
   
 window.createEchoRipple = function(e) {

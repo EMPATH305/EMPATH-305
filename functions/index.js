@@ -25,7 +25,9 @@ const RATE_LIMIT_SALT = defineSecret('RATE_LIMIT_SALT');
 const REGION = 'asia-east1';
 const REPORT_LIMIT_PER_HOUR = 8;
 const CONTENT_LIMIT_PER_HOUR = 12;
-const CONTENT_LIMIT_PER_TEN_MINUTES = 4;
+// Six allows a visitor to complete all five rooms once without tripping the
+// burst guard, while the hourly ceiling still blocks sustained flooding.
+const CONTENT_LIMIT_PER_TEN_MINUTES = 6;
 // Roll App Check out in stages: protect private moderation immediately while
 // public reporting remains observable until embedded-browser compatibility is proven.
 const ADMIN_APP_CHECK_ENFORCED = true;

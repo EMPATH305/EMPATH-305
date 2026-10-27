@@ -11,34 +11,13 @@ service cloud.firestore {
 
     match /emotions/{id} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['text', 'image', 'createdAt'])
-        && validCreatedAt(request.resource.data)
-        && (
-          ('text' in request.resource.data && validText(request.resource.data.text))
-          || ('image' in request.resource.data
-            && request.resource.data.image is string
-            && request.resource.data.image.size() > 0
-            && request.resource.data.image.size() <= 700000)
-        );
+      allow create: if false;
       allow update, delete: if false;
     }
 
     match /stars/{id} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly([
-          'text', 'brightness', 'clicks', 'colorIdx', 'relX', 'relY', 'createdAt'
-        ])
-        && validText(request.resource.data.text)
-        && request.resource.data.brightness == 1
-        && request.resource.data.clicks == 0
-        && request.resource.data.colorIdx is int
-        && request.resource.data.relX is number
-        && request.resource.data.relX >= 0.05
-        && request.resource.data.relX <= 0.95
-        && request.resource.data.relY is number
-        && request.resource.data.relY >= 0.05
-        && request.resource.data.relY <= 0.95
-        && validCreatedAt(request.resource.data);
+      allow create: if false;
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['brightness', 'clicks'])
         && request.resource.data.clicks == resource.data.clicks + 1
         && request.resource.data.brightness >= resource.data.brightness
@@ -60,10 +39,7 @@ service cloud.firestore {
 
     match /shards/{id} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['text', 'healed', 'createdAt'])
-        && validText(request.resource.data.text)
-        && request.resource.data.healed == false
-        && validCreatedAt(request.resource.data);
+      allow create: if false;
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['healed'])
         && resource.data.healed == false
         && request.resource.data.healed == true;
@@ -78,25 +54,13 @@ service cloud.firestore {
       // collection query. Keep list access bounded; the site query also filters
       // on expireAt, while managed TTL performs the physical deletion.
       allow list: if request.query.limit != null && request.query.limit <= 30;
-      allow create: if request.resource.data.keys().hasOnly([
-          'text', 'absoluteTime', 'lifespan', 'expireAt', 'createdAt'
-        ])
-        && validText(request.resource.data.text)
-        && request.resource.data.absoluteTime is int
-        && request.resource.data.lifespan in [60000, 3600000, 86400000]
-        && request.resource.data.expireAt is timestamp
-        && request.resource.data.expireAt > request.time
-        && request.resource.data.expireAt <= request.time + duration.value(25, 'h')
-        && validCreatedAt(request.resource.data);
+      allow create: if false;
       allow update, delete: if false;
     }
 
     match /warmth/{id} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['text', 'echos', 'createdAt'])
-        && validText(request.resource.data.text)
-        && request.resource.data.echos == 0
-        && validCreatedAt(request.resource.data);
+      allow create: if false;
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['echos'])
         && request.resource.data.echos == resource.data.echos + 1;
       allow delete: if false;
@@ -121,11 +85,7 @@ service cloud.firestore {
 
     match /metadata/room_a_stats {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['totalReleased'])
-        && request.resource.data.totalReleased == 1;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalReleased'])
-        && request.resource.data.totalReleased == resource.data.totalReleased + 1;
-      allow delete: if false;
+      allow write: if false;
     }
 
     match /metadata/silent_presence {
