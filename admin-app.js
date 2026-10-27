@@ -62,6 +62,7 @@ function showStatus(message) {
 
 function readableError(error) {
   const code = String(error?.code || '');
+  if (code.includes('unauthenticated')) return '登入或 App Check 驗證失敗，請重新載入頁面後再試。';
   if (code.includes('permission-denied')) return '這個 Google 帳號沒有 EMPATH 管理員權限。';
   if (code.includes('popup-closed')) return '登入視窗已關閉。';
   if (code.includes('resource-exhausted')) return '操作太頻繁，請稍後再試。';
@@ -172,10 +173,10 @@ async function review(report, action, card) {
   }
 }
 
-function updateAppCheckStatus(verified) {
+function updateAppCheckStatus(verified, enforced = false) {
   appCheckHealth.className = `health-chip ${verified === true ? 'ready' : 'warning'}`;
   appCheckHealth.textContent = verified === true
-    ? 'App Check 權杖有效'
+    ? enforced ? 'App Check 已強制保護' : 'App Check 權杖有效'
     : verified === false
       ? 'App Check 尚未驗證'
       : 'App Check 狀態未確認';
@@ -196,7 +197,10 @@ async function loadReports({ append = false } = {}) {
     allReports = [...existing.values()];
     hasMore = result.data?.hasMore === true;
     nextCursor = result.data?.nextCursor || null;
-    updateAppCheckStatus(result.data?.security?.appCheckVerified === true);
+    updateAppCheckStatus(
+      result.data?.security?.appCheckVerified === true,
+      result.data?.security?.appCheckEnforced === true
+    );
     renderReports();
   } catch (error) {
     console.error(error);
