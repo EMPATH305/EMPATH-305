@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=20.5.1', 'safety-guard.js?v=20.5', 'firebase-app.js?v=20.9.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.0.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.0.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -29,6 +29,7 @@ for (const page of pages) {
 const appSource = readFileSync('firebase-app.js', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
+const roomE = readFileSync('room-e.html', 'utf8');
 assert(/#room-a\s+\.a-collective-count\s*\{[^}]*grid-column:\s*7\/13!important;[^}]*grid-row:\s*6!important;/s.test(styles), 'Room A collective count must occupy the right content column');
 assert(/#room-a\s+#a-feed-wrapper\s*\{[^}]*grid-column:\s*1\/13!important;[^}]*grid-row:\s*8!important;/s.test(styles), 'Room A feed must remain below the collective count and safety note');
 assert(/where\(["']expireAt["'],\s*["']>["'],\s*roomAQueryCutoff\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
@@ -43,6 +44,14 @@ assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSo
 assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
+assert(appSource.includes("httpsCallable(functions, 'sendDriftLetter')"), 'Room E must send drift letters through the private backend');
+assert(appSource.includes("httpsCallable(functions, 'receiveDriftLetter')"), 'Room E must receive drift letters through the private backend');
+assert(appSource.includes("createContentActions('drift_letters'"), 'Received drift letters must support hiding and anonymous reporting');
+assert(appSource.includes("containsCrisisSignal(text)"), 'Crisis content must not be sent randomly to a stranger');
+assert(roomE.includes('id="e-delivery-drift"'), 'Room E must offer private one-recipient delivery');
+assert(roomE.includes('id="e-drift-receive-btn"'), 'Room E must offer active letter pickup');
+assert(roomE.includes('id="e-drift-letter-text"'), 'Room E must render received text without placing it in the public feed');
+assert(styles.includes('.e-drift-dock'), 'Letter drift must have a responsive, branded presentation');
 for (const collectionName of ['emotions', 'stars', 'shards', 'sand', 'warmth']) {
   assert(!appSource.includes(`addDoc(collection(db, "${collectionName}")`), `Clients must not create ${collectionName} directly`);
   const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
@@ -88,7 +97,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v20.9.0'), 'Service worker cache must be bumped for v20.9.0');
+assert(serviceWorker.includes('empath-cache-v21.0.0'), 'Service worker cache must be bumped for v21.0.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 for (const icon of manifest.icons) {
   assert(serviceWorker.includes(icon.src), `Service worker must precache ${icon.src}`);

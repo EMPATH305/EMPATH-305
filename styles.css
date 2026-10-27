@@ -262,6 +262,39 @@ nav{
 .e-expand-btn { display:none; align-items:center; justify-content:center; gap:8px; margin: 20px auto 0; padding:12px 28px; background:rgba(123,143,161,0.05); border:1px solid rgba(123,143,161,0.4); border-radius:24px; font-family:'Noto Serif TC',serif; font-size:13px; letter-spacing:2px; color:var(--e); cursor:pointer; transition:all 0.3s; }
 .e-expand-btn:hover { background:rgba(123,143,161,0.15); border-color:var(--e); box-shadow: 0 4px 15px rgba(123,143,161,0.2); }
 
+.e-delivery-choice{max-width:600px;margin-top:24px;padding-top:22px;border-top:1px solid rgba(123,143,161,.18);}
+.e-delivery-choice[hidden]{display:none;}
+.e-delivery-label{margin:0 0 12px;font:400 12px 'Noto Sans TC',sans-serif;letter-spacing:.18em;color:rgba(232,230,225,.62);}
+.e-delivery-options{display:grid;grid-template-columns:1fr 1.35fr;gap:10px;}
+.e-delivery-btn{min-height:48px;padding:10px 16px;border:1px solid rgba(123,143,161,.28);background:rgba(3,10,17,.24);color:rgba(232,230,225,.56);font:400 12px 'Noto Serif TC',serif;line-height:1.55;letter-spacing:.08em;cursor:pointer;transition:border-color .3s ease,background .3s ease,color .3s ease,transform .3s ease;}
+.e-delivery-btn:hover{border-color:rgba(123,143,161,.62);color:var(--fog);transform:translateY(-1px);}
+.e-delivery-btn.active{border-color:rgba(154,184,207,.72);background:rgba(123,143,161,.12);color:#e3edf4;box-shadow:inset 0 0 24px rgba(123,143,161,.07);}
+.e-delivery-hint{min-height:22px;margin:12px 0 0;font-size:11px;line-height:1.8;letter-spacing:.07em;color:rgba(232,230,225,.42);}
+
+.e-drift-dock{position:relative;isolation:isolate;width:min(720px,100%);margin:76px 0 52px;padding:clamp(28px,5vw,52px);border:1px solid rgba(123,143,161,.2);background:radial-gradient(circle at 80% 10%,rgba(110,145,174,.12),transparent 42%),rgba(2,9,15,.28);overflow:hidden;}
+.e-drift-dock::before{content:'✉';position:absolute;right:28px;top:14px;z-index:-1;font:300 clamp(76px,12vw,126px) 'Cormorant Garamond',serif;color:rgba(123,143,161,.055);transform:rotate(-7deg);}
+.e-drift-kicker{margin:0 0 14px;font:400 10px 'Noto Sans TC',sans-serif;letter-spacing:.32em;color:rgba(145,176,199,.62);}
+.e-drift-dock h2{margin:0 0 18px;font:300 clamp(25px,4vw,38px) 'Noto Serif TC',serif;letter-spacing:.1em;color:rgba(242,244,246,.9);}
+.e-drift-copy{max-width:570px;margin:0 0 28px;font-size:13px;line-height:2;letter-spacing:.08em;color:rgba(232,230,225,.54);}
+.e-drift-receive-btn{min-height:48px;padding:12px 24px;border:1px solid rgba(145,176,199,.5);background:transparent;color:rgba(205,222,234,.88);font:400 12px 'Noto Serif TC',serif;letter-spacing:.12em;cursor:pointer;transition:.35s ease;}
+.e-drift-receive-btn:hover{background:rgba(123,143,161,.1);border-color:rgba(175,205,226,.8);box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(-1px);}
+.e-drift-receive-btn:disabled{opacity:.45;cursor:wait;transform:none;}
+.e-drift-status{min-height:24px;margin:16px 0 0;font-size:12px;line-height:1.8;letter-spacing:.07em;color:rgba(180,203,219,.62);}
+.e-drift-letter{position:relative;margin-top:28px;padding:32px clamp(22px,5vw,42px);border:1px solid rgba(203,218,229,.22);background:linear-gradient(145deg,rgba(232,238,242,.08),rgba(123,143,161,.035));box-shadow:0 24px 60px rgba(0,0,0,.2);}
+.e-drift-letter[hidden]{display:none;}
+.e-drift-letter::after{content:'';position:absolute;top:-1px;right:-1px;width:28px;height:28px;background:linear-gradient(225deg,#0c1824 49%,rgba(198,216,228,.22) 50%,rgba(198,216,228,.06) 53%);}
+.e-drift-letter-label{margin:0 0 22px;font:400 10px 'Noto Sans TC',sans-serif;letter-spacing:.26em;color:rgba(160,189,209,.68);}
+.e-drift-letter blockquote{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:300 clamp(15px,2.4vw,18px) 'Noto Serif TC',serif;line-height:2.15;letter-spacing:.06em;color:rgba(241,239,234,.88);}
+.e-drift-letter .content-safety-actions{margin-top:26px;}
+
+@media(max-width:600px){
+  .e-delivery-options{grid-template-columns:1fr;}
+  .e-delivery-btn{width:100%;}
+  .e-drift-dock{margin-top:58px;padding:30px 22px;}
+  .e-drift-dock::before{right:10px;font-size:82px;}
+  .e-drift-receive-btn{width:100%;}
+}
+
 /* ===== M ROOM ===== */
 #room-m{background:#060d1a;overflow:hidden;}
 #room-m .room-letter{color:var(--m);} #room-m .room-tag{color:var(--m);} 
