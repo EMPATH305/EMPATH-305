@@ -59,6 +59,22 @@
 3. **鍵盤與螢幕閱讀器補強**：檢舉視窗加入說明關聯、焦點循環、Esc 關閉及關閉後焦點還原。
 4. **測試護欄**：新增安全介面語系與無障礙狀態的自動檢查。
 
+## ✦ v20.5 Moderation Backend
+
+1. **伺服器端匿名檢舉**：檢舉改由 `submitContentReport` Callable Function 接收，先驗證目標是否存在，再寫入後台。
+2. **真正的速率限制**：同一來源每小時最多送出 8 次檢舉；來源位址只經 HMAC 雜湊後用於短期計數，不寫入檢舉資料。
+3. **管理員審核室**：`admin.html` 使用 Google 登入與 Firebase custom claim，能保留或永久移除被檢舉內容。
+4. **最小揭露與稽核**：審核頁只顯示必要摘要，不傳回完整圖片；每次處置另存不可由前端讀寫的稽核紀錄。
+5. **私密設定**：唯一管理員與限流鹽值使用 Firebase Secret Manager，禁止硬寫在前端或 GitHub。
+
+### 首次部署 v20.5
+
+1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
+2. 專案切換至可部署 Cloud Functions 的 Blaze 方案，並安裝最新版 Firebase CLI。
+3. 執行 `firebase functions:secrets:set ADMIN_EMAIL` 與 `firebase functions:secrets:set RATE_LIMIT_SALT`；值只在 CLI 隱藏提示中輸入。
+4. 先執行 `firebase deploy --only functions`，成功後再執行 `firebase deploy --only firestore`。
+5. Functions 與規則部署成功後，才合併並發布 v20.5 靜態前端，避免檢舉功能中斷。
+
 ---
 
 ## ✦ v20.1 信任與穩定性升級 (Trust & Stability)
