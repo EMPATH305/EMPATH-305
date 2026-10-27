@@ -53,11 +53,24 @@ button { font:inherit; }
 .soft-orbit { position:absolute; width:240px; height:240px; right:-90px; top:-110px; border:1px solid rgba(201,168,76,.18); border-radius:50%; box-shadow:0 0 60px rgba(201,168,76,.06); }
 .review-panel { margin-top:54px; }
 .review-heading { display:flex; align-items:end; justify-content:space-between; gap:24px; }
+.security-status { display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 16px; }
+.health-chip { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid rgba(255,255,255,.08); border-radius:999px; color:var(--muted); font-size:11px; }
+.health-chip::before { content:""; width:6px; height:6px; border-radius:50%; background:#929aa0; box-shadow:0 0 9px currentColor; }
+.health-chip.ready { color:#a9d3b1; border-color:rgba(132,190,146,.2); }
+.health-chip.ready::before { background:#84be92; }
+.health-chip.warning { color:#e4c77d; border-color:rgba(201,168,76,.25); }
+.health-chip.warning::before { background:#c9a84c; }
+.review-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; align-items:end; gap:10px; padding:14px; border:1px solid rgba(255,255,255,.06); border-radius:16px; background:rgba(8,20,32,.42); }
+.review-tools label { display:grid; gap:6px; }
+.review-tools label > span { color:rgba(232,230,225,.42); font-size:10px; letter-spacing:.12em; }
+.review-tools select { width:100%; min-height:38px; padding:0 34px 0 12px; border:1px solid var(--line); border-radius:10px; color:var(--paper); background:#102234; font:inherit; font-size:12px; }
+.review-tools select:focus-visible { border-color:rgba(201,168,76,.65); outline:2px solid rgba(201,168,76,.16); outline-offset:2px; }
 .review-summary { min-height:24px; margin:18px 0; color:var(--muted); font-size:13px; }
 .report-list { display:grid; gap:14px; }
 .report-card { padding:22px; border:1px solid rgba(255,255,255,.08); border-radius:18px; background:rgba(8,20,32,.62); }
 .report-meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin-bottom:14px; color:rgba(232,230,225,.42); font-size:11px; letter-spacing:.05em; }
 .report-reason { color:#efcd73; }
+.report-location { color:rgba(232,230,225,.64); }
 .report-preview { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; color:rgba(232,230,225,.82); font:300 15px/1.8 'Noto Serif TC',serif; }
 .report-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; }
 .report-action { padding:9px 16px; font-size:12px; }
@@ -65,6 +78,9 @@ button { font:inherit; }
 .report-action.remove:hover,.report-action.remove:focus-visible { border-color:rgba(208,105,92,.65); background:rgba(208,105,92,.08); }
 .report-action:disabled,.quiet-button:disabled,.primary-button:disabled { opacity:.42; cursor:wait; transform:none; }
 .empty-state { padding:60px 20px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:18px; font:300 15px/1.8 'Noto Serif TC',serif; }
+.load-more-button { display:block; min-width:180px; margin:22px auto 0; padding:11px 20px; border:1px solid var(--line); border-radius:999px; color:var(--paper); background:rgba(255,255,255,.025); cursor:pointer; }
+.load-more-button:hover,.load-more-button:focus-visible { border-color:rgba(201,168,76,.55); background:rgba(201,168,76,.07); outline:none; }
+.load-more-button:disabled { opacity:.45; cursor:wait; }
 .admin-status { position:fixed; left:50%; bottom:24px; z-index:4; max-width:min(520px,calc(100% - 32px)); margin:0; padding:11px 18px; border:1px solid var(--line); border-radius:999px; background:rgba(6,17,28,.94); color:var(--paper); font-size:12px; opacity:0; transform:translate(-50%,12px); pointer-events:none; transition:.25s; }
 .admin-status.show { opacity:1; transform:translate(-50%,0); }
 @media (max-width:640px) {
@@ -73,6 +89,8 @@ button { font:inherit; }
   .admin-title { grid-row:2; grid-column:1/-1; margin-top:8px; }
   .auth-panel { margin-top:8vh; border-radius:22px; }
   .review-heading { align-items:center; }
+  .review-tools { grid-template-columns:1fr; }
+  .review-tools .quiet-button { width:100%; }
   .report-actions { justify-content:stretch; }
   .report-action { flex:1; }
 }
