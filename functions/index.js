@@ -23,6 +23,10 @@ const ADMIN_EMAIL = defineSecret('ADMIN_EMAIL');
 const RATE_LIMIT_SALT = defineSecret('RATE_LIMIT_SALT');
 const REGION = 'asia-east1';
 const REPORT_LIMIT_PER_HOUR = 8;
+// Roll App Check out in stages: protect private moderation immediately while
+// public reporting remains observable until embedded-browser compatibility is proven.
+const ADMIN_APP_CHECK_ENFORCED = true;
+const PUBLIC_REPORT_APP_CHECK_ENFORCED = false;
 
 setGlobalOptions({ region:REGION, memory:'256MiB', timeoutSeconds:30, maxInstances:10 });
 
@@ -77,7 +81,10 @@ exports.claimAdminRole = onCall({ secrets:[ADMIN_EMAIL], enforceAppCheck:false }
   return { granted:true };
 });
 
-exports.submitContentReport = onCall({ secrets:[RATE_LIMIT_SALT], enforceAppCheck:false }, async request => {
+exports.submitContentReport = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
   const report = validateReportInput(request.data);
   if (!report) throw new HttpsError('invalid-argument', 'Invalid report.');
   await enforceReportLimit(request);
@@ -97,7 +104,7 @@ exports.submitContentReport = onCall({ secrets:[RATE_LIMIT_SALT], enforceAppChec
   return { accepted:true };
 });
 
-exports.listReports = onCall({ enforceAppCheck:false }, async request => {
+exports.listReports = onCall({ enforceAppCheck:ADMIN_APP_CHECK_ENFORCED }, async request => {
   requireAdmin(request);
   const { limit, cursor } = validateListReportsInput(request.data);
   let query = db.collection('content_reports')
@@ -140,11 +147,14 @@ exports.listReports = onCall({ enforceAppCheck:false }, async request => {
       id:last.id,
       createdAt:last.data().createdAt?.toMillis?.() || null
     } : null,
-    security:{ appCheckVerified:Boolean(request.app) }
+    security:{
+      appCheckVerified:Boolean(request.app),
+      appCheckEnforced:ADMIN_APP_CHECK_ENFORCED
+    }
   };
 });
 
-exports.moderateReport = onCall({ enforceAppCheck:false }, async request => {
+exports.moderateReport = onCall({ enforceAppCheck:ADMIN_APP_CHECK_ENFORCED }, async request => {
   const moderatorUid = requireAdmin(request);
   const input = validateModerationInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid moderation action.');
