@@ -4475,14 +4475,14 @@ body.content-report-open { overflow: hidden; }
 }
 
 .collective-grief-close {
-    width: 28px;
-    height: 28px;
-    margin: -5px -7px 0 0;
+    width: 44px;
+    height: 44px;
+    margin: -13px -11px 0 0;
     padding: 0;
     border: 0;
     background: transparent;
     color: rgba(232, 237, 242, .56);
-    font: 300 20px/28px Georgia, serif;
+    font: 300 20px/44px Georgia, serif;
     cursor: pointer;
 }
 
