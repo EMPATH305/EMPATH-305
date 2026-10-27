@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v20.5'; // Still Here：全年情緒記憶與無聲陪伴
+const CACHE_NAME = 'empath-cache-v20.5.1'; // Room A layout hotfix
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
