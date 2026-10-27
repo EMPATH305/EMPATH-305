@@ -3,7 +3,7 @@
 const crypto = require('node:crypto');
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-const { FieldValue, Timestamp, getFirestore } = require('firebase-admin/firestore');
+const { FieldPath, FieldValue, Timestamp, getFirestore } = require('firebase-admin/firestore');
 const { setGlobalOptions } = require('firebase-functions/v2');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
@@ -12,6 +12,7 @@ const {
   ALLOWED_COLLECTIONS,
   validateReportInput,
   validateModerationInput,
+  validateListReportsInput,
   summarizeTarget
 } = require('./lib/validation');
 
@@ -70,7 +71,8 @@ exports.claimAdminRole = onCall({ secrets:[ADMIN_EMAIL], enforceAppCheck:false }
     logger.warn('Rejected admin claim request', { uid:request.auth.uid });
     throw new HttpsError('permission-denied', 'This Google account is not an EMPATH administrator.');
   }
-  await auth.setCustomUserClaims(request.auth.uid, { admin:true });
+  const user = await auth.getUser(request.auth.uid);
+  await auth.setCustomUserClaims(request.auth.uid, { ...(user.customClaims || {}), admin:true });
   logger.info('Granted EMPATH admin claim', { uid:request.auth.uid });
   return { granted:true };
 });
@@ -97,11 +99,18 @@ exports.submitContentReport = onCall({ secrets:[RATE_LIMIT_SALT], enforceAppChec
 
 exports.listReports = onCall({ enforceAppCheck:false }, async request => {
   requireAdmin(request);
-  const requestedLimit = Number(request.data?.limit || 50);
-  const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(Math.floor(requestedLimit), 1), 100) : 50;
-  const snapshot = await db.collection('content_reports').orderBy('createdAt', 'desc').limit(100).get();
-  const openReports = snapshot.docs.filter(item => (item.data().status || 'open') === 'open').slice(0, limit);
-  const reports = await Promise.all(openReports.map(async item => {
+  const { limit, cursor } = validateListReportsInput(request.data);
+  let query = db.collection('content_reports')
+    .where('status', '==', 'open')
+    .orderBy('createdAt', 'desc')
+    .orderBy(FieldPath.documentId(), 'desc');
+  if (cursor) {
+    query = query.startAfter(Timestamp.fromMillis(cursor.createdAt), cursor.id);
+  }
+  const snapshot = await query.limit(limit + 1).get();
+  const hasMore = snapshot.docs.length > limit;
+  const pageDocs = snapshot.docs.slice(0, limit);
+  const reports = await Promise.all(pageDocs.map(async item => {
     const data = item.data();
     const targetCollection = ALLOWED_COLLECTIONS.has(data.targetCollection) ? data.targetCollection : '';
     const targetId = typeof data.targetId === 'string' ? data.targetId : '';
@@ -123,7 +132,16 @@ exports.listReports = onCall({ enforceAppCheck:false }, async request => {
       preview
     };
   }));
-  return { reports };
+  const last = pageDocs.at(-1);
+  return {
+    reports,
+    hasMore,
+    nextCursor:hasMore && last ? {
+      id:last.id,
+      createdAt:last.data().createdAt?.toMillis?.() || null
+    } : null,
+    security:{ appCheckVerified:Boolean(request.app) }
+  };
 });
 
 exports.moderateReport = onCall({ enforceAppCheck:false }, async request => {

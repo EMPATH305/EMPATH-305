@@ -88,9 +88,13 @@ assert(safetySource.includes("empath:language-changed"), 'Safety controls must r
 const adminPage = readFileSync('admin.html', 'utf8');
 const adminSource = readFileSync('admin-app.js', 'utf8');
 assert(adminPage.includes('noindex,nofollow,noarchive'), 'Admin route must not be indexed');
-assert(adminPage.includes('admin-app.js?v=20.5'), 'Admin route must load the current controller');
+assert(adminPage.includes('admin-app.js?v=20.6'), 'Admin route must load the current controller');
+assert(adminPage.includes('id="load-more-reports"'), 'Admin route must support paginated review');
+assert(adminPage.includes('id="app-check-health"'), 'Admin route must expose App Check readiness');
 assert(adminSource.includes("httpsCallable(functions, 'claimAdminRole')"), 'Admin access must be granted by the backend');
 assert(adminSource.includes("httpsCallable(functions, 'moderateReport')"), 'Moderation actions must use the backend');
+assert(adminSource.includes('signInWithRedirect'), 'Admin login must fall back to redirect on popup-restricted browsers');
+assert(!adminSource.includes('.innerHTML'), 'Admin content must be rendered without innerHTML');
 assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded in the client');
 
 const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
@@ -99,5 +103,10 @@ const functionsSource = readFileSync('functions/index.js', 'utf8');
 assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity must be stored in Secret Manager');
 assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit salt must be stored in Secret Manager');
 assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side report limit must remain bounded');
+assert(functionsSource.includes("where('status', '==', 'open')"), 'Admin report listing must query only open reports');
+assert(functionsSource.includes('FieldPath.documentId()'), 'Admin report pagination must have a stable document cursor');
+
+const reportIndex = indexes.indexes?.find(index => index.collectionGroup === 'content_reports');
+assert(reportIndex, 'Open moderation reports must have a composite index');
 
 console.log(`Site checks passed for ${pages.length} pages.`);

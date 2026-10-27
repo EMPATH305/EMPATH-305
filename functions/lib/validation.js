@@ -25,6 +25,19 @@ function validateModerationInput(data) {
   return { reportId, action };
 }
 
+function validateListReportsInput(data) {
+  const requestedLimit = Number(data?.limit ?? 30);
+  const limit = Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(Math.floor(requestedLimit), 1), 50)
+    : 30;
+  const cursorId = cleanString(data?.cursor?.id, 160);
+  const cursorCreatedAt = Number(data?.cursor?.createdAt);
+  const cursor = cursorId && Number.isFinite(cursorCreatedAt) && cursorCreatedAt > 0
+    ? { id:cursorId, createdAt:cursorCreatedAt }
+    : null;
+  return { limit, cursor };
+}
+
 function summarizeTarget(data) {
   if (!data || typeof data !== 'object') return '';
   if (typeof data.text === 'string' && data.text.trim()) return data.text.trim().slice(0, 500);
@@ -36,5 +49,6 @@ module.exports = {
   ALLOWED_COLLECTIONS,
   validateReportInput,
   validateModerationInput,
+  validateListReportsInput,
   summarizeTarget
 };
