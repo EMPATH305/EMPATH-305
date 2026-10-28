@@ -18,12 +18,7 @@ service cloud.firestore {
     match /stars/{id} {
       allow read: if true;
       allow create: if false;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['brightness', 'clicks'])
-        && request.resource.data.clicks == resource.data.clicks + 1
-        && request.resource.data.brightness >= resource.data.brightness
-        && request.resource.data.brightness <= resource.data.brightness + 1
-        && request.resource.data.brightness <= 12;
-      allow delete: if false;
+      allow update, delete: if false;
     }
 
     match /constellations/{id} {
@@ -40,10 +35,7 @@ service cloud.firestore {
     match /shards/{id} {
       allow read: if true;
       allow create: if false;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['healed'])
-        && resource.data.healed == false
-        && request.resource.data.healed == true;
-      allow delete: if false;
+      allow update, delete: if false;
     }
 
     match /sand/{id} {
@@ -61,9 +53,7 @@ service cloud.firestore {
     match /warmth/{id} {
       allow read: if true;
       allow create: if false;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['echos'])
-        && request.resource.data.echos == resource.data.echos + 1;
-      allow delete: if false;
+      allow update, delete: if false;
     }
 
     // Drift letters are sent and received only through callable functions.
