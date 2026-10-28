@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.3.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.4.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -57,7 +57,12 @@ assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'A
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
 assert(appSource.includes("httpsCallable(functions, 'reactToRoomContent')"), 'Room reactions must use the rate-limited backend');
+assert(appSource.includes("httpsCallable(functions, 'joinSilentCompanionship')"), 'Silent companionship must use the rate-limited backend');
+assert(appSource.includes("httpsCallable(functions, 'recordSiteVisit')"), 'Site visits must use the rate-limited backend');
 assert(!appSource.includes('updateDoc('), 'Clients must not update room content directly');
+assert(!appSource.includes('addDoc('), 'Clients must not create shared records directly');
+assert(!appSource.includes('runTransaction('), 'Clients must not transact shared counters directly');
+assert(!appSource.includes('increment('), 'Clients must not increment shared counters directly');
 assert(appSource.includes("httpsCallable(functions, 'sendDriftLetter')"), 'Room E must send drift letters through the private backend');
 assert(appSource.includes("httpsCallable(functions, 'receiveDriftLetter')"), 'Room E must receive drift letters through the private backend');
 assert(appSource.includes("createContentActions('drift_letters'"), 'Received drift letters must support hiding and anonymous reporting');
@@ -90,6 +95,10 @@ assert(rules.includes('request.query.limit <= 30'), 'Room A collection reads mus
 assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclared collections by default');
 assert(rules.includes('match /metadata/room_a_stats'), 'Rules must protect the Room A aggregate counter');
 assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect silent companionship counts');
+for (const protectedPath of ['constellations/{id}', 'metadata/site_stats', 'metadata/silent_presence']) {
+  const ruleBlock = rules.match(new RegExp(`match /${protectedPath.replace(/[{}]/g, '\\$&')} \\{([\\s\\S]*?)\\n    \\}`));
+  assert(ruleBlock?.[1].includes('if false;'), `${protectedPath} writes must be server-only`);
+}
 assert(rules.includes('match /content_reports/{reportId}'), 'Rules must validate anonymous content reports');
 assert(rules.includes('match /rate_limits/{bucketId}'), 'Rate-limit documents must be private');
 assert(rules.includes('match /moderation_audit/{entryId}'), 'Moderation audit records must be private');
@@ -118,7 +127,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.3.0'), 'Service worker cache must be bumped for v21.3.0');
+assert(serviceWorker.includes('empath-cache-v21.4.0'), 'Service worker cache must be bumped for v21.4.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
 for (const icon of manifest.icons) {

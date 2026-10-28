@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, runTransaction, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, getCountFromServer, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
 
@@ -31,6 +31,8 @@ const submitRoomContent = httpsCallable(functions, 'submitRoomContent');
 const reactToRoomContentRequest = httpsCallable(functions, 'reactToRoomContent');
 const sendDriftLetterRequest = httpsCallable(functions, 'sendDriftLetter');
 const receiveDriftLetterRequest = httpsCallable(functions, 'receiveDriftLetter');
+const joinSilentCompanionshipRequest = httpsCallable(functions, 'joinSilentCompanionship');
+const recordSiteVisitRequest = httpsCallable(functions, 'recordSiteVisit');
 let memoryDriftClientId = '';
 
 function generateDriftClientId() {
@@ -63,8 +65,8 @@ async function createRoomContent(room, payload = {}, returnResult = false) {
     return returnResult ? result : result.id;
 }
 
-async function reactToRoomContent(kind, targetId) {
-    const response = await reactToRoomContentRequest({ kind, targetId });
+async function reactToRoomContent(kind, targetId, extra = {}) {
+    const response = await reactToRoomContentRequest({ kind, targetId, ...extra });
     const result = response?.data;
     if (!result?.accepted) throw new Error('Room reaction was not accepted.');
     return result;
@@ -2961,9 +2963,19 @@ roomM?.addEventListener('click', async e => {
                 actions || document.createDocumentFragment()
             ); 
         } else {
+            // The backend creates these constellation lines in the same transaction
+            // as the accepted star reaction, so a failed or duplicate reaction leaves no lines behind.
+            const nearest = starMessages
+                .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
+                .filter(s => s.star.id !== star.id)
+                .sort((a,b) => a.d - b.d)
+                .slice(0, 2)
+                .map(item => item.star);
             let reaction;
             try {
-                reaction = await reactToRoomContent('star', star.id);
+                reaction = await reactToRoomContent('star', star.id, {
+                    neighborIds:nearest.map(neighbor => neighbor.id)
+                });
             } catch (error) {
                 if (isDuplicateRoomReaction(error)) {
                     window.showToast(t('你已經點亮過這顆思念', 'You already resonated with this memory', 'この想いにはすでに共鳴しています', 'Ya resonaste con este recuerdo', 'Vous avez déjà fait résonner ce souvenir', 'Du hast bereits mit dieser Erinnerung mitgeschwungen', '你已经点亮过这颗思念', 'Ви вже відгукнулися на цей спогад', 'Ta myśl już została przez ciebie rozświetlona'));
@@ -2982,19 +2994,6 @@ roomM?.addEventListener('click', async e => {
             // 🎧 觸發 3D 空間水晶音
             const panValue = (x / window.innerWidth) * 2 - 1;
             if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
-
-            // ✨ 觸發全網星系連線魔法 (強制牽起最近的兩顆星，無視距離)
-            const nearest = starMessages
-                .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
-                .filter(s => s.star.id !== star.id)
-                .sort((a,b) => a.d - b.d)
-                .slice(0, 2)
-                .map(item => item.star);
-            await Promise.allSettled(nearest.map(n => addDoc(collection(db, "constellations"), {
-                s1Id: star.id,
-                s2Id: n.id,
-                createdAt: serverTimestamp()
-            })));
 
             tooltip.classList.remove('active');
             activeStarId = null;
@@ -3599,25 +3598,18 @@ window.startSilentCompanionship = async function() {
     document.body.classList.add('empath-dialog-open', 'silent-company-active');
     document.getElementById('silent-company-exit')?.focus({ preventScroll:true });
 
-    const bucket = Math.floor(Date.now() / SILENT_BUCKET_MS);
-    const bucketKey = String(bucket);
+    let bucket = Math.floor(Date.now() / SILENT_BUCKET_MS);
+    let bucketKey = String(bucket);
     const joinedKey = 'empath_silent_company_bucket';
     const presenceRef = doc(db, 'metadata', 'silent_presence');
     if (sessionStorage.getItem(joinedKey) !== bucketKey) {
         try {
-            await runTransaction(db, async transaction => {
-                const snapshot = await transaction.get(presenceRef);
-                const previous = snapshot.data() || {};
-                const sameBucket = Number(previous.bucket) === bucket;
-                const nextCount = sameBucket
-                    ? Math.min(100000, Math.max(0, Number(previous.count) || 0) + 1)
-                    : 1;
-                transaction.set(presenceRef, {
-                    bucket,
-                    count:nextCount,
-                    updatedAt:serverTimestamp()
-                });
-            });
+            const response = await joinSilentCompanionshipRequest({ clientId:getDriftClientId() });
+            const result = response?.data;
+            if (!result?.accepted) throw new Error('Silent companionship join was not accepted.');
+            bucket = Number(result.bucket) || bucket;
+            bucketKey = String(bucket);
+            renderSilentCompanyCount(result.count);
             sessionStorage.setItem(joinedKey, bucketKey);
         } catch(error) {
             console.error('Silent company count failed:', error);
@@ -4081,8 +4073,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   subscribeRealtimeData();
   
-  const metaRef = doc(db, "metadata", "site_stats"); const hasVisited = localStorage.getItem('empath_visited');
-  if (!hasVisited) { try { await setDoc(metaRef, { totalVisitors: increment(1) }, { merge: true }); localStorage.setItem('empath_visited', 'true'); } catch(e) { console.error("發生錯誤:", e); } }
+  const visitDay = String(Math.floor(Date.now() / 86400000));
+  const visitDayKey = 'empath_site_visit_day';
+  if (localStorage.getItem(visitDayKey) !== visitDay) {
+      try {
+          const response = await recordSiteVisitRequest({});
+          if (response?.data?.accepted) localStorage.setItem(visitDayKey, visitDay);
+      } catch(e) {
+          console.error('Anonymous site visit failed:', e);
+      }
+  }
   if(!localStorage.getItem('empath_hsp_hint_shown')) { setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000); }
   if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
   initTimeline(); updateSyncUI(); 
