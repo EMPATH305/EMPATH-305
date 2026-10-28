@@ -6,6 +6,7 @@ const ALLOWED_ACTIONS = new Set(['dismiss', 'remove']);
 const ALLOWED_ROOMS = new Set(['e', 'm', 'p', 'a', 't']);
 const ALLOWED_LIFESPANS = new Set([60_000, 3_600_000, 86_400_000]);
 const ALLOWED_WEIGHT_KINDS = new Set(['relationship', 'loss', 'self', 'future', 'unnamed']);
+const ALLOWED_REACTION_KINDS = new Set(['star', 'shard', 'warmth']);
 
 function cleanString(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -64,6 +65,13 @@ function validateDriftReceiveInput(data) {
   return clientId ? { clientId } : null;
 }
 
+function validateRoomReactionInput(data) {
+  const kind = cleanString(data?.kind, 16).toLowerCase();
+  const targetId = cleanString(data?.targetId, 160);
+  if (!ALLOWED_REACTION_KINDS.has(kind) || !/^[A-Za-z0-9_-]{1,160}$/.test(targetId)) return null;
+  return { kind, targetId };
+}
+
 function containsCrisisSignal(text) {
   return /(想死|不想活|活不下去|結束生命|自殺|傷害自己|不想存在|死にたい|自殺|want\s+to\s+die|kill\s+myself|end\s+my\s+life|hurt\s+myself|suicid)/i.test(String(text || ''));
 }
@@ -98,9 +106,11 @@ function summarizeTarget(data) {
 module.exports = {
   ALLOWED_COLLECTIONS,
   ALLOWED_WEIGHT_KINDS,
+  ALLOWED_REACTION_KINDS,
   validateRoomSubmissionInput,
   validateDriftLetterInput,
   validateDriftReceiveInput,
+  validateRoomReactionInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,

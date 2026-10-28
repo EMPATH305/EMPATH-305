@@ -145,7 +145,12 @@ assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit 
 assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side report limit must remain bounded');
 assert(functionsSource.includes('CONTENT_LIMIT_PER_HOUR = 12'), 'Server-side room posting limit must remain bounded');
 assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 6'), 'Room posting must have burst protection without blocking a five-room journey');
+assert(functionsSource.includes('REACTION_LIMIT_PER_HOUR = 40'), 'Room reactions must have a bounded hourly server limit');
+assert(functionsSource.includes('REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000'), 'Duplicate reaction receipts must expire after 48 hours');
 assert(functionsSource.includes('exports.submitRoomContent = onCall'), 'Public room submissions must have a callable backend');
+assert(functionsSource.includes('exports.reactToRoomContent = onCall'), 'Public room reactions must have a callable backend');
+assert(functionsSource.includes("throw new HttpsError('already-exists', 'This reaction was already counted.')"), 'Duplicate reactions must be rejected atomically');
+assert(functionsSource.includes("doc(`reaction_${input.kind}_${targetHash}_${participantHash}`)"), 'Reaction receipts must avoid storing a raw participant address or target ID');
 assert(functionsSource.includes('exports.sendDriftLetter = onCall'), 'Room E must have a private drift-letter sender');
 assert(functionsSource.includes('exports.receiveDriftLetter = onCall'), 'Room E must have a one-recipient drift-letter receiver');
 assert(functionsSource.includes("where('status', '==', 'waiting')"), 'Only waiting drift letters may be delivered');

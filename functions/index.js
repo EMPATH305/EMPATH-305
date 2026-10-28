@@ -13,6 +13,7 @@ const {
   validateRoomSubmissionInput,
   validateDriftLetterInput,
   validateDriftReceiveInput,
+  validateRoomReactionInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -33,6 +34,8 @@ const CONTENT_LIMIT_PER_HOUR = 12;
 const CONTENT_LIMIT_PER_TEN_MINUTES = 6;
 const DRIFT_SEND_LIMIT_PER_HOUR = 4;
 const DRIFT_RECEIVE_LIMIT_PER_HOUR = 8;
+const REACTION_LIMIT_PER_HOUR = 40;
+const REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000;
 const DRIFT_WAITING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
@@ -126,6 +129,27 @@ async function enforceDriftLimit(request, clientId, action, limit) {
     if (count >= limit) throw new HttpsError('resource-exhausted', 'Too many letter drift actions. Try again later.');
     transaction.set(ref, {
       kind:`drift-${action}`,
+      count:count + 1,
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis((hour + 2) * 3_600_000)
+    }, { merge:true });
+  });
+}
+
+async function enforceReactionLimit(request) {
+  const now = Date.now();
+  const hour = Math.floor(now / 3_600_000);
+  const key = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const ref = db.collection('rate_limits').doc(`reaction_hour_${hour}_${key}`);
+  await db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    const count = snapshot.exists ? Math.max(0, Number(snapshot.data()?.count) || 0) : 0;
+    if (count >= REACTION_LIMIT_PER_HOUR) {
+      throw new HttpsError('resource-exhausted', 'Too many reactions. Try again later.');
+    }
+    transaction.set(ref, {
+      kind:'room-reaction',
+      window:'hour',
       count:count + 1,
       updatedAt:FieldValue.serverTimestamp(),
       expiresAt:Timestamp.fromMillis((hour + 2) * 3_600_000)
@@ -243,6 +267,74 @@ exports.submitRoomContent = onCall({
     appVerified:Boolean(request.app)
   });
   return { accepted:true, id:contentRef.id, ...(roomStats ? { roomStats } : {}) };
+});
+
+exports.reactToRoomContent = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateRoomReactionInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid room reaction.');
+  await enforceReactionLimit(request);
+
+  const targets = {
+    star:{ collection:'stars' },
+    shard:{ collection:'shards' },
+    warmth:{ collection:'warmth' }
+  };
+  const target = targets[input.kind];
+  const now = Date.now();
+  const participantHash = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const targetHash = crypto.createHash('sha256')
+    .update(`${input.kind}:${input.targetId}`)
+    .digest('hex')
+    .slice(0, 24);
+  const contentRef = db.collection(target.collection).doc(input.targetId);
+  const receiptRef = db.collection('rate_limits')
+    .doc(`reaction_${input.kind}_${targetHash}_${participantHash}`);
+  let reactionResult = null;
+
+  await db.runTransaction(async transaction => {
+    const [contentSnapshot, receiptSnapshot] = await Promise.all([
+      transaction.get(contentRef),
+      transaction.get(receiptRef)
+    ]);
+    if (!contentSnapshot.exists) throw new HttpsError('not-found', 'Content no longer exists.');
+    const receiptExpiry = receiptSnapshot.data()?.expiresAt?.toMillis?.() || 0;
+    if (receiptSnapshot.exists && receiptExpiry > now) {
+      throw new HttpsError('already-exists', 'This reaction was already counted.');
+    }
+
+    const content = contentSnapshot.data() || {};
+    if (input.kind === 'star') {
+      const clicks = Math.min(Math.max(0, Number(content.clicks) || 0) + 1, 1_000_000);
+      const brightness = Math.min(Math.max(1, Number(content.brightness) || 1) + 1, 12);
+      transaction.update(contentRef, { clicks, brightness });
+      reactionResult = { clicks, brightness };
+    } else if (input.kind === 'shard') {
+      const healed = content.healed === true;
+      if (!healed) transaction.update(contentRef, { healed:true });
+      reactionResult = { healed:true, changed:!healed };
+    } else {
+      const echos = Math.min(Math.max(0, Number(content.echos) || 0) + 1, 1_000_000);
+      transaction.update(contentRef, { echos });
+      reactionResult = { echos };
+    }
+
+    transaction.set(receiptRef, {
+      kind:`reaction-${input.kind}`,
+      count:1,
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis(now + REACTION_RECEIPT_TTL_MS)
+    });
+  });
+
+  logger.info('Anonymous room reaction accepted', {
+    kind:input.kind,
+    targetId:input.targetId,
+    appVerified:Boolean(request.app)
+  });
+  return { accepted:true, ...reactionResult };
 });
 
 exports.sendDriftLetter = onCall({

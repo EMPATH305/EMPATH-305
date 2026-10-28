@@ -6,6 +6,7 @@ const {
   validateRoomSubmissionInput,
   validateDriftLetterInput,
   validateDriftReceiveInput,
+  validateRoomReactionInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -46,6 +47,18 @@ test('accepts anonymous drift letters only with a bounded device identifier', ()
   assert.equal(validateDriftReceiveInput({ clientId:'not-a-client-id' }), null);
   assert.equal(containsCrisisSignal('I want to kill myself tonight'), true);
   assert.equal(containsCrisisSignal('I hope tomorrow feels lighter'), false);
+});
+
+test('accepts only known room reactions with safe document IDs', () => {
+  assert.deepEqual(validateRoomReactionInput({ kind:'star', targetId:'abc_123-Z' }), {
+    kind:'star', targetId:'abc_123-Z'
+  });
+  assert.deepEqual(validateRoomReactionInput({ kind:'SHARD', targetId:'shard-1' }), {
+    kind:'shard', targetId:'shard-1'
+  });
+  assert.equal(validateRoomReactionInput({ kind:'invented', targetId:'abc' }), null);
+  assert.equal(validateRoomReactionInput({ kind:'warmth', targetId:'bad/id' }), null);
+  assert.equal(validateRoomReactionInput({ kind:'warmth', targetId:'' }), null);
 });
 
 test('accepts only known report targets and reasons', () => {
