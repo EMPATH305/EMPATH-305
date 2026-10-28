@@ -5,6 +5,7 @@ const ALLOWED_REASONS = new Set(['harassment', 'hate', 'personal_info', 'spam', 
 const ALLOWED_ACTIONS = new Set(['dismiss', 'remove']);
 const ALLOWED_ROOMS = new Set(['e', 'm', 'p', 'a', 't']);
 const ALLOWED_LIFESPANS = new Set([60_000, 3_600_000, 86_400_000]);
+const ALLOWED_WEIGHT_KINDS = new Set(['relationship', 'loss', 'self', 'future', 'unnamed']);
 
 function cleanString(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -38,7 +39,9 @@ function validateRoomSubmissionInput(data) {
   if (room === 'a') {
     const lifespan = Number(data.lifespan);
     if (!Number.isInteger(lifespan) || !ALLOWED_LIFESPANS.has(lifespan)) return null;
-    return { room, text, lifespan };
+    const requestedWeightKind = cleanString(data?.weightKind, 24).toLowerCase();
+    const weightKind = ALLOWED_WEIGHT_KINDS.has(requestedWeightKind) ? requestedWeightKind : 'unnamed';
+    return { room, text, lifespan, weightKind };
   }
   return { room, text };
 }
@@ -94,6 +97,7 @@ function summarizeTarget(data) {
 
 module.exports = {
   ALLOWED_COLLECTIONS,
+  ALLOWED_WEIGHT_KINDS,
   validateRoomSubmissionInput,
   validateDriftLetterInput,
   validateDriftReceiveInput,

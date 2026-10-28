@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.1.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.0.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.2.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -30,19 +30,26 @@ const appSource = readFileSync('firebase-app.js', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
 const roomE = readFileSync('room-e.html', 'utf8');
+const roomA = readFileSync('room-a.html', 'utf8');
 const collectiveCalendar = readFileSync('collective-calendar.js', 'utf8');
 assert(collectiveCalendar.includes("en-u-ca-chinese"), 'Collective calendar must recognize lunar observances locally');
 assert(collectiveCalendar.includes('empath_collective_grief_seen_'), 'Collective calendar must avoid repeating within a session');
 assert(collectiveCalendar.includes('copy.textContent = messageFor(moment)'), 'Collective calendar copy must use safe DOM text rendering');
 assert(!collectiveCalendar.includes('.innerHTML'), 'Collective calendar must not render HTML strings');
 assert(/#room-a\s+\.a-collective-count\s*\{[^}]*grid-column:\s*7\/13!important;[^}]*grid-row:\s*6!important;/s.test(styles), 'Room A collective count must occupy the right content column');
-assert(/#room-a\s+#a-feed-wrapper\s*\{[^}]*grid-column:\s*1\/13!important;[^}]*grid-row:\s*8!important;/s.test(styles), 'Room A feed must remain below the collective count and safety note');
+assert(/#room-a\s+\.a-release-witness\s*\{[^}]*grid-column:\s*7\/13!important;[^}]*grid-row:\s*7!important;/s.test(styles), 'Room A witness must remain below the anonymous aggregate');
+assert(/#room-a\s+#a-feed-wrapper\s*\{[^}]*grid-column:\s*1\/13!important;[^}]*grid-row:\s*9!important;/s.test(styles), 'Room A feed must remain below the witness and safety note');
 assert(/where\(["']expireAt["'],\s*["']>["'],\s*roomAQueryCutoff\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
 assert(appSource.includes('Date.now() + 10000'), 'Room A query cutoff must stay ahead of Firestore request.time');
 assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consent gated');
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
 assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired message fragments');
 assert(appSource.includes("doc(db, 'metadata', 'room_a_stats')"), 'Room A must use anonymous aggregate counts');
+assert(appSource.includes('lastRoomAWitness'), 'Room A must render a post-release anonymous witness');
+assert(appSource.includes('sameKindBefore'), 'Room A witness must distinguish broad user-selected categories');
+assert(roomA.includes('id="a-release-witness"'), 'Room A must include a dedicated post-release witness');
+assert(roomA.includes('name="a-weight-kind"'), 'Room A must offer an explicit broad-category choice');
+assert(roomA.includes('aria-describedby="a-weight-privacy"'), 'Room A category choice must explain its privacy boundary');
 assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
 assert(appSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client');
 assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSource), 'Production App Check site key must be configured');
@@ -63,7 +70,7 @@ for (const collectionName of ['emotions', 'stars', 'shards', 'sand', 'warmth']) 
   const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
   assert(ruleBlock?.[1].includes('allow create: if false;'), `${collectionName} creates must be server-only`);
 }
-assert(appSource.includes("createRoomContent('a', { text, lifespan })"), 'Room A count and content must share the server transaction');
+assert(appSource.includes("createRoomContent('a', { text, lifespan, weightKind }, true)"), 'Room A content and anonymous category count must share the server transaction');
 assert(appSource.includes("localStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
@@ -103,7 +110,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.1.0'), 'Service worker cache must be bumped for v21.1.0');
+assert(serviceWorker.includes('empath-cache-v21.2.0'), 'Service worker cache must be bumped for v21.2.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
 for (const icon of manifest.icons) {
@@ -144,6 +151,9 @@ assert(functionsSource.includes('exports.receiveDriftLetter = onCall'), 'Room E 
 assert(functionsSource.includes("where('status', '==', 'waiting')"), 'Only waiting drift letters may be delivered');
 assert(functionsSource.includes("status:'delivered'"), 'A received drift letter must be atomically consumed');
 assert(functionsSource.includes('expireAt:Timestamp.fromMillis'), 'Room A server writes must include a Firestore TTL timestamp');
+assert(functionsSource.includes('kindCounts[input.weightKind] += 1'), 'Room A must update the selected anonymous category atomically');
+assert(functionsSource.includes('sameKind:kindCounts[input.weightKind]'), 'Room A must return the anonymous same-category count');
+assert(!/Object\.assign\(data,\s*\{[^}]*weightKind/s.test(functionsSource), 'Room A must not bind the aggregate category to the submitted text document');
 assert(functionsSource.includes('ADMIN_APP_CHECK_ENFORCED = true'), 'Private moderation functions must enforce App Check');
 assert(functionsSource.includes('PUBLIC_REPORT_APP_CHECK_ENFORCED = false'), 'Public reports must remain in monitored rollout mode');
 assert(functionsSource.includes('enforceAppCheck:ADMIN_APP_CHECK_ENFORCED'), 'Admin callables must use the enforcement flag');

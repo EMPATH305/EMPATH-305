@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.1.0'; // Collective grief calendar
+const CACHE_NAME = 'empath-cache-v21.2.0'; // Room A anonymous witness
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
