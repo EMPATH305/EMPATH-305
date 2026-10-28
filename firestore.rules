@@ -23,13 +23,7 @@ service cloud.firestore {
 
     match /constellations/{id} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['s1Id', 's2Id', 'createdAt'])
-        && request.resource.data.s1Id is string
-        && request.resource.data.s1Id.size() <= 128
-        && request.resource.data.s2Id is string
-        && request.resource.data.s2Id.size() <= 128
-        && validCreatedAt(request.resource.data);
-      allow update, delete: if false;
+      allow create, update, delete: if false;
     }
 
     match /shards/{id} {
@@ -72,11 +66,7 @@ service cloud.firestore {
 
     match /metadata/site_stats {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['totalVisitors'])
-        && request.resource.data.totalVisitors == 1;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisitors'])
-        && request.resource.data.totalVisitors == resource.data.totalVisitors + 1;
-      allow delete: if false;
+      allow write: if false;
     }
 
     match /metadata/room_a_stats {
@@ -86,23 +76,7 @@ service cloud.firestore {
 
     match /metadata/silent_presence {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['bucket', 'count', 'updatedAt'])
-        && request.resource.data.bucket is int
-        && request.resource.data.count == 1
-        && request.resource.data.updatedAt is timestamp;
-      allow update: if request.resource.data.keys().hasOnly(['bucket', 'count', 'updatedAt'])
-        && request.resource.data.bucket is int
-        && request.resource.data.count is int
-        && request.resource.data.count >= 1
-        && request.resource.data.count <= 100000
-        && request.resource.data.updatedAt is timestamp
-        && (
-          (request.resource.data.bucket == resource.data.bucket
-            && request.resource.data.count == resource.data.count + 1)
-          || (request.resource.data.bucket > resource.data.bucket
-            && request.resource.data.count == 1)
-        );
-      allow delete: if false;
+      allow write: if false;
     }
 
     match /user_journeys/{soulKey} {
