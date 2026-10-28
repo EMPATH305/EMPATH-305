@@ -14,6 +14,7 @@ const {
   validateDriftLetterInput,
   validateDriftReceiveInput,
   validateRoomReactionInput,
+  validateAnonymousClientInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -36,6 +37,9 @@ const DRIFT_SEND_LIMIT_PER_HOUR = 4;
 const DRIFT_RECEIVE_LIMIT_PER_HOUR = 8;
 const REACTION_LIMIT_PER_HOUR = 40;
 const REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000;
+const CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000;
+const SILENT_BUCKET_MS = 5 * 60 * 1000;
+const SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5;
 const DRIFT_WAITING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
@@ -113,6 +117,13 @@ async function enforceContentSubmissionLimit(request) {
 function driftParticipantKey(clientId) {
   return crypto.createHmac('sha256', RATE_LIMIT_SALT.value())
     .update(`drift-participant:${clientId}`)
+    .digest('hex')
+    .slice(0, 40);
+}
+
+function anonymousParticipantKey(namespace, value) {
+  return crypto.createHmac('sha256', RATE_LIMIT_SALT.value())
+    .update(`${namespace}:${value}`)
     .digest('hex')
     .slice(0, 40);
 }
@@ -290,14 +301,17 @@ exports.reactToRoomContent = onCall({
     .digest('hex')
     .slice(0, 24);
   const contentRef = db.collection(target.collection).doc(input.targetId);
+  const neighborRefs = (input.neighborIds || []).map(id => db.collection('stars').doc(id));
+  const constellationRefs = neighborRefs.map(() => db.collection('constellations').doc());
   const receiptRef = db.collection('rate_limits')
     .doc(`reaction_${input.kind}_${targetHash}_${participantHash}`);
   let reactionResult = null;
 
   await db.runTransaction(async transaction => {
-    const [contentSnapshot, receiptSnapshot] = await Promise.all([
+    const [contentSnapshot, receiptSnapshot, ...neighborSnapshots] = await Promise.all([
       transaction.get(contentRef),
-      transaction.get(receiptRef)
+      transaction.get(receiptRef),
+      ...neighborRefs.map(ref => transaction.get(ref))
     ]);
     if (!contentSnapshot.exists) throw new HttpsError('not-found', 'Content no longer exists.');
     const receiptExpiry = receiptSnapshot.data()?.expiresAt?.toMillis?.() || 0;
@@ -310,7 +324,19 @@ exports.reactToRoomContent = onCall({
       const clicks = Math.min(Math.max(0, Number(content.clicks) || 0) + 1, 1_000_000);
       const brightness = Math.min(Math.max(1, Number(content.brightness) || 1) + 1, 12);
       transaction.update(contentRef, { clicks, brightness });
-      reactionResult = { clicks, brightness };
+      const connectedIds = [];
+      neighborSnapshots.forEach((snapshot, index) => {
+        if (!snapshot.exists) return;
+        const neighborId = neighborRefs[index].id;
+        transaction.set(constellationRefs[index], {
+          s1Id:input.targetId,
+          s2Id:neighborId,
+          createdAt:FieldValue.serverTimestamp(),
+          expiresAt:Timestamp.fromMillis(now + CONSTELLATION_TTL_MS)
+        });
+        connectedIds.push(neighborId);
+      });
+      reactionResult = { clicks, brightness, connectedIds };
     } else if (input.kind === 'shard') {
       const healed = content.healed === true;
       if (!healed) transaction.update(contentRef, { healed:true });
@@ -335,6 +361,101 @@ exports.reactToRoomContent = onCall({
     appVerified:Boolean(request.app)
   });
   return { accepted:true, ...reactionResult };
+});
+
+exports.joinSilentCompanionship = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateAnonymousClientInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid silent companionship participant.');
+  const now = Date.now();
+  const bucket = Math.floor(now / SILENT_BUCKET_MS);
+  const participantHash = anonymousParticipantKey('silent-participant', `${requestIp(request)}:${input.clientId}`);
+  const sourceHash = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const presenceRef = db.collection('metadata').doc('silent_presence');
+  const receiptRef = db.collection('rate_limits').doc(`silent_receipt_${bucket}_${participantHash}`);
+  const sourceRef = db.collection('rate_limits').doc(`silent_source_${bucket}_${sourceHash}`);
+  let result = null;
+
+  await db.runTransaction(async transaction => {
+    const [presenceSnapshot, receiptSnapshot, sourceSnapshot] = await Promise.all([
+      transaction.get(presenceRef),
+      transaction.get(receiptRef),
+      transaction.get(sourceRef)
+    ]);
+    const current = presenceSnapshot.data() || {};
+    const currentCount = Number(current.bucket) === bucket
+      ? Math.min(100_000, Math.max(0, Number(current.count) || 0))
+      : 0;
+    const receiptExpiry = receiptSnapshot.data()?.expiresAt?.toMillis?.() || 0;
+    if (receiptSnapshot.exists && receiptExpiry > now) {
+      result = { count:Math.max(1, currentCount), bucket, counted:false };
+      return;
+    }
+    const sourceCount = sourceSnapshot.exists ? Math.max(0, Number(sourceSnapshot.data()?.count) || 0) : 0;
+    if (sourceCount >= SILENT_PARTICIPANTS_PER_SOURCE_BUCKET) {
+      throw new HttpsError('resource-exhausted', 'Too many silent companionship joins from this source.');
+    }
+    const count = Math.min(100_000, currentCount + 1);
+    const expiresAt = Timestamp.fromMillis((bucket + 2) * SILENT_BUCKET_MS);
+    transaction.set(presenceRef, { bucket, count, updatedAt:FieldValue.serverTimestamp() });
+    transaction.set(receiptRef, {
+      kind:'silent-companionship-receipt', count:1,
+      updatedAt:FieldValue.serverTimestamp(), expiresAt
+    });
+    transaction.set(sourceRef, {
+      kind:'silent-companionship-source', count:sourceCount + 1,
+      updatedAt:FieldValue.serverTimestamp(), expiresAt
+    }, { merge:true });
+    result = { count, bucket, counted:true };
+  });
+
+  logger.info('Silent companionship joined', {
+    bucket,
+    counted:result?.counted === true,
+    appVerified:Boolean(request.app)
+  });
+  return { accepted:true, ...result };
+});
+
+exports.recordSiteVisit = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const now = Date.now();
+  const day = Math.floor(now / 86_400_000);
+  const sourceHash = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const statsRef = db.collection('metadata').doc('site_stats');
+  const receiptRef = db.collection('rate_limits').doc(`site_visit_${day}_${sourceHash}`);
+  let result = null;
+
+  await db.runTransaction(async transaction => {
+    const [statsSnapshot, receiptSnapshot] = await Promise.all([
+      transaction.get(statsRef),
+      transaction.get(receiptRef)
+    ]);
+    const totalVisitors = Math.min(10_000_000, Math.max(0, Number(statsSnapshot.data()?.totalVisitors) || 0));
+    const receiptExpiry = receiptSnapshot.data()?.expiresAt?.toMillis?.() || 0;
+    if (receiptSnapshot.exists && receiptExpiry > now) {
+      result = { totalVisitors, counted:false };
+      return;
+    }
+    const nextTotal = Math.min(10_000_000, totalVisitors + 1);
+    transaction.set(statsRef, { totalVisitors:nextTotal }, { merge:true });
+    transaction.set(receiptRef, {
+      kind:'site-visit', count:1,
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis((day + 2) * 86_400_000)
+    });
+    result = { totalVisitors:nextTotal, counted:true };
+  });
+
+  logger.info('Anonymous site visit recorded', {
+    counted:result?.counted === true,
+    appVerified:Boolean(request.app)
+  });
+  return { accepted:true, ...result };
 });
 
 exports.sendDriftLetter = onCall({

@@ -69,7 +69,20 @@ function validateRoomReactionInput(data) {
   const kind = cleanString(data?.kind, 16).toLowerCase();
   const targetId = cleanString(data?.targetId, 160);
   if (!ALLOWED_REACTION_KINDS.has(kind) || !/^[A-Za-z0-9_-]{1,160}$/.test(targetId)) return null;
-  return { kind, targetId };
+  const result = { kind, targetId };
+  if (data?.neighborIds !== undefined) {
+    if (kind !== 'star' || !Array.isArray(data.neighborIds) || data.neighborIds.length > 2) return null;
+    const neighborIds = data.neighborIds.map(value => cleanString(value, 160));
+    if (neighborIds.some(id => !/^[A-Za-z0-9_-]{1,160}$/.test(id) || id === targetId)) return null;
+    if (new Set(neighborIds).size !== neighborIds.length) return null;
+    result.neighborIds = neighborIds;
+  }
+  return result;
+}
+
+function validateAnonymousClientInput(data) {
+  const clientId = validateDriftClientId(data?.clientId);
+  return clientId ? { clientId } : null;
 }
 
 function containsCrisisSignal(text) {
@@ -111,6 +124,7 @@ module.exports = {
   validateDriftLetterInput,
   validateDriftReceiveInput,
   validateRoomReactionInput,
+  validateAnonymousClientInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
