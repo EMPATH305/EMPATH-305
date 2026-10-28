@@ -212,11 +212,27 @@ exports.submitRoomContent = onCall({
   }
 
   const contentRef = db.collection(collectionByRoom[input.room]).doc();
+  let roomStats = null;
   if (input.room === 'a') {
     const statsRef = db.collection('metadata').doc('room_a_stats');
     await db.runTransaction(async transaction => {
+      const statsSnapshot = await transaction.get(statsRef);
+      const existingStats = statsSnapshot.exists ? statsSnapshot.data() : {};
+      const totalReleased = Math.max(0, Number(existingStats?.totalReleased) || 0) + 1;
+      const kindCounts = Object.fromEntries(
+        ['relationship', 'loss', 'self', 'future', 'unnamed'].map(kind => [
+          kind,
+          Math.max(0, Number(existingStats?.kindCounts?.[kind]) || 0)
+        ])
+      );
+      kindCounts[input.weightKind] += 1;
       transaction.set(contentRef, data);
-      transaction.set(statsRef, { totalReleased:FieldValue.increment(1) }, { merge:true });
+      transaction.set(statsRef, { totalReleased, kindCounts }, { merge:true });
+      roomStats = {
+        totalReleased,
+        sameKind:kindCounts[input.weightKind],
+        weightKind:input.weightKind
+      };
     });
   } else {
     await contentRef.set(data);
@@ -226,7 +242,7 @@ exports.submitRoomContent = onCall({
     contentId:contentRef.id,
     appVerified:Boolean(request.app)
   });
-  return { accepted:true, id:contentRef.id };
+  return { accepted:true, id:contentRef.id, ...(roomStats ? { roomStats } : {}) };
 });
 
 exports.sendDriftLetter = onCall({

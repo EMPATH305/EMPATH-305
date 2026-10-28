@@ -17,8 +17,11 @@ test('accepts only bounded room submissions with server-owned fields', () => {
   assert.deepEqual(validateRoomSubmissionInput({ room:'m', text:'  miss you  ', brightness:99 }), {
     room:'m', text:'miss you'
   });
-  assert.deepEqual(validateRoomSubmissionInput({ room:'a', text:'let go', lifespan:3_600_000 }), {
-    room:'a', text:'let go', lifespan:3_600_000
+  assert.deepEqual(validateRoomSubmissionInput({ room:'a', text:'let go', lifespan:3_600_000, weightKind:'loss' }), {
+    room:'a', text:'let go', lifespan:3_600_000, weightKind:'loss'
+  });
+  assert.deepEqual(validateRoomSubmissionInput({ room:'a', text:'unnamed', lifespan:60_000, weightKind:'too-specific' }), {
+    room:'a', text:'unnamed', lifespan:60_000, weightKind:'unnamed'
   });
   assert.deepEqual(validateRoomSubmissionInput({ room:'e', image:'data:image/webp;base64,AAAA' }), {
     room:'e', image:'data:image/webp;base64,AAAA'
