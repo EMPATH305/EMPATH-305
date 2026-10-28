@@ -105,6 +105,8 @@ const driftIndex = indexes.indexes?.find(index => index.collectionGroup === 'dri
 assert(driftIndex, 'Waiting drift letters must have a delivery index');
 const driftTtl = indexes.fieldOverrides?.find(field => field.collectionGroup === 'drift_letters' && field.fieldPath === 'expiresAt');
 assert.equal(driftTtl?.ttl, true, 'Delivered and abandoned drift letters must expire automatically');
+const constellationTtl = indexes.fieldOverrides?.find(field => field.collectionGroup === 'constellations' && field.fieldPath === 'expiresAt');
+assert.equal(constellationTtl?.ttl, true, 'Constellation lines must expire automatically');
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
 for (const icon of manifest.icons) {
@@ -153,8 +155,12 @@ assert(functionsSource.includes('CONTENT_LIMIT_PER_HOUR = 12'), 'Server-side roo
 assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 6'), 'Room posting must have burst protection without blocking a five-room journey');
 assert(functionsSource.includes('REACTION_LIMIT_PER_HOUR = 40'), 'Room reactions must have a bounded hourly server limit');
 assert(functionsSource.includes('REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000'), 'Duplicate reaction receipts must expire after 48 hours');
+assert(functionsSource.includes('CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000'), 'Constellations must expire after 24 hours');
+assert(functionsSource.includes('SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5'), 'Silent companionship must bound joins per source bucket');
 assert(functionsSource.includes('exports.submitRoomContent = onCall'), 'Public room submissions must have a callable backend');
 assert(functionsSource.includes('exports.reactToRoomContent = onCall'), 'Public room reactions must have a callable backend');
+assert(functionsSource.includes('exports.joinSilentCompanionship = onCall'), 'Silent companionship joins must have a callable backend');
+assert(functionsSource.includes('exports.recordSiteVisit = onCall'), 'Anonymous site visits must have a callable backend');
 assert(functionsSource.includes("throw new HttpsError('already-exists', 'This reaction was already counted.')"), 'Duplicate reactions must be rejected atomically');
 assert(functionsSource.includes("doc(`reaction_${input.kind}_${targetHash}_${participantHash}`)"), 'Reaction receipts must avoid storing a raw participant address or target ID');
 assert(functionsSource.includes('exports.sendDriftLetter = onCall'), 'Room E must have a private drift-letter sender');

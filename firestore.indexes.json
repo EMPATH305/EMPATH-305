@@ -38,6 +38,12 @@
       "fieldPath": "expiresAt",
       "ttl": true,
       "indexes": []
+    },
+    {
+      "collectionGroup": "constellations",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
     }
   ]
 }

@@ -7,6 +7,7 @@ const {
   validateDriftLetterInput,
   validateDriftReceiveInput,
   validateRoomReactionInput,
+  validateAnonymousClientInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -56,9 +57,25 @@ test('accepts only known room reactions with safe document IDs', () => {
   assert.deepEqual(validateRoomReactionInput({ kind:'SHARD', targetId:'shard-1' }), {
     kind:'shard', targetId:'shard-1'
   });
+  assert.deepEqual(validateRoomReactionInput({
+    kind:'star', targetId:'star-1', neighborIds:['star-2', 'star-3']
+  }), {
+    kind:'star', targetId:'star-1', neighborIds:['star-2', 'star-3']
+  });
   assert.equal(validateRoomReactionInput({ kind:'invented', targetId:'abc' }), null);
   assert.equal(validateRoomReactionInput({ kind:'warmth', targetId:'bad/id' }), null);
   assert.equal(validateRoomReactionInput({ kind:'warmth', targetId:'' }), null);
+  assert.equal(validateRoomReactionInput({ kind:'star', targetId:'a', neighborIds:['a'] }), null);
+  assert.equal(validateRoomReactionInput({ kind:'star', targetId:'a', neighborIds:['b', 'b'] }), null);
+  assert.equal(validateRoomReactionInput({ kind:'star', targetId:'a', neighborIds:['b', 'c', 'd'] }), null);
+  assert.equal(validateRoomReactionInput({ kind:'warmth', targetId:'a', neighborIds:['b'] }), null);
+});
+
+test('accepts only bounded anonymous client identifiers', () => {
+  const clientId = 'f'.repeat(32);
+  assert.deepEqual(validateAnonymousClientInput({ clientId }), { clientId });
+  assert.equal(validateAnonymousClientInput({ clientId:'short' }), null);
+  assert.equal(validateAnonymousClientInput({ clientId:'g'.repeat(32) }), null);
 });
 
 test('accepts only known report targets and reasons', () => {
