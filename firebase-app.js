@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, runTransaction, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, increment, limit as firestoreLimit, getCountFromServer, runTransaction, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
 
@@ -28,6 +28,7 @@ const db = initializeFirestore(app, {
 const functions = getFunctions(app, 'asia-east1');
 const submitContentReport = httpsCallable(functions, 'submitContentReport');
 const submitRoomContent = httpsCallable(functions, 'submitRoomContent');
+const reactToRoomContentRequest = httpsCallable(functions, 'reactToRoomContent');
 const sendDriftLetterRequest = httpsCallable(functions, 'sendDriftLetter');
 const receiveDriftLetterRequest = httpsCallable(functions, 'receiveDriftLetter');
 let memoryDriftClientId = '';
@@ -60,6 +61,17 @@ async function createRoomContent(room, payload = {}, returnResult = false) {
         throw new Error('Room submission was not accepted.');
     }
     return returnResult ? result : result.id;
+}
+
+async function reactToRoomContent(kind, targetId) {
+    const response = await reactToRoomContentRequest({ kind, targetId });
+    const result = response?.data;
+    if (!result?.accepted) throw new Error('Room reaction was not accepted.');
+    return result;
+}
+
+function isDuplicateRoomReaction(error) {
+    return String(error?.code || '').endsWith('already-exists');
 }
 
 function showRoomSubmissionError(error) {
@@ -1670,18 +1682,30 @@ function createPShardCard(record) {
         div.dataset.healing = 'true';
         div.setAttribute('aria-busy','true');
         try {
-            await updateDoc(doc(db, 'shards', id), { healed: true });
+            const result = await reactToRoomContent('shard', id);
             data.healed = true;
             div.classList.add('healed');
-            window.pHealedTotal = (window.pHealedTotal || globalCounts.p || 0) + 1;
-            globalCounts.p = window.pHealedTotal;
-            updateDynamicTexts();
-            updateCountersUI();
-            refreshRoomCount('p');
+            div.removeAttribute('tabindex');
+            div.removeAttribute('role');
+            if (result.changed) {
+                window.pHealedTotal = (window.pHealedTotal || globalCounts.p || 0) + 1;
+                globalCounts.p = window.pHealedTotal;
+                updateDynamicTexts();
+                updateCountersUI();
+                refreshRoomCount('p');
+            }
             if (typeof window.playChime === 'function') window.playChime();
             logJourney('p', data.text);
             window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
         } catch (error) {
+            if (isDuplicateRoomReaction(error)) {
+                data.healed = true;
+                div.classList.add('healed');
+                div.removeAttribute('tabindex');
+                div.removeAttribute('role');
+                window.showToast(t('這道裂紋已被你的金光接住', 'You already mended this crack', 'このひびはすでに修復されています', 'Ya reparaste esta grieta', 'Vous avez déjà réparé cette fissure', 'Du hast diesen Riss bereits geflickt', '这道裂纹已被你的金光接住', 'Ви вже відновили цю тріщину', 'To pęknięcie zostało już przez ciebie naprawione'));
+                return;
+            }
             console.error('無法修補碎片:', error);
             window.showToast(t('暫時無法修補，請稍後再試', 'Could not mend this yet. Please try again.', '修復できませんでした。後でもう一度お試しください。', 'No se pudo reparar. Inténtalo de nuevo.', 'Réparation impossible. Réessayez plus tard.', 'Reparatur fehlgeschlagen. Bitte erneut versuchen.', '暂时无法修补，请稍后再试', 'Не вдалося відновити. Спробуйте ще раз.', 'Nie udało się naprawić. Spróbuj ponownie.'));
         } finally {
@@ -1728,12 +1752,15 @@ function createTWarmthItem(record) {
         if(this.classList.contains('pulsed')) return;
         this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
         try {
-            // 使用伺服器原子遞增，避免多人同時點擊時彼此覆蓋計數。
-            await updateDoc(doc(db, 'warmth', id), { echos: increment(1) });
+            await reactToRoomContent('warmth', id);
             window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
             if (typeof window.createEchoRipple === 'function') window.createEchoRipple(e);
             if (typeof window.playChime === 'function') window.playChime();
         } catch (error) {
+            if (isDuplicateRoomReaction(error)) {
+                window.showToast(t('這份共鳴已經送達', 'Your echo has already arrived', 'この共鳴はすでに届いています', 'Tu eco ya llegó', 'Votre écho est déjà arrivé', 'Dein Echo ist bereits angekommen', '这份共鸣已经送达', 'Ваш відгук уже надійшов', 'Twoje echo już dotarło'));
+                return;
+            }
             this.classList.remove('pulsed'); localStorage.removeItem('echoed_'+id);
             window.showToast(t('共鳴沒有送出，請稍後再試', 'Echo was not sent. Please try again.', '共鳴を送信できませんでした。', 'No se envió el eco. Inténtalo de nuevo.', "L'écho n'a pas été envoyé. Réessayez.", 'Echo wurde nicht gesendet. Bitte erneut versuchen.', '共鸣没有送出，请稍后再试'));
             console.error('Echo Pulse failed:', error);
@@ -2933,35 +2960,44 @@ roomM?.addEventListener('click', async e => {
                 prompt,
                 actions || document.createDocumentFragment()
             ); 
-        } else { 
-            try { 
-                await updateDoc(doc(db, "stars", star.id), { brightness: Math.min(star.brightness + 1, 12), clicks: star.clicks + 1 }); 
-                window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦')); 
-                window.triggerHeartbeat(); 
-                
-                // 🎧 觸發 3D 空間水晶音
-                const panValue = (x / window.innerWidth) * 2 - 1;
-                if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
-                
-                // ✨ 觸發全網星系連線魔法 (強制牽起最近的兩顆星，無視距離)
-                let distances = starMessages
-                    .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
-                    .filter(s => s.star.id !== star.id);
-                distances.sort((a,b) => a.d - b.d);
-                let nearest = distances.slice(0, 2).map(d => d.star);
-                
-                nearest.forEach(async n => {
-                    // 將這條金線同步到 Firebase，讓全網看見，並設定 24 小時後消失
-                    await addDoc(collection(db, "constellations"), {
-                        s1Id: star.id,
-                        s2Id: n.id,
-                        createdAt: serverTimestamp()
-                    });
-                });
-                
-                tooltip.classList.remove('active'); 
-                activeStarId = null; 
-            } catch (err) {} 
+        } else {
+            let reaction;
+            try {
+                reaction = await reactToRoomContent('star', star.id);
+            } catch (error) {
+                if (isDuplicateRoomReaction(error)) {
+                    window.showToast(t('你已經點亮過這顆思念', 'You already resonated with this memory', 'この想いにはすでに共鳴しています', 'Ya resonaste con este recuerdo', 'Vous avez déjà fait résonner ce souvenir', 'Du hast bereits mit dieser Erinnerung mitgeschwungen', '你已经点亮过这颗思念', 'Ви вже відгукнулися на цей спогад', 'Ta myśl już została przez ciebie rozświetlona'));
+                } else {
+                    console.error('Star resonance failed:', error);
+                    window.showToast(t('暫時無法點亮，請稍後再試', 'Could not resonate yet. Please try again.', '今は共鳴できません。後でもう一度お試しください。', 'No se pudo resonar. Inténtalo de nuevo.', 'Impossible de résonner pour le moment. Réessayez.', 'Resonanz fehlgeschlagen. Bitte erneut versuchen.', '暂时无法点亮，请稍后再试', 'Не вдалося відгукнутися. Спробуйте ще раз.', 'Nie udało się rozświetlić. Spróbuj ponownie.'));
+                }
+                return;
+            }
+
+            star.brightness = Number(reaction.brightness) || star.brightness;
+            star.clicks = Number(reaction.clicks) || star.clicks;
+            window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦'));
+            window.triggerHeartbeat();
+
+            // 🎧 觸發 3D 空間水晶音
+            const panValue = (x / window.innerWidth) * 2 - 1;
+            if(typeof window.playSpatialChime === 'function') window.playSpatialChime(panValue);
+
+            // ✨ 觸發全網星系連線魔法 (強制牽起最近的兩顆星，無視距離)
+            const nearest = starMessages
+                .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
+                .filter(s => s.star.id !== star.id)
+                .sort((a,b) => a.d - b.d)
+                .slice(0, 2)
+                .map(item => item.star);
+            await Promise.allSettled(nearest.map(n => addDoc(collection(db, "constellations"), {
+                s1Id: star.id,
+                s2Id: n.id,
+                createdAt: serverTimestamp()
+            })));
+
+            tooltip.classList.remove('active');
+            activeStarId = null;
         } 
     } else { 
         tooltip.classList.remove('active'); activeStarId = null; 

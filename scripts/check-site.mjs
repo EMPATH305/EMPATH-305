@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.2.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.3.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -56,6 +56,8 @@ assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSo
 assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
+assert(appSource.includes("httpsCallable(functions, 'reactToRoomContent')"), 'Room reactions must use the rate-limited backend');
+assert(!appSource.includes('updateDoc('), 'Clients must not update room content directly');
 assert(appSource.includes("httpsCallable(functions, 'sendDriftLetter')"), 'Room E must send drift letters through the private backend');
 assert(appSource.includes("httpsCallable(functions, 'receiveDriftLetter')"), 'Room E must receive drift letters through the private backend');
 assert(appSource.includes("createContentActions('drift_letters'"), 'Received drift letters must support hiding and anonymous reporting');
@@ -69,6 +71,10 @@ for (const collectionName of ['emotions', 'stars', 'shards', 'sand', 'warmth']) 
   assert(!appSource.includes(`addDoc(collection(db, "${collectionName}")`), `Clients must not create ${collectionName} directly`);
   const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
   assert(ruleBlock?.[1].includes('allow create: if false;'), `${collectionName} creates must be server-only`);
+}
+for (const collectionName of ['stars', 'shards', 'warmth']) {
+  const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
+  assert(ruleBlock?.[1].includes('allow update, delete: if false;'), `${collectionName} updates must be server-only`);
 }
 assert(appSource.includes("createRoomContent('a', { text, lifespan, weightKind }, true)"), 'Room A content and anonymous category count must share the server transaction');
 assert(appSource.includes("localStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID');
@@ -110,7 +116,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.2.0'), 'Service worker cache must be bumped for v21.2.0');
+assert(serviceWorker.includes('empath-cache-v21.3.0'), 'Service worker cache must be bumped for v21.3.0');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
 for (const icon of manifest.icons) {
