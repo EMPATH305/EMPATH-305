@@ -15,13 +15,15 @@ service cloud.firestore {
     }
 
     match /emotions/{id} {
-      allow read: if withinPublicRetention(resource.data);
+      allow get: if withinPublicRetention(resource.data);
+      allow list: if request.query.limit != null && request.query.limit <= 30;
       allow create: if false;
       allow update, delete: if false;
     }
 
     match /stars/{id} {
-      allow read: if withinPublicRetention(resource.data);
+      allow get: if withinPublicRetention(resource.data);
+      allow list: if request.query.limit != null && request.query.limit <= 80;
       allow create: if false;
       allow update, delete: if false;
     }
@@ -32,7 +34,8 @@ service cloud.firestore {
     }
 
     match /shards/{id} {
-      allow read: if withinPublicRetention(resource.data);
+      allow get: if withinPublicRetention(resource.data);
+      allow list: if request.query.limit != null && request.query.limit <= 60;
       allow create: if false;
       allow update, delete: if false;
     }
@@ -50,7 +53,8 @@ service cloud.firestore {
     }
 
     match /warmth/{id} {
-      allow read: if withinPublicRetention(resource.data);
+      allow get: if withinPublicRetention(resource.data);
+      allow list: if request.query.limit != null && request.query.limit <= 30;
       allow create: if false;
       allow update, delete: if false;
     }
