@@ -42,6 +42,7 @@ const CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000;
 const SILENT_BUCKET_MS = 5 * 60 * 1000;
 const SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5;
 const SOUL_MAINTENANCE_LIMIT_PER_HOUR = 8;
+const PUBLIC_CONTENT_RETENTION_MS = 180 * 24 * 60 * 60 * 1000;
 const DRIFT_WAITING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
@@ -247,6 +248,9 @@ exports.submitRoomContent = onCall({
     createdAt:FieldValue.serverTimestamp(),
     appVerified:Boolean(request.app)
   };
+  if (input.room !== 'a') {
+    data.expireAt = Timestamp.fromMillis(now + PUBLIC_CONTENT_RETENTION_MS);
+  }
   if (input.room === 'e') {
     if (input.text) data.text = input.text;
     if (input.image) data.image = input.image;
@@ -296,7 +300,15 @@ exports.submitRoomContent = onCall({
       };
     });
   } else {
-    await contentRef.set(data);
+    const publicStatsRef = db.collection('metadata').doc('public_room_stats');
+    const statsFieldByRoom = { e:'emotions', m:'stars', p:'shards', t:'warmth' };
+    await db.runTransaction(async transaction => {
+      transaction.set(contentRef, data);
+      transaction.set(publicStatsRef, {
+        [statsFieldByRoom[input.room]]:FieldValue.increment(1),
+        updatedAt:FieldValue.serverTimestamp()
+      }, { merge:true });
+    });
   }
   logger.info('Anonymous room content created', {
     room:input.room,
@@ -327,6 +339,7 @@ exports.reactToRoomContent = onCall({
     .digest('hex')
     .slice(0, 24);
   const contentRef = db.collection(target.collection).doc(input.targetId);
+  const publicStatsRef = db.collection('metadata').doc('public_room_stats');
   const neighborRefs = (input.neighborIds || []).map(id => db.collection('stars').doc(id));
   const constellationRefs = neighborRefs.map(() => db.collection('constellations').doc());
   const receiptRef = db.collection('rate_limits')
@@ -365,7 +378,13 @@ exports.reactToRoomContent = onCall({
       reactionResult = { clicks, brightness, connectedIds };
     } else if (input.kind === 'shard') {
       const healed = content.healed === true;
-      if (!healed) transaction.update(contentRef, { healed:true });
+      if (!healed) {
+        transaction.update(contentRef, { healed:true });
+        transaction.set(publicStatsRef, {
+          healedShards:FieldValue.increment(1),
+          updatedAt:FieldValue.serverTimestamp()
+        }, { merge:true });
+      }
       reactionResult = { healed:true, changed:!healed };
     } else {
       const echos = Math.min(Math.max(0, Number(content.echos) || 0) + 1, 1_000_000);
@@ -482,6 +501,90 @@ exports.recordSiteVisit = onCall({
     appVerified:Boolean(request.app)
   });
   return { accepted:true, ...result };
+});
+
+exports.initializePublicRetention = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED,
+  timeoutSeconds:120,
+  memory:'512MiB'
+}, async request => {
+  if (request.data?.migrationId !== 'public-retention-v1') {
+    throw new HttpsError('invalid-argument', 'Invalid retention migration request.');
+  }
+  await enforceSoulMaintenanceLimit(request);
+  const now = Date.now();
+  const markerRef = db.collection('metadata').doc('public_retention_v1');
+  const statsRef = db.collection('metadata').doc('public_room_stats');
+  let alreadyCompleted = false;
+  await db.runTransaction(async transaction => {
+    const markerSnapshot = await transaction.get(markerRef);
+    const marker = markerSnapshot.data() || {};
+    if (marker.completed === true) {
+      alreadyCompleted = true;
+      return;
+    }
+    const lockUntil = marker.lockUntil?.toMillis?.() || 0;
+    if (lockUntil > now) {
+      throw new HttpsError('resource-exhausted', 'Retention migration is already running.');
+    }
+    transaction.set(markerRef, {
+      completed:false,
+      lockUntil:Timestamp.fromMillis(now + 5 * 60 * 1000),
+      updatedAt:FieldValue.serverTimestamp()
+    }, { merge:true });
+  });
+  if (alreadyCompleted) {
+    const statsSnapshot = await statsRef.get();
+    return { completed:true, alreadyCompleted:true, stats:statsSnapshot.data() || {} };
+  }
+
+  const collections = ['emotions', 'stars', 'shards', 'warmth'];
+  const snapshots = {};
+  for (const collectionName of collections) {
+    snapshots[collectionName] = await db.collection(collectionName)
+      .select('createdAt', 'expireAt', 'healed')
+      .get();
+  }
+
+  const writer = db.bulkWriter();
+  let backfilled = 0;
+  for (const collectionName of collections) {
+    snapshots[collectionName].forEach(documentSnapshot => {
+      const data = documentSnapshot.data() || {};
+      if (data.expireAt?.toMillis?.()) return;
+      const createdAt = data.createdAt?.toMillis?.() || now;
+      writer.update(documentSnapshot.ref, {
+        expireAt:Timestamp.fromMillis(createdAt + PUBLIC_CONTENT_RETENTION_MS)
+      });
+      backfilled += 1;
+    });
+  }
+  await writer.close();
+
+  const stats = {
+    emotions:snapshots.emotions.size,
+    stars:snapshots.stars.size,
+    shards:snapshots.shards.size,
+    healedShards:snapshots.shards.docs.filter(documentSnapshot => documentSnapshot.data()?.healed === true).length,
+    warmth:snapshots.warmth.size
+  };
+  await db.runTransaction(async transaction => {
+    transaction.set(statsRef, {
+      ...stats,
+      initializedAt:FieldValue.serverTimestamp(),
+      updatedAt:FieldValue.serverTimestamp()
+    });
+    transaction.set(markerRef, {
+      completed:true,
+      backfilled,
+      completedAt:FieldValue.serverTimestamp(),
+      updatedAt:FieldValue.serverTimestamp(),
+      lockUntil:FieldValue.delete()
+    }, { merge:true });
+  });
+  logger.info('Public content retention initialized', { backfilled, stats });
+  return { completed:true, alreadyCompleted:false, backfilled, stats };
 });
 
 exports.retireLegacySoulJourney = onCall({
