@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.4.0'; // Security closure for shared presence
+const CACHE_NAME = 'empath-cache-v21.5.0'; // End-to-end encrypted Soul backups
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -9,6 +9,7 @@ self.addEventListener('install', (event) => {
                 './index.html',
                 './styles.css',
                 './firebase-app.js',
+  './soul-crypto.mjs',
                 './collective-calendar.js',
                 './safety-guard.js',
                 './interactions.js',
