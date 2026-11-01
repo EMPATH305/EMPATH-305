@@ -80,20 +80,40 @@ service cloud.firestore {
     }
 
     match /user_journeys/{soulKey} {
-      allow get: if soulKey.matches('^(EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}|EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8})$');
+      allow get: if soulKey.matches('^(EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}|EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}|sj_[a-f0-9]{64})$');
       allow list: if false;
-      allow create, update: if soulKey.matches('^(EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}|EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8})$')
-        && request.resource.data.keys().hasOnly([
-          'counters', 'events', 'letters', 'visitCount', 'schemaVersion', 'clientUpdatedAt', 'updatedAt'
-        ])
-        && request.resource.data.counters is map
-        && request.resource.data.events is list
-        && request.resource.data.events.size() <= 500
-        && (!('letters' in request.resource.data)
-          || (request.resource.data.letters is list && request.resource.data.letters.size() <= 50))
-        && request.resource.data.schemaVersion == 2
-        && request.resource.data.clientUpdatedAt is int
-        && request.resource.data.updatedAt is timestamp;
+      allow create, update: if (
+        soulKey.matches('^sj_[a-f0-9]{64}$')
+          && request.resource.data.keys().hasOnly([
+            'schemaVersion', 'cipher', 'kdf', 'iterations', 'salt', 'iv', 'ciphertext',
+            'clientUpdatedAt', 'updatedAt'
+          ])
+          && request.resource.data.schemaVersion == 3
+          && request.resource.data.cipher == 'AES-GCM-256'
+          && request.resource.data.kdf == 'PBKDF2-SHA256'
+          && request.resource.data.iterations == 210000
+          && request.resource.data.salt is string
+          && request.resource.data.salt.size() <= 64
+          && request.resource.data.iv is string
+          && request.resource.data.iv.size() <= 32
+          && request.resource.data.ciphertext is string
+          && request.resource.data.ciphertext.size() <= 750000
+          && request.resource.data.clientUpdatedAt is int
+          && request.resource.data.updatedAt is timestamp
+      ) || (
+        soulKey.matches('^(EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}|EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8})$')
+          && request.resource.data.keys().hasOnly([
+            'counters', 'events', 'letters', 'visitCount', 'schemaVersion', 'clientUpdatedAt', 'updatedAt'
+          ])
+          && request.resource.data.counters is map
+          && request.resource.data.events is list
+          && request.resource.data.events.size() <= 500
+          && (!('letters' in request.resource.data)
+            || (request.resource.data.letters is list && request.resource.data.letters.size() <= 50))
+          && request.resource.data.schemaVersion == 2
+          && request.resource.data.clientUpdatedAt is int
+          && request.resource.data.updatedAt is timestamp
+      );
       allow delete: if false;
     }
 

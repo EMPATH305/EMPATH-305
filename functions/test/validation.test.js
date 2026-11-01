@@ -8,6 +8,7 @@ const {
   validateDriftReceiveInput,
   validateRoomReactionInput,
   validateAnonymousClientInput,
+  validateSoulKeyInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -76,6 +77,15 @@ test('accepts only bounded anonymous client identifiers', () => {
   assert.deepEqual(validateAnonymousClientInput({ clientId }), { clientId });
   assert.equal(validateAnonymousClientInput({ clientId:'short' }), null);
   assert.equal(validateAnonymousClientInput({ clientId:'g'.repeat(32) }), null);
+});
+
+test('accepts only supported Soul Key formats', () => {
+  assert.deepEqual(validateSoulKeyInput({ soulKey:' emp-00112233-44556677-8899aabb-ccddeeff ' }), {
+    soulKey:'EMP-00112233-44556677-8899AABB-CCDDEEFF'
+  });
+  assert.deepEqual(validateSoulKeyInput({ soulKey:'EMP-ABCD-EFGH' }), { soulKey:'EMP-ABCD-EFGH' });
+  assert.equal(validateSoulKeyInput({ soulKey:'EMP-short' }), null);
+  assert.equal(validateSoulKeyInput({ soulKey:'EMP-../../private-data' }), null);
 });
 
 test('accepts only known report targets and reasons', () => {
