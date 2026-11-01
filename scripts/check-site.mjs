@@ -113,6 +113,11 @@ assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclare
 assert(rules.includes('match /metadata/room_a_stats'), 'Rules must protect the Room A aggregate counter');
 assert(rules.includes("duration.value(180, 'd')"), 'Rules must deny E/M/P/T content older than 180 days');
 assert(rules.includes('match /metadata/public_room_stats'), 'Rules must expose only the server-owned public room totals');
+for (const [collectionName, maxLimit] of [['emotions', 30], ['stars', 80], ['shards', 60], ['warmth', 30]]) {
+  const ruleBlock = rules.match(new RegExp(`match /${collectionName}/\\{id\\} \\{([\\s\\S]*?)\\n    \\}`));
+  assert(ruleBlock?.[1].includes('allow get: if withinPublicRetention(resource.data);'), `${collectionName} direct reads must enforce retention`);
+  assert(ruleBlock?.[1].includes(`request.query.limit <= ${maxLimit}`), `${collectionName} list reads must match the bounded feed`);
+}
 assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect silent companionship counts');
 for (const protectedPath of ['constellations/{id}', 'metadata/site_stats', 'metadata/silent_presence']) {
   const ruleBlock = rules.match(new RegExp(`match /${protectedPath.replace(/[{}]/g, '\\$&')} \\{([\\s\\S]*?)\\n    \\}`));
