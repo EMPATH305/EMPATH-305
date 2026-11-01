@@ -85,6 +85,14 @@ function validateAnonymousClientInput(data) {
   return clientId ? { clientId } : null;
 }
 
+function validateSoulKeyInput(data) {
+  if (typeof data?.soulKey !== 'string') return null;
+  const soulKey = data.soulKey.trim().toUpperCase();
+  const validLegacyKey = /^EMP-[A-Z0-9]{4,12}-[A-Z0-9]{4,12}$/.test(soulKey);
+  const validCurrentKey = /^EMP-(?:[A-Z0-9]{8}-){3}[A-Z0-9]{8}$/.test(soulKey);
+  return validLegacyKey || validCurrentKey ? { soulKey } : null;
+}
+
 function containsCrisisSignal(text) {
   return /(想死|不想活|活不下去|結束生命|自殺|傷害自己|不想存在|死にたい|自殺|want\s+to\s+die|kill\s+myself|end\s+my\s+life|hurt\s+myself|suicid)/i.test(String(text || ''));
 }
@@ -125,6 +133,7 @@ module.exports = {
   validateDriftReceiveInput,
   validateRoomReactionInput,
   validateAnonymousClientInput,
+  validateSoulKeyInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,

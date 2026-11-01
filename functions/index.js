@@ -15,6 +15,7 @@ const {
   validateDriftReceiveInput,
   validateRoomReactionInput,
   validateAnonymousClientInput,
+  validateSoulKeyInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -40,6 +41,7 @@ const REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000;
 const CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000;
 const SILENT_BUCKET_MS = 5 * 60 * 1000;
 const SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5;
+const SOUL_MAINTENANCE_LIMIT_PER_HOUR = 8;
 const DRIFT_WAITING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
@@ -64,6 +66,30 @@ function requestIp(request) {
 
 function rateLimitKey(request, salt) {
   return crypto.createHmac('sha256', salt).update(requestIp(request)).digest('hex').slice(0, 40);
+}
+
+function soulStorageId(soulKey) {
+  return `sj_${crypto.createHash('sha256').update(`EMPATH-SOUL-ID:${soulKey}`).digest('hex')}`;
+}
+
+async function enforceSoulMaintenanceLimit(request) {
+  const now = Date.now();
+  const hour = Math.floor(now / 3_600_000);
+  const key = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const ref = db.collection('rate_limits').doc(`soul_maintenance_${hour}_${key}`);
+  await db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    const count = snapshot.exists ? Math.max(0, Number(snapshot.data()?.count) || 0) : 0;
+    if (count >= SOUL_MAINTENANCE_LIMIT_PER_HOUR) {
+      throw new HttpsError('resource-exhausted', 'Too many Soul backup requests. Try again later.');
+    }
+    transaction.set(ref, {
+      kind:'soul-maintenance',
+      count:count + 1,
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis((hour + 2) * 3_600_000)
+    }, { merge:true });
+  });
 }
 
 async function enforceReportLimit(request) {
@@ -456,6 +482,68 @@ exports.recordSiteVisit = onCall({
     appVerified:Boolean(request.app)
   });
   return { accepted:true, ...result };
+});
+
+exports.retireLegacySoulJourney = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateSoulKeyInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid Soul Key.');
+  await enforceSoulMaintenanceLimit(request);
+  const encryptedRef = db.collection('user_journeys').doc(soulStorageId(input.soulKey));
+  const legacyRef = db.collection('user_journeys').doc(input.soulKey);
+  let retired = false;
+  await db.runTransaction(async transaction => {
+    const [encryptedSnapshot, legacySnapshot] = await Promise.all([
+      transaction.get(encryptedRef),
+      transaction.get(legacyRef)
+    ]);
+    const encrypted = encryptedSnapshot.data() || {};
+    if (!encryptedSnapshot.exists || encrypted.schemaVersion !== 3 || typeof encrypted.ciphertext !== 'string') {
+      throw new HttpsError('failed-precondition', 'Encrypted Soul backup must exist before legacy data is retired.');
+    }
+    if (legacySnapshot.exists) {
+      transaction.delete(legacyRef);
+      retired = true;
+    }
+  });
+  logger.info('Legacy Soul journey retired', {
+    storageId:soulStorageId(input.soulKey),
+    retired,
+    appVerified:Boolean(request.app)
+  });
+  return { completed:true, retired };
+});
+
+exports.deleteSoulJourney = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateSoulKeyInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid Soul Key.');
+  await enforceSoulMaintenanceLimit(request);
+  const encryptedRef = db.collection('user_journeys').doc(soulStorageId(input.soulKey));
+  const legacyRef = db.collection('user_journeys').doc(input.soulKey);
+  let encryptedDeleted = false;
+  let legacyDeleted = false;
+  await db.runTransaction(async transaction => {
+    const [encryptedSnapshot, legacySnapshot] = await Promise.all([
+      transaction.get(encryptedRef),
+      transaction.get(legacyRef)
+    ]);
+    encryptedDeleted = encryptedSnapshot.exists;
+    legacyDeleted = legacySnapshot.exists;
+    if (encryptedDeleted) transaction.delete(encryptedRef);
+    if (legacyDeleted) transaction.delete(legacyRef);
+  });
+  logger.info('Soul journey deleted by key holder', {
+    storageId:soulStorageId(input.soulKey),
+    encryptedDeleted,
+    legacyDeleted,
+    appVerified:Boolean(request.app)
+  });
+  return { completed:true, deleted:encryptedDeleted || legacyDeleted };
 });
 
 exports.sendDriftLetter = onCall({
