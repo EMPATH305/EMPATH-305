@@ -9,14 +9,19 @@ service cloud.firestore {
       return data.createdAt is timestamp;
     }
 
+    function withinPublicRetention(data) {
+      return data.createdAt is timestamp
+        && data.createdAt > request.time - duration.value(180, 'd');
+    }
+
     match /emotions/{id} {
-      allow read: if true;
+      allow read: if withinPublicRetention(resource.data);
       allow create: if false;
       allow update, delete: if false;
     }
 
     match /stars/{id} {
-      allow read: if true;
+      allow read: if withinPublicRetention(resource.data);
       allow create: if false;
       allow update, delete: if false;
     }
@@ -27,7 +32,7 @@ service cloud.firestore {
     }
 
     match /shards/{id} {
-      allow read: if true;
+      allow read: if withinPublicRetention(resource.data);
       allow create: if false;
       allow update, delete: if false;
     }
@@ -45,7 +50,7 @@ service cloud.firestore {
     }
 
     match /warmth/{id} {
-      allow read: if true;
+      allow read: if withinPublicRetention(resource.data);
       allow create: if false;
       allow update, delete: if false;
     }
@@ -70,6 +75,11 @@ service cloud.firestore {
     }
 
     match /metadata/room_a_stats {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /metadata/public_room_stats {
       allow read: if true;
       allow write: if false;
     }

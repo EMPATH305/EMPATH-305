@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.5.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.6.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -43,6 +43,13 @@ assert(/#room-a\s+\.a-release-witness\s*\{[^}]*grid-column:\s*7\/13!important;[^
 assert(/#room-a\s+#a-feed-wrapper\s*\{[^}]*grid-column:\s*1\/13!important;[^}]*grid-row:\s*9!important;/s.test(styles), 'Room A feed must remain below the witness and safety note');
 assert(/where\(["']expireAt["'],\s*["']>["'],\s*roomAQueryCutoff\(\)\)/.test(appSource), 'Room A must hide expired records at query time');
 assert(appSource.includes('Date.now() + 10000'), 'Room A query cutoff must stay ahead of Firestore request.time');
+assert(appSource.includes('PUBLIC_CONTENT_RETENTION_MS = 180 * 24 * 60 * 60 * 1000'), 'Public room content must use a 180-day retention window');
+assert(appSource.includes('Date.now() - PUBLIC_CONTENT_RETENTION_MS + 10000'), 'Public room queries must stay inside the rules boundary');
+for (const collectionName of ['emotions', 'stars', 'shards', 'warmth']) {
+  assert(new RegExp(`collection\\(db, ["']${collectionName}["']\\), where\\(["']createdAt["'], ["']>["'], publicContentCutoff\\(\\)\\)`).test(appSource), `${collectionName} feed must exclude content older than 180 days`);
+}
+assert(appSource.includes("doc(db, 'metadata', 'public_room_stats')"), 'Public room totals must use durable server-owned metadata');
+assert(!appSource.includes('getCountFromServer'), 'Clients must not recount collections that are being expired');
 assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consent gated');
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
 assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired message fragments');
@@ -104,6 +111,8 @@ assert(rules.includes('allow get: if resource.data.expireAt is timestamp'), 'Rul
 assert(rules.includes('request.query.limit <= 30'), 'Room A collection reads must be bounded');
 assert(rules.includes('allow read, write: if false'), 'Rules must deny undeclared collections by default');
 assert(rules.includes('match /metadata/room_a_stats'), 'Rules must protect the Room A aggregate counter');
+assert(rules.includes("duration.value(180, 'd')"), 'Rules must deny E/M/P/T content older than 180 days');
+assert(rules.includes('match /metadata/public_room_stats'), 'Rules must expose only the server-owned public room totals');
 assert(rules.includes('match /metadata/silent_presence'), 'Rules must protect silent companionship counts');
 for (const protectedPath of ['constellations/{id}', 'metadata/site_stats', 'metadata/silent_presence']) {
   const ruleBlock = rules.match(new RegExp(`match /${protectedPath.replace(/[{}]/g, '\\$&')} \\{([\\s\\S]*?)\\n    \\}`));
@@ -140,7 +149,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.5.0'), 'Service worker cache must be bumped for v21.5.0');
+assert(serviceWorker.includes('empath-cache-v21.6.0'), 'Service worker cache must be bumped for v21.6.0');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
