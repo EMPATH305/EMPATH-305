@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, getCountFromServer, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
@@ -192,6 +192,10 @@ let roomAReleasedTotal = 0;
 // Keep the client query slightly ahead of Firestore request.time so the rules
 // can prove every returned Room A document is still unexpired.
 const roomAQueryCutoff = () => Timestamp.fromMillis(Date.now() + 10000);
+const PUBLIC_CONTENT_RETENTION_MS = 180 * 24 * 60 * 60 * 1000;
+// Keep the client cutoff slightly newer than the rules boundary so Firestore
+// can prove every document returned by E/M/P/T is within the 180-day window.
+const publicContentCutoff = () => Timestamp.fromMillis(Date.now() - PUBLIC_CONTENT_RETENTION_MS + 10000);
 const ACTIVE_ROOM = ['e','m','p','a','t','h'].find(key =>
     document.documentElement.classList.contains(`empath-room-${key}`)
 ) || '';
@@ -1500,63 +1504,17 @@ function handleDataError(room,error) {
     setDataState(room,'error',retryDataSubscriptions);
 }
 
-async function fetchRealCounts() {
-    try {
-        const [eSnap, mSnap, pSnap, aSnap, tSnap] = await Promise.all([
-            getCountFromServer(collection(db, "emotions")),
-            getCountFromServer(collection(db, "stars")),
-            getCountFromServer(query(collection(db, "shards"), where("healed", "==", true))),
-            getCountFromServer(query(collection(db, "sand"), where("expireAt", ">", roomAQueryCutoff()), firestoreLimit(30))),
-            getCountFromServer(collection(db, "warmth")),
-        ]);
-        globalCounts.e = eSnap.data().count;
-        globalCounts.m = mSnap.data().count;
-        globalCounts.p = pSnap.data().count;
-        globalCounts.a = aSnap.data().count;
-        globalCounts.t = tSnap.data().count;
-        updateCountersUI();
-    } catch(e) {
-        console.error(e);
-        // 計數失敗不覆寫已知數字，避免介面出現 undefined 或誤導性的 0。
-        updateCountersUI();
-    }
+function fetchRealCounts() {
+    // Durable totals arrive through metadata/public_room_stats. Keeping this
+    // entry point avoids coupling room rendering to counter availability.
+    updateCountersUI();
 }
 
-async function refreshRoomCount(room) {
-    const collections = { e:'emotions', m:'stars', a:'sand', t:'warmth' };
-    try {
-        if (room === 'p') {
-            const [totalSnap, healedSnap] = await Promise.all([
-                getCountFromServer(collection(db, 'shards')),
-                getCountFromServer(query(collection(db, 'shards'), where('healed', '==', true)))
-            ]);
-            window.pTotalShards = totalSnap.data().count;
-            window.pHealedTotal = healedSnap.data().count;
-            globalCounts.p = window.pHealedTotal;
-            const baseTotal = 300;
-            const baseHealed = 142;
-            const ratio = (window.pTotalShards + baseTotal) > 0
-                ? (window.pHealedTotal + baseHealed) / (window.pTotalShards + baseTotal)
-                : 0;
-            const pct = (ratio * 100).toFixed(1);
-            const bar = document.getElementById('global-healing-bar');
-            const pctText = document.getElementById('global-healing-pct');
-            if (bar) bar.style.width = pct + '%';
-            if (pctText) pctText.textContent = pct + '%';
-            window.drawKintsugiVessel?.();
-            updateDynamicTexts();
-        } else if (collections[room]) {
-            const countTarget = room === 'a'
-                ? query(collection(db, collections[room]), where("expireAt", ">", roomAQueryCutoff()), firestoreLimit(30))
-                : collection(db, collections[room]);
-            const snap = await getCountFromServer(countTarget);
-            globalCounts[room] = snap.data().count;
-            if (room === 'm') window.updateMStats?.();
-        }
-        updateCountersUI();
-    } catch (error) {
-        console.error(`Room ${room.toUpperCase()} count refresh failed:`, error);
-    }
+function refreshRoomCount(room) {
+    // Public totals are server-owned and update in real time. Room A retains
+    // its separate release aggregate subscription.
+    if (room === 'm') window.updateMStats?.();
+    updateCountersUI();
 }
   
 function subscribeAll() {
@@ -1572,7 +1530,7 @@ function subscribeAll() {
     setDataState(ACTIVE_ROOM,'loading');
 
     // 1. 監聽情緒出口：首頁只保留近期 30 筆，避免為初始 3 張卡下載整批歷史資料。
-    if (ACTIVE_ROOM === 'e') firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 'e') firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         allEmotions = [];
         snapshot.forEach(docSnap => {
             if (!window.EmpathSafety?.isHidden('emotions', docSnap.id)) {
@@ -1807,7 +1765,7 @@ window.renderTWarmthFeed = function() {
 // 📦 接近互動房間後才載入其即時資料
 function subscribeOtherRooms() {
     // 2. 監聽星星 (修正全域變數綁定)
-    if (ACTIVE_ROOM === 'm') firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
+    if (ACTIVE_ROOM === 'm') firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
@@ -1842,7 +1800,7 @@ function subscribeOtherRooms() {
     }));
 
     // 4. 監聽碎片與金繼進度；畫面只渲染目前需要的批次
-    if (ACTIVE_ROOM === 'p') firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
+    if (ACTIVE_ROOM === 'p') firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
         window.pShardRecords = [];
         window.pShardDataReady = true;
@@ -1915,7 +1873,7 @@ function subscribeOtherRooms() {
     },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
-    if (ACTIVE_ROOM === 't') firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 't') firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         const feed = document.getElementById('t-feed'); if(!feed) return;
         window.tWarmthRecords = [];
         snapshot.forEach(docSnap => {
@@ -1947,11 +1905,30 @@ function subscribeSiteStats() {
     }, error => console.error('Site visitor total failed:', error)));
 }
 
+function subscribePublicRoomStats() {
+    const metaRef = doc(db, 'metadata', 'public_room_stats');
+    firestoreUnsubs.push(onSnapshot(metaRef, docSnap => {
+        if (!docSnap.exists()) return;
+        const stats = docSnap.data();
+        globalCounts.e = Number(stats.emotions) || 0;
+        globalCounts.m = Number(stats.stars) || 0;
+        window.pTotalShards = Number(stats.shards) || 0;
+        window.pHealedTotal = Number(stats.healedShards) || 0;
+        globalCounts.p = window.pHealedTotal;
+        globalCounts.t = Number(stats.warmth) || 0;
+        window.updateMStats?.();
+        window.drawKintsugiVessel?.();
+        updateDynamicTexts();
+        updateCountersUI();
+    }, error => console.error('Public room totals failed:', error)));
+}
+
 function subscribeRealtimeData() {
     // Order matters: subscribeAll uses the shared array as its duplicate guard.
     // Add room feeds first, then the counters that must survive retry/background cycles.
     subscribeAll();
     subscribeRoomAReleaseStats();
+    subscribePublicRoomStats();
     subscribeSiteStats();
 }
 
