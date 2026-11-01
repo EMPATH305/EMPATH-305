@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.6.0'; // 180-day public content retention
+const CACHE_NAME = 'empath-cache-v21.6.1'; // Public retention statistics hotfix
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者

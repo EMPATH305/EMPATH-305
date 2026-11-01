@@ -1510,6 +1510,21 @@ function fetchRealCounts() {
     updateCountersUI();
 }
 
+function updatePHealingProgress() {
+    const total = Number(window.pTotalShards) || 0;
+    const healed = Number(window.pHealedTotal) || 0;
+    const baseTotal = 300;
+    const baseHealed = 142;
+    const ratio = (total + baseTotal) > 0
+        ? (healed + baseHealed) / (total + baseTotal)
+        : 0;
+    const pct = `${(ratio * 100).toFixed(1)}%`;
+    const bar = document.getElementById('global-healing-bar');
+    const pctText = document.getElementById('global-healing-pct');
+    if (bar) bar.style.width = pct;
+    if (pctText) pctText.textContent = pct;
+}
+
 function refreshRoomCount(room) {
     // Public totals are server-owned and update in real time. Room A retains
     // its separate release aggregate subscription.
@@ -1653,6 +1668,7 @@ function createPShardCard(record) {
             if (result.changed) {
                 window.pHealedTotal = (window.pHealedTotal || globalCounts.p || 0) + 1;
                 globalCounts.p = window.pHealedTotal;
+                updatePHealingProgress();
                 updateDynamicTexts();
                 updateCountersUI();
                 refreshRoomCount('p');
@@ -1820,6 +1836,7 @@ function subscribeOtherRooms() {
             window.pTotalShards = Math.max(snapshot.size, window.pHealedTotal);
         }
         globalCounts.p = window.pHealedTotal;
+        updatePHealingProgress();
         
         if(typeof window.drawKintsugiVessel === 'function') window.drawKintsugiVessel();
         updateDynamicTexts();
@@ -1916,6 +1933,7 @@ function subscribePublicRoomStats() {
         window.pHealedTotal = Number(stats.healedShards) || 0;
         globalCounts.p = window.pHealedTotal;
         globalCounts.t = Number(stats.warmth) || 0;
+        updatePHealingProgress();
         window.updateMStats?.();
         window.drawKintsugiVessel?.();
         updateDynamicTexts();

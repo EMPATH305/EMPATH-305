@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.6.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.6.1', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -50,6 +50,8 @@ for (const collectionName of ['emotions', 'stars', 'shards', 'warmth']) {
 }
 assert(appSource.includes("doc(db, 'metadata', 'public_room_stats')"), 'Public room totals must use durable server-owned metadata');
 assert(!appSource.includes('getCountFromServer'), 'Clients must not recount collections that are being expired');
+assert(appSource.includes('function updatePHealingProgress()'), 'Room P must recompute healing progress from durable totals');
+assert(/subscribePublicRoomStats[\s\S]*updatePHealingProgress\(\)/.test(appSource), 'Room P progress must refresh when aggregate stats arrive');
 assert(appSource.includes('empath_analytics_consent'), 'Analytics must be consent gated');
 assert(appSource.includes('empath_crisis_region'), 'Crisis support must use an explicit region preference');
 assert(!appSource.includes('randomMsg.slice'), 'Room A must never replay expired message fragments');
@@ -154,7 +156,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.6.0'), 'Service worker cache must be bumped for v21.6.0');
+assert(serviceWorker.includes('empath-cache-v21.6.1'), 'Service worker cache must be bumped for v21.6.1');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
