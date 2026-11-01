@@ -403,8 +403,8 @@ try {
 
     <div class="sync-box">
       <div class="sync-title" data-zh="SOUL SYNC — 靈魂共振同步" data-en="SOUL SYNC — Cloud Sync" data-ja="SOUL SYNC — クラウド同期" data-es="SOUL SYNC — Sincronización" data-fr="SOUL SYNC — Synchronisation" data-de="SOUL SYNC — Synchronisierung" data-zh-cn="SOUL SYNC — 灵魂共振同步">SOUL SYNC — 靈魂共振同步</div>
-      <p style="font-size:13px; color:var(--muted); line-height:1.8;" data-zh="無需建立公開帳號。靈魂鑰匙可在其他裝置合併足跡；任何取得鑰匙的人都能讀取這份備份，因此請自行妥善保存。EMPATH 不會替你找回遺失的鑰匙。" data-en="No public account is required. A Soul Key can merge your footprints on another device. Anyone who has the key can read that backup, so keep it private; EMPATH cannot recover a lost key." data-ja="公開アカウントは不要です。魂の鍵は大切に保管してください。" data-es="No se requiere una cuenta pública. Guarda tu Llave del Alma de forma privada." data-fr="Aucun compte public n'est requis. Gardez votre Clé de l'Âme privée." data-de="Kein öffentliches Konto erforderlich. Bewahre deinen Seelenschlüssel sicher auf." data-zh-cn="无需建立公开账号。灵魂钥匙可在其他设备合并足迹；任何取得钥匙的人都能读取这份备份，请妥善保存。EMPATH 无法找回遗失的钥匙。">
-        無需建立公開帳號。靈魂鑰匙可在其他裝置合併足跡；任何取得鑰匙的人都能讀取這份備份，因此請自行妥善保存。EMPATH 不會替你找回遺失的鑰匙。
+      <p style="font-size:13px; color:var(--muted); line-height:1.8;" data-zh="無需建立公開帳號。足跡與未來信會先在這台裝置加密，再同步到雲端；EMPATH 只保存密文。靈魂鑰匙是唯一解密方式，遺失後無法復原。" data-en="No public account is required. Footprints and future letters are encrypted on this device before cloud sync; EMPATH stores only ciphertext. Your Soul Key is the only way to decrypt them and cannot be recovered if lost." data-ja="公開アカウントは不要です。足跡と未来への手紙は、この端末で暗号化されてからクラウドに同期されます。魂の鍵を失うと復元できません。" data-es="No se requiere una cuenta pública. Las huellas y cartas se cifran en este dispositivo antes de sincronizarse. Si pierdes la Llave del Alma, no se pueden recuperar." data-fr="Aucun compte public n'est requis. Les empreintes et lettres sont chiffrées sur cet appareil avant synchronisation. Une Clé de l'Âme perdue ne peut pas être récupérée." data-de="Kein öffentliches Konto erforderlich. Spuren und Zukunftsbriefe werden vor der Cloud-Synchronisierung auf diesem Gerät verschlüsselt. Ein verlorener Seelenschlüssel kann nicht wiederhergestellt werden." data-zh-cn="无需建立公开账号。足迹与未来信会先在这台设备加密，再同步到云端；EMPATH 只保存密文。灵魂钥匙遗失后无法恢复。">
+        無需建立公開帳號。足跡與未來信會先在這台裝置加密，再同步到雲端；EMPATH 只保存密文。靈魂鑰匙是唯一解密方式，遺失後無法復原。
       </p>
       <div class="sync-actions" id="sync-initial-actions">
         <button type="button" class="sync-btn-small" onclick="window.createSoulKey()" data-zh="生成我的靈魂鑰匙" data-en="Generate Soul Key" data-ja="魂の鍵を生成する" data-es="Generar Llave del Alma" data-fr="Générer la Clé de l'Âme" data-de="Seelenschlüssel generieren" data-zh-cn="生成我的灵魂钥匙">生成我的靈魂鑰匙</button>
@@ -417,6 +417,7 @@ try {
         <span class="key-display" id="active-key-display">-</span>
         <button type="button" class="sync-btn-small" onclick="window.copySoulKey()" id="copy-key-btn" style="border-color:var(--gold); color:var(--gold); margin-right:8px;" data-zh="複製鑰匙" data-en="Copy Key" data-ja="キーをコピー" data-es="Copiar Llave" data-fr="Copier la Clé" data-de="Schlüssel kopieren" data-zh-cn="复制钥匙">複製鑰匙</button>
         <button type="button" class="sync-btn-small" onclick="window.unlinkSoulKey()" style="font-size:11px; padding:10px 16px; border-color:rgba(255,50,50,0.3); color:rgba(255,100,100,0.7);" data-zh="解除綁定" data-en="Unlink" data-ja="連携解除" data-es="Desvincular" data-fr="Dissocier" data-de="Entkoppeln" data-zh-cn="解除绑定">解除綁定</button>
+        <button type="button" class="sync-btn-small" onclick="window.deleteSoulBackup()" style="font-size:11px; padding:10px 16px; border-color:rgba(255,50,50,0.45); color:rgba(255,130,130,0.9);" data-zh="刪除雲端備份" data-en="Delete Cloud Backup" data-ja="クラウドバックアップを削除" data-es="Eliminar copia en la nube" data-fr="Supprimer la sauvegarde cloud" data-de="Cloud-Backup löschen" data-zh-cn="删除云端备份">刪除雲端備份</button>
       </div>
     </div>
 
@@ -481,7 +482,7 @@ try {
 </footer>
 
 <script src="safety-guard.js?v=20.5"></script>
-<script type="module" src="firebase-app.js?v=21.4.0"></script>
+<script type="module" src="firebase-app.js?v=21.5.0"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {

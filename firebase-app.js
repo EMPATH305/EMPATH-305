@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, getCountFromServer, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
+import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 
 // ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
@@ -33,6 +34,8 @@ const sendDriftLetterRequest = httpsCallable(functions, 'sendDriftLetter');
 const receiveDriftLetterRequest = httpsCallable(functions, 'receiveDriftLetter');
 const joinSilentCompanionshipRequest = httpsCallable(functions, 'joinSilentCompanionship');
 const recordSiteVisitRequest = httpsCallable(functions, 'recordSiteVisit');
+const retireLegacySoulJourneyRequest = httpsCallable(functions, 'retireLegacySoulJourney');
+const deleteSoulJourneyRequest = httpsCallable(functions, 'deleteSoulJourney');
 let memoryDriftClientId = '';
 
 function generateDriftClientId() {
@@ -2259,6 +2262,72 @@ function mergeJourneys(localSource, cloudSource) {
     return { counters, events, visitCount:Math.max(local.visitCount, cloud.visitCount) };
 }
 
+function normalizeSoulLetters(source) {
+    return Array.isArray(source)
+        ? source.filter(letter => letter && typeof letter.content === 'string').map(letter => ({
+            content:letter.content.slice(0, 5000),
+            unlockDate:Math.max(0, Number(letter.unlockDate) || 0),
+            createdAt:Math.max(0, Number(letter.createdAt) || 0)
+        })).filter(letter => letter.content && letter.unlockDate && letter.createdAt).slice(-50)
+        : [];
+}
+
+function mergeSoulLetters(...sources) {
+    const seen = new Set();
+    return sources.flatMap(normalizeSoulLetters).filter(letter => {
+        const signature = `${letter.createdAt}\u0000${letter.unlockDate}\u0000${letter.content}`;
+        if (seen.has(signature)) return false;
+        seen.add(signature);
+        return true;
+    }).sort((a, b) => a.createdAt - b.createdAt).slice(-50);
+}
+
+async function readSoulBackup(key) {
+    const storageId = await soulStorageId(key);
+    const encryptedSnapshot = await getDoc(doc(db, 'user_journeys', storageId));
+    if (encryptedSnapshot.exists()) {
+        const record = encryptedSnapshot.data();
+        if (!isEncryptedSoulRecord(record)) throw new Error('Unsupported encrypted Soul backup.');
+        const payload = await decryptSoulPayload(key, record);
+        return {
+            journey:normalizeJourney(payload?.journey),
+            letters:normalizeSoulLetters(payload?.letters),
+            legacy:false,
+            storageId
+        };
+    }
+    const legacySnapshot = await getDoc(doc(db, 'user_journeys', key));
+    if (!legacySnapshot.exists()) return null;
+    const legacy = legacySnapshot.data();
+    return {
+        journey:normalizeJourney(legacy),
+        letters:normalizeSoulLetters(legacy.letters),
+        legacy:true,
+        storageId
+    };
+}
+
+async function writeSoulBackup(key, nextJourney, letters = []) {
+    const encrypted = await encryptSoulPayload(key, {
+        journey:normalizeJourney(nextJourney),
+        letters:normalizeSoulLetters(letters)
+    });
+    await setDoc(doc(db, 'user_journeys', encrypted.storageId), {
+        ...encrypted.record,
+        clientUpdatedAt:Date.now(),
+        updatedAt:serverTimestamp()
+    });
+    return encrypted.storageId;
+}
+
+async function retireLegacySoulBackup(key) {
+    try {
+        await retireLegacySoulJourneyRequest({ soulKey:key });
+    } catch (error) {
+        console.warn('Encrypted Soul backup saved, but legacy cleanup will be retried later:', error);
+    }
+}
+
 function applyJourney(nextJourney) {
     journeyData = normalizeJourney(nextJourney);
     localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
@@ -2305,14 +2374,15 @@ window.loadExistingSoulKey = async function() {
         return;
     }
     try {
-        const docSnap = await getDoc(doc(db, "user_journeys", key));
-        if(!docSnap.exists()) {
+        const cloud = await readSoulBackup(key);
+        if(!cloud) {
             window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙'));
             return;
         }
-        applyJourney(mergeJourneys(journeyData, docSnap.data()));
+        applyJourney(mergeJourneys(journeyData, cloud.journey));
         localStorage.setItem('empath_soul_key', key);
-        await autoBackupToCloud();
+        await writeSoulBackup(key, journeyData, cloud.letters);
+        if (cloud.legacy) await retireLegacySoulBackup(key);
         updateSyncUI();
         window.showToast(t('足跡已安全合併，沒有覆蓋本機紀錄 ✦', 'Footprints merged without replacing this device ✦', '足跡が安全に統合されました ✦', 'Huellas combinadas con seguridad ✦', 'Empreintes fusionnées en sécurité ✦', 'Spuren wurden sicher zusammengeführt ✦', '足迹已安全合并，没有覆盖本机记录 ✦'));
         input.value='';
@@ -2322,20 +2392,24 @@ window.loadExistingSoulKey = async function() {
     }
 }
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
+let soulBackupQueue = Promise.resolve();
 async function autoBackupToCloud() {
     const key = localStorage.getItem('empath_soul_key');
     if(!key) return false;
-    try {
-        const safeJourney = normalizeJourney(journeyData);
-        await setDoc(doc(db, "user_journeys", key), {
-            counters:safeJourney.counters,
-            events:safeJourney.events,
-            schemaVersion:2,
-            clientUpdatedAt:Date.now(),
-            updatedAt:serverTimestamp()
-        }, { merge:true });
-        return true;
-    } catch(err) { console.error("發生錯誤:", err); return false; }
+    soulBackupQueue = soulBackupQueue.catch(() => false).then(async () => {
+        try {
+            const cloud = await readSoulBackup(key);
+            const mergedJourney = mergeJourneys(journeyData, cloud?.journey || {});
+            const letters = cloud?.letters || [];
+            await writeSoulBackup(key, mergedJourney, letters);
+            if (cloud?.legacy) await retireLegacySoulBackup(key);
+            return true;
+        } catch(err) {
+            console.error('Encrypted Soul backup failed:', err);
+            return false;
+        }
+    });
+    return soulBackupQueue;
 }
 function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = localStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
 const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); const display = document.getElementById('active-key-display'); if(display) display.textContent=key; } else { initial.style.display='flex'; active.style.display='none'; } }
@@ -3828,26 +3902,26 @@ window.submitFutureLetter = async function() {
     if(!key) return;
     const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); // 預設 90 天後解鎖
     try {
-        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-        const docRef = doc(db, "user_journeys", key);
-        const docSnap = await getDoc(docRef);
-        let letters = [];
-        if(docSnap.exists() && docSnap.data().letters) letters = docSnap.data().letters;
-        letters.push({ content: text, unlockDate: unlockDate, createdAt: Date.now() });
-        await setDoc(docRef, { letters, schemaVersion:2, clientUpdatedAt:Date.now(), updatedAt:serverTimestamp() }, { merge:true });
+        const cloud = await readSoulBackup(key);
+        const mergedJourney = mergeJourneys(journeyData, cloud?.journey || {});
+        const letters = mergeSoulLetters(cloud?.letters || [], [{ content:text, unlockDate, createdAt:Date.now() }]);
+        await writeSoulBackup(key, mergedJourney, letters);
+        if (cloud?.legacy) await retireLegacySoulBackup(key);
         document.getElementById('future-letter-input').value = '';
         window.showToast('✉️ 信件已封存。三個月後，帶著鑰匙回來這裡。', 4000);
-    } catch(e) { console.error(e); }
+    } catch(e) {
+        console.error(e);
+        window.showToast(t('信件暫時無法封存，內容仍留在輸入框中。', 'The letter could not be sealed yet. Your text is still here.'));
+    }
 };
 
 window.checkFutureLetters = async function() {
     const key = localStorage.getItem('empath_soul_key');
     if(!key) return;
     try {
-        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-        const docSnap = await getDoc(doc(db, "user_journeys", key));
-        if(docSnap.exists() && docSnap.data().letters) {
-            const letters = docSnap.data().letters;
+        const cloud = await readSoulBackup(key);
+        if(cloud?.letters?.length) {
+            const letters = cloud.letters;
             const container = document.getElementById('unlocked-letters');
             container.innerHTML = '';
             const now = Date.now();
@@ -3871,7 +3945,36 @@ window.checkFutureLetters = async function() {
                 }
             });
         }
-    } catch(e) {}
+    } catch(e) {
+        console.warn('Future letters could not be opened:', e);
+    }
+};
+
+window.deleteSoulBackup = async function() {
+    const key = localStorage.getItem('empath_soul_key');
+    if (!key) return;
+    const confirmed = confirm(t(
+        '確定永久刪除這把鑰匙的雲端足跡與未來信嗎？本機足跡會保留，但此動作無法復原。',
+        'Permanently delete this key’s cloud footprints and future letters? Local footprints will remain, but this cannot be undone.',
+        'この鍵のクラウド上の足跡と未来への手紙を完全に削除しますか？元に戻せません。',
+        '¿Eliminar permanentemente las huellas y cartas futuras de esta llave? No se puede deshacer.',
+        'Supprimer définitivement les empreintes et lettres futures de cette clé ? Cette action est irréversible.',
+        'Cloud-Spuren und Zukunftsbriefe dieses Schlüssels dauerhaft löschen? Dies kann nicht rückgängig gemacht werden.',
+        '确定永久删除这把钥匙的云端足迹与未来信吗？此操作无法恢复。'
+    ));
+    if (!confirmed) return;
+    try {
+        const response = await deleteSoulJourneyRequest({ soulKey:key });
+        if (!response?.data?.completed) throw new Error('Soul backup deletion was not completed.');
+        localStorage.removeItem('empath_soul_key');
+        updateSyncUI();
+        const unlocked = document.getElementById('unlocked-letters');
+        if (unlocked) unlocked.replaceChildren();
+        window.showToast(t('雲端備份已永久刪除，本機足跡仍保留。', 'Cloud backup permanently deleted; local footprints remain.'));
+    } catch (error) {
+        console.error('Soul backup deletion failed:', error);
+        window.showToast(t('暫時無法刪除，雲端資料沒有變動。', 'Could not delete yet; cloud data was not changed.'));
+    }
 };
 
 // 2. Room A：24 小時後只回傳匿名總量，不重播任何已消散原文。
@@ -4089,11 +4192,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const existingKey = localStorage.getItem('empath_soul_key');
   if(existingKey && document.getElementById('h-events')) {
       try {
-          const docSnap = await getDoc(doc(db, "user_journeys", existingKey));
-          if(docSnap.exists()) {
-              applyJourney(mergeJourneys(journeyData, docSnap.data()));
-              await autoBackupToCloud();
-          }
+          const cloud = await readSoulBackup(existingKey);
+          if(cloud) applyJourney(mergeJourneys(journeyData, cloud.journey));
+          await autoBackupToCloud();
       } catch(err) { console.error("發生錯誤:", err); }
   }
   const observer = new IntersectionObserver((entries) => {

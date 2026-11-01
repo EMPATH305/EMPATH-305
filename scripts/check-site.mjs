@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.4.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.5.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -31,6 +31,8 @@ const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
 const roomE = readFileSync('room-e.html', 'utf8');
 const roomA = readFileSync('room-a.html', 'utf8');
+const roomH = readFileSync('room-h.html', 'utf8');
+const soulCrypto = readFileSync('soul-crypto.mjs', 'utf8');
 const collectiveCalendar = readFileSync('collective-calendar.js', 'utf8');
 assert(collectiveCalendar.includes("en-u-ca-chinese"), 'Collective calendar must recognize lunar observances locally');
 assert(collectiveCalendar.includes('empath_collective_grief_seen_'), 'Collective calendar must avoid repeating within a session');
@@ -85,6 +87,14 @@ assert(appSource.includes("createRoomContent('a', { text, lifespan, weightKind }
 assert(appSource.includes("localStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
+assert(appSource.includes("from \"./soul-crypto.mjs\""), 'Soul backups must use the dedicated client-side encryption module');
+assert(appSource.includes("httpsCallable(functions, 'retireLegacySoulJourney')"), 'Legacy Soul records need verified server cleanup');
+assert(appSource.includes("httpsCallable(functions, 'deleteSoulJourney')"), 'Users must be able to delete cloud Soul backups');
+assert(appSource.includes('await writeSoulBackup(key, mergedJourney, letters)'), 'Future letters must be encrypted with the journey payload');
+assert(!appSource.includes('doc(db, "user_journeys", key)'), 'Soul backups must not use the raw key as the primary storage path');
+assert(soulCrypto.includes("name:'AES-GCM'"), 'Soul backups must use authenticated AES-GCM encryption');
+assert(soulCrypto.includes("name:'PBKDF2'"), 'Soul backup encryption keys must use a deliberate derivation step');
+assert(roomH.includes('onclick="window.deleteSoulBackup()"'), 'Room H must offer cloud backup deletion');
 assert(appSource.includes('function subscribeRealtimeData()'), 'Realtime feeds and counters must share a restartable lifecycle');
 assert(appSource.includes('subscribeRoomAReleaseStats();'), 'Room A aggregate must resume after backgrounding');
 assert(appSource.includes('subscribeSiteStats();'), 'Visitor totals must resume after backgrounding');
@@ -104,6 +114,9 @@ assert(rules.includes('match /rate_limits/{bucketId}'), 'Rate-limit documents mu
 assert(rules.includes('match /moderation_audit/{entryId}'), 'Moderation audit records must be private');
 assert(rules.includes('match /drift_letters/{id}'), 'Drift letters must remain private to callable functions');
 assert(rules.includes('EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}'), 'Rules must accept v20.3 Soul Keys');
+assert(rules.includes("soulKey.matches('^sj_[a-f0-9]{64}$')"), 'Rules must accept only opaque v3 Soul storage IDs');
+assert(rules.includes("request.resource.data.cipher == 'AES-GCM-256'"), 'Rules must reject unencrypted v3 Soul records');
+assert(rules.includes('request.resource.data.ciphertext.size() <= 750000'), 'Encrypted Soul records must remain below the Firestore document limit');
 
 const indexes = JSON.parse(readFileSync('firestore.indexes.json', 'utf8'));
 const ttlField = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'sand' && field.fieldPath === 'expireAt');
@@ -127,7 +140,8 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.4.0'), 'Service worker cache must be bumped for v21.4.0');
+assert(serviceWorker.includes('empath-cache-v21.5.0'), 'Service worker cache must be bumped for v21.5.0');
+assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
 for (const icon of manifest.icons) {
