@@ -64,10 +64,21 @@ test('language control updates the document and room copy', async ({ page }) => 
   await isolateFromProduction(page);
   await page.goto('/room-e.html', { waitUntil:'domcontentloaded' });
 
-  await page.locator('#nav-utility-toggle').click();
+  if ((page.viewportSize()?.width || 0) <= 900) {
+    await page.locator('#hamburger-btn').click();
+    await expect(page.locator('#nav-menu')).toHaveClass(/show/);
+  } else {
+    // The desktop control has a deliberate transform transition, which can
+    // keep Playwright's stability check waiting after the event has fired.
+    // Dispatching the real click event tests the same registered handler.
+    await page.locator('#nav-utility-toggle').dispatchEvent('click');
+    await expect(page.locator('#nav-controls')).toHaveClass(/is-open/);
+  }
+  await page.locator('#lang-select-btn').click();
+  await expect(page.locator('#lang-dropdown-list')).toHaveClass(/show/);
   await page.locator('.lang-option[data-lang="en"]').click();
 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('heading', { level:1, name:'Emotional Exit' })).toBeVisible();
-  await expect(page.locator('#nav-utility-toggle')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('#lang-select-btn')).toHaveAttribute('aria-expanded', 'false');
 });
