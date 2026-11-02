@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.6.1'; // Public retention statistics hotfix
+const CACHE_NAME = 'empath-cache-v21.7.0'; // Moderation data lifecycle disclosure
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
