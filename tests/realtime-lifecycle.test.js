@@ -28,6 +28,6 @@ test('presence and Room T return listeners cannot accumulate duplicates', () => 
 
 test('a new Room T submission immediately follows its latest echo lifecycle', () => {
   const submitT = source.split('window.submitT = async function()')[1].split('window.createEchoRipple')[0];
-  assert(submitT.includes("localStorage.setItem('empath_my_warmth_id', contentId)"));
+  assert(submitT.includes("safeLocalStorage.setItem('empath_my_warmth_id', contentId)"));
   assert(submitT.includes('window.checkRoomTWarmth()'));
 });

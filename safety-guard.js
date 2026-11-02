@@ -39,7 +39,7 @@
   function currentLanguage() {
     let language = window.currentLang;
     if (!language) {
-      try { language = localStorage.getItem('empath_language'); } catch (error) {}
+      try { language = window.EmpathStorage?.local?.getItem('empath_language') ?? localStorage.getItem('empath_language'); } catch (error) {}
     }
     if (language === 'en-uk') language = 'en';
     return COPY[language] ? language : 'zh';
@@ -53,7 +53,8 @@
 
   function readJson(key, fallback) {
     try {
-      const value = JSON.parse(localStorage.getItem(key) || 'null');
+      const stored = window.EmpathStorage?.local?.getItem(key) ?? localStorage.getItem(key);
+      const value = JSON.parse(stored || 'null');
       return value ?? fallback;
     } catch (error) {
       return fallback;
@@ -62,7 +63,12 @@
 
   function writeJson(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const serialized = JSON.stringify(value);
+      if (window.EmpathStorage?.local) {
+        window.EmpathStorage.local.setItem(key, serialized);
+        return window.EmpathStorage.local.getItem(key) === serialized;
+      }
+      localStorage.setItem(key, serialized);
       return true;
     } catch (error) {
       return false;
