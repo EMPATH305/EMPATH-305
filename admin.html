@@ -27,6 +27,7 @@
       <p class="eyebrow">PRIVATE SPACE · 僅限管理員</p>
       <h2 id="auth-title">照看這個空間留下的重量</h2>
       <p>登入後才能閱讀匿名檢舉摘要。系統不會顯示訪客身分，也不會把完整圖片資料載入審核頁面。</p>
+      <p>匿名檢舉最多保留 180 天；管理員處置稽核最多保留 365 天，之後由後端自動清理。</p>
       <button id="google-sign-in" class="primary-button" type="button">使用 Google 管理員帳號登入</button>
     </section>
 
@@ -43,6 +44,7 @@
         <span id="claim-health" class="health-chip ready">管理權限已驗證</span>
         <span id="app-check-health" class="health-chip waiting">App Check 檢查中</span>
       </div>
+      <p class="review-summary">資料生命週期：匿名檢舉 180 天；處置稽核 365 天。到期後由 Firestore TTL 自動清理。</p>
       <div class="review-tools" aria-label="篩選待審核內容">
         <label>
           <span>房間</span>
