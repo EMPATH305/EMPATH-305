@@ -38,6 +38,21 @@ test('accepts only bounded room submissions with server-owned fields', () => {
   assert.equal(validateRoomSubmissionInput({ room:'e', image:`data:image/webp;base64,${'A'.repeat(700_000)}` }), null);
 });
 
+test('accepts an optional normalized idempotency request identifier', () => {
+  const requestId = 'A1'.repeat(16);
+  assert.deepEqual(validateRoomSubmissionInput({ room:'t', text:'stay', requestId }), {
+    room:'t', text:'stay', requestId:requestId.toLowerCase()
+  });
+  assert.deepEqual(validateRoomSubmissionInput({
+    room:'e', image:'data:image/png;base64,AAAA', requestId
+  }), {
+    room:'e', image:'data:image/png;base64,AAAA', requestId:requestId.toLowerCase()
+  });
+  assert.equal(validateRoomSubmissionInput({ room:'t', text:'stay', requestId:'a'.repeat(31) }), null);
+  assert.equal(validateRoomSubmissionInput({ room:'t', text:'stay', requestId:'a'.repeat(33) }), null);
+  assert.equal(validateRoomSubmissionInput({ room:'t', text:'stay', requestId:'g'.repeat(32) }), null);
+});
+
 test('accepts anonymous drift letters only with a bounded device identifier', () => {
   const clientId = 'a'.repeat(32);
   assert.deepEqual(validateDriftLetterInput({ clientId, text:'  a letter for someone  ' }), {
