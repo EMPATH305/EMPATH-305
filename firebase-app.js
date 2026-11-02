@@ -29,6 +29,7 @@ const db = initializeFirestore(app, {
 const functions = getFunctions(app, 'asia-east1');
 const submitContentReport = httpsCallable(functions, 'submitContentReport');
 const submitRoomContent = httpsCallable(functions, 'submitRoomContent');
+const deleteRoomContentRequest = httpsCallable(functions, 'deleteRoomContent');
 const reactToRoomContentRequest = httpsCallable(functions, 'reactToRoomContent');
 const sendDriftLetterRequest = httpsCallable(functions, 'sendDriftLetter');
 const receiveDriftLetterRequest = httpsCallable(functions, 'receiveDriftLetter');
@@ -64,6 +65,19 @@ async function createRoomContent(room, payload = {}, returnResult = false) {
     const result = response?.data;
     if (!result?.accepted || typeof result.id !== 'string' || !result.id) {
         throw new Error('Room submission was not accepted.');
+    }
+    const ownedCollectionByRoom = { e:'emotions', m:'stars', p:'shards', t:'warmth' };
+    const ownedCollection = ownedCollectionByRoom[room];
+    if (ownedCollection && typeof result.deletionToken === 'string') {
+        const receiptStored = window.EmpathSafety?.rememberOwnedContent(
+            ownedCollection,
+            result.id,
+            result.deletionToken,
+            result.deletionExpiresAt
+        );
+        if (receiptStored && room === 'e') window.renderEFeed?.();
+        if (receiptStored && room === 'p') window.renderPShards?.();
+        if (receiptStored && room === 't') window.renderTWarmthFeed?.();
     }
     return returnResult ? result : result.id;
 }
@@ -183,6 +197,39 @@ window.addEventListener('empath:report-content', async event => {
     } catch(error) {
         console.error('Anonymous content report failed:', error);
         window.showToast?.(t('檢舉暫時無法送出，請稍後再試。', 'The report could not be sent. Please try later.'));
+    }
+});
+
+window.addEventListener('empath:delete-owned-content', async event => {
+    const collectionName = String(event.detail?.collection || '');
+    const targetId = String(event.detail?.id || '');
+    const deletionToken = String(event.detail?.token || '');
+    const allowedCollections = new Set(['emotions', 'stars', 'shards', 'warmth']);
+    if (!allowedCollections.has(collectionName)
+        || !/^[A-Za-z0-9_-]{1,160}$/.test(targetId)
+        || !/^[A-Za-z0-9_-]{43}$/.test(deletionToken)) return;
+    const throttle = window.EmpathSafety?.allowAction('owned-content-delete', {
+        cooldownMs:5000,
+        dailyLimit:20
+    }) || { allowed:true };
+    if (!throttle.allowed) {
+        window.showToast?.(t('刪除要求送出得太快，請稍後再試。', 'Deletion requests are being sent too quickly. Please try later.'));
+        return;
+    }
+    try {
+        const response = await deleteRoomContentRequest({
+            targetCollection:collectionName,
+            targetId,
+            deletionToken
+        });
+        if (!response?.data?.completed) throw new Error('Content deletion was not completed.');
+        window.EmpathSafety?.forgetOwnedContent(collectionName, targetId);
+        window.EmpathSafety?.hideContent(collectionName, targetId);
+        event.detail?.onDeleted?.();
+        window.showToast?.(t('這則內容已永久收回。', 'This content was permanently withdrawn.'));
+    } catch (error) {
+        console.error('Owned content deletion failed:', error);
+        window.showToast?.(t('暫時無法收回，內容沒有變動。', 'Could not withdraw this yet; the content was not changed.'));
     }
 });
 
