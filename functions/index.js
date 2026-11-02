@@ -8,6 +8,7 @@ const { setGlobalOptions } = require('firebase-functions/v2');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
 const { logger } = require('firebase-functions');
+const { createCallableTelemetry } = require('./lib/callable-telemetry');
 const {
   ALLOWED_COLLECTIONS,
   validateRoomSubmissionInput,
@@ -54,7 +55,29 @@ const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
 // public reporting remains observable until embedded-browser compatibility is proven.
 const ADMIN_APP_CHECK_ENFORCED = true;
-const PUBLIC_REPORT_APP_CHECK_ENFORCED = false;
+const PUBLIC_APP_CHECK_ENFORCEMENT = Object.freeze({
+  submitContentReport:false,
+  submitRoomContent:false,
+  deleteRoomContent:false,
+  reactToRoomContent:false,
+  joinSilentCompanionship:false,
+  recordSiteVisit:false,
+  initializePublicRetention:false,
+  initializeModerationRetention:false,
+  retireLegacySoulJourney:false,
+  deleteSoulJourney:false,
+  sendDriftLetter:false,
+  receiveDriftLetter:false
+});
+
+const withCallableTelemetry = createCallableTelemetry(logger);
+
+function observedOnCall(functionName, options, handler) {
+  return onCall(
+    options,
+    withCallableTelemetry(functionName, options?.enforceAppCheck === true, handler)
+  );
+}
 
 setGlobalOptions({ region:REGION, memory:'256MiB', timeoutSeconds:30, maxInstances:10 });
 
@@ -336,9 +359,9 @@ exports.claimAdminRole = onCall({ secrets:[ADMIN_EMAIL], enforceAppCheck:false }
   return { granted:true };
 });
 
-exports.submitContentReport = onCall({
+exports.submitContentReport = observedOnCall('submitContentReport', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.submitContentReport
 }, async request => {
   const report = validateReportInput(request.data);
   if (!report) throw new HttpsError('invalid-argument', 'Invalid report.');
@@ -361,9 +384,9 @@ exports.submitContentReport = onCall({
   return { accepted:true };
 });
 
-exports.submitRoomContent = onCall({
+exports.submitRoomContent = observedOnCall('submitRoomContent', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.submitRoomContent
 }, async request => {
   const input = validateRoomSubmissionInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid room submission.');
@@ -517,9 +540,9 @@ exports.submitRoomContent = onCall({
   return submissionResult;
 });
 
-exports.deleteRoomContent = onCall({
+exports.deleteRoomContent = observedOnCall('deleteRoomContent', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.deleteRoomContent
 }, async request => {
   const input = validateContentDeletionInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid content withdrawal request.');
@@ -564,9 +587,9 @@ exports.deleteRoomContent = onCall({
   return { completed:true, deleted };
 });
 
-exports.reactToRoomContent = onCall({
+exports.reactToRoomContent = observedOnCall('reactToRoomContent', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.reactToRoomContent
 }, async request => {
   const input = validateRoomReactionInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid room reaction.');
@@ -654,9 +677,9 @@ exports.reactToRoomContent = onCall({
   return { accepted:true, ...reactionResult };
 });
 
-exports.joinSilentCompanionship = onCall({
+exports.joinSilentCompanionship = observedOnCall('joinSilentCompanionship', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.joinSilentCompanionship
 }, async request => {
   const input = validateAnonymousClientInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid silent companionship participant.');
@@ -710,9 +733,9 @@ exports.joinSilentCompanionship = onCall({
   return { accepted:true, ...result };
 });
 
-exports.recordSiteVisit = onCall({
+exports.recordSiteVisit = observedOnCall('recordSiteVisit', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.recordSiteVisit
 }, async request => {
   const now = Date.now();
   const day = Math.floor(now / 86_400_000);
@@ -749,9 +772,9 @@ exports.recordSiteVisit = onCall({
   return { accepted:true, ...result };
 });
 
-exports.initializePublicRetention = onCall({
+exports.initializePublicRetention = observedOnCall('initializePublicRetention', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED,
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.initializePublicRetention,
   timeoutSeconds:120,
   memory:'512MiB'
 }, async request => {
@@ -833,9 +856,9 @@ exports.initializePublicRetention = onCall({
   return { completed:true, alreadyCompleted:false, backfilled, stats };
 });
 
-exports.initializeModerationRetention = onCall({
+exports.initializeModerationRetention = observedOnCall('initializeModerationRetention', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED,
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.initializeModerationRetention,
   timeoutSeconds:120,
   memory:'512MiB'
 }, async request => {
@@ -896,9 +919,9 @@ exports.initializeModerationRetention = onCall({
   return { completed:true, alreadyCompleted:false, backfilled };
 });
 
-exports.retireLegacySoulJourney = onCall({
+exports.retireLegacySoulJourney = observedOnCall('retireLegacySoulJourney', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.retireLegacySoulJourney
 }, async request => {
   const input = validateSoulKeyInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid Soul Key.');
@@ -928,9 +951,9 @@ exports.retireLegacySoulJourney = onCall({
   return { completed:true, retired };
 });
 
-exports.deleteSoulJourney = onCall({
+exports.deleteSoulJourney = observedOnCall('deleteSoulJourney', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.deleteSoulJourney
 }, async request => {
   const input = validateSoulKeyInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid Soul Key.');
@@ -958,9 +981,9 @@ exports.deleteSoulJourney = onCall({
   return { completed:true, deleted:encryptedDeleted || legacyDeleted };
 });
 
-exports.sendDriftLetter = onCall({
+exports.sendDriftLetter = observedOnCall('sendDriftLetter', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.sendDriftLetter
 }, async request => {
   const input = validateDriftLetterInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid drift letter.');
@@ -981,9 +1004,9 @@ exports.sendDriftLetter = onCall({
   return { accepted:true };
 });
 
-exports.receiveDriftLetter = onCall({
+exports.receiveDriftLetter = observedOnCall('receiveDriftLetter', {
   secrets:[RATE_LIMIT_SALT],
-  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+  enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.receiveDriftLetter
 }, async request => {
   const input = validateDriftReceiveInput(request.data);
   if (!input) throw new HttpsError('invalid-argument', 'Invalid drift receiver.');
