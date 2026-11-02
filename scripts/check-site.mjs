@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=20.5', 'firebase-app.js?v=21.7.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=21.8.0', 'firebase-app.js?v=21.8.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -26,6 +26,7 @@ for (const page of pages) {
   }
   assert(html.includes('匿名檢舉只保存目標編號'), `${page}: missing moderation retention disclosure`);
   assert(html.includes('Anonymous reports retain only the target ID'), `${page}: missing English moderation retention disclosure`);
+  assert(html.includes('新版 Room E／M／P／T 投稿'), `${page}: missing owned-content deletion disclosure`);
 }
 
 const appSource = readFileSync('firebase-app.js', 'utf8');
@@ -69,6 +70,8 @@ assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSo
 assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
+assert(appSource.includes("httpsCallable(functions, 'deleteRoomContent')"), 'Owned public content must use the deletion backend');
+assert(appSource.includes('rememberOwnedContent('), 'Accepted submissions must retain their local deletion receipt');
 assert(appSource.includes("httpsCallable(functions, 'reactToRoomContent')"), 'Room reactions must use the rate-limited backend');
 assert(appSource.includes("httpsCallable(functions, 'joinSilentCompanionship')"), 'Silent companionship must use the rate-limited backend');
 assert(appSource.includes("httpsCallable(functions, 'recordSiteVisit')"), 'Site visits must use the rate-limited backend');
@@ -158,7 +161,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.7.0'), 'Service worker cache must be bumped for v21.7.0');
+assert(serviceWorker.includes('empath-cache-v21.8.0'), 'Service worker cache must be bumped for v21.8.0');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
@@ -172,6 +175,9 @@ assert(safetySource.includes("event.key === 'Escape'"), 'Report dialog must supp
 assert(safetySource.includes("event.key !== 'Tab'"), 'Report dialog must trap keyboard focus');
 assert(safetySource.includes('reportReturnFocus.focus'), 'Report dialog must restore focus after closing');
 assert(safetySource.includes("empath:language-changed"), 'Safety controls must react to language changes');
+assert(safetySource.includes("OWNED_CONTENT_KEY = 'empath_owned_content_v1'"), 'Deletion receipts must stay on the submitting browser');
+assert(safetySource.includes("empath:delete-owned-content"), 'Owned content must expose a deliberate withdrawal event');
+assert(safetySource.includes("window.confirm(text('deleteConfirm'))"), 'Permanent content withdrawal must require confirmation');
 
 const adminPage = readFileSync('admin.html', 'utf8');
 const adminSource = readFileSync('admin-app.js', 'utf8');

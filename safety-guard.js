@@ -6,6 +6,7 @@
   const ACTION_KEY = 'empath_safety_actions_v1';
   const HIDDEN_KEY = 'empath_hidden_content_v1';
   const REPORTED_KEY = 'empath_reported_content_v1';
+  const OWNED_CONTENT_KEY = 'empath_owned_content_v1';
   const DAY_MS = 24 * 60 * 60 * 1000;
   const MAX_LOCAL_ITEMS = 500;
   const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -23,6 +24,18 @@
     pl:{ kicker:'TROSKA SPOŁECZNOŚCI · ANONIMOWE ZGŁOSZENIE', title:'Czy ta treść sprawia, że czujesz się niebezpiecznie?', description:'Wysyłamy tylko identyfikator treści i powód, bez twojej tożsamości.', harassment:'Atak lub nękanie', hate:'Treści szerzące nienawiść', personal_info:'Dane umożliwiające identyfikację', spam:'Spam lub powtarzająca się treść', self_harm:'Niepokojąca treść kryzysowa', other:'Inna niewłaściwa treść', cancel:'Nie zgłaszaj', hide:'Ukryj', hideLabel:'Ukryj tę treść tylko na tym urządzeniu', report:'Zgłoś', reported:'Zgłoszono', alreadyReported:'Ta treść została już przez ciebie zgłoszona', hidden:'Ukryto na tym urządzeniu' }
   };
 
+  const OWNERSHIP_COPY = {
+    zh:{ deleteOwn:'收回', deleteOwnLabel:'永久刪除我在這台裝置送出的內容', deleteConfirm:'確定永久收回這則內容嗎？此動作無法復原。' },
+    'zh-cn':{ deleteOwn:'收回', deleteOwnLabel:'永久删除我在这台设备送出的内容', deleteConfirm:'确定永久收回这则内容吗？此操作无法撤销。' },
+    en:{ deleteOwn:'Withdraw', deleteOwnLabel:'Permanently delete content I sent from this device', deleteConfirm:'Permanently withdraw this content? This cannot be undone.' },
+    ja:{ deleteOwn:'取り消す', deleteOwnLabel:'この端末から送信した内容を完全に削除', deleteConfirm:'この内容を完全に削除しますか？元に戻せません。' },
+    es:{ deleteOwn:'Retirar', deleteOwnLabel:'Eliminar permanentemente el contenido enviado desde este dispositivo', deleteConfirm:'¿Retirar este contenido permanentemente? No se puede deshacer.' },
+    fr:{ deleteOwn:'Retirer', deleteOwnLabel:'Supprimer définitivement le contenu envoyé depuis cet appareil', deleteConfirm:'Retirer définitivement ce contenu ? Cette action est irréversible.' },
+    de:{ deleteOwn:'Zurückziehen', deleteOwnLabel:'Von diesem Gerät gesendeten Inhalt dauerhaft löschen', deleteConfirm:'Diesen Inhalt dauerhaft zurückziehen? Dies kann nicht rückgängig gemacht werden.' },
+    uk:{ deleteOwn:'Відкликати', deleteOwnLabel:'Назавжди видалити вміст, надісланий із цього пристрою', deleteConfirm:'Назавжди відкликати цей вміст? Цю дію неможливо скасувати.' },
+    pl:{ deleteOwn:'Wycofaj', deleteOwnLabel:'Trwale usuń treść wysłaną z tego urządzenia', deleteConfirm:'Trwale wycofać tę treść? Tej operacji nie można cofnąć.' }
+  };
+
   function currentLanguage() {
     let language = window.currentLang;
     if (!language) {
@@ -33,7 +46,9 @@
   }
 
   function text(key) {
-    return COPY[currentLanguage()][key] || COPY.en[key] || COPY.zh[key] || '';
+    const language = currentLanguage();
+    return OWNERSHIP_COPY[language]?.[key] || COPY[language][key]
+      || OWNERSHIP_COPY.en[key] || COPY.en[key] || COPY.zh[key] || '';
   }
 
   function readJson(key, fallback) {
@@ -103,6 +118,39 @@
     const reported = getStoredSet(REPORTED_KEY);
     reported.add(contentKey(collection, id));
     saveStoredSet(REPORTED_KEY, reported);
+  }
+
+  function ownedContentReceipts() {
+    const now = Date.now();
+    const stored = readJson(OWNED_CONTENT_KEY, {});
+    const active = {};
+    Object.entries(stored && typeof stored === 'object' ? stored : {}).slice(-MAX_LOCAL_ITEMS).forEach(([key, receipt]) => {
+      const token = typeof receipt?.token === 'string' ? receipt.token : '';
+      const expiresAt = Number(receipt?.expiresAt);
+      if (/^[A-Za-z0-9_-]{43}$/.test(token) && Number.isFinite(expiresAt) && expiresAt > now) {
+        active[key] = { token, expiresAt };
+      }
+    });
+    return active;
+  }
+
+  function rememberOwnedContent(collection, id, token, expiresAt) {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(String(token || ''))) return false;
+    const expiry = Number(expiresAt);
+    if (!Number.isFinite(expiry) || expiry <= Date.now()) return false;
+    const receipts = ownedContentReceipts();
+    receipts[contentKey(collection, id)] = { token:String(token), expiresAt:expiry };
+    return writeJson(OWNED_CONTENT_KEY, receipts);
+  }
+
+  function ownedContentReceipt(collection, id) {
+    return ownedContentReceipts()[contentKey(collection, id)] || null;
+  }
+
+  function forgetOwnedContent(collection, id) {
+    const receipts = ownedContentReceipts();
+    delete receipts[contentKey(collection, id)];
+    writeJson(OWNED_CONTENT_KEY, receipts);
   }
 
   function refreshLanguage(root = document) {
@@ -209,6 +257,21 @@
       requestReport(collection, id);
     });
     actions.append(hide, report);
+    const receipt = ownedContentReceipt(collection, id);
+    if (receipt) {
+      const withdraw = document.createElement('button');
+      withdraw.type = 'button';
+      withdraw.dataset.safetyCopy = 'deleteOwn';
+      withdraw.dataset.safetyLabel = 'deleteOwnLabel';
+      withdraw.addEventListener('click', event => {
+        event.stopPropagation();
+        if (!window.confirm(text('deleteConfirm'))) return;
+        window.dispatchEvent(new CustomEvent('empath:delete-owned-content', {
+          detail:{ collection, id, token:receipt.token, onDeleted:onHidden }
+        }));
+      });
+      actions.append(withdraw);
+    }
     refreshLanguage(actions);
     return actions;
   }
@@ -247,6 +310,9 @@
     hideContent,
     isReported,
     markReported,
+    rememberOwnedContent,
+    ownedContentReceipt,
+    forgetOwnedContent,
     createContentActions,
     closeReportDialog,
     refreshLanguage

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.7.0'; // Moderation data lifecycle disclosure
+const CACHE_NAME = 'empath-cache-v21.8.0'; // Anonymous owned-content deletion receipts
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
