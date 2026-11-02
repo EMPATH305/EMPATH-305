@@ -10,9 +10,11 @@ const indexes = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', 
 
 test('new persistent room content receives a high-entropy private deletion receipt', () => {
   assert(functionSource.includes("crypto.randomBytes(32).toString('base64url')"));
+  assert(functionSource.includes('idempotentDeletionToken(input.requestId'));
   assert(functionSource.includes("db.collection('content_deletion_receipts')"));
   assert(functionSource.includes('contentDeletionTokenHash(contentRef.parent.id, contentRef.id, deletionToken)'));
-  assert(functionSource.includes('{ deletionToken, deletionExpiresAt }'));
+  assert(functionSource.includes('deletionToken,'));
+  assert(functionSource.includes('deletionExpiresAt'));
 });
 
 test('withdrawal binds the receipt to one target and compares its digest safely', () => {

@@ -26,12 +26,18 @@ function validateReportInput(data) {
 function validateRoomSubmissionInput(data) {
   const room = cleanString(data?.room, 1).toLowerCase();
   if (!ALLOWED_ROOMS.has(room)) return null;
+  let requestId = '';
+  if (data?.requestId !== undefined) {
+    if (typeof data.requestId !== 'string' || !/^[a-f0-9]{32}$/i.test(data.requestId.trim())) return null;
+    requestId = data.requestId.trim().toLowerCase();
+  }
+  const withRequestId = value => requestId ? { ...value, requestId } : value;
 
   if (room === 'e' && typeof data?.image === 'string') {
     const image = data.image.trim();
     if (!/^data:image\/(?:webp|png|jpeg);base64,[a-z0-9+/=]+$/i.test(image)) return null;
     if (image.length === 0 || image.length > 700_000) return null;
-    return { room, image };
+    return withRequestId({ room, image });
   }
 
   if (typeof data?.text !== 'string') return null;
@@ -43,9 +49,9 @@ function validateRoomSubmissionInput(data) {
     if (!Number.isInteger(lifespan) || !ALLOWED_LIFESPANS.has(lifespan)) return null;
     const requestedWeightKind = cleanString(data?.weightKind, 24).toLowerCase();
     const weightKind = ALLOWED_WEIGHT_KINDS.has(requestedWeightKind) ? requestedWeightKind : 'unnamed';
-    return { room, text, lifespan, weightKind };
+    return withRequestId({ room, text, lifespan, weightKind });
   }
-  return { room, text };
+  return withRequestId({ room, text });
 }
 
 function validateDriftClientId(value) {
