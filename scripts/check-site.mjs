@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=21.8.0', 'firebase-app.js?v=21.9.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=22.0.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -70,6 +70,11 @@ assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSo
 assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
+assert(appSource.includes('getOrCreateSubmissionRequest(safeLocalStorage, room, payload)'), 'Room submissions must reuse request IDs after uncertain delivery');
+assert(appSource.includes('requestId:pendingRequest.requestId'), 'Room submissions must send the idempotency request ID');
+assert(appSource.includes('window.EmpathStorage = Object.freeze'), 'Safety controls must share the resilient storage layer');
+assert(!/\blocalStorage\.(getItem|setItem|removeItem)\(/.test(appSource), 'Client storage access must use the resilient wrapper');
+assert(!/\bsessionStorage\.(getItem|setItem|removeItem)\(/.test(appSource), 'Session storage access must use the resilient wrapper');
 assert(appSource.includes("httpsCallable(functions, 'deleteRoomContent')"), 'Owned public content must use the deletion backend');
 assert(appSource.includes('rememberOwnedContent('), 'Accepted submissions must retain their local deletion receipt');
 assert(appSource.includes("httpsCallable(functions, 'reactToRoomContent')"), 'Room reactions must use the rate-limited backend');
@@ -98,7 +103,7 @@ for (const collectionName of ['stars', 'shards', 'warmth']) {
   assert(ruleBlock?.[1].includes('allow update, delete: if false;'), `${collectionName} updates must be server-only`);
 }
 assert(appSource.includes("createRoomContent('a', { text, lifespan, weightKind }, true)"), 'Room A content and anonymous category count must share the server transaction');
-assert(appSource.includes("localStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID');
+assert(appSource.includes("safeLocalStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID safely');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
 assert(appSource.includes("from \"./soul-crypto.mjs\""), 'Soul backups must use the dedicated client-side encryption module');
@@ -164,8 +169,9 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v21.9.0'), 'Service worker cache must be bumped for v21.9.0');
+assert(serviceWorker.includes('empath-cache-v22.0.0'), 'Service worker cache must be bumped for v22.0.0');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
+assert(serviceWorker.includes("'./storage-resilience.mjs'"), 'Service worker must precache resilient storage support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
 assert(serviceWorker.includes("'./collective-calendar.js'"), 'Service worker must precache the collective calendar');
 for (const icon of manifest.icons) {
@@ -181,6 +187,7 @@ assert(safetySource.includes("empath:language-changed"), 'Safety controls must r
 assert(safetySource.includes("OWNED_CONTENT_KEY = 'empath_owned_content_v1'"), 'Deletion receipts must stay on the submitting browser');
 assert(safetySource.includes("empath:delete-owned-content"), 'Owned content must expose a deliberate withdrawal event');
 assert(safetySource.includes("window.confirm(text('deleteConfirm'))"), 'Permanent content withdrawal must require confirmation');
+assert(safetySource.includes('window.EmpathStorage?.local'), 'Deletion receipts must use resilient storage when available');
 
 const adminPage = readFileSync('admin.html', 'utf8');
 const adminSource = readFileSync('admin-app.js', 'utf8');

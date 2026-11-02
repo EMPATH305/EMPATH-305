@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.9.0'; // Complete realtime subscription lifecycle
+const CACHE_NAME = 'empath-cache-v22.0.0'; // Resilient local storage and idempotent submissions
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -9,7 +9,8 @@ self.addEventListener('install', (event) => {
                 './index.html',
                 './styles.css',
                 './firebase-app.js',
-  './soul-crypto.mjs',
+                './soul-crypto.mjs',
+                './storage-resilience.mjs',
                 './collective-calendar.js',
                 './safety-guard.js',
                 './interactions.js',

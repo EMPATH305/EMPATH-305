@@ -3,6 +3,7 @@ import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
+import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
 
 // ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
 const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
@@ -37,6 +38,9 @@ const joinSilentCompanionshipRequest = httpsCallable(functions, 'joinSilentCompa
 const recordSiteVisitRequest = httpsCallable(functions, 'recordSiteVisit');
 const retireLegacySoulJourneyRequest = httpsCallable(functions, 'retireLegacySoulJourney');
 const deleteSoulJourneyRequest = httpsCallable(functions, 'deleteSoulJourney');
+const safeLocalStorage = createSafeStorage(getBrowserStorage('localStorage'));
+const safeSessionStorage = createSafeStorage(getBrowserStorage('sessionStorage'));
+window.EmpathStorage = Object.freeze({ local:safeLocalStorage, session:safeSessionStorage });
 let memoryDriftClientId = '';
 
 function generateDriftClientId() {
@@ -48,26 +52,23 @@ function generateDriftClientId() {
 
 function getDriftClientId() {
     if (memoryDriftClientId) return memoryDriftClientId;
-    try {
-        const saved = localStorage.getItem('empath_drift_client_id') || '';
-        if (/^[a-f0-9]{32}$/.test(saved)) return (memoryDriftClientId = saved);
-        memoryDriftClientId = generateDriftClientId();
-        localStorage.setItem('empath_drift_client_id', memoryDriftClientId);
-        return memoryDriftClientId;
-    } catch (error) {
-        memoryDriftClientId = generateDriftClientId();
-        return memoryDriftClientId;
-    }
+    const saved = safeLocalStorage.getItem('empath_drift_client_id') || '';
+    if (/^[a-f0-9]{32}$/.test(saved)) return (memoryDriftClientId = saved);
+    memoryDriftClientId = generateDriftClientId();
+    safeLocalStorage.setItem('empath_drift_client_id', memoryDriftClientId);
+    return memoryDriftClientId;
 }
 
 async function createRoomContent(room, payload = {}, returnResult = false) {
-    const response = await submitRoomContent({ room, ...payload });
+    const pendingRequest = await getOrCreateSubmissionRequest(safeLocalStorage, room, payload);
+    const response = await submitRoomContent({ room, ...payload, requestId:pendingRequest.requestId });
     const result = response?.data;
     if (!result?.accepted || typeof result.id !== 'string' || !result.id) {
         throw new Error('Room submission was not accepted.');
     }
     const ownedCollectionByRoom = { e:'emotions', m:'stars', p:'shards', t:'warmth' };
     const ownedCollection = ownedCollectionByRoom[room];
+    let submissionLocallyComplete = true;
     if (ownedCollection && typeof result.deletionToken === 'string') {
         const receiptStored = window.EmpathSafety?.rememberOwnedContent(
             ownedCollection,
@@ -75,9 +76,13 @@ async function createRoomContent(room, payload = {}, returnResult = false) {
             result.deletionToken,
             result.deletionExpiresAt
         );
+        submissionLocallyComplete = Boolean(receiptStored);
         if (receiptStored && room === 'e') window.renderEFeed?.();
         if (receiptStored && room === 'p') window.renderPShards?.();
         if (receiptStored && room === 't') window.renderTWarmthFeed?.();
+    }
+    if (submissionLocallyComplete) {
+        completeSubmissionRequest(safeLocalStorage, room, pendingRequest.requestId);
     }
     return returnResult ? result : result.id;
 }
@@ -108,7 +113,7 @@ window.empathLogEvent = () => {};
 window.empathSetAnalyticsCollectionEnabled = () => {};
 let analyticsInitPromise = null;
 async function initializeConsentedAnalytics() {
-    if (localStorage.getItem('empath_analytics_consent') !== 'granted') return null;
+    if (safeLocalStorage.getItem('empath_analytics_consent') !== 'granted') return null;
     if (window.empathAnalytics) {
         window.empathSetAnalyticsCollectionEnabled(window.empathAnalytics, true);
         return window.empathAnalytics;
@@ -132,7 +137,7 @@ async function initializeConsentedAnalytics() {
 }
 
 window.setAnalyticsConsent = async function(granted) {
-    localStorage.setItem('empath_analytics_consent', granted ? 'granted' : 'denied');
+    safeLocalStorage.setItem('empath_analytics_consent', granted ? 'granted' : 'denied');
     if (granted) await initializeConsentedAnalytics();
     else if (window.empathAnalytics) window.empathSetAnalyticsCollectionEnabled(window.empathAnalytics, false);
     renderAnalyticsConsentControls();
@@ -247,7 +252,7 @@ const ACTIVE_ROOM = ['e','m','p','a','t','h'].find(key =>
     document.documentElement.classList.contains(`empath-room-${key}`)
 ) || '';
 try {
-    const cachedCounts = JSON.parse(localStorage.getItem('empath_global_counts') || '{}');
+    const cachedCounts = JSON.parse(safeLocalStorage.getItem('empath_global_counts') || '{}');
     ['e','m','p','a','t'].forEach(key => {
         const value = Number(cachedCounts[key]);
         if(Number.isFinite(value) && value >= 0) globalCounts[key] = value;
@@ -275,7 +280,7 @@ function playRitual(btnId, origText) { const btn = document.getElementById(btnId
 
 function updateCountersUI() {
     try {
-        localStorage.setItem('empath_global_counts', JSON.stringify({
+        safeLocalStorage.setItem('empath_global_counts', JSON.stringify({
             e:globalCounts.e || 0, m:globalCounts.m || 0, p:globalCounts.p || 0,
             a:globalCounts.a || 0, t:globalCounts.t || 0, savedAt:Date.now()
         }));
@@ -284,7 +289,7 @@ function updateCountersUI() {
     ['h-e-count','h-m-count','h-p-count','h-a-count','h-t-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = state[id.split('-')[1]+'Count']; });
     
     // 🌟 讓大腦學會記憶，實現 0 秒載入的視覺魔術
-    localStorage.setItem('empath_global_counts', JSON.stringify(globalCounts));
+    safeLocalStorage.setItem('empath_global_counts', JSON.stringify(globalCounts));
     
     updateSoulWeather();
     // 計算全站總留言數，並檢查是否觸發情緒脈衝
@@ -493,7 +498,7 @@ window.stopBreathe = function() {
 const SUPPORTED_LANGUAGES = new Set(['zh','zh-cn','en','en-uk','ja','es','fr','de','uk','pl']);
 let savedLanguage = 'zh';
 try {
-    const storedLanguage = localStorage.getItem('empath_language');
+    const storedLanguage = safeLocalStorage.getItem('empath_language');
     if (SUPPORTED_LANGUAGES.has(storedLanguage)) savedLanguage = storedLanguage;
 } catch (error) {}
 window.currentLang = savedLanguage;
@@ -508,7 +513,7 @@ const CRISIS_REGIONS = {
 
 function currentCrisisRegion() {
     try {
-        const saved = localStorage.getItem('empath_crisis_region');
+        const saved = safeLocalStorage.getItem('empath_crisis_region');
         return CRISIS_REGIONS[saved] ? saved : 'global';
     } catch (error) { return 'global'; }
 }
@@ -534,7 +539,7 @@ function updateCrisisLinks() {
 
 window.setCrisisRegion = function(regionKey) {
     if (!CRISIS_REGIONS[regionKey]) return;
-    localStorage.setItem('empath_crisis_region', regionKey);
+    safeLocalStorage.setItem('empath_crisis_region', regionKey);
     updateCrisisLinks();
 };
 
@@ -571,7 +576,7 @@ function renderAnalyticsConsentControls() {
         panel.className = 'analytics-consent-controls';
         privacyCard.querySelector('#privacy-close-btn')?.parentElement?.before(panel);
     }
-    const granted = localStorage.getItem('empath_analytics_consent') === 'granted';
+    const granted = safeLocalStorage.getItem('empath_analytics_consent') === 'granted';
     panel.replaceChildren();
     const status = document.createElement('p');
     status.textContent = granted
@@ -716,7 +721,7 @@ window.switchLang = function(lang, options = {}) {
   const { silent = false, persist = true } = options;
   window.currentLang = lang;
   if (persist) {
-    try { localStorage.setItem('empath_language', lang); } catch (error) {}
+    try { safeLocalStorage.setItem('empath_language', lang); } catch (error) {}
   }
   const documentLanguages = { 'zh':'zh-Hant', 'zh-cn':'zh-Hans', 'en':'en', 'en-uk':'en-GB', 'ja':'ja', 'es':'es', 'fr':'fr', 'de':'de', 'uk':'uk', 'pl':'pl' };
   document.documentElement.lang = documentLanguages[lang] || 'zh-Hant';
@@ -843,7 +848,7 @@ window.toggleHeroQuotes = function() { const el = document.getElementById('hero-
 
 window.addEventListener('scroll', () => { const btt = document.getElementById('btt-btn'); if(window.scrollY > 500) { btt.style.display = 'flex'; } else { btt.style.display = 'none'; } });
 
-function loadLocalJourney() { const savedJourney = localStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = JSON.parse(savedJourney); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) { console.error("發生錯誤:", err); } } }
+function loadLocalJourney() { const savedJourney = safeLocalStorage.getItem('empath_user_journey'); if(savedJourney){ try { journeyData = normalizeJourney(JSON.parse(savedJourney)); state.eCount = journeyData.counters.e || 0; state.mCount = journeyData.counters.m || 0; state.pCount = journeyData.counters.p || 0; state.aCount = journeyData.counters.a || 0; state.tCount = journeyData.counters.t || 0; } catch(err) { console.error("發生錯誤:", err); journeyData = normalizeJourney(); } } }
 loadLocalJourney();
 
 // ==========================================
@@ -920,19 +925,19 @@ function applyReturningPlaceholder() {
 
 function initReturnMemory() {
     const now = new Date();
-    const rawPreviousVisit = localStorage.getItem(RETURN_MEMORY_LAST_VISIT_KEY);
+    const rawPreviousVisit = safeLocalStorage.getItem(RETURN_MEMORY_LAST_VISIT_KEY);
     const parsedPreviousVisit = Number(rawPreviousVisit);
     const hasValidPreviousVisit = Number.isFinite(parsedPreviousVisit) && parsedPreviousVisit > 0 && parsedPreviousVisit <= now.getTime() + 300000;
     const previousVisit = hasValidPreviousVisit ? parsedPreviousVisit : null;
     const visitCount = Math.max(0,Number(journeyData.visitCount) || 0) + 1;
 
     journeyData.visitCount = visitCount;
-    localStorage.setItem('empath_user_journey',JSON.stringify(journeyData));
-    localStorage.setItem(RETURN_MEMORY_LAST_VISIT_KEY,String(now.getTime()));
+    safeLocalStorage.setItem('empath_user_journey',JSON.stringify(journeyData));
+    safeLocalStorage.setItem(RETURN_MEMORY_LAST_VISIT_KEY,String(now.getTime()));
     window.empathReturnMemory = { isReturning:Boolean(previousVisit), previousVisit, visitCount };
 
     const primaryEntry = document.getElementById('primary-entry-cta');
-    const lastRoom = localStorage.getItem('empath_last_room');
+    const lastRoom = safeLocalStorage.getItem('empath_last_room');
     if (previousVisit && primaryEntry && ['e','m','p','a','t','h'].includes(lastRoom)) {
         primaryEntry.href = `room-${lastRoom}.html`;
         primaryEntry.textContent = t(`繼續上次的 Room ${lastRoom.toUpperCase()}`, `Continue Room ${lastRoom.toUpperCase()}`);
@@ -957,7 +962,7 @@ function initReturnMemory() {
     applyReturningPlaceholder();
 
     const hMemory = document.getElementById('h-return-memory');
-    const soulKey = localStorage.getItem('empath_soul_key');
+    const soulKey = safeLocalStorage.getItem('empath_soul_key');
     if (hMemory && soulKey) {
         setReturnMemoryTranslations(hMemory,returnCountMessages(visitCount));
         const roomH = document.getElementById('room-h');
@@ -978,7 +983,7 @@ const sessionRoomNames = { E:'情緒出口', M:'思念映射', P:'碎片修補',
 
 function readSessionRoute() {
     try {
-        const route = JSON.parse(sessionStorage.getItem(SESSION_ROUTE_KEY) || '[]');
+        const route = JSON.parse(safeSessionStorage.getItem(SESSION_ROUTE_KEY) || '[]');
         return Array.isArray(route) ? route.filter(room => sessionRoomNames[room]) : [];
     } catch(error) { return []; }
 }
@@ -1016,7 +1021,7 @@ function recordSessionRoom(room) {
     const route = readSessionRoute();
     if (route[route.length-1] === room || route.includes(room)) return;
     route.push(room);
-    sessionStorage.setItem(SESSION_ROUTE_KEY,JSON.stringify(route));
+    safeSessionStorage.setItem(SESSION_ROUTE_KEY,JSON.stringify(route));
     window.renderSessionJourney();
 }
 
@@ -1027,7 +1032,7 @@ window.storeSessionEcho = function(text) {
     if (/\s/.test(fragment)) fragment = fragment.split(/\s+/).find(word => word.length >= 3) || fragment;
     fragment = Array.from(fragment.replace(/[<>]/g,'')).slice(0,6).join('');
     if (!fragment) return;
-    sessionStorage.setItem(SESSION_ECHO_KEY,fragment);
+    safeSessionStorage.setItem(SESSION_ECHO_KEY,fragment);
     const echo = document.getElementById('h-session-echo');
     if (echo) echo.textContent = fragment;
 };
@@ -1035,7 +1040,7 @@ window.storeSessionEcho = function(text) {
 function initSessionNarrative() {
     window.renderSessionJourney();
     const echo = document.getElementById('h-session-echo');
-    if (echo) echo.textContent = sessionStorage.getItem(SESSION_ECHO_KEY) || '';
+    if (echo) echo.textContent = safeSessionStorage.getItem(SESSION_ECHO_KEY) || '';
     // 以「房間確實進入視窗」判定，不再用房間總高度比例。
     // Room P 內容很長；舊 threshold:.32 會要求超過一個視窗的可見高度，
     // 因此在任何螢幕上都可能永遠無法觸發。固定像素內縮也避免
@@ -1802,7 +1807,7 @@ function createTWarmthItem(record) {
     const message = document.createElement('div'); message.textContent = typeof data.text === 'string' ? data.text : '';
     const echoButton = document.createElement('button'); echoButton.type = 'button'; echoButton.className = 'echo-btn'; echoButton.id = `btn-${id}`;
     echoButton.setAttribute('aria-label', t('為這則溫暖送出共鳴', 'Send an echo for this message', 'このメッセージに共鳴を送る', 'Enviar un eco para este mensaje', 'Envoyer un écho pour ce message', 'Ein Echo für diese Nachricht senden', '为这则温暖送出共鸣'));
-    if (localStorage.getItem('echoed_'+id)) echoButton.classList.add('pulsed');
+    if (safeLocalStorage.getItem('echoed_'+id)) echoButton.classList.add('pulsed');
     const heart = document.createElement('span'); heart.className = 'heart'; heart.textContent = '🕯️';
     echoButton.append(heart, document.createTextNode(' Echo Pulse '));
     const actions = window.EmpathSafety?.createContentActions('warmth', id, () => {
@@ -1812,7 +1817,7 @@ function createTWarmthItem(record) {
     div.append(pulse, message, echoButton, actions || document.createDocumentFragment());
     echoButton.addEventListener('click', async function(e){
         if(this.classList.contains('pulsed')) return;
-        this.classList.add('pulsed'); localStorage.setItem('echoed_'+id, 'true');
+        this.classList.add('pulsed'); safeLocalStorage.setItem('echoed_'+id, 'true');
         try {
             await reactToRoomContent('warmth', id);
             window.showToast('✦ Echo Pulse Sent'); window.triggerHeartbeat();
@@ -1823,7 +1828,7 @@ function createTWarmthItem(record) {
                 window.showToast(t('這份共鳴已經送達', 'Your echo has already arrived', 'この共鳴はすでに届いています', 'Tu eco ya llegó', 'Votre écho est déjà arrivé', 'Dein Echo ist bereits angekommen', '这份共鸣已经送达', 'Ваш відгук уже надійшов', 'Twoje echo już dotarło'));
                 return;
             }
-            this.classList.remove('pulsed'); localStorage.removeItem('echoed_'+id);
+            this.classList.remove('pulsed'); safeLocalStorage.removeItem('echoed_'+id);
             window.showToast(t('共鳴沒有送出，請稍後再試', 'Echo was not sent. Please try again.', '共鳴を送信できませんでした。', 'No se envió el eco. Inténtalo de nuevo.', "L'écho n'a pas été envoyé. Réessayez.", 'Echo wurde nicht gesendet. Bitte erneut versuchen.', '共鸣没有送出，请稍后再试'));
             console.error('Echo Pulse failed:', error);
         }
@@ -1871,7 +1876,7 @@ function subscribeOtherRooms() {
         window.starMessages = tempStars
             .filter(star => !window.EmpathSafety?.isHidden('stars', star.id))
             .map(normalizeStar).sort((a,b) => b.brightness - a.brightness).slice(0, 80);
-        try { localStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks,colorIdx:s.colorIdx,relX:s.relX,relY:s.relY})))); } catch(e) {}
+        try { safeLocalStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks,colorIdx:s.colorIdx,relX:s.relX,relY:s.relY})))); } catch(e) {}
         starMessages = window.starMessages;
         
         if(typeof window.updateMStats === 'function') window.updateMStats();
@@ -2056,7 +2061,7 @@ window.addEventListener('pageshow', event => {
     if (event.persisted) subscribeRealtimeData();
 });
 
-window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
+window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); safeLocalStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); safeLocalStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
 
 // 提早載入語音庫，避免第一次點擊沒聲音
 if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
@@ -2288,7 +2293,7 @@ document.addEventListener('keydown', (e) => {
 window.showToast = function(msg, dur=2400){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), dur); }
 function nowStr(){ const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 
-function logJourney(type, text){ const time = nowStr(); journeyData.counters[type] = (journeyData.counters[type] || 0) + 1; journeyData.events.push({ type, text, time }); localStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud(); updateCountersUI(); }
+function logJourney(type, text){ const time = nowStr(); journeyData.counters[type] = (journeyData.counters[type] || 0) + 1; journeyData.events.push({ type, text, time }); safeLocalStorage.setItem('empath_user_journey', JSON.stringify(journeyData)); state[type+'Count']++; renderTimelineHTML(type, text, time); autoBackupToCloud(); updateCountersUI(); }
 function renderTimelineHTML(type, text, time){
     const container = document.getElementById('h-events');
     if (!container) return;
@@ -2415,7 +2420,7 @@ async function retireLegacySoulBackup(key) {
 
 function applyJourney(nextJourney) {
     journeyData = normalizeJourney(nextJourney);
-    localStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
+    safeLocalStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
     ['e','m','p','a','t'].forEach(type => { state[type + 'Count'] = journeyData.counters[type] || 0; });
     const timeline = document.getElementById('h-events');
     if (timeline) { timeline.innerHTML = ''; initTimeline(); }
@@ -2434,13 +2439,13 @@ function generateSoulKey() {
 
 window.createSoulKey = async function() {
     const soulKey = generateSoulKey();
-    localStorage.setItem('empath_soul_key', soulKey);
+    safeLocalStorage.setItem('empath_soul_key', soulKey);
     await autoBackupToCloud();
     updateSyncUI();
     window.showToast(t('靈魂鑰匙已生成，請妥善保存 ✦', 'Key generated — keep it somewhere safe ✦', '鍵が生成されました ✦', '¡Llave generada!', 'Clé générée !', 'Schlüssel generiert!', '灵魂钥匙已生成，请妥善保存 ✦'));
     return soulKey;
 }
-window.copySoulKey = function() { const key = localStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
+window.copySoulKey = function() { const key = safeLocalStorage.getItem('empath_soul_key'); if (key) { navigator.clipboard.writeText(key).then(() => { const btn = document.getElementById('copy-key-btn'); const originalText = btn.innerHTML; btn.innerHTML = t('✓ 已複製', '✓ Copied', '✓ コピー済', '✓ Copiado', '✓ Copié', '✓ Kopiert', '✓ 已复制'); btn.style.color = '#fff'; btn.style.borderColor = '#fff'; window.showToast(t('🗝️ 鑰匙已複製到剪貼簿', '🗝️ Key copied', '🗝️ キーをコピーしました', '🗝️ Llave copiada', '🗝️ Clé copiée', '🗝️ Schlüssel kopiert', '🗝️ 钥匙已复制到剪贴板')); setTimeout(() => { btn.innerHTML = originalText; btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }, 2000); }).catch(err => { window.showToast('複製失敗 / Copy failed'); }); } }
 window.loadExistingSoulKey = async function() {
     const input = document.getElementById('sync-key-input');
     const key = input?.value.trim().toUpperCase() || '';
@@ -2465,7 +2470,7 @@ window.loadExistingSoulKey = async function() {
             return;
         }
         applyJourney(mergeJourneys(journeyData, cloud.journey));
-        localStorage.setItem('empath_soul_key', key);
+        safeLocalStorage.setItem('empath_soul_key', key);
         await writeSoulBackup(key, journeyData, cloud.letters);
         if (cloud.legacy) await retireLegacySoulBackup(key);
         updateSyncUI();
@@ -2476,10 +2481,10 @@ window.loadExistingSoulKey = async function() {
         window.showToast(t('同步暫時失敗，原有足跡仍保留', 'Sync failed for now; your local footprints are still safe'));
     }
 }
-window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { localStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
+window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { safeLocalStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
 let soulBackupQueue = Promise.resolve();
 async function autoBackupToCloud() {
-    const key = localStorage.getItem('empath_soul_key');
+    const key = safeLocalStorage.getItem('empath_soul_key');
     if(!key) return false;
     soulBackupQueue = soulBackupQueue.catch(() => false).then(async () => {
         try {
@@ -2496,7 +2501,7 @@ async function autoBackupToCloud() {
     });
     return soulBackupQueue;
 }
-function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = localStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
+function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = safeLocalStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
 const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); const display = document.getElementById('active-key-display'); if(display) display.textContent=key; } else { initial.style.display='flex'; active.style.display='none'; } }
 
 let allEmotions = []; let eFeedExpanded = false;
@@ -2822,12 +2827,12 @@ function normalizeStar(star, index = 0) {
 }
 
 try {
-    const _c = localStorage.getItem('empath_stars_cache');
+    const _c = safeLocalStorage.getItem('empath_stars_cache');
     const cachedStars = _c ? JSON.parse(_c) : [];
     window.starMessages = Array.isArray(cachedStars) ? cachedStars.map(normalizeStar) : [];
 } catch(e) {
     window.starMessages = [];
-    localStorage.removeItem('empath_stars_cache');
+    safeLocalStorage.removeItem('empath_stars_cache');
 }
 window.resizeCanvas = function(target = 'all'){ 
     const dpr = window.devicePixelRatio || 1; 
@@ -3473,7 +3478,7 @@ window.drawSand = function() {
     ctx.globalAlpha = 1; sandRafId = requestAnimationFrame(window.drawSand); 
 }
 
-window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); sessionStorage.setItem('empath_a_accepted', 'true'); }
+window.acceptARead = function() { document.getElementById('a-warning-mask').style.display = 'none'; const feed = document.getElementById('a-feed'); feed.style.display = 'flex'; setTimeout(() => feed.style.filter = 'blur(0px)', 50); safeSessionStorage.setItem('empath_a_accepted', 'true'); }
 window.hideAFeed = function() { document.getElementById('a-warning-mask').innerHTML = `<p style="color:var(--muted); font-size:13px; line-height:2;">${t('已隱藏他人留言。<br>你的痛苦依然會被這裡安放。', 'Messages hidden.<br>Your pain will still be held here.', '他人のメッセージを非表示にしました。<br>あなたの痛みはここで大切に保管されます。', 'Mensajes ocultos.<br>Tu dolor seguirá siendo sostenido aquí.', 'Messages masqués.<br>Votre douleur sera toujours conservée ici.', 'Nachrichten ausgeblendet.<br>Dein Schmerz wird hier weiterhin bewahrt.', '已隐藏他人留言。<br>你的痛苦依然会被这里安放。')}</p>`; }
 
 function renderRoomACollectiveCount(justReleased = false) {
@@ -3585,10 +3590,10 @@ function subscribeRoomAReleaseStats() {
     const statsRef = doc(db, 'metadata', 'room_a_stats');
     firestoreUnsubs.push(onSnapshot(statsRef, snapshot => {
         roomAReleasedTotal = Math.max(0, Number(snapshot.data()?.totalReleased) || 0);
-        const justReleased = sessionStorage.getItem('empath_a_just_released') === 'true';
+        const justReleased = safeSessionStorage.getItem('empath_a_just_released') === 'true';
         renderRoomACollectiveCount(justReleased);
         if (justReleased) {
-            sessionStorage.removeItem('empath_a_just_released');
+            safeSessionStorage.removeItem('empath_a_just_released');
             setTimeout(() => document.getElementById('a-collective-count')?.classList.remove('is-new-release'), 5000);
         }
     }, error => console.error('Room A anonymous total failed:', error)));
@@ -3615,9 +3620,9 @@ window.submitA = async function(){
             weightKind
         };
         renderRoomAReleaseWitness();
-        sessionStorage.setItem('empath_a_just_released', 'true');
+        safeSessionStorage.setItem('empath_a_just_released', 'true');
         // 🌟 記錄投遞時間，作為 24 小時後宇宙回聲的種子
-        localStorage.setItem('empath_a_submit_time', Date.now());
+        safeLocalStorage.setItem('empath_a_submit_time', Date.now());
         input.value='';
         const unnamedOption = document.querySelector('input[name="a-weight-kind"][value="unnamed"]');
         if (unnamedOption) unnamedOption.checked = true;
@@ -3638,8 +3643,8 @@ window.submitT = async function(){
     // 🌟 取得這則溫暖的專屬 ID，用來監聽它未來的命運
     try {
         const contentId = await createRoomContent('t', { text });
-        localStorage.setItem('empath_my_warmth_id', contentId);
-        localStorage.setItem('empath_my_warmth_echos', '0');
+        safeLocalStorage.setItem('empath_my_warmth_id', contentId);
+        safeLocalStorage.setItem('empath_my_warmth_echos', '0');
         window.checkRoomTWarmth();
         input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); queueTonightEcho('t');
     } catch(error) { showRoomSubmissionError(error); }
@@ -3769,7 +3774,7 @@ window.startSilentCompanionship = async function() {
     let bucketKey = String(bucket);
     const joinedKey = 'empath_silent_company_bucket';
     const presenceRef = doc(db, 'metadata', 'silent_presence');
-    if (sessionStorage.getItem(joinedKey) !== bucketKey) {
+    if (safeSessionStorage.getItem(joinedKey) !== bucketKey) {
         try {
             const response = await joinSilentCompanionshipRequest({ clientId:getDriftClientId() });
             const result = response?.data;
@@ -3777,7 +3782,7 @@ window.startSilentCompanionship = async function() {
             bucket = Number(result.bucket) || bucket;
             bucketKey = String(bucket);
             renderSilentCompanyCount(result.count);
-            sessionStorage.setItem(joinedKey, bucketKey);
+            safeSessionStorage.setItem(joinedKey, bucketKey);
         } catch(error) {
             console.error('Silent company count failed:', error);
             renderSilentCompanyCount(1);
@@ -3987,10 +3992,10 @@ window.submitFutureLetter = async function() {
         window.showToast(t('請先寫下你想對未來自己說的話 ✦', 'Please write a message for your future self first ✦'));
         return;
     }
-    let key = localStorage.getItem('empath_soul_key');
+    let key = safeLocalStorage.getItem('empath_soul_key');
     if(!key) {
         await window.createSoulKey();
-        key = localStorage.getItem('empath_soul_key');
+        key = safeLocalStorage.getItem('empath_soul_key');
     }
     if(!key) return;
     const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); // 預設 90 天後解鎖
@@ -4009,7 +4014,7 @@ window.submitFutureLetter = async function() {
 };
 
 window.checkFutureLetters = async function() {
-    const key = localStorage.getItem('empath_soul_key');
+    const key = safeLocalStorage.getItem('empath_soul_key');
     if(!key) return;
     try {
         const cloud = await readSoulBackup(key);
@@ -4044,7 +4049,7 @@ window.checkFutureLetters = async function() {
 };
 
 window.deleteSoulBackup = async function() {
-    const key = localStorage.getItem('empath_soul_key');
+    const key = safeLocalStorage.getItem('empath_soul_key');
     if (!key) return;
     const confirmed = confirm(t(
         '確定永久刪除這把鑰匙的雲端足跡與未來信嗎？本機足跡會保留，但此動作無法復原。',
@@ -4059,7 +4064,7 @@ window.deleteSoulBackup = async function() {
     try {
         const response = await deleteSoulJourneyRequest({ soulKey:key });
         if (!response?.data?.completed) throw new Error('Soul backup deletion was not completed.');
-        localStorage.removeItem('empath_soul_key');
+        safeLocalStorage.removeItem('empath_soul_key');
         updateSyncUI();
         const unlocked = document.getElementById('unlocked-letters');
         if (unlocked) unlocked.replaceChildren();
@@ -4072,7 +4077,7 @@ window.deleteSoulBackup = async function() {
 
 // 2. Room A：24 小時後只回傳匿名總量，不重播任何已消散原文。
 window.checkRoomAEcho = async function() {
-    const aSubmitTime = localStorage.getItem('empath_a_submit_time');
+    const aSubmitTime = safeLocalStorage.getItem('empath_a_submit_time');
     if (aSubmitTime && (Date.now() - parseInt(aSubmitTime) > 24 * 60 * 60 * 1000 || window.isTestingEcho)) {
         try {
             const snapshot = await getDoc(doc(db, 'metadata', 'room_a_stats'));
@@ -4083,7 +4088,7 @@ window.checkRoomAEcho = async function() {
                     `✦ ${total.toLocaleString()} weights have now been given to time. None of their words were kept.`
                 ), 8000);
             }, 4000);
-            localStorage.removeItem('empath_a_submit_time');
+            safeLocalStorage.removeItem('empath_a_submit_time');
         } catch(error) {
             console.error('Room A anonymous echo failed:', error);
         }
@@ -4092,7 +4097,7 @@ window.checkRoomAEcho = async function() {
 
 // 3. Room T：溫暖抵達了
 window.checkRoomTWarmth = function() {
-    const myWarmthId = localStorage.getItem('empath_my_warmth_id');
+    const myWarmthId = safeLocalStorage.getItem('empath_my_warmth_id');
     const subscriptionKey = 'warmth:return';
     if(!myWarmthId) {
         removeAuxiliarySubscription(subscriptionKey);
@@ -4102,15 +4107,15 @@ window.checkRoomTWarmth = function() {
         doc(db, "warmth", myWarmthId),
         (docSnap) => {
             if(!docSnap.exists()) {
-                localStorage.removeItem('empath_my_warmth_id');
-                localStorage.removeItem('empath_my_warmth_echos');
+                safeLocalStorage.removeItem('empath_my_warmth_id');
+                safeLocalStorage.removeItem('empath_my_warmth_echos');
                 removeAuxiliarySubscription(subscriptionKey);
                 return;
             }
                 const echos = docSnap.data().echos || 0;
-                const lastEchos = parseInt(localStorage.getItem('empath_my_warmth_echos') || '0');
+                const lastEchos = parseInt(safeLocalStorage.getItem('empath_my_warmth_echos') || '0');
                 if(echos > lastEchos) {
-                    localStorage.setItem('empath_my_warmth_echos', echos);
+                    safeLocalStorage.setItem('empath_my_warmth_echos', echos);
                     // 讓 Room T 門口微微發光
                     const tDoor = document.querySelector('.door-btn[data-d="T"]');
                     if(tDoor) { tDoor.style.boxShadow = '0 0 25px rgba(232,168,124,0.6)'; tDoor.style.borderColor = 'var(--amber)'; }
@@ -4226,11 +4231,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. 全站情緒脈衝觸發器
   window.checkGlobalPulse = function(totalMsgs) {
       const currentThousand = Math.floor(totalMsgs / 1000) * 1000;
-      const lastPulse = parseInt(localStorage.getItem('empath_last_pulse') || '0');
+      const lastPulse = parseInt(safeLocalStorage.getItem('empath_last_pulse') || '0');
       
       // 當跨越一個新的 1000 門檻時觸發 (例如從 999 變成 1000)
       if (currentThousand > 0 && currentThousand > lastPulse) {
-          localStorage.setItem('empath_last_pulse', currentThousand);
+          safeLocalStorage.setItem('empath_last_pulse', currentThousand);
           
           const overlay = document.getElementById('global-pulse-overlay');
           const textEl = document.getElementById('pulse-text');
@@ -4272,7 +4277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 1000);
     
   // 🌟 瞬間視覺魔法：在 Firebase 還沒連上之前，先用快取數據填滿畫面！
-  const cached = localStorage.getItem('empath_global_counts');
+  const cached = safeLocalStorage.getItem('empath_global_counts');
   if (cached) {
       Object.assign(globalCounts, JSON.parse(cached));
       updateCountersUI();
@@ -4282,18 +4287,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   const visitDay = String(Math.floor(Date.now() / 86400000));
   const visitDayKey = 'empath_site_visit_day';
-  if (localStorage.getItem(visitDayKey) !== visitDay) {
+  if (safeLocalStorage.getItem(visitDayKey) !== visitDay) {
       try {
           const response = await recordSiteVisitRequest({});
-          if (response?.data?.accepted) localStorage.setItem(visitDayKey, visitDay);
+          if (response?.data?.accepted) safeLocalStorage.setItem(visitDayKey, visitDay);
       } catch(e) {
           console.error('Anonymous site visit failed:', e);
       }
   }
-  if(!localStorage.getItem('empath_hsp_hint_shown')) { setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); localStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000); }
-  if(sessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
+  if(!safeLocalStorage.getItem('empath_hsp_hint_shown')) { setTimeout(() => { const ttip = document.getElementById('hsp-tooltip'); if(ttip) { ttip.classList.add('show'); setTimeout(() => { ttip.classList.remove('show'); }, 8000); safeLocalStorage.setItem('empath_hsp_hint_shown', 'true'); } }, 1000); }
+  if(safeSessionStorage.getItem('empath_a_accepted') === 'true') { const mask = document.getElementById('a-warning-mask'); const feed = document.getElementById('a-feed'); if(mask && feed) { mask.style.display = 'none'; feed.style.display = 'flex'; feed.style.filter = 'blur(0px)'; } }
   initTimeline(); updateSyncUI(); 
-  const existingKey = localStorage.getItem('empath_soul_key');
+  const existingKey = safeLocalStorage.getItem('empath_soul_key');
   if(existingKey && document.getElementById('h-events')) {
       try {
           const cloud = await readSoulBackup(existingKey);
