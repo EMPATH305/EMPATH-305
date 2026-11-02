@@ -7,6 +7,7 @@ const ALLOWED_ROOMS = new Set(['e', 'm', 'p', 'a', 't']);
 const ALLOWED_LIFESPANS = new Set([60_000, 3_600_000, 86_400_000]);
 const ALLOWED_WEIGHT_KINDS = new Set(['relationship', 'loss', 'self', 'future', 'unnamed']);
 const ALLOWED_REACTION_KINDS = new Set(['star', 'shard', 'warmth']);
+const DELETABLE_CONTENT_COLLECTIONS = new Set(['emotions', 'stars', 'shards', 'warmth']);
 
 function cleanString(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -80,6 +81,19 @@ function validateRoomReactionInput(data) {
   return result;
 }
 
+function validateContentDeletionInput(data) {
+  if (typeof data?.targetCollection !== 'string'
+      || typeof data?.targetId !== 'string'
+      || typeof data?.deletionToken !== 'string') return null;
+  const targetCollection = data.targetCollection.trim();
+  const targetId = data.targetId.trim();
+  const deletionToken = data.deletionToken.trim();
+  if (!DELETABLE_CONTENT_COLLECTIONS.has(targetCollection)) return null;
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(targetId)) return null;
+  if (!/^[A-Za-z0-9_-]{43}$/.test(deletionToken)) return null;
+  return { targetCollection, targetId, deletionToken };
+}
+
 function validateAnonymousClientInput(data) {
   const clientId = validateDriftClientId(data?.clientId);
   return clientId ? { clientId } : null;
@@ -132,6 +146,7 @@ module.exports = {
   validateDriftLetterInput,
   validateDriftReceiveInput,
   validateRoomReactionInput,
+  validateContentDeletionInput,
   validateAnonymousClientInput,
   validateSoulKeyInput,
   containsCrisisSignal,

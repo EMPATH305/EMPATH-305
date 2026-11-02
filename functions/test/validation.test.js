@@ -7,6 +7,7 @@ const {
   validateDriftLetterInput,
   validateDriftReceiveInput,
   validateRoomReactionInput,
+  validateContentDeletionInput,
   validateAnonymousClientInput,
   validateSoulKeyInput,
   containsCrisisSignal,
@@ -70,6 +71,33 @@ test('accepts only known room reactions with safe document IDs', () => {
   assert.equal(validateRoomReactionInput({ kind:'star', targetId:'a', neighborIds:['b', 'b'] }), null);
   assert.equal(validateRoomReactionInput({ kind:'star', targetId:'a', neighborIds:['b', 'c', 'd'] }), null);
   assert.equal(validateRoomReactionInput({ kind:'warmth', targetId:'a', neighborIds:['b'] }), null);
+});
+
+test('accepts deletion receipts only for persistent public room content', () => {
+  const deletionToken = 'A'.repeat(43);
+  assert.deepEqual(validateContentDeletionInput({
+    targetCollection:'shards', targetId:'shard_123-Z', deletionToken
+  }), {
+    targetCollection:'shards', targetId:'shard_123-Z', deletionToken
+  });
+  assert.equal(validateContentDeletionInput({
+    targetCollection:'sand', targetId:'message-1', deletionToken
+  }), null);
+  assert.equal(validateContentDeletionInput({
+    targetCollection:'shards', targetId:'bad/id', deletionToken
+  }), null);
+  assert.equal(validateContentDeletionInput({
+    targetCollection:'shards', targetId:'message-1', deletionToken:'short'
+  }), null);
+  assert.equal(validateContentDeletionInput({
+    targetCollection:'shards', targetId:'A'.repeat(161), deletionToken
+  }), null);
+  assert.equal(validateContentDeletionInput({
+    targetCollection:'shards', targetId:'message-1', deletionToken:'A'.repeat(44)
+  }), null);
+  assert.equal(validateContentDeletionInput({
+    targetCollection:'shards', targetId:'message-1', deletionToken:`${'A'.repeat(42)}+`
+  }), null);
 });
 
 test('accepts only bounded anonymous client identifiers', () => {
