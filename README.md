@@ -195,6 +195,14 @@
 
 App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 [`functions/OBSERVABILITY.md`](functions/OBSERVABILITY.md)。
 
+## ✦ v22.2 Browser Smoke Tests
+
+1. **真實瀏覽器回歸測試**：GitHub Actions 使用 Chromium 實際開啟首頁與六個房間，不再只檢查檔案字串與 JavaScript 語法。
+2. **桌面與手機雙尺寸**：每個頁面分別以 1440×900 與 390×844 視窗測試，檢查主內容、唯一 `h1`、安全備援畫面及水平溢位。
+3. **基本互動驗證**：自動展開設定面板、切換英文並確認 `<html lang>` 與 Room E 標題同步更新。
+4. **零正式資料接觸**：測試會攔截 Functions、Firestore 與 Analytics 網路請求；不投稿、不讀取公開留言，也不增加正式訪客統計。
+5. **失敗證據保留**：CI 失敗時保存畫面截圖、Playwright trace 與 HTML 報告 14 天，方便直接重現錯誤。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
