@@ -141,6 +141,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Withdrawal receipts contain only server-owned token digests and are
+    // accessed exclusively by callable functions.
+    match /content_deletion_receipts/{receiptId} {
+      allow read, write: if false;
+    }
+
     match /rate_limits/{bucketId} {
       allow read, write: if false;
     }

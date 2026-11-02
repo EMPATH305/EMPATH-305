@@ -14,6 +14,7 @@ const {
   validateDriftLetterInput,
   validateDriftReceiveInput,
   validateRoomReactionInput,
+  validateContentDeletionInput,
   validateAnonymousClientInput,
   validateSoulKeyInput,
   containsCrisisSignal,
@@ -34,6 +35,7 @@ const CONTENT_LIMIT_PER_HOUR = 12;
 // Six allows a visitor to complete all five rooms once without tripping the
 // burst guard, while the hourly ceiling still blocks sustained flooding.
 const CONTENT_LIMIT_PER_TEN_MINUTES = 6;
+const CONTENT_DELETION_LIMIT_PER_HOUR = 10;
 const DRIFT_SEND_LIMIT_PER_HOUR = 4;
 const DRIFT_RECEIVE_LIMIT_PER_HOUR = 8;
 const REACTION_LIMIT_PER_HOUR = 40;
@@ -162,6 +164,43 @@ async function enforceContentSubmissionLimit(request) {
     transaction.set(hourlyRef, { ...shared, window:'hour', count:hourlyCount + 1 }, { merge:true });
     transaction.set(burstRef, { ...shared, window:'ten-minutes', count:burstCount + 1 }, { merge:true });
   });
+}
+
+async function enforceContentDeletionLimit(request) {
+  const now = Date.now();
+  const hour = Math.floor(now / 3_600_000);
+  const key = rateLimitKey(request, RATE_LIMIT_SALT.value());
+  const ref = db.collection('rate_limits').doc(`content_deletion_${hour}_${key}`);
+  await db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    const count = snapshot.exists ? Math.max(0, Number(snapshot.data()?.count) || 0) : 0;
+    if (count >= CONTENT_DELETION_LIMIT_PER_HOUR) {
+      throw new HttpsError('resource-exhausted', 'Too many withdrawal requests. Try again later.');
+    }
+    transaction.set(ref, {
+      kind:'content-deletion',
+      count:count + 1,
+      updatedAt:FieldValue.serverTimestamp(),
+      expiresAt:Timestamp.fromMillis((hour + 2) * 3_600_000)
+    }, { merge:true });
+  });
+}
+
+function contentDeletionReceiptId(targetCollection, targetId) {
+  return crypto.createHash('sha256')
+    .update(`content-deletion-receipt:${targetCollection}:${targetId}`)
+    .digest('hex');
+}
+
+function contentDeletionTokenHash(targetCollection, targetId, deletionToken) {
+  return crypto.createHmac('sha256', RATE_LIMIT_SALT.value())
+    .update(`content-deletion-token:${targetCollection}:${targetId}:${deletionToken}`)
+    .digest('hex');
+}
+
+function tokenHashesMatch(expected, actual) {
+  if (!/^[a-f0-9]{64}$/.test(String(expected)) || !/^[a-f0-9]{64}$/.test(String(actual))) return false;
+  return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(actual, 'hex'));
 }
 
 function driftParticipantKey(clientId) {
@@ -303,6 +342,8 @@ exports.submitRoomContent = onCall({
 
   const contentRef = db.collection(collectionByRoom[input.room]).doc();
   let roomStats = null;
+  let deletionToken = null;
+  let deletionExpiresAt = null;
   if (input.room === 'a') {
     const statsRef = db.collection('metadata').doc('room_a_stats');
     await db.runTransaction(async transaction => {
@@ -327,8 +368,20 @@ exports.submitRoomContent = onCall({
   } else {
     const publicStatsRef = db.collection('metadata').doc('public_room_stats');
     const statsFieldByRoom = { e:'emotions', m:'stars', p:'shards', t:'warmth' };
+    deletionToken = crypto.randomBytes(32).toString('base64url');
+    deletionExpiresAt = now + PUBLIC_CONTENT_RETENTION_MS;
+    const receiptRef = db.collection('content_deletion_receipts').doc(
+      contentDeletionReceiptId(contentRef.parent.id, contentRef.id)
+    );
     await db.runTransaction(async transaction => {
       transaction.set(contentRef, data);
+      transaction.set(receiptRef, {
+        targetCollection:contentRef.parent.id,
+        targetId:contentRef.id,
+        tokenHash:contentDeletionTokenHash(contentRef.parent.id, contentRef.id, deletionToken),
+        createdAt:FieldValue.serverTimestamp(),
+        expiresAt:Timestamp.fromMillis(deletionExpiresAt)
+      });
       transaction.set(publicStatsRef, {
         [statsFieldByRoom[input.room]]:FieldValue.increment(1),
         updatedAt:FieldValue.serverTimestamp()
@@ -340,7 +393,59 @@ exports.submitRoomContent = onCall({
     contentId:contentRef.id,
     appVerified:Boolean(request.app)
   });
-  return { accepted:true, id:contentRef.id, ...(roomStats ? { roomStats } : {}) };
+  return {
+    accepted:true,
+    id:contentRef.id,
+    ...(deletionToken ? { deletionToken, deletionExpiresAt } : {}),
+    ...(roomStats ? { roomStats } : {})
+  };
+});
+
+exports.deleteRoomContent = onCall({
+  secrets:[RATE_LIMIT_SALT],
+  enforceAppCheck:PUBLIC_REPORT_APP_CHECK_ENFORCED
+}, async request => {
+  const input = validateContentDeletionInput(request.data);
+  if (!input) throw new HttpsError('invalid-argument', 'Invalid content withdrawal request.');
+  await enforceContentDeletionLimit(request);
+
+  const receiptRef = db.collection('content_deletion_receipts').doc(
+    contentDeletionReceiptId(input.targetCollection, input.targetId)
+  );
+  const contentRef = db.collection(input.targetCollection).doc(input.targetId);
+  let deleted = false;
+  await db.runTransaction(async transaction => {
+    const [receiptSnapshot, contentSnapshot] = await Promise.all([
+      transaction.get(receiptRef),
+      transaction.get(contentRef)
+    ]);
+    if (!receiptSnapshot.exists) {
+      throw new HttpsError('not-found', 'This withdrawal receipt is unavailable or expired.');
+    }
+    const receipt = receiptSnapshot.data() || {};
+    const expiresAt = receipt.expiresAt?.toMillis?.() || 0;
+    if (receipt.targetCollection !== input.targetCollection
+        || receipt.targetId !== input.targetId
+        || expiresAt <= Date.now()) {
+      throw new HttpsError('not-found', 'This withdrawal receipt is unavailable or expired.');
+    }
+    const suppliedHash = contentDeletionTokenHash(
+      input.targetCollection, input.targetId, input.deletionToken
+    );
+    if (!tokenHashesMatch(receipt.tokenHash, suppliedHash)) {
+      throw new HttpsError('permission-denied', 'The withdrawal receipt does not match this content.');
+    }
+    deleted = contentSnapshot.exists;
+    if (deleted) transaction.delete(contentRef);
+    transaction.delete(receiptRef);
+  });
+  logger.info('Anonymous room content withdrawn', {
+    targetCollection:input.targetCollection,
+    targetId:input.targetId,
+    deleted,
+    appVerified:Boolean(request.app)
+  });
+  return { completed:true, deleted };
 });
 
 exports.reactToRoomContent = onCall({

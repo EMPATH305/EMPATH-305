@@ -132,6 +132,7 @@ for (const protectedPath of ['constellations/{id}', 'metadata/site_stats', 'meta
 }
 assert(rules.includes('match /content_reports/{reportId}'), 'Rules must validate anonymous content reports');
 assert(rules.includes('match /rate_limits/{bucketId}'), 'Rate-limit documents must be private');
+assert(rules.includes('match /content_deletion_receipts/{receiptId}'), 'Deletion receipt digests must be private');
 assert(rules.includes('match /moderation_audit/{entryId}'), 'Moderation audit records must be private');
 assert(rules.includes('match /drift_letters/{id}'), 'Drift letters must remain private to callable functions');
 assert(rules.includes('EMP-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}'), 'Rules must accept v20.3 Soul Keys');
@@ -144,6 +145,8 @@ const ttlField = indexes.fieldOverrides?.find((field) => field.collectionGroup =
 assert.equal(ttlField?.ttl, true, 'Room A expireAt must be configured as a TTL field');
 const rateLimitTtl = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'rate_limits' && field.fieldPath === 'expiresAt');
 assert.equal(rateLimitTtl?.ttl, true, 'Rate-limit buckets must expire automatically');
+const deletionReceiptTtl = indexes.fieldOverrides?.find((field) => field.collectionGroup === 'content_deletion_receipts' && field.fieldPath === 'expiresAt');
+assert.equal(deletionReceiptTtl?.ttl, true, 'Deletion receipt digests must expire automatically');
 const driftIndex = indexes.indexes?.find(index => index.collectionGroup === 'drift_letters');
 assert(driftIndex, 'Waiting drift letters must have a delivery index');
 const driftTtl = indexes.fieldOverrides?.find(field => field.collectionGroup === 'drift_letters' && field.fieldPath === 'expiresAt');
