@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v21.8.0'; // Anonymous owned-content deletion receipts
+const CACHE_NAME = 'empath-cache-v21.9.0'; // Complete realtime subscription lifecycle
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者

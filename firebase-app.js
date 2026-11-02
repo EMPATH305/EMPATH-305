@@ -1471,6 +1471,42 @@ let roomAVisible = false;
 let firestoreUnsubs = [];
 let otherRoomsObserver = null;
 let otherRoomsSubscribed = false;
+const auxiliarySubscriptions = new Map();
+
+function startAuxiliarySubscription(key) {
+    const entry = auxiliarySubscriptions.get(key);
+    if (!entry || entry.unsubscribe || document.hidden) return;
+    try {
+        const unsubscribe = entry.subscribe();
+        if (typeof unsubscribe === 'function') entry.unsubscribe = unsubscribe;
+    } catch (error) {
+        console.error(`Firestore auxiliary subscription failed (${key}):`, error);
+    }
+}
+
+function registerAuxiliarySubscription(key, subscribe) {
+    const existing = auxiliarySubscriptions.get(key);
+    existing?.unsubscribe?.();
+    auxiliarySubscriptions.set(key, { subscribe, unsubscribe:null });
+    startAuxiliarySubscription(key);
+}
+
+function removeAuxiliarySubscription(key) {
+    const entry = auxiliarySubscriptions.get(key);
+    entry?.unsubscribe?.();
+    auxiliarySubscriptions.delete(key);
+}
+
+function subscribeAuxiliaryData() {
+    auxiliarySubscriptions.forEach((_, key) => startAuxiliarySubscription(key));
+}
+
+function unsubscribeAuxiliaryData() {
+    auxiliarySubscriptions.forEach(entry => {
+        entry.unsubscribe?.();
+        entry.unsubscribe = null;
+    });
+}
 
 const DATA_STATE_COPY = {
     loading: {
@@ -1958,6 +1994,7 @@ function unsubscribeAll() {
     otherRoomsSubscribed = false;
     firestoreUnsubs.forEach(unsub => unsub());
     firestoreUnsubs = [];
+    unsubscribeAuxiliaryData();
 }
 
 function subscribeSiteStats() {
@@ -1995,6 +2032,7 @@ function subscribeRealtimeData() {
     subscribeRoomAReleaseStats();
     subscribePublicRoomStats();
     subscribeSiteStats();
+    subscribeAuxiliaryData();
 }
 
 document.addEventListener('visibilitychange', () => {
@@ -2011,6 +2049,11 @@ document.addEventListener('visibilitychange', () => {
         if (typeof window.drawStars === 'function') window.drawStars();
         if (typeof window.drawSand === 'function') window.drawSand();
     }
+});
+
+window.addEventListener('pagehide', unsubscribeAll);
+window.addEventListener('pageshow', event => {
+    if (event.persisted) subscribeRealtimeData();
 });
 
 window.toggleHSP = function() { const body = document.body; const btn = document.getElementById('hsp-btn'); body.classList.toggle('hsp-mode'); if(body.classList.contains('hsp-mode')) { btn.classList.add('active'); localStorage.setItem('empath_hsp_mode', 'true'); if (typeof audioCtx !== 'undefined' && isAudioEnabled) window.toggleAudio(); isAnimating = false; if(starsRafId) cancelAnimationFrame(starsRafId); if(sandRafId) cancelAnimationFrame(sandRafId); window.showToast(t('👁️ 已開啟降噪模式：降低對比與暫停閃爍', '👁️ Calm mode activated', '👁️ 静寂モードをオンにしました', '👁️ Modo Calma activado', '👁️ Mode Calme activé', '👁️ Ruhemodus aktiviert', '👁️ 已开启降噪模式：降低对比与暂停闪烁')); } else { btn.classList.remove('active'); localStorage.setItem('empath_hsp_mode', 'false'); isAnimating = true; if(typeof window.drawStars === 'function') window.drawStars(); if(typeof window.drawSand === 'function') window.drawSand(); window.showToast(t('已關閉降噪模式', 'Calm mode deactivated', '静寂モードをオフにしました', 'Modo Calma desactivado', 'Mode Calme désactivé', 'Ruhemodus deaktiviert', '已关闭降噪模式')); } }
@@ -3597,6 +3640,7 @@ window.submitT = async function(){
         const contentId = await createRoomContent('t', { text });
         localStorage.setItem('empath_my_warmth_id', contentId);
         localStorage.setItem('empath_my_warmth_echos', '0');
+        window.checkRoomTWarmth();
         input.value=''; logJourney('t', text); playRitual('t-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('溫暖已漂浮', 'Warmth floating', '温もりが漂いました', 'Calidez flotante', 'Chaleur flottante', 'Wärme schwebt', '温暖已漂浮')); queueTonightEcho('t');
     } catch(error) { showRoomSubmissionError(error); }
 }
@@ -3651,18 +3695,25 @@ function setupRoomPresence(roomKey, inputId) {
     });
 
     let presenceHideTimer;
-    onSnapshot(presenceRef, (docSnap) => {
-        if(docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.by !== mySessionId && data.by !== 'none') { 
-                sparkEl.classList.add('show'); 
-                clearTimeout(presenceHideTimer); 
-                presenceHideTimer = setTimeout(() => { sparkEl.classList.remove('show'); }, 4000); 
-            } else if (data.by === 'none') { 
-                sparkEl.classList.remove('show'); 
-                clearTimeout(presenceHideTimer); 
+    registerAuxiliarySubscription(`presence:${roomKey}`, () => {
+        const unsubscribe = onSnapshot(presenceRef, (docSnap) => {
+            if(docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.by !== mySessionId && data.by !== 'none') {
+                    sparkEl.classList.add('show');
+                    clearTimeout(presenceHideTimer);
+                    presenceHideTimer = setTimeout(() => { sparkEl.classList.remove('show'); }, 4000);
+                } else if (data.by === 'none') {
+                    sparkEl.classList.remove('show');
+                    clearTimeout(presenceHideTimer);
+                }
             }
-        }
+        }, error => console.error(`Room presence failed (${roomKey}):`, error));
+        return () => {
+            unsubscribe();
+            clearTimeout(presenceHideTimer);
+            sparkEl.classList.remove('show');
+        };
     });
 }
 
@@ -4042,9 +4093,20 @@ window.checkRoomAEcho = async function() {
 // 3. Room T：溫暖抵達了
 window.checkRoomTWarmth = function() {
     const myWarmthId = localStorage.getItem('empath_my_warmth_id');
-    if(myWarmthId) {
-        onSnapshot(doc(db, "warmth", myWarmthId), (docSnap) => {
-            if(docSnap.exists()){
+    const subscriptionKey = 'warmth:return';
+    if(!myWarmthId) {
+        removeAuxiliarySubscription(subscriptionKey);
+        return;
+    }
+    registerAuxiliarySubscription(subscriptionKey, () => onSnapshot(
+        doc(db, "warmth", myWarmthId),
+        (docSnap) => {
+            if(!docSnap.exists()) {
+                localStorage.removeItem('empath_my_warmth_id');
+                localStorage.removeItem('empath_my_warmth_echos');
+                removeAuxiliarySubscription(subscriptionKey);
+                return;
+            }
                 const echos = docSnap.data().echos || 0;
                 const lastEchos = parseInt(localStorage.getItem('empath_my_warmth_echos') || '0');
                 if(echos > lastEchos) {
@@ -4063,9 +4125,9 @@ window.checkRoomTWarmth = function() {
                     }
                     msgBox.textContent = `✦ 宇宙回聲：你上次送出的溫暖，已被陌生人共鳴了 ${Math.max(0, Number(echos) || 0)} 次。`;
                 }
-            }
-        });
-    }
+        },
+        error => console.error('Room T return echo failed:', error)
+    ));
 };
   
   // Cinematic pointer light and restrained reveal motion
