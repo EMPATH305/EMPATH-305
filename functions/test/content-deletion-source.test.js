@@ -18,7 +18,7 @@ test('new persistent room content receives a high-entropy private deletion recei
 });
 
 test('withdrawal binds the receipt to one target and compares its digest safely', () => {
-  assert(functionSource.includes('exports.deleteRoomContent = onCall'));
+  assert(functionSource.includes("exports.deleteRoomContent = observedOnCall('deleteRoomContent'"));
   assert(functionSource.includes("crypto.createHmac('sha256', RATE_LIMIT_SALT.value())"));
   assert(functionSource.includes('crypto.timingSafeEqual'));
   assert(functionSource.includes('transaction.get(receiptRef)'));
@@ -29,8 +29,9 @@ test('withdrawal binds the receipt to one target and compares its digest safely'
 });
 
 test('withdrawal does not rewrite durable lifetime submission totals', () => {
-  const deletionFunction = functionSource.split('exports.deleteRoomContent = onCall')[1]
-    .split('exports.reactToRoomContent = onCall')[0];
+  const deletionFunction = functionSource
+    .split("exports.deleteRoomContent = observedOnCall('deleteRoomContent'")[1]
+    .split("exports.reactToRoomContent = observedOnCall('reactToRoomContent'")[0];
   assert(!deletionFunction.includes('FieldValue.increment('));
   assert(!deletionFunction.includes("doc('public_room_stats')"));
 });
