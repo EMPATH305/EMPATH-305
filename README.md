@@ -185,6 +185,16 @@
 4. **儲存失敗不再反轉成功狀態**：localStorage 或 sessionStorage 被封鎖、額度已滿時，網站會退回目前分頁的記憶體儲存，避免後端已接受卻顯示投稿失敗。
 5. **刪除能力仍不落庫**：後端可從 request ID 重建同一次投稿的刪除憑證，但資料庫仍只保存不可逆摘要，不保存原始刪除憑證或原始 request ID。
 
+## ✦ v22.1 Observability & App Check Readiness
+
+1. **一致的 Callable 監測事件**：12 個公開 Functions 都記錄成功、拒絕、App Check 驗證結果與粗略耗時區間，方便辨認真實故障與濫用流量。
+2. **不記錄情緒內容**：監測事件不包含留言、圖片、文件 ID、request ID、IP、Soul Key 或錯誤訊息，只保留固定欄位與允許清單中的布林結果。
+3. **嵌入式瀏覽器相容性**：User-Agent 只在請求期間被歸類為 iOS／Android／桌面及一般／App 內建瀏覽器，不保存原始字串，供 App Check 上線前找出相容性缺口。
+4. **逐功能強制開關**：公開端不再共用單一 App Check 開關，可由低風險端點開始逐項啟用；本版仍維持監測模式，不會突然阻擋合法使用者。
+5. **回歸測試**：新增監測隱私邊界、錯誤分類、瀏覽器粗略分類及逐功能設定測試；完整品質檢查目前共 45 項自動測試，另含七頁網站與安全檢查。
+
+App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 [`functions/OBSERVABILITY.md`](functions/OBSERVABILITY.md)。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。

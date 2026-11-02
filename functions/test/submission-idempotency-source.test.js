@@ -17,8 +17,9 @@ test('submission request IDs use private HMAC document keys and canonical payloa
 });
 
 test('the content write and idempotency receipt share one transaction', () => {
-  const submissionFunction = functionSource.split('exports.submitRoomContent = onCall')[1]
-    .split('exports.deleteRoomContent = onCall')[0];
+  const submissionFunction = functionSource
+    .split("exports.submitRoomContent = observedOnCall('submitRoomContent'")[1]
+    .split("exports.deleteRoomContent = observedOnCall('deleteRoomContent'")[0];
   assert(submissionFunction.includes('transaction.get(submissionReceiptRef)'));
   assert(submissionFunction.includes('transaction.set(submissionReceiptRef'));
   assert(submissionFunction.includes('transaction.set(contentRef, data)'));
