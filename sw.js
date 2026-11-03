@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v22.0.0'; // Resilient local storage and idempotent submissions
+const CACHE_NAME = 'empath-cache-v23.0.0'; // Modular Firebase client boundary
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -9,6 +9,7 @@ self.addEventListener('install', (event) => {
                 './index.html',
                 './styles.css',
                 './firebase-app.js',
+                './firebase-client.mjs',
                 './soul-crypto.mjs',
                 './storage-resilience.mjs',
                 './collective-calendar.js',
