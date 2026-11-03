@@ -211,6 +211,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 4. **PWA 離線相容**：Service Worker 快取提升至 v23.0，並預先保存新的 Firebase client 模組；七個頁面同步更新模組版本。
 5. **架構護欄**：新增來源合約測試，禁止 Firebase 初始化重新流回 `firebase-app.js`，並確認所有 Callable 與離線資產保持完整。
 
+## ✦ v23.1 Modular Client — Phase 2
+
+1. **Room E controller 獨立**：文字／塗鴉模式、公開／漂流投遞狀態與 Room E 網路流程移至 `room-e-controller.mjs`。
+2. **畫面與資料責任分離**：`firebase-app.js` 保留動畫、DOM 與危機支持提示；controller 專注決定投稿路徑及 callable payload。
+3. **既有體驗不變**：公開牆、匿名漂流信、塗鴉、父親節彩蛋、回聲與內容安全操作維持原本行為。
+4. **狀態不再散落**：切換塗鴉時必定回到公開投遞，且無效模式不會污染 Room E 狀態。
+5. **可獨立測試**：新增五項 controller 測試，驗證模式轉換、公開投稿、私人寄信與拾信資料合約。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。

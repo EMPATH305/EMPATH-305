@@ -82,3 +82,20 @@ test('language control updates the document and room copy', async ({ page }) => 
   await expect(page.getByRole('heading', { level:1, name:'Emotional Exit' })).toBeVisible();
   await expect(page.locator('#lang-select-btn')).toHaveAttribute('aria-expanded', 'false');
 });
+
+test('Room E delivery state follows text and drawing modes', async ({ page }) => {
+  await isolateFromProduction(page);
+  await page.goto('/room-e.html', { waitUntil:'domcontentloaded' });
+
+  await page.locator('#e-delivery-drift').click();
+  await expect(page.locator('#e-delivery-drift')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#e-submit-btn')).toContainText('把信裝進瓶子');
+
+  await page.locator('#btn-mode-draw').click();
+  await expect(page.locator('#e-delivery-choice')).toBeHidden();
+  await expect(page.locator('#e-delivery-public')).toHaveAttribute('aria-pressed', 'true');
+
+  await page.locator('#btn-mode-text').click();
+  await expect(page.locator('#e-delivery-choice')).toBeVisible();
+  await expect(page.locator('#e-delivery-public')).toHaveAttribute('aria-pressed', 'true');
+});
