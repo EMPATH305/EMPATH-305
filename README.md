@@ -203,6 +203,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 4. **零正式資料接觸**：測試會攔截 Functions、Firestore 與 Analytics 網路請求；不投稿、不讀取公開留言，也不增加正式訪客統計。
 5. **失敗證據保留**：CI 失敗時保存畫面截圖、Playwright trace 與 HTML 報告 14 天，方便直接重現錯誤。
 
+## ✦ v23.0 Modular Client — Phase 1
+
+1. **Firebase 平台邊界獨立**：App 初始化、App Check、Firestore 連線策略與 Functions 地區設定移至 `firebase-client.mjs`，主程式不再自行建立後端連線。
+2. **Callable 合約集中**：10 個公開 Callable 由單一唯讀物件建立與輸出，房間邏輯只取用既有合約，避免名稱或地區設定散落在主程式。
+3. **行為保持不變**：本階段不修改投稿、回聲、Soul Key、語言、動畫或房間資料流程，只改變程式責任邊界。
+4. **PWA 離線相容**：Service Worker 快取提升至 v23.0，並預先保存新的 Firebase client 模組；七個頁面同步更新模組版本。
+5. **架構護欄**：新增來源合約測試，禁止 Firebase 初始化重新流回 `firebase-app.js`，並確認所有 Callable 與離線資產保持完整。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。

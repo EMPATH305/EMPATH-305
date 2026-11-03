@@ -1,43 +1,20 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
+import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { app, callables, db } from "./firebase-client.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
 
-// ⚠️ 把最後面的 G-MW5GYM0H77 換成妳剛剛複製的新代碼！
-const firebaseConfig = { apiKey: "AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90", authDomain: "empath-62582.firebaseapp.com", projectId: "empath-62582", storageBucket: "empath-62582.firebasestorage.app", messagingSenderId: "945974527649", appId: "1:945974527649:web:552e236eff7809dfea52e0", measurementId: "G-9Z9X6E7WBZ" };
-
-const app = initializeApp(firebaseConfig);
-
-// Filled after the production domain is registered in Firebase App Check.
-// App Check stays in monitoring mode until verified traffic is confirmed.
-const APP_CHECK_ENTERPRISE_SITE_KEY = '6LfIqgEuAAAAADuOmZVHbEizh5hw3GAKMcziAcXy';
-if (APP_CHECK_ENTERPRISE_SITE_KEY) {
-    initializeAppCheck(app, {
-        provider:new ReCaptchaEnterpriseProvider(APP_CHECK_ENTERPRISE_SITE_KEY),
-        isTokenAutoRefreshEnabled:true
-    });
-}
-
-// 自動偵測長輪詢可避開部分 iOS、校園網路與代理伺服器阻擋 WebChannel。
-// IndexedDB 快取讓曾載入過的房間在短暫離線時仍能先顯示內容。
-const db = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
-    useFetchStreams: false,
-    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
-const functions = getFunctions(app, 'asia-east1');
-const submitContentReport = httpsCallable(functions, 'submitContentReport');
-const submitRoomContent = httpsCallable(functions, 'submitRoomContent');
-const deleteRoomContentRequest = httpsCallable(functions, 'deleteRoomContent');
-const reactToRoomContentRequest = httpsCallable(functions, 'reactToRoomContent');
-const sendDriftLetterRequest = httpsCallable(functions, 'sendDriftLetter');
-const receiveDriftLetterRequest = httpsCallable(functions, 'receiveDriftLetter');
-const joinSilentCompanionshipRequest = httpsCallable(functions, 'joinSilentCompanionship');
-const recordSiteVisitRequest = httpsCallable(functions, 'recordSiteVisit');
-const retireLegacySoulJourneyRequest = httpsCallable(functions, 'retireLegacySoulJourney');
-const deleteSoulJourneyRequest = httpsCallable(functions, 'deleteSoulJourney');
+const {
+    submitContentReport,
+    submitRoomContent,
+    deleteRoomContent:deleteRoomContentRequest,
+    reactToRoomContent:reactToRoomContentRequest,
+    sendDriftLetter:sendDriftLetterRequest,
+    receiveDriftLetter:receiveDriftLetterRequest,
+    joinSilentCompanionship:joinSilentCompanionshipRequest,
+    recordSiteVisit:recordSiteVisitRequest,
+    retireLegacySoulJourney:retireLegacySoulJourneyRequest,
+    deleteSoulJourney:deleteSoulJourneyRequest
+} = callables;
 const safeLocalStorage = createSafeStorage(getBrowserStorage('localStorage'));
 const safeSessionStorage = createSafeStorage(getBrowserStorage('sessionStorage'));
 window.EmpathStorage = Object.freeze({ local:safeLocalStorage, session:safeSessionStorage });

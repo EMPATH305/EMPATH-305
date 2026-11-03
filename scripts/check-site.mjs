@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=22.0.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.0.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -30,6 +30,7 @@ for (const page of pages) {
 }
 
 const appSource = readFileSync('firebase-app.js', 'utf8');
+const firebaseClientSource = readFileSync('firebase-client.mjs', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
 const roomE = readFileSync('room-e.html', 'utf8');
@@ -65,27 +66,27 @@ assert(roomA.includes('id="a-release-witness"'), 'Room A must include a dedicate
 assert(roomA.includes('name="a-weight-kind"'), 'Room A must offer an explicit broad-category choice');
 assert(roomA.includes('aria-describedby="a-weight-privacy"'), 'Room A category choice must explain its privacy boundary');
 assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
-assert(appSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client');
-assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(appSource), 'Production App Check site key must be configured');
-assert(appSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
+assert(firebaseClientSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client boundary');
+assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(firebaseClientSource), 'Production App Check site key must be configured');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
-assert(appSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
 assert(appSource.includes('getOrCreateSubmissionRequest(safeLocalStorage, room, payload)'), 'Room submissions must reuse request IDs after uncertain delivery');
 assert(appSource.includes('requestId:pendingRequest.requestId'), 'Room submissions must send the idempotency request ID');
 assert(appSource.includes('window.EmpathStorage = Object.freeze'), 'Safety controls must share the resilient storage layer');
 assert(!/\blocalStorage\.(getItem|setItem|removeItem)\(/.test(appSource), 'Client storage access must use the resilient wrapper');
 assert(!/\bsessionStorage\.(getItem|setItem|removeItem)\(/.test(appSource), 'Session storage access must use the resilient wrapper');
-assert(appSource.includes("httpsCallable(functions, 'deleteRoomContent')"), 'Owned public content must use the deletion backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'deleteRoomContent')"), 'Owned public content must use the deletion backend');
 assert(appSource.includes('rememberOwnedContent('), 'Accepted submissions must retain their local deletion receipt');
-assert(appSource.includes("httpsCallable(functions, 'reactToRoomContent')"), 'Room reactions must use the rate-limited backend');
-assert(appSource.includes("httpsCallable(functions, 'joinSilentCompanionship')"), 'Silent companionship must use the rate-limited backend');
-assert(appSource.includes("httpsCallable(functions, 'recordSiteVisit')"), 'Site visits must use the rate-limited backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'reactToRoomContent')"), 'Room reactions must use the rate-limited backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'joinSilentCompanionship')"), 'Silent companionship must use the rate-limited backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'recordSiteVisit')"), 'Site visits must use the rate-limited backend');
 assert(!appSource.includes('updateDoc('), 'Clients must not update room content directly');
 assert(!appSource.includes('addDoc('), 'Clients must not create shared records directly');
 assert(!appSource.includes('runTransaction('), 'Clients must not transact shared counters directly');
 assert(!appSource.includes('increment('), 'Clients must not increment shared counters directly');
-assert(appSource.includes("httpsCallable(functions, 'sendDriftLetter')"), 'Room E must send drift letters through the private backend');
-assert(appSource.includes("httpsCallable(functions, 'receiveDriftLetter')"), 'Room E must receive drift letters through the private backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'sendDriftLetter')"), 'Room E must send drift letters through the private backend');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'receiveDriftLetter')"), 'Room E must receive drift letters through the private backend');
 assert(appSource.includes("createContentActions('drift_letters'"), 'Received drift letters must support hiding and anonymous reporting');
 assert(appSource.includes("containsCrisisSignal(text)"), 'Crisis content must not be sent randomly to a stranger');
 assert(roomE.includes('id="e-delivery-drift"'), 'Room E must offer private one-recipient delivery');
@@ -107,8 +108,8 @@ assert(appSource.includes("safeLocalStorage.setItem('empath_my_warmth_id', conte
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
 assert(appSource.includes("from \"./soul-crypto.mjs\""), 'Soul backups must use the dedicated client-side encryption module');
-assert(appSource.includes("httpsCallable(functions, 'retireLegacySoulJourney')"), 'Legacy Soul records need verified server cleanup');
-assert(appSource.includes("httpsCallable(functions, 'deleteSoulJourney')"), 'Users must be able to delete cloud Soul backups');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'retireLegacySoulJourney')"), 'Legacy Soul records need verified server cleanup');
+assert(firebaseClientSource.includes("httpsCallable(functions, 'deleteSoulJourney')"), 'Users must be able to delete cloud Soul backups');
 assert(appSource.includes('await writeSoulBackup(key, mergedJourney, letters)'), 'Future letters must be encrypted with the journey payload');
 assert(!appSource.includes('doc(db, "user_journeys", key)'), 'Soul backups must not use the raw key as the primary storage path');
 assert(soulCrypto.includes("name:'AES-GCM'"), 'Soul backups must use authenticated AES-GCM encryption');
@@ -169,7 +170,8 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v22.0.0'), 'Service worker cache must be bumped for v22.0.0');
+assert(serviceWorker.includes('empath-cache-v23.0.0'), 'Service worker cache must be bumped for v23.0.0');
+assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./storage-resilience.mjs'"), 'Service worker must precache resilient storage support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');
