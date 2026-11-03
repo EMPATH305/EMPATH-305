@@ -1,5 +1,6 @@
 import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { app, callables, db } from "./firebase-client.mjs";
+import { createRoomEController } from "./room-e-controller.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
 
@@ -8,8 +9,6 @@ const {
     submitRoomContent,
     deleteRoomContent:deleteRoomContentRequest,
     reactToRoomContent:reactToRoomContentRequest,
-    sendDriftLetter:sendDriftLetterRequest,
-    receiveDriftLetter:receiveDriftLetterRequest,
     joinSilentCompanionship:joinSilentCompanionshipRequest,
     recordSiteVisit:recordSiteVisitRequest,
     retireLegacySoulJourney:retireLegacySoulJourneyRequest,
@@ -63,6 +62,13 @@ async function createRoomContent(room, payload = {}, returnResult = false) {
     }
     return returnResult ? result : result.id;
 }
+
+const roomEController = createRoomEController({
+    createPublicContent:createRoomContent,
+    sendDriftLetter:callables.sendDriftLetter,
+    receiveDriftLetter:callables.receiveDriftLetter,
+    getClientId:getDriftClientId
+});
 
 async function reactToRoomContent(kind, targetId, extra = {}) {
     const response = await reactToRoomContentRequest({ kind, targetId, ...extra });
@@ -1130,8 +1136,6 @@ window.setBrushVolume = function(speed) {
 // ==========================================
 // EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼 (強健修復版)
 // ==========================================
-let eMode = 'text';
-let eDeliveryMode = 'public';
 let eDrawCanvas = null;
 let eCtx = null;
 let isDrawing = false;
@@ -1142,40 +1146,38 @@ let eDrawEventsBound = false;
 let eDrawResizeTimer = null;
 
 function renderEDeliveryMode() {
+    const { contentMode, deliveryMode } = roomEController.getState();
     const publicButton = document.getElementById('e-delivery-public');
     const driftButton = document.getElementById('e-delivery-drift');
     const hint = document.getElementById('e-delivery-hint');
     const submitButton = document.getElementById('e-submit-btn');
-    publicButton?.classList.toggle('active', eDeliveryMode === 'public');
-    driftButton?.classList.toggle('active', eDeliveryMode === 'drift');
-    publicButton?.setAttribute('aria-pressed', String(eDeliveryMode === 'public'));
-    driftButton?.setAttribute('aria-pressed', String(eDeliveryMode === 'drift'));
-    if (hint) hint.textContent = eDeliveryMode === 'drift'
+    publicButton?.classList.toggle('active', deliveryMode === 'public');
+    driftButton?.classList.toggle('active', deliveryMode === 'drift');
+    publicButton?.setAttribute('aria-pressed', String(deliveryMode === 'public'));
+    driftButton?.setAttribute('aria-pressed', String(deliveryMode === 'drift'));
+    if (hint) hint.textContent = deliveryMode === 'drift'
         ? t('這封信不會出現在公開牆，只會被一位陌生人拾起。', 'This letter will stay off the public wall and reach one stranger only.', 'この手紙は公開されず、ひとりの見知らぬ誰かだけに届きます。', 'Esta carta no aparecerá públicamente y llegará a una sola persona.', 'Cette lettre ne sera pas publique et n’atteindra qu’une seule personne.', 'Dieser Brief bleibt privat und erreicht nur eine fremde Person.', '这封信不会出现在公开墙，只会被一位陌生人拾起。')
         : t('公開牆上的文字會被房間訪客看見。', 'Words on the wall can be seen by Room E visitors.', '公開の壁の言葉は Room E の訪問者に表示されます。', 'Las palabras del muro son visibles para visitantes de Room E.', 'Les mots du mur sont visibles par les visiteurs de Room E.', 'Worte an der Wand sind für Besucher von Room E sichtbar.', '公开墙上的文字会被房间访客看见。');
-    if (submitButton) submitButton.textContent = eDeliveryMode === 'drift' && eMode === 'text'
+    if (submitButton) submitButton.textContent = deliveryMode === 'drift' && contentMode === 'text'
         ? t('把信裝進瓶子', 'Seal the letter in a bottle', '手紙を瓶に入れる', 'Guardar la carta en una botella', 'Mettre la lettre en bouteille', 'Den Brief in eine Flasche legen', '把信装进瓶子')
         : t('把它留在這裡', 'Leave It Here', 'ここに置いていく', 'Déjalo Aquí', 'Le laisser ici', 'Lass es hier', '把它留在这里');
 }
 
 window.setEDelivery = function(mode) {
-    if (!['public', 'drift'].includes(mode) || (mode === 'drift' && eMode !== 'text')) return;
-    eDeliveryMode = mode;
+    if (!roomEController.setDeliveryMode(mode)) return;
     renderEDeliveryMode();
 };
 
 window.addEventListener('empath:language-changed', renderEDeliveryMode);
 
 window.setEMode = function(mode) {
-    eMode = mode;
+    if (!roomEController.setContentMode(mode)) return;
     const textBtn = document.getElementById('btn-mode-text');
     const drawBtn = document.getElementById('btn-mode-draw');
     const input = document.getElementById('e-input');
     const counter = document.getElementById('e-char');
     const drawWrap = document.getElementById('e-draw-wrap');
     const deliveryChoice = document.getElementById('e-delivery-choice');
-
-    if (mode === 'draw') eDeliveryMode = 'public';
 
     if(textBtn) textBtn.classList.toggle('active', mode === 'text');
     if(drawBtn) drawBtn.classList.toggle('active', mode === 'draw');
@@ -1283,7 +1285,7 @@ function initEDrawCanvas() {
         eDrawEventsBound = true;
 
         window.addEventListener('resize', () => {
-            if(eMode !== 'draw') return;
+            if(roomEController.getState().contentMode !== 'draw') return;
             clearTimeout(eDrawResizeTimer);
             eDrawResizeTimer = setTimeout(resizeEDrawCanvas, 120);
         }, { passive:true });
@@ -2487,10 +2489,11 @@ let allEmotions = []; let eFeedExpanded = false;
 // 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
 // ==========================================
 window.submitE = async function(){ 
+    const { contentMode, deliveryMode } = roomEController.getState();
     let text = "";
     let imageData = null;
 
-    if (eMode === 'text') {
+    if (contentMode === 'text') {
         const input = document.getElementById('e-input'); 
         text = input.value.trim(); 
         if(!text) return; 
@@ -2499,17 +2502,17 @@ window.submitE = async function(){
         if(!eDrawCanvas || !eCanvasHasDrawn) return;
         imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
     }
-    if (eDeliveryMode === 'drift' && text && containsCrisisSignal(text)) {
+    if (deliveryMode === 'drift' && text && containsCrisisSignal(text)) {
         window.showCrisisSupportNotice?.();
         window.showToast(t('這段重量不會被隨機交給陌生人；文字仍留在這裡，我們先陪你找到即時支持。', 'This weight will not be sent randomly to a stranger. Your words remain here while we help you find immediate support.'));
         return;
     }
-    if(!canSubmit(eDeliveryMode === 'drift' ? 'e-drift-send' : 'e')) return;
+    if(!canSubmit(deliveryMode === 'drift' ? 'e-drift-send' : 'e')) return;
 
     try { 
         const origText = document.getElementById('e-submit-btn').innerHTML; 
-        if (eDeliveryMode === 'drift') {
-            await sendDriftLetterRequest({ text, clientId:getDriftClientId() });
+        if (deliveryMode === 'drift') {
+            await roomEController.submitContent({ text });
             document.getElementById('e-input').value = '';
             document.getElementById('e-char').textContent = '0 / 500';
             if(window.empathAnalytics) window.empathLogEvent(window.empathAnalytics, 'room_e_drift_send');
@@ -2525,8 +2528,8 @@ window.submitE = async function(){
         if (text) payload.text = text;
         if (imageData) payload.image = imageData;
 
-        await createRoomContent('e', payload);
-        if (eMode === 'text') {
+        await roomEController.submitContent(payload);
+        if (contentMode === 'text') {
             document.getElementById('e-input').value = '';
             document.getElementById('e-char').textContent = '0 / 500';
         } else {
@@ -2624,7 +2627,7 @@ window.submitE = async function(){
         queueTonightEcho('e');
 
     } catch(error) {
-        if (eDeliveryMode === 'drift' && String(error?.code || '').endsWith('failed-precondition')) {
+        if (deliveryMode === 'drift' && String(error?.code || '').endsWith('failed-precondition')) {
             window.showCrisisSupportNotice?.();
             window.showToast(t('這封信不適合隨機交給陌生人，文字仍為你保留。', 'This letter should not be delivered randomly to a stranger. Your words are still here.'));
         } else {
@@ -2668,8 +2671,7 @@ window.receiveDriftLetter = async function() {
     button.setAttribute('aria-busy', 'true');
     status.textContent = t('正在聽海面上的聲音……', 'Listening across the water…', '水面の声に耳を澄ませています……', 'Escuchando sobre el agua…', 'À l’écoute de l’eau…', 'Wir lauschen über dem Wasser…', '正在听海面上的声音……');
     try {
-        const response = await receiveDriftLetterRequest({ clientId:getDriftClientId() });
-        const result = response?.data;
+        const result = await roomEController.receivePrivateLetter();
         if (!result?.available || typeof result.id !== 'string' || typeof result.text !== 'string') {
             clearDisplayedDriftLetter(t('今天海面很安靜。也許下一封信還在路上。', 'The water is quiet today. Perhaps the next letter is still on its way.', '今日は水面が静かです。次の手紙はまだ旅の途中かもしれません。', 'Hoy el agua está tranquila. Quizá la próxima carta siga en camino.', 'L’eau est calme aujourd’hui. La prochaine lettre est peut-être encore en route.', 'Heute ist das Wasser still. Vielleicht ist der nächste Brief noch unterwegs.', '今天海面很安静。也许下一封信还在路上。'));
             return;
