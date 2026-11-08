@@ -1,6 +1,8 @@
 import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { app, callables, db, runtimeProfile } from "./firebase-client.mjs";
+import { createRoomECanvas } from "./room-e-canvas.mjs";
 import { createRoomEController } from "./room-e-controller.mjs";
+import { createRoomEFeedView } from "./room-e-feed.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
 
@@ -71,6 +73,24 @@ const roomEController = createRoomEController({
     receiveDriftLetter:callables.receiveDriftLetter,
     getClientId:getDriftClientId
 });
+
+const roomECanvas = createRoomECanvas({
+    document,
+    browserWindow:window,
+    getContentMode:() => roomEController.getState().contentMode,
+    onBrushVolume:speed => window.setBrushVolume?.(speed)
+});
+
+const roomEFeed = createRoomEFeedView({
+    document,
+    translate:(...copy) => t(...copy),
+    formatTime:createdAt => createdAt?.seconds
+        ? new Date(createdAt.seconds * 1000).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+        : nowStr(),
+    createContentActions:(collectionName, id, onHidden) => window.EmpathSafety?.createContentActions(collectionName, id, onHidden)
+});
+window.renderEFeed = () => roomEFeed.render();
+window.toggleEFeed = () => roomEFeed.toggle();
 
 async function reactToRoomContent(kind, targetId, extra = {}) {
     const response = await reactToRoomContentRequest({ kind, targetId, ...extra });
@@ -159,8 +179,7 @@ window.addEventListener('empath:report-content', async event => {
             detail:{ collection:collectionName, id:targetId }
         }));
         if (collectionName === 'emotions') {
-            allEmotions = allEmotions.filter(item => item.id !== targetId);
-            window.renderEFeed?.();
+            roomEFeed.removeRecord(targetId);
         } else if (collectionName === 'stars') {
             starMessages = starMessages.filter(item => item.id !== targetId);
             window.starMessages = starMessages;
@@ -1138,15 +1157,6 @@ window.setBrushVolume = function(speed) {
 // ==========================================
 // EMPATH V2: 肌肉釋放 (塗鴉模式) 核心代碼 (強健修復版)
 // ==========================================
-let eDrawCanvas = null;
-let eCtx = null;
-let isDrawing = false;
-let eCanvasHasDrawn = false;
-let lastX = 0;
-let lastY = 0;
-let eDrawEventsBound = false;
-let eDrawResizeTimer = null;
-
 function renderEDeliveryMode() {
     const { contentMode, deliveryMode } = roomEController.getState();
     const publicButton = document.getElementById('e-delivery-public');
@@ -1191,108 +1201,9 @@ window.setEMode = function(mode) {
 
     // iPhone/Safari 需要等 display:block 真正完成排版後才能取得畫布寬度。
     if(mode === 'draw') {
-        requestAnimationFrame(() => requestAnimationFrame(() => initEDrawCanvas()));
+        requestAnimationFrame(() => requestAnimationFrame(() => roomECanvas.init()));
     }
 };
-
-function resizeEDrawCanvas() {
-    if(!eDrawCanvas || !eCtx) return;
-    const rect = eDrawCanvas.getBoundingClientRect();
-    const wrap = document.getElementById('e-draw-wrap');
-    const cssWidth = Math.max(280, Math.round(rect.width || (wrap && wrap.clientWidth) || 600));
-    const cssHeight = 220;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const nextWidth = Math.round(cssWidth * dpr);
-    const nextHeight = Math.round(cssHeight * dpr);
-
-    if(eDrawCanvas.width !== nextWidth || eDrawCanvas.height !== nextHeight) {
-        eDrawCanvas.width = nextWidth;
-        eDrawCanvas.height = nextHeight;
-        eDrawCanvas.style.height = cssHeight + 'px';
-        eCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        eCtx.lineCap = 'round';
-        eCtx.lineJoin = 'round';
-        eCanvasHasDrawn = false;
-    }
-}
-
-function initEDrawCanvas() {
-    eDrawCanvas = document.getElementById('e-draw-canvas');
-    if(!eDrawCanvas) return;
-    eCtx = eDrawCanvas.getContext('2d', { alpha: true });
-    if(!eCtx) return;
-    resizeEDrawCanvas();
-
-    if(!eDrawEventsBound) {
-        const point = (e) => {
-            const rect = eDrawCanvas.getBoundingClientRect();
-            return {
-                x: (e.clientX - rect.left) * ((eDrawCanvas.width / Math.min(window.devicePixelRatio || 1, 2)) / rect.width),
-                y: (e.clientY - rect.top) * ((eDrawCanvas.height / Math.min(window.devicePixelRatio || 1, 2)) / rect.height)
-            };
-        };
-
-        const beginDraw = (e) => {
-            if(e.pointerType === 'mouse' && e.button !== 0) return;
-            e.preventDefault();
-            isDrawing = true;
-            eCanvasHasDrawn = true;
-            const pos = point(e);
-            lastX = pos.x;
-            lastY = pos.y;
-            eCtx.beginPath();
-            eCtx.arc(lastX, lastY, 1.8, 0, Math.PI * 2);
-            eCtx.fillStyle = 'rgba(222,230,238,.9)';
-            eCtx.fill();
-            eCtx.beginPath();
-            eCtx.moveTo(lastX, lastY);
-            try { eDrawCanvas.setPointerCapture(e.pointerId); } catch(err) {}
-        };
-
-        const continueDraw = (e) => {
-            if(!isDrawing) return;
-            e.preventDefault();
-            const pos = point(e);
-            const dx = pos.x - lastX;
-            const dy = pos.y - lastY;
-            const dist = Math.hypot(dx, dy);
-            eCtx.lineWidth = Math.max(1.4, 5.2 - dist * .09);
-            eCtx.strokeStyle = 'rgba(222,230,238,.9)';
-            eCtx.shadowBlur = 4;
-            eCtx.shadowColor = 'rgba(123,143,161,.62)';
-            eCtx.lineTo(pos.x, pos.y);
-            eCtx.stroke();
-            eCtx.beginPath();
-            eCtx.moveTo(pos.x, pos.y);
-            lastX = pos.x;
-            lastY = pos.y;
-            if(typeof window.setBrushVolume === 'function') window.setBrushVolume(dist);
-        };
-
-        const endDraw = (e) => {
-            if(!isDrawing) return;
-            e.preventDefault();
-            isDrawing = false;
-            if(typeof window.setBrushVolume === 'function') window.setBrushVolume(0);
-            eCtx.beginPath();
-            try {
-                if(eDrawCanvas.hasPointerCapture(e.pointerId)) eDrawCanvas.releasePointerCapture(e.pointerId);
-            } catch(err) {}
-        };
-
-        eDrawCanvas.addEventListener('pointerdown', beginDraw, { passive:false });
-        eDrawCanvas.addEventListener('pointermove', continueDraw, { passive:false });
-        eDrawCanvas.addEventListener('pointerup', endDraw, { passive:false });
-        eDrawCanvas.addEventListener('pointercancel', endDraw, { passive:false });
-        eDrawEventsBound = true;
-
-        window.addEventListener('resize', () => {
-            if(roomEController.getState().contentMode !== 'draw') return;
-            clearTimeout(eDrawResizeTimer);
-            eDrawResizeTimer = setTimeout(resizeEDrawCanvas, 120);
-        }, { passive:true });
-    }
-}
 
 // ==========================================
 // EMPATH V2: 星雲檔案館 (隱藏彩蛋) 核心代碼
@@ -1444,10 +1355,7 @@ window.closeNebula = function() {
     if (typeof audioCtx !== 'undefined' && isAudioEnabled) audioCtx.resume();
 };
   
-window.clearEDraw = function() {
-    if(eCtx) eCtx.clearRect(0, 0, eDrawCanvas.width, eDrawCanvas.height);
-    eCanvasHasDrawn = false; // 清除畫布時，重置標記
-}
+window.clearEDraw = () => roomECanvas.clear();
 
 let isAnimating = true;
 let starsRafId = null;
@@ -1632,14 +1540,14 @@ function subscribeAll() {
 
     // 1. 監聽情緒出口：首頁只保留近期 30 筆，避免為初始 3 張卡下載整批歷史資料。
     if (ACTIVE_ROOM === 'e') firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
-        allEmotions = [];
+        const emotions = [];
         snapshot.forEach(docSnap => {
             if (!window.EmpathSafety?.isHidden('emotions', docSnap.id)) {
-                allEmotions.push({ id:docSnap.id, data:docSnap.data() });
+                emotions.push({ id:docSnap.id, data:docSnap.data() });
             }
         });
-        if(typeof window.renderEFeed === 'function') window.renderEFeed();
-        setDataState('e',allEmotions.length ? null : 'empty');
+        roomEFeed.setRecords(emotions);
+        setDataState('e',emotions.length ? null : 'empty');
         refreshRoomCount('e');
         updateCountersUI();
     },error => handleDataError('e',error)));
@@ -2502,8 +2410,6 @@ async function autoBackupToCloud() {
 function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = safeLocalStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
 const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); const display = document.getElementById('active-key-display'); if(display) display.textContent=key; } else { initial.style.display='flex'; active.style.display='none'; } }
 
-let allEmotions = []; let eFeedExpanded = false;
-
 // ==========================================
 // 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
 // ==========================================
@@ -2518,8 +2424,8 @@ window.submitE = async function(){
         if(!text) return; 
         text = prepareSubmittedText(text); 
     } else {
-        if(!eDrawCanvas || !eCanvasHasDrawn) return;
-        imageData = eDrawCanvas.toDataURL('image/webp', 0.8); 
+        if(!roomECanvas.hasDrawing()) return;
+        imageData = roomECanvas.toDataURL('image/webp', 0.8);
     }
     if (deliveryMode === 'drift' && text && containsCrisisSignal(text)) {
         window.showCrisisSupportNotice?.();
@@ -2715,85 +2621,6 @@ window.receiveDriftLetter = async function() {
         button.removeAttribute('aria-busy');
     }
 };
-
-let currentEFeedLimit = 3; // 初始只顯示 3 筆
-
-window.renderEFeed = function() { 
-    const feed = document.getElementById('e-feed'); 
-    const fade = document.getElementById('e-feed-fade'); 
-    const btn = document.getElementById('e-expand-btn'); 
-    const container = document.querySelector('#room-e .e-feed-container');
-    if(!feed) return; 
-    
-    // 每次渲染前清空
-    feed.innerHTML = ''; 
-    
-    // 根據目前的顯示上限來切出要顯示的資料
-    const dataToShow = allEmotions.slice(0, currentEFeedLimit);
-    
-    dataToShow.forEach(record => {
-        const { id, data } = record;
-        const timeStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : nowStr(); 
-        const div = document.createElement('div'); 
-        div.className = 'e-msg'; 
-        
-        const anon = document.createElement('div');
-        anon.className = 'e-msg-anon';
-        anon.textContent = t('匿名 · ANONYMOUS', 'ANONYMOUS', '匿名 · ANONYMOUS', 'ANÓNIMO', 'ANONYME', 'ANONYM', '匿名 · ANONYMOUS');
-        div.appendChild(anon);
-        if (typeof data.text === 'string' && data.text) {
-            const message = document.createElement('div');
-            message.textContent = data.text;
-            div.appendChild(message);
-        } else if (typeof data.image === 'string' && /^data:image\/(?:png|jpeg|webp);base64,/i.test(data.image)) {
-            const image = document.createElement('img');
-            image.src = data.image;
-            image.className = 'e-msg-img';
-            image.alt = 'Emotional Scribble';
-            div.appendChild(image);
-        }
-        const time = document.createElement('div');
-        time.className = 'e-msg-time';
-        time.textContent = timeStr;
-        const actions = window.EmpathSafety?.createContentActions('emotions', id, () => {
-            allEmotions = allEmotions.filter(item => item.id !== id);
-            window.renderEFeed();
-        });
-        div.append(time, actions || document.createDocumentFragment());
-        feed.appendChild(div); 
-    }); 
-    
-    // 展開時同步解除外層裁切，否則新增的留言仍會被固定高度藏住。
-    if (container) container.classList.toggle('is-expanded', currentEFeedLimit > 3);
-
-    // 按鈕與漸層的顯示邏輯
-    if(allEmotions.length > 3) { 
-        btn.style.display = 'inline-flex'; 
-        
-        if(currentEFeedLimit < allEmotions.length) { 
-            // 如果還沒顯示完所有抓下來的資料
-            fade.style.display = 'block'; 
-            btn.innerHTML = t('↓ 載入更多', '↓ Load More', '↓ もっと読み込む', '↓ Cargar más', '↓ Charger plus', '↓ Mehr laden', '↓ 载入更多'); 
-        } else { 
-            // 已經顯示到極限了
-            fade.style.display = 'none'; 
-            btn.innerHTML = t('↑ 收起全部', '↑ Collapse All', '↑ すべて閉じる', '↑ Ocultar todo', '↑ Tout réduire', '↑ Alle einklappen', '↑ 收起全部'); 
-        } 
-    } else { 
-        btn.style.display = 'none'; fade.style.display = 'none'; 
-    } 
-}
-
-window.toggleEFeed = function() { 
-    if (currentEFeedLimit < allEmotions.length) {
-        // 如果還沒到底，每次點擊多顯示 30 筆 (這樣保證滑順，絕對不會當機)
-        currentEFeedLimit += 30;
-    } else {
-        // 如果已經到底了，再點一次就會收回到只剩 3 筆
-        currentEFeedLimit = 3;
-    }
-    window.renderEFeed(); 
-}
 
 const canvas = document.getElementById('star-canvas'); const ctx = canvas?.getContext('2d') || null; const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
 

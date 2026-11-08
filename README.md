@@ -227,6 +227,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 4. **Instagram 模擬 CI**：Playwright 新增 iPhone Instagram User-Agent 專案，七頁載入、語言切換與 Room E 狀態流程都會經過內建瀏覽器路徑。
 5. **不改正式資料**：本版只調整瀏覽器連線策略與錯誤復原介面，不修改 Functions、Firestore Rules 或任何房間資料格式。
 
+## ✦ v23.3 Modular Client — Phase 3
+
+1. **Room E 公開牆獨立**：留言安全渲染、隱藏後移除、三筆預覽與分批展開狀態移至 `room-e-feed.mjs`。
+2. **Room E 畫布獨立**：指標事件、Retina 尺寸換算、清除與 WebP 輸出移至 `room-e-canvas.mjs`。
+3. **主程式只負責協調**：`firebase-app.js` 接收 Firestore 快照並交給 view module，不再持有公開牆或畫布的內部狀態。
+4. **行為與資料合約不變**：文字、塗鴉、匿名檢舉、隱藏、投稿 Callable 與 Firestore 文件格式維持原樣。
+5. **新增架構回歸測試**：驗證公開牆分頁／移除、圖片格式白名單、手機畫布尺寸與座標換算。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
