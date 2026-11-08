@@ -1,6 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
 import {
   initializeFirestore,
+  memoryLocalCache,
   persistentLocalCache,
   persistentMultipleTabManager
 } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
@@ -12,6 +13,7 @@ import {
   getFunctions,
   httpsCallable
 } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js';
+import { detectBrowserRuntime } from './browser-runtime.mjs';
 
 const firebaseConfig = Object.freeze({
   apiKey:'AIzaSyANaBq5vt8G5L2GJjzAAfVmHYFeKA9bF90',
@@ -24,6 +26,7 @@ const firebaseConfig = Object.freeze({
 });
 
 export const app = initializeApp(firebaseConfig);
+export const runtimeProfile = detectBrowserRuntime();
 
 // App Check remains in monitored rollout mode for public callables. The key is
 // a public site identifier; security comes from its domain restrictions and
@@ -36,14 +39,22 @@ if (APP_CHECK_ENTERPRISE_SITE_KEY) {
   });
 }
 
-// Automatic long-polling detection avoids WebChannel failures on some iOS,
-// campus-network, proxy, and embedded-browser connections. Persistent cache
-// allows a previously visited room to render during a short outage.
-export const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling:true,
-  useFetchStreams:false,
-  localCache:persistentLocalCache({ tabManager:persistentMultipleTabManager() })
-});
+// Social-app webviews can buffer WebChannel responses and restrict IndexedDB.
+// Use the most conservative transport/cache pair there; full browsers retain
+// automatic transport detection and multi-tab offline persistence.
+const firestoreSettings = runtimeProfile.isEmbedded
+  ? {
+      experimentalForceLongPolling:true,
+      useFetchStreams:false,
+      localCache:memoryLocalCache()
+    }
+  : {
+      experimentalAutoDetectLongPolling:true,
+      useFetchStreams:false,
+      localCache:persistentLocalCache({ tabManager:persistentMultipleTabManager() })
+    };
+
+export const db = initializeFirestore(app, firestoreSettings);
 
 const functions = getFunctions(app, 'asia-east1');
 

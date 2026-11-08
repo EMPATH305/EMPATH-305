@@ -43,6 +43,17 @@ export default defineConfig({
         hasTouch:true,
         isMobile:true
       }
+    },
+    {
+      name:'instagram-ios',
+      use:{
+        browserName:'chromium',
+        viewport:{ width:390, height:844 },
+        deviceScaleFactor:3,
+        hasTouch:true,
+        isMobile:true,
+        userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 355.0.0.20.109'
+      }
     }
   ]
 });

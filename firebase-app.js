@@ -1,5 +1,5 @@
 import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { app, callables, db } from "./firebase-client.mjs";
+import { app, callables, db, runtimeProfile } from "./firebase-client.mjs";
 import { createRoomEController } from "./room-e-controller.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
@@ -17,6 +17,8 @@ const {
 const safeLocalStorage = createSafeStorage(getBrowserStorage('localStorage'));
 const safeSessionStorage = createSafeStorage(getBrowserStorage('sessionStorage'));
 window.EmpathStorage = Object.freeze({ local:safeLocalStorage, session:safeSessionStorage });
+window.EmpathRuntime = runtimeProfile;
+document.documentElement.dataset.empathRuntime = runtimeProfile.kind;
 let memoryDriftClientId = '';
 
 function generateDriftClientId() {
@@ -1511,6 +1513,17 @@ const DATA_STATE_COPY = {
     retry: {
         zh:'再試著呼喚一次', en:'CALL ONCE MORE', ja:'もう一度呼びかける', es:'VOLVER A LLAMAR', fr:'RAPPELER ENCORE', de:'NOCH EINMAL RUFEN',
         'zh-cn':'再试着呼唤一次', uk:'ПОКЛИКАТИ ЩЕ РАЗ', pl:'ZAWOŁAJ JESZCZE RAZ'
+    },
+    embeddedHelp: {
+        zh:'App 內建瀏覽器可能擋住即時資料。請點選 ⋯，改用 Safari 或預設瀏覽器開啟。',
+        en:'The in-app browser may be blocking live data. Tap ⋯ and open this page in Safari or your default browser.',
+        ja:'アプリ内ブラウザがリアルタイムデータを遮断している可能性があります。⋯ をタップし、Safari または既定のブラウザで開いてください。',
+        es:'El navegador de la aplicación puede estar bloqueando los datos en vivo. Toca ⋯ y abre la página en Safari o en tu navegador predeterminado.',
+        fr:'Le navigateur intégré bloque peut-être les données en direct. Touchez ⋯ puis ouvrez la page dans Safari ou votre navigateur par défaut.',
+        de:'Der In-App-Browser blockiert möglicherweise Live-Daten. Tippe auf ⋯ und öffne die Seite in Safari oder im Standardbrowser.',
+        'zh-cn':'App 内置浏览器可能挡住即时资料。请点选 ⋯，改用 Safari 或默认浏览器开启。',
+        uk:'Вбудований браузер застосунку може блокувати дані. Натисніть ⋯ і відкрийте сторінку в Safari або типовому браузері.',
+        pl:'Przeglądarka w aplikacji może blokować dane na żywo. Dotknij ⋯ i otwórz stronę w Safari lub domyślnej przeglądarce.'
     }
 };
 
@@ -1552,6 +1565,12 @@ function setDataState(room,status,onRetry) {
     const message = document.createElement('span');
     applyDataStateTranslations(message,status);
     stateEl.replaceChildren(message);
+    if (status === 'error' && runtimeProfile.isEmbedded) {
+        const help = document.createElement('span');
+        help.className = 'embedded-browser-help';
+        applyDataStateTranslations(help,'embeddedHelp');
+        stateEl.appendChild(help);
+    }
     if (status === 'error' && typeof onRetry === 'function') {
         const retry = document.createElement('button');
         retry.type = 'button'; retry.className = 'data-state-retry'; applyDataStateTranslations(retry,'retry');

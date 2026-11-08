@@ -99,3 +99,11 @@ test('Room E delivery state follows text and drawing modes', async ({ page }) =>
   await expect(page.locator('#e-delivery-choice')).toBeVisible();
   await expect(page.locator('#e-delivery-public')).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('runtime profile selects the embedded-browser compatibility path', async ({ page }, testInfo) => {
+  await isolateFromProduction(page);
+  await page.goto('/room-e.html', { waitUntil:'domcontentloaded' });
+
+  const expectedRuntime = testInfo.project.name === 'instagram-ios' ? 'embedded' : 'standard';
+  await expect(page.locator('html')).toHaveAttribute('data-empath-runtime', expectedRuntime);
+});

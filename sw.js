@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v23.1.0'; // Modular Room E controller
+const CACHE_NAME = 'empath-cache-v23.2.0'; // Embedded-browser compatibility
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -10,6 +10,7 @@ self.addEventListener('install', (event) => {
                 './styles.css',
                 './firebase-app.js',
                 './firebase-client.mjs',
+                './browser-runtime.mjs',
                 './room-e-controller.mjs',
                 './soul-crypto.mjs',
                 './storage-resilience.mjs',

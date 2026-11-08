@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.1.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.2.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -31,6 +31,7 @@ for (const page of pages) {
 
 const appSource = readFileSync('firebase-app.js', 'utf8');
 const firebaseClientSource = readFileSync('firebase-client.mjs', 'utf8');
+const browserRuntimeSource = readFileSync('browser-runtime.mjs', 'utf8');
 const roomEControllerSource = readFileSync('room-e-controller.mjs', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
@@ -68,6 +69,14 @@ assert(roomA.includes('name="a-weight-kind"'), 'Room A must offer an explicit br
 assert(roomA.includes('aria-describedby="a-weight-privacy"'), 'Room A category choice must explain its privacy boundary');
 assert(appSource.includes('startSilentCompanionship'), 'Room H must expose silent companionship mode');
 assert(firebaseClientSource.includes('initializeAppCheck'), 'Firebase App Check must be wired into the client boundary');
+assert(firebaseClientSource.includes('experimentalForceLongPolling:true'), 'Embedded browsers must force the conservative Firestore transport');
+assert(firebaseClientSource.includes('localCache:memoryLocalCache()'), 'Embedded browsers must avoid persistent IndexedDB cache');
+assert(firebaseClientSource.includes('experimentalAutoDetectLongPolling:true'), 'Standard browsers must retain automatic transport detection');
+assert(browserRuntimeSource.includes('Instagram|Threads'), 'Instagram and Threads webviews must be detected');
+assert(browserRuntimeSource.includes('FBAN|FBAV|FB_IAB'), 'Facebook webviews must be detected');
+assert(browserRuntimeSource.includes('Line\\/[\\d.]+'), 'LINE webviews must be detected');
+assert(appSource.includes('document.documentElement.dataset.empathRuntime = runtimeProfile.kind'), 'The active runtime path must remain observable in smoke tests');
+assert(appSource.includes("applyDataStateTranslations(help,'embeddedHelp')"), 'Embedded browsers must receive external-browser recovery guidance');
 assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(firebaseClientSource), 'Production App Check site key must be configured');
 assert(firebaseClientSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
@@ -177,8 +186,9 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v23.1.0'), 'Service worker cache must be bumped for v23.1.0');
+assert(serviceWorker.includes('empath-cache-v23.2.0'), 'Service worker cache must be bumped for v23.2.0');
 assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
+assert(serviceWorker.includes("'./browser-runtime.mjs'"), 'Service worker must precache embedded-browser detection');
 assert(serviceWorker.includes("'./room-e-controller.mjs'"), 'Service worker must precache the Room E controller');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./storage-resilience.mjs'"), 'Service worker must precache resilient storage support');
