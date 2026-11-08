@@ -11,7 +11,7 @@ test('Firebase initialization has one explicit client boundary', () => {
   assert(clientSource.includes("getFunctions(app, 'asia-east1')"));
   assert(clientSource.includes('experimentalAutoDetectLongPolling:true'));
   assert(clientSource.includes('persistentMultipleTabManager()'));
-  assert(appSource.includes('import { app, callables, db } from "./firebase-client.mjs"'));
+  assert(appSource.includes('import { app, callables, db, runtimeProfile } from "./firebase-client.mjs"'));
   assert(!appSource.includes('initializeApp('));
   assert(!appSource.includes('initializeAppCheck('));
   assert(!appSource.includes('getFunctions('));
@@ -38,7 +38,8 @@ test('the client boundary exposes every callable contract used by the experience
 
 test('the modular client is available offline and cache-busted on every page', () => {
   assert(serviceWorkerSource.includes("'./firebase-client.mjs'"));
-  assert(serviceWorkerSource.includes('empath-cache-v23.1.0'));
+  assert(serviceWorkerSource.includes("'./browser-runtime.mjs'"));
+  assert(serviceWorkerSource.includes('empath-cache-v23.2.0'));
   for (const pageName of [
     'index.html',
     'room-e.html',
@@ -49,6 +50,6 @@ test('the modular client is available offline and cache-busted on every page', (
     'room-h.html'
   ]) {
     const pageSource = readFileSync(new URL(`../${pageName}`, import.meta.url), 'utf8');
-    assert(pageSource.includes('firebase-app.js?v=23.1.0'));
+    assert(pageSource.includes('firebase-app.js?v=23.2.0'));
   }
 });

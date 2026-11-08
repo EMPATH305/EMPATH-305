@@ -3055,6 +3055,7 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 .data-state[data-status="loading"]::before{animation:dataStateBreath 2.8s ease-in-out infinite}
 .data-state[data-status="error"]{color:rgba(232,230,225,.58)!important}
 .data-state[data-status="error"]::before{content:'—';color:rgba(201,168,76,.58)}
+.embedded-browser-help{display:block!important;max-width:560px!important;color:rgba(232,230,225,.72)!important;font:400 12px/1.9 'Noto Sans TC',sans-serif!important;letter-spacing:.04em!important}
 .data-state-retry{
   min-height:44px!important;padding:0 18px!important;border:1px solid rgba(201,168,76,.28)!important;
   border-radius:2px!important;background:transparent!important;color:rgba(232,230,225,.68)!important;

@@ -219,6 +219,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 4. **狀態不再散落**：切換塗鴉時必定回到公開投遞，且無效模式不會污染 Room E 狀態。
 5. **可獨立測試**：新增五項 controller 測試，驗證模式轉換、公開投稿、私人寄信與拾信資料合約。
 
+## ✦ v23.2 Embedded Browser Resilience
+
+1. **社群內建瀏覽器辨識**：新增 `browser-runtime.mjs`，辨認 Instagram／Threads、Facebook、LINE、WeChat 與 TikTok WebView。
+2. **保守 Firestore 通道**：App 內瀏覽器改用強制 long-polling 與記憶體快取，避開 WebChannel 緩衝及受限 IndexedDB；Safari／Chrome 維持原本的自動偵測與多分頁離線快取。
+3. **可理解的失敗指引**：若即時資料仍失敗，畫面會直接指示使用者透過 `⋯` 改用 Safari 或預設瀏覽器，不再只顯示抽象錯誤文案。
+4. **Instagram 模擬 CI**：Playwright 新增 iPhone Instagram User-Agent 專案，七頁載入、語言切換與 Room E 狀態流程都會經過內建瀏覽器路徑。
+5. **不改正式資料**：本版只調整瀏覽器連線策略與錯誤復原介面，不修改 Functions、Firestore Rules 或任何房間資料格式。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
