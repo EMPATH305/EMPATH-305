@@ -94,6 +94,10 @@ test('Room E delivery state follows text and drawing modes', async ({ page }) =>
   await page.locator('#btn-mode-draw').click();
   await expect(page.locator('#e-delivery-choice')).toBeHidden();
   await expect(page.locator('#e-delivery-public')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#e-draw-canvas')).toBeVisible();
+  const canvasSize = await page.locator('#e-draw-canvas').evaluate(canvas => ({ width:canvas.width, height:canvas.height }));
+  expect(canvasSize.width).toBeGreaterThan(0);
+  expect(canvasSize.height).toBeGreaterThan(0);
 
   await page.locator('#btn-mode-text').click();
   await expect(page.locator('#e-delivery-choice')).toBeVisible();
