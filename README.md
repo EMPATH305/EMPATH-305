@@ -271,6 +271,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 測試覆蓋背景／返回、替換／移除、清理失敗與啟動失敗後恢復；保留原本 Firestore 查詢與顯示行為。
 - v23 後續仍包含 Soul、CSS 分層與 Functions 職責整理；本批未宣告整體完成。
 
+## ✦ v23.9 Soul backup boundaries
+
+- `soul-model.mjs` 管理旅程與信件的正規化、去重與合併規則。
+- `soul-backup-service.mjs` 管理加密讀寫與舊備份讀取；Firebase 透過 adapter 注入，保留既有加密格式、儲存 ID、時間欄位與錯誤處理。
+- 測試涵蓋加密往返、舊資料相容、損壞紀錄不降級讀取、寫入失敗、清理失敗與合併上限。
+- Soul UI 與同步佇列仍在主程式；整體 v23 尚有 CSS、Functions 與其餘架構整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
