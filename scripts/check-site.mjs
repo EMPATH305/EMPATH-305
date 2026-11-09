@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.4.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.5.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -37,6 +37,8 @@ const roomECanvasSource = readFileSync('room-e-canvas.mjs', 'utf8');
 const roomEFeedSource = readFileSync('room-e-feed.mjs', 'utf8');
 const roomMModelSource = readFileSync('room-m-model.mjs', 'utf8');
 const roomMLayoutSource = readFileSync('room-m-layout.mjs', 'utf8');
+const roomPModelSource = readFileSync('room-p-model.mjs', 'utf8');
+const roomPCanvasSource = readFileSync('room-p-canvas.mjs', 'utf8');
 const styles = readFileSync('styles.css', 'utf8');
 const rules = readFileSync('firestore.rules', 'utf8');
 const roomE = readFileSync('room-e.html', 'utf8');
@@ -112,6 +114,11 @@ assert(appSource.includes('from "./room-m-model.mjs"'), 'Room M must use its ded
 assert(appSource.includes('from "./room-m-layout.mjs"'), 'Room M must use its dedicated layout boundary');
 assert(roomMModelSource.includes('createRoomMStarModel'), 'Room M cache and reaction state must stay inside its model');
 assert(roomMLayoutSource.includes('layoutRoomMStars'), 'Room M collision layout must stay inside its layout module');
+assert(appSource.includes('from "./room-p-model.mjs"'), 'Room P must use its dedicated shard model');
+assert(appSource.includes('from "./room-p-canvas.mjs"'), 'Room P must use its dedicated canvas boundary');
+assert(roomPModelSource.includes('createRoomPShardModel'), 'Room P records and totals must stay inside its model');
+assert(roomPCanvasSource.includes('ResizeObserver'), 'Room P canvas must react to mobile viewport changes');
+assert(!appSource.includes('let pCanvas'), 'Room P canvas state must stay outside the application shell');
 assert(!appSource.includes('function normalizeStar'), 'Room M star normalization must stay outside the application shell');
 assert(!appSource.includes('function getStarAt'), 'Room M hit testing must stay outside the application shell');
 assert(roomEControllerSource.includes("createPublicContent('e', payload)"), 'Room E public submissions must retain the existing room contract');
@@ -202,7 +209,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v23.4.0'), 'Service worker cache must be bumped for v23.4.0');
+assert(serviceWorker.includes('empath-cache-v23.5.0'), 'Service worker cache must be bumped for v23.5.0');
 assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
 assert(serviceWorker.includes("'./browser-runtime.mjs'"), 'Service worker must precache embedded-browser detection');
 assert(serviceWorker.includes("'./room-e-controller.mjs'"), 'Service worker must precache the Room E controller');
@@ -210,6 +217,8 @@ assert(serviceWorker.includes("'./room-e-canvas.mjs'"), 'Service worker must pre
 assert(serviceWorker.includes("'./room-e-feed.mjs'"), 'Service worker must precache the Room E feed module');
 assert(serviceWorker.includes("'./room-m-model.mjs'"), 'Service worker must precache the Room M star model');
 assert(serviceWorker.includes("'./room-m-layout.mjs'"), 'Service worker must precache the Room M layout module');
+assert(serviceWorker.includes("'./room-p-model.mjs'"), 'Service worker must precache the Room P shard model');
+assert(serviceWorker.includes("'./room-p-canvas.mjs'"), 'Service worker must precache the Room P canvas module');
 assert(serviceWorker.includes("'./soul-crypto.mjs'"), 'Service worker must precache Soul encryption support');
 assert(serviceWorker.includes("'./storage-resilience.mjs'"), 'Service worker must precache resilient storage support');
 assert(serviceWorker.includes("'./safety-guard.js'"), 'Service worker must precache the safety layer');

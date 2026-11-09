@@ -58,6 +58,17 @@ for (const entry of pages) {
       expect(canvasSize.height).toBeGreaterThan(0);
     }
 
+    if (entry.path === '/room-p.html') {
+      const canvasSize = await page.locator('#p-canvas').evaluate(canvas => ({
+        width:canvas.width,
+        height:canvas.height,
+        renderedWidth:canvas.getBoundingClientRect().width
+      }));
+      expect(canvasSize.width).toBeGreaterThan(0);
+      expect(canvasSize.height).toBeGreaterThan(0);
+      expect(canvasSize.renderedWidth).toBeGreaterThan(0);
+    }
+
     const viewport = page.viewportSize();
     const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(documentWidth).toBeLessThanOrEqual((viewport?.width || documentWidth) + 2);

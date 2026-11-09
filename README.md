@@ -243,6 +243,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 4. **既有體驗保持不變**：星空動畫、匿名思念、共鳴點亮、24 小時星系連線與資料格式維持原樣。
 5. **新增 Room M 回歸測試**：驗證快取、隱藏、共鳴、手機抽樣、點擊命中與安全區配置，瀏覽器測試確認畫布實際初始化。
 
+## ✦ v23.5 Modular Client — Phase 5
+
+1. **Room P 單一碎片狀態**：Firestore 快照、隱藏、修補結果與全網統計統一由 `room-p-model.mjs` 管理。
+2. **金繼畫布獨立**：瓷器繪製與 Retina backing pixels 移至 `room-p-canvas.mjs`，主程式只傳入療癒進度。
+3. **手機尺寸即時校正**：以 `ResizeObserver` 處理旋轉、App 內瀏覽器工具列與可視區域變化，並限制最高 2 倍像素密度。
+4. **資料合約保持不變**：Room P 投稿、金繼修補 Callable、Firestore 文件與全網統計格式維持原樣。
+5. **新增 Room P 回歸測試**：覆蓋基準進度、隱藏／修補狀態、耐久總數協調、畫布尺寸與正式頁面初始化。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
