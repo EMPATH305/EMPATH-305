@@ -251,6 +251,12 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 4. **資料合約保持不變**：Room P 投稿、金繼修補 Callable、Firestore 文件與全網統計格式維持原樣。
 5. **新增 Room P 回歸測試**：覆蓋基準進度、隱藏／修補狀態、耐久總數協調、畫布尺寸與正式頁面初始化。
 
+## ✦ v23.6 Room T pagination repair
+
+- Room T 分頁與收起按鈕統一使用未隱藏的留言數，避免隱藏內容後需多次點擊才能收起。
+- `room-t-feed.mjs` 管理資料、可見項目與每批六則的展開狀態；即時快照更新保留展開進度，清空後恢復六則。
+- 新增預先隱藏、展開後隱藏、即時更新與移除的回歸測試。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
