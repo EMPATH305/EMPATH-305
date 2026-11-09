@@ -264,6 +264,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 保留失敗重試及憑證未保存時的 pending request；不改投稿 payload、資料格式或使用者介面。
 - 下一批仍需處理 realtime／Soul 等前端邏輯、CSS 分層及 Functions 職責拆分；v23 整體尚未完成。
 
+## ✦ v23.8 Realtime lifecycle
+
+- 以 `realtime-lifecycle.mjs` 集中管理房間與統計的取消訂閱，以及 presence／warmth 輔助訂閱。
+- 背景頁面不啟動監聽；重複恢復不重複建立統計訂閱；停止後保留輔助訂閱定義以便返回時恢復。
+- 測試覆蓋背景／返回、替換／移除、清理失敗與啟動失敗後恢復；保留原本 Firestore 查詢與顯示行為。
+- v23 後續仍包含 Soul、CSS 分層與 Functions 職責整理；本批未宣告整體完成。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
