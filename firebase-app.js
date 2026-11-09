@@ -9,7 +9,8 @@ import { findRoomMStarAt, layoutRoomMStars, nearestRoomMStars, visibleRoomMStars
 import { createRoomPShardModel } from "./room-p-model.mjs";
 import { createRoomTFeedModel } from "./room-t-feed.mjs";
 import { createRoomPCanvas } from "./room-p-canvas.mjs";
-import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
+import { normalizeJourney, mergeJourneys, mergeSoulLetters } from "./soul-model.mjs";
+import { createSoulBackupService } from "./soul-backup-service.mjs";
 import { createSubmissionService } from "./submission-service.mjs";
 import { createSafeStorage, getBrowserStorage } from "./storage-resilience.mjs";
 
@@ -2181,101 +2182,13 @@ function initTimeline(){
     }
 }
   
-function normalizeJourney(source = {}) {
-    const counters = {};
-    ['e','m','p','a','t'].forEach(type => {
-        counters[type] = Math.max(0, Number(source?.counters?.[type]) || 0);
-    });
-    const events = Array.isArray(source.events)
-        ? source.events.filter(event => event && ['e','m','p','a','t'].includes(event.type)).map(event => ({
-            type:event.type,
-            text:typeof event.text === 'string' ? event.text.slice(0, 500) : '',
-            time:typeof event.time === 'string' ? event.time.slice(0, 20) : ''
-        }))
-        : [];
-    return { counters, events, visitCount:Math.max(0, Number(source.visitCount) || 0) };
-}
-
-function mergeJourneys(localSource, cloudSource) {
-    const local = normalizeJourney(localSource);
-    const cloud = normalizeJourney(cloudSource);
-    const counters = {};
-    ['e','m','p','a','t'].forEach(type => { counters[type] = Math.max(local.counters[type], cloud.counters[type]); });
-    const seen = new Set();
-    const events = [...cloud.events, ...local.events].filter(event => {
-        const signature = `${event.type}\u0000${event.time}\u0000${event.text}`;
-        if (seen.has(signature)) return false;
-        seen.add(signature);
-        return true;
-    }).slice(-500);
-    return { counters, events, visitCount:Math.max(local.visitCount, cloud.visitCount) };
-}
-
-function normalizeSoulLetters(source) {
-    return Array.isArray(source)
-        ? source.filter(letter => letter && typeof letter.content === 'string').map(letter => ({
-            content:letter.content.slice(0, 5000),
-            unlockDate:Math.max(0, Number(letter.unlockDate) || 0),
-            createdAt:Math.max(0, Number(letter.createdAt) || 0)
-        })).filter(letter => letter.content && letter.unlockDate && letter.createdAt).slice(-50)
-        : [];
-}
-
-function mergeSoulLetters(...sources) {
-    const seen = new Set();
-    return sources.flatMap(normalizeSoulLetters).filter(letter => {
-        const signature = `${letter.createdAt}\u0000${letter.unlockDate}\u0000${letter.content}`;
-        if (seen.has(signature)) return false;
-        seen.add(signature);
-        return true;
-    }).sort((a, b) => a.createdAt - b.createdAt).slice(-50);
-}
-
-async function readSoulBackup(key) {
-    const storageId = await soulStorageId(key);
-    const encryptedSnapshot = await getDoc(doc(db, 'user_journeys', storageId));
-    if (encryptedSnapshot.exists()) {
-        const record = encryptedSnapshot.data();
-        if (!isEncryptedSoulRecord(record)) throw new Error('Unsupported encrypted Soul backup.');
-        const payload = await decryptSoulPayload(key, record);
-        return {
-            journey:normalizeJourney(payload?.journey),
-            letters:normalizeSoulLetters(payload?.letters),
-            legacy:false,
-            storageId
-        };
-    }
-    const legacySnapshot = await getDoc(doc(db, 'user_journeys', key));
-    if (!legacySnapshot.exists()) return null;
-    const legacy = legacySnapshot.data();
-    return {
-        journey:normalizeJourney(legacy),
-        letters:normalizeSoulLetters(legacy.letters),
-        legacy:true,
-        storageId
-    };
-}
-
-async function writeSoulBackup(key, nextJourney, letters = []) {
-    const encrypted = await encryptSoulPayload(key, {
-        journey:normalizeJourney(nextJourney),
-        letters:normalizeSoulLetters(letters)
-    });
-    await setDoc(doc(db, 'user_journeys', encrypted.storageId), {
-        ...encrypted.record,
-        clientUpdatedAt:Date.now(),
-        updatedAt:serverTimestamp()
-    });
-    return encrypted.storageId;
-}
-
-async function retireLegacySoulBackup(key) {
-    try {
-        await retireLegacySoulJourneyRequest({ soulKey:key });
-    } catch (error) {
-        console.warn('Encrypted Soul backup saved, but legacy cleanup will be retried later:', error);
-    }
-}
+const { readSoulBackup, writeSoulBackup, retireLegacySoulBackup } = createSoulBackupService({
+    readRecord:id => getDoc(doc(db, 'user_journeys', id)),
+    writeRecord:(id, record) => setDoc(doc(db, 'user_journeys', id), record),
+    serverTimestamp,
+    retireLegacy:retireLegacySoulJourneyRequest,
+    onCleanupError:error => console.warn('Encrypted Soul backup saved, but legacy cleanup will be retried later:', error)
+});
 
 function applyJourney(nextJourney) {
     journeyData = normalizeJourney(nextJourney);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.8.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.9.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -147,7 +147,7 @@ assert(appSource.includes("createRoomContent('a', { text, lifespan, weightKind }
 assert(appSource.includes("safeLocalStorage.setItem('empath_my_warmth_id', contentId)"), 'Room T must retain the server-generated ID safely');
 assert(appSource.includes('new Uint8Array(16)'), 'New Soul Keys must use 128 bits of entropy');
 assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must be locally throttled');
-assert(appSource.includes("from \"./soul-crypto.mjs\""), 'Soul backups must use the dedicated client-side encryption module');
+assert(appSource.includes("from \"./soul-backup-service.mjs\""), 'Soul backups must use the dedicated backup service');
 assert(firebaseClientSource.includes("httpsCallable(functions, 'retireLegacySoulJourney')"), 'Legacy Soul records need verified server cleanup');
 assert(firebaseClientSource.includes("httpsCallable(functions, 'deleteSoulJourney')"), 'Users must be able to delete cloud Soul backups');
 assert(appSource.includes('await writeSoulBackup(key, mergedJourney, letters)'), 'Future letters must be encrypted with the journey payload');
@@ -210,7 +210,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v23.8.0'), 'Service worker cache must be bumped for v23.8.0');
+assert(serviceWorker.includes('empath-cache-v23.9.0'), 'Service worker cache must be bumped for v23.9.0');
 assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
 assert(serviceWorker.includes("'./browser-runtime.mjs'"), 'Service worker must precache embedded-browser detection');
 assert(serviceWorker.includes("'./room-e-controller.mjs'"), 'Service worker must precache the Room E controller');
@@ -294,3 +294,5 @@ console.log(`Site checks passed for ${pages.length} pages.`);
 
 assert(appSource.includes('createSubmissionService({'), 'Main client must use the shared submission service');
 assert(serviceWorker.includes("'./submission-service.mjs'"), 'Submission service must be available offline');
+
+assert(readFileSync(new URL('../soul-backup-service.mjs', import.meta.url), 'utf8').includes('from "./soul-crypto.mjs"'), 'Soul backup service must retain client-side encryption');
