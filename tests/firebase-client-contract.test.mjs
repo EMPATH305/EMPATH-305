@@ -40,8 +40,9 @@ test('the modular client is available offline and cache-busted on every page', (
   assert(serviceWorkerSource.includes("'./firebase-client.mjs'"));
   assert(serviceWorkerSource.includes("'./browser-runtime.mjs'"));
   assert(serviceWorkerSource.includes("'./submission-service.mjs'"));
+  assert(serviceWorkerSource.includes("'./realtime-lifecycle.mjs'"));
   assert(serviceWorkerSource.includes("'./room-t-feed.mjs'"));
-  assert(serviceWorkerSource.includes('empath-cache-v23.7.0'));
+  assert(serviceWorkerSource.includes('empath-cache-v23.8.0'));
   for (const pageName of [
     'index.html',
     'room-e.html',
@@ -52,6 +53,6 @@ test('the modular client is available offline and cache-busted on every page', (
     'room-h.html'
   ]) {
     const pageSource = readFileSync(new URL(`../${pageName}`, import.meta.url), 'utf8');
-    assert(pageSource.includes('firebase-app.js?v=23.7.0'));
+    assert(pageSource.includes('firebase-app.js?v=23.8.0'));
   }
 });

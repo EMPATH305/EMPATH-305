@@ -1,3 +1,4 @@
+import { createRealtimeLifecycle } from "./realtime-lifecycle.mjs";
 import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { app, callables, db, runtimeProfile } from "./firebase-client.mjs";
 import { createRoomECanvas } from "./room-e-canvas.mjs";
@@ -1357,45 +1358,14 @@ let starsRafId = null;
 let sandRafId = null;
 let roomMVisible = false;
 let roomAVisible = false;
-let firestoreUnsubs = [];
+const realtimeLifecycle = createRealtimeLifecycle({
+    isHidden:() => document.hidden,
+    onError:(error, key) => console.error(`Firestore subscription lifecycle failed (${key}):`, error)
+});
 let otherRoomsObserver = null;
 let otherRoomsSubscribed = false;
-const auxiliarySubscriptions = new Map();
-
-function startAuxiliarySubscription(key) {
-    const entry = auxiliarySubscriptions.get(key);
-    if (!entry || entry.unsubscribe || document.hidden) return;
-    try {
-        const unsubscribe = entry.subscribe();
-        if (typeof unsubscribe === 'function') entry.unsubscribe = unsubscribe;
-    } catch (error) {
-        console.error(`Firestore auxiliary subscription failed (${key}):`, error);
-    }
-}
-
-function registerAuxiliarySubscription(key, subscribe) {
-    const existing = auxiliarySubscriptions.get(key);
-    existing?.unsubscribe?.();
-    auxiliarySubscriptions.set(key, { subscribe, unsubscribe:null });
-    startAuxiliarySubscription(key);
-}
-
-function removeAuxiliarySubscription(key) {
-    const entry = auxiliarySubscriptions.get(key);
-    entry?.unsubscribe?.();
-    auxiliarySubscriptions.delete(key);
-}
-
-function subscribeAuxiliaryData() {
-    auxiliarySubscriptions.forEach((_, key) => startAuxiliarySubscription(key));
-}
-
-function unsubscribeAuxiliaryData() {
-    auxiliarySubscriptions.forEach(entry => {
-        entry.unsubscribe?.();
-        entry.unsubscribe = null;
-    });
-}
+const registerAuxiliarySubscription = realtimeLifecycle.register;
+const removeAuxiliarySubscription = realtimeLifecycle.remove;
 
 const DATA_STATE_COPY = {
     loading: {
@@ -1515,7 +1485,7 @@ function refreshRoomCount(room) {
 }
   
 function subscribeAll() {
-    if(firestoreUnsubs.length > 0) return;
+    if(realtimeLifecycle.getPrimaryCount() > 0) return;
     if (!ACTIVE_ROOM) {
         fetchRealCounts();
         return;
@@ -1527,7 +1497,7 @@ function subscribeAll() {
     setDataState(ACTIVE_ROOM,'loading');
 
     // 1. 監聽情緒出口：首頁只保留近期 30 筆，避免為初始 3 張卡下載整批歷史資料。
-    if (ACTIVE_ROOM === 'e') firestoreUnsubs.push(onSnapshot(query(collection(db, "emotions"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 'e') realtimeLifecycle.track(onSnapshot(query(collection(db, "emotions"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         const emotions = [];
         snapshot.forEach(docSnap => {
             if (!window.EmpathSafety?.isHidden('emotions', docSnap.id)) {
@@ -1770,7 +1740,7 @@ window.renderTWarmthFeed = function() {
 // 📦 接近互動房間後才載入其即時資料
 function subscribeOtherRooms() {
     // 2. 監聽星星 (修正全域變數綁定)
-    if (ACTIVE_ROOM === 'm') firestoreUnsubs.push(onSnapshot(query(collection(db, "stars"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
+    if (ACTIVE_ROOM === 'm') realtimeLifecycle.track(onSnapshot(query(collection(db, "stars"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(80)), (snapshot) => {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
@@ -1788,7 +1758,7 @@ function subscribeOtherRooms() {
     },error => { const _sl = document.getElementById('star-loading'); if(_sl) _sl.style.display = 'none'; handleDataError('m',error); }));
 
     // 3. 監聽星系金線
-    if (ACTIVE_ROOM === 'm') firestoreUnsubs.push(onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), firestoreLimit(50)), (snapshot) => {
+    if (ACTIVE_ROOM === 'm') realtimeLifecycle.track(onSnapshot(query(collection(db, "constellations"), orderBy("createdAt", "desc"), firestoreLimit(50)), (snapshot) => {
         const nowMs = Date.now();
         window.activeConstellations = [];
         snapshot.forEach(docSnap => {
@@ -1802,7 +1772,7 @@ function subscribeOtherRooms() {
     }));
 
     // 4. 監聽碎片與金繼進度；畫面只渲染目前需要的批次
-    if (ACTIVE_ROOM === 'p') firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
+    if (ACTIVE_ROOM === 'p') realtimeLifecycle.track(onSnapshot(query(collection(db, "shards"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
         const records = [];
         snapshot.forEach(docSnap => {
@@ -1828,7 +1798,7 @@ function subscribeOtherRooms() {
     },error => handleDataError('p',error)));
 
     // 5. 監聽沙畫
-    if (ACTIVE_ROOM === 'a') firestoreUnsubs.push(onSnapshot(query(
+    if (ACTIVE_ROOM === 'a') realtimeLifecycle.track(onSnapshot(query(
         collection(db, "sand"),
         where("expireAt", ">", roomAQueryCutoff()),
         orderBy("expireAt", "asc"),
@@ -1867,7 +1837,7 @@ function subscribeOtherRooms() {
     },error => handleDataError('a',error)));
 
     // 6. 監聽溫暖共振
-    if (ACTIVE_ROOM === 't') firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
+    if (ACTIVE_ROOM === 't') realtimeLifecycle.track(onSnapshot(query(collection(db, "warmth"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         const feed = document.getElementById('t-feed'); if(!feed) return;
         const records = [];
         snapshot.forEach(docSnap => {
@@ -1888,14 +1858,12 @@ function unsubscribeAll() {
     if (otherRoomsObserver) otherRoomsObserver.disconnect();
     otherRoomsObserver = null;
     otherRoomsSubscribed = false;
-    firestoreUnsubs.forEach(unsub => unsub());
-    firestoreUnsubs = [];
-    unsubscribeAuxiliaryData();
+    realtimeLifecycle.stop();
 }
 
 function subscribeSiteStats() {
     const metaRef = doc(db, 'metadata', 'site_stats');
-    firestoreUnsubs.push(onSnapshot(metaRef, docSnap => {
+    realtimeLifecycle.track(onSnapshot(metaRef, docSnap => {
         if (!docSnap.exists()) return;
         globalCounts.v = docSnap.data().totalVisitors || 0;
         updateCountersUI();
@@ -1904,7 +1872,7 @@ function subscribeSiteStats() {
 
 function subscribePublicRoomStats() {
     const metaRef = doc(db, 'metadata', 'public_room_stats');
-    firestoreUnsubs.push(onSnapshot(metaRef, docSnap => {
+    realtimeLifecycle.track(onSnapshot(metaRef, docSnap => {
         if (!docSnap.exists()) return;
         const stats = docSnap.data();
         globalCounts.e = Number(stats.emotions) || 0;
@@ -1922,13 +1890,13 @@ function subscribePublicRoomStats() {
 }
 
 function subscribeRealtimeData() {
-    // Order matters: subscribeAll uses the shared array as its duplicate guard.
-    // Add room feeds first, then the counters that must survive retry/background cycles.
-    subscribeAll();
-    subscribeRoomAReleaseStats();
-    subscribePublicRoomStats();
-    subscribeSiteStats();
-    subscribeAuxiliaryData();
+    realtimeLifecycle.start(() => {
+        // Room feeds precede counters because subscribeAll guards tracked listeners.
+        subscribeAll();
+        subscribeRoomAReleaseStats();
+        subscribePublicRoomStats();
+        subscribeSiteStats();
+    });
 }
 
 document.addEventListener('visibilitychange', () => {
@@ -3119,7 +3087,7 @@ window.addEventListener('empath:language-changed', renderRoomAReleaseWitness);
 function subscribeRoomAReleaseStats() {
     if (ACTIVE_ROOM !== 'a' || !document.getElementById('a-collective-count')) return;
     const statsRef = doc(db, 'metadata', 'room_a_stats');
-    firestoreUnsubs.push(onSnapshot(statsRef, snapshot => {
+    realtimeLifecycle.track(onSnapshot(statsRef, snapshot => {
         roomAReleasedTotal = Math.max(0, Number(snapshot.data()?.totalReleased) || 0);
         const justReleased = safeSessionStorage.getItem('empath_a_just_released') === 'true';
         renderRoomACollectiveCount(justReleased);
