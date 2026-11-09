@@ -9,7 +9,8 @@ import { createRoomPShardModel } from "./room-p-model.mjs";
 import { createRoomTFeedModel } from "./room-t-feed.mjs";
 import { createRoomPCanvas } from "./room-p-canvas.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
-import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
+import { createSubmissionService } from "./submission-service.mjs";
+import { createSafeStorage, getBrowserStorage } from "./storage-resilience.mjs";
 
 const {
     submitContentReport,
@@ -46,33 +47,16 @@ function getDriftClientId() {
     return memoryDriftClientId;
 }
 
-async function createRoomContent(room, payload = {}, returnResult = false) {
-    const pendingRequest = await getOrCreateSubmissionRequest(safeLocalStorage, room, payload);
-    const response = await submitRoomContent({ room, ...payload, requestId:pendingRequest.requestId });
-    const result = response?.data;
-    if (!result?.accepted || typeof result.id !== 'string' || !result.id) {
-        throw new Error('Room submission was not accepted.');
+const { createRoomContent } = createSubmissionService({
+    storage:safeLocalStorage,
+    submitRoomContent,
+    rememberOwnedContent:(...args) => window.EmpathSafety?.rememberOwnedContent(...args),
+    onReceiptStored:room => {
+        if (room === 'e') window.renderEFeed?.();
+        if (room === 'p') window.renderPShards?.();
+        if (room === 't') window.renderTWarmthFeed?.();
     }
-    const ownedCollectionByRoom = { e:'emotions', m:'stars', p:'shards', t:'warmth' };
-    const ownedCollection = ownedCollectionByRoom[room];
-    let submissionLocallyComplete = true;
-    if (ownedCollection && typeof result.deletionToken === 'string') {
-        const receiptStored = window.EmpathSafety?.rememberOwnedContent(
-            ownedCollection,
-            result.id,
-            result.deletionToken,
-            result.deletionExpiresAt
-        );
-        submissionLocallyComplete = Boolean(receiptStored);
-        if (receiptStored && room === 'e') window.renderEFeed?.();
-        if (receiptStored && room === 'p') window.renderPShards?.();
-        if (receiptStored && room === 't') window.renderTWarmthFeed?.();
-    }
-    if (submissionLocallyComplete) {
-        completeSubmissionRequest(safeLocalStorage, room, pendingRequest.requestId);
-    }
-    return returnResult ? result : result.id;
-}
+});
 
 const roomEController = createRoomEController({
     createPublicContent:createRoomContent,

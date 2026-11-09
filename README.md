@@ -257,6 +257,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - `room-t-feed.mjs` 管理資料、可見項目與每批六則的展開狀態；即時快照更新保留展開進度，清空後恢復六則。
 - 新增預先隱藏、展開後隱藏、即時更新與移除的回歸測試。
 
+## ✦ v23.7 Shared submission service
+
+- 把公開房間投稿、回覆驗證、重試識別碼與刪除憑證協調移至 `submission-service.mjs`。
+- 主程式注入 Callable、本機儲存與畫面刷新；模組不依賴 DOM 或 Firebase SDK。
+- 保留失敗重試及憑證未保存時的 pending request；不改投稿 payload、資料格式或使用者介面。
+- 下一批仍需處理 realtime／Soul 等前端邏輯、CSS 分層及 Functions 職責拆分；v23 整體尚未完成。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
