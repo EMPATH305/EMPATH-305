@@ -52,6 +52,12 @@ for (const entry of pages) {
     await expect(page.locator('#empath-safe-mode')).toBeHidden();
     await page.waitForTimeout(750);
 
+    if (entry.path === '/room-m.html') {
+      const canvasSize = await page.locator('#star-canvas').evaluate(canvas => ({ width:canvas.width, height:canvas.height }));
+      expect(canvasSize.width).toBeGreaterThan(0);
+      expect(canvasSize.height).toBeGreaterThan(0);
+    }
+
     const viewport = page.viewportSize();
     const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(documentWidth).toBeLessThanOrEqual((viewport?.width || documentWidth) + 2);
