@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v23.4.0'; // Room M star model and layout
+const CACHE_NAME = 'empath-cache-v23.5.0'; // Room P shard state and responsive kintsugi canvas
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -16,6 +16,8 @@ self.addEventListener('install', (event) => {
                 './room-e-feed.mjs',
                 './room-m-model.mjs',
                 './room-m-layout.mjs',
+                './room-p-model.mjs',
+                './room-p-canvas.mjs',
                 './soul-crypto.mjs',
                 './storage-resilience.mjs',
                 './collective-calendar.js',

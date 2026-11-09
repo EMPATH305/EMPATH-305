@@ -5,6 +5,8 @@ import { createRoomEController } from "./room-e-controller.mjs";
 import { createRoomEFeedView } from "./room-e-feed.mjs";
 import { createRoomMStarModel, ROOM_M_STAR_COLORS } from "./room-m-model.mjs";
 import { findRoomMStarAt, layoutRoomMStars, nearestRoomMStars, visibleRoomMStars } from "./room-m-layout.mjs";
+import { createRoomPShardModel } from "./room-p-model.mjs";
+import { createRoomPCanvas } from "./room-p-canvas.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
 
@@ -20,6 +22,7 @@ const {
 } = callables;
 const safeLocalStorage = createSafeStorage(getBrowserStorage('localStorage'));
 const safeSessionStorage = createSafeStorage(getBrowserStorage('sessionStorage'));
+const roomPShards = createRoomPShardModel();
 window.EmpathStorage = Object.freeze({ local:safeLocalStorage, session:safeSessionStorage });
 window.EmpathRuntime = runtimeProfile;
 document.documentElement.dataset.empathRuntime = runtimeProfile.kind;
@@ -189,7 +192,8 @@ window.addEventListener('empath:report-content', async event => {
             window.starMessages = roomMStars.getStars();
             document.getElementById('star-tooltip')?.classList.remove('active');
         } else if (collectionName === 'shards') {
-            window.pShardRecords = (window.pShardRecords || []).filter(item => item.id !== targetId);
+            roomPShards.remove(targetId);
+            syncRoomPLegacyState();
             window.renderPShards?.();
         } else if (collectionName === 'warmth') {
             window.tWarmthRecords = (window.tWarmthRecords || []).filter(item => item.id !== targetId);
@@ -1509,18 +1513,11 @@ function fetchRealCounts() {
 }
 
 function updatePHealingProgress() {
-    const total = Number(window.pTotalShards) || 0;
-    const healed = Number(window.pHealedTotal) || 0;
-    const baseTotal = 300;
-    const baseHealed = 142;
-    const ratio = (total + baseTotal) > 0
-        ? (healed + baseHealed) / (total + baseTotal)
-        : 0;
-    const pct = `${(ratio * 100).toFixed(1)}%`;
+    const { label } = roomPShards.getSummary();
     const bar = document.getElementById('global-healing-bar');
     const pctText = document.getElementById('global-healing-pct');
-    if (bar) bar.style.width = pct;
-    if (pctText) pctText.textContent = pct;
+    if (bar) bar.style.width = label;
+    if (pctText) pctText.textContent = label;
 }
 
 function refreshRoomCount(room) {
@@ -1586,8 +1583,14 @@ function scheduleOtherRoomSubscriptions() {
     targets.forEach(target => otherRoomsObserver.observe(target));
 }
 
-window.pShardRecords = window.pShardRecords || [];
-window.pShardDataReady = false;
+function syncRoomPLegacyState() {
+    const summary = roomPShards.getSummary();
+    window.pShardRecords = roomPShards.getRecords();
+    window.pShardDataReady = summary.dataReady;
+    window.pTotalShards = summary.total;
+    window.pHealedTotal = summary.healed;
+}
+syncRoomPLegacyState();
 
 // 深連結或站內房間導覽後，非同步資料可能改變前方房間高度。
 // 暫時鎖定使用者最近選擇的房間，在首批資料安定後重新對齊。
@@ -1644,7 +1647,8 @@ function createPShardCard(record) {
     const glow = document.createElement('div');
     glow.className = 'shard-glow';
     const actions = window.EmpathSafety?.createContentActions('shards', id, () => {
-        window.pShardRecords = window.pShardRecords.filter(item => item.id !== id);
+        roomPShards.remove(id);
+        syncRoomPLegacyState();
         window.renderPShards();
     });
     div.append(text, healedTag, glow, actions || document.createDocumentFragment());
@@ -1664,7 +1668,8 @@ function createPShardCard(record) {
             div.removeAttribute('tabindex');
             div.removeAttribute('role');
             if (result.changed) {
-                window.pHealedTotal = (window.pHealedTotal || globalCounts.p || 0) + 1;
+                roomPShards.markHealed(id, true);
+                syncRoomPLegacyState();
                 globalCounts.p = window.pHealedTotal;
                 updatePHealingProgress();
                 updateDynamicTexts();
@@ -1676,6 +1681,8 @@ function createPShardCard(record) {
             window.showToast(t('以金修補，裂縫成為了光 ✦', 'Mended with gold ✦', '金で修復しました ✦', 'Reparado con oro ✦', 'Réparé avec de l\'or ✦', 'Mit Gold geflickt ✦', '以金修补，裂缝成为了光 ✦'));
         } catch (error) {
             if (isDuplicateRoomReaction(error)) {
+                roomPShards.markHealed(id, false);
+                syncRoomPLegacyState();
                 data.healed = true;
                 div.classList.add('healed');
                 div.removeAttribute('tabindex');
@@ -1696,8 +1703,7 @@ function createPShardCard(record) {
 window.renderPShards = function(limit = 12) {
     const board = document.getElementById('p-board');
     if (!board) return { rendered: 0, total: 0 };
-    const records = (Array.isArray(window.pShardRecords) ? window.pShardRecords : [])
-        .filter(record => !window.EmpathSafety?.isHidden('shards', record.id));
+    const records = roomPShards.getRecords();
     const count = Math.min(Math.max(0, Number(limit) || 0), records.length);
     const fragment = document.createDocumentFragment();
     records.slice(0,count).forEach(record => fragment.appendChild(createPShardCard(record)));
@@ -1813,23 +1819,14 @@ function subscribeOtherRooms() {
     // 4. 監聽碎片與金繼進度；畫面只渲染目前需要的批次
     if (ACTIVE_ROOM === 'p') firestoreUnsubs.push(onSnapshot(query(collection(db, "shards"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(60)), (snapshot) => {
         const board = document.getElementById('p-board'); if(!board) return;
-        window.pShardRecords = [];
-        window.pShardDataReady = true;
-        let sampleHealed = 0;
-        
+        const records = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id; 
-            if(data.healed) sampleHealed++;
-            window.pShardRecords.push({ id, data });
+            records.push({ id, data });
         });
-        
-        // 避免 60 筆局部快取覆蓋全網真實修補總數
-        if (!window.pHealedTotal || window.pHealedTotal < sampleHealed) {
-            window.pHealedTotal = Math.max(sampleHealed, globalCounts.p || 0);
-        }
-        if (!window.pTotalShards || window.pTotalShards < snapshot.size) {
-            window.pTotalShards = Math.max(snapshot.size, window.pHealedTotal);
-        }
+        roomPShards.setRecords(records, id => window.EmpathSafety?.isHidden('shards', id));
+        roomPShards.reconcileTotals({ total:snapshot.size, healed:globalCounts.p });
+        syncRoomPLegacyState();
         globalCounts.p = window.pHealedTotal;
         updatePHealingProgress();
         
@@ -1838,7 +1835,7 @@ function subscribeOtherRooms() {
         updateCountersUI();
 
         document.dispatchEvent(new CustomEvent('empath:p-shards-updated', {
-            detail: { total: window.pShardRecords.length }
+            detail: { total: roomPShards.getRecords().length }
         }));
         setDataState('p',snapshot.empty ? 'empty' : null);
         refreshRoomCount('p');
@@ -1925,8 +1922,8 @@ function subscribePublicRoomStats() {
         const stats = docSnap.data();
         globalCounts.e = Number(stats.emotions) || 0;
         globalCounts.m = Number(stats.stars) || 0;
-        window.pTotalShards = Number(stats.shards) || 0;
-        window.pHealedTotal = Number(stats.healedShards) || 0;
+        roomPShards.setTotals({ total:stats.shards, healed:stats.healedShards });
+        syncRoomPLegacyState();
         globalCounts.p = window.pHealedTotal;
         globalCounts.t = Number(stats.warmth) || 0;
         updatePHealingProgress();
@@ -2894,191 +2891,13 @@ roomM?.addEventListener('click', async e => {
   
 window.submitM = async function(){ const input = document.getElementById('m-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); try { const origText = document.getElementById('m-submit-btn').innerHTML; await createRoomContent('m', { text }); input.value=''; logJourney('m', text); playRitual('m-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('你的思念成為了一顆星 ✦', 'Added to the sky ✦', '星になりました ✦', 'Añadido al cielo ✦', 'Ajouté au ciel ✦', 'Zum Himmel hinzugefügt ✦', '你的思念成为了一颗星 ✦')); queueTonightEcho('m'); } catch(error) { showRoomSubmissionError(error); } }
 
-let pCanvas, pCtx;
-window.pHealedTotal = 0;
-window.pTotalShards = 0;
-window.addEventListener('load', () => { pCanvas = document.getElementById('p-canvas'); if(!pCanvas) return; pCtx = pCanvas.getContext('2d'); if(!pCtx) return; const dpr = window.devicePixelRatio || 1; const cw = pCanvas.offsetWidth || 540; const ch = 380; pCanvas.width = cw * dpr; pCanvas.height = ch * dpr; pCanvas.style.width = cw + 'px'; pCanvas.style.height = ch + 'px'; pCtx.setTransform(dpr, 0, 0, dpr, 0, 0); window.drawKintsugiVessel(); });
-window.drawKintsugiVessel = function(){
-    const healed = window.pHealedTotal || 0;
-    const total = window.pTotalShards || 0;
-    if(!pCtx || !pCanvas) return;
-
-    const c = pCtx;
-    const w = pCanvas.offsetWidth || 620;
-    const h = 380;
-    c.clearRect(0, 0, w, h);
-    c.save();
-    c.translate(w / 2, h / 2 + 18);
-    const scale = Math.min(1, w / 620);
-    c.scale(scale, scale);
-
-    // 樂茶碗的手捏輪廓：低、厚、偏心，避免完美橢圓與花盆感。
-    const body = new Path2D();
-    body.moveTo(-164, -55);
-    body.bezierCurveTo(-151, -15, -139, 38, -102, 77);
-    body.bezierCurveTo(-72, 107, -31, 118, 8, 116);
-    body.bezierCurveTo(55, 116, 97, 98, 125, 65);
-    body.bezierCurveTo(151, 33, 160, -13, 157, -50);
-    body.bezierCurveTo(88, -30, -92, -27, -164, -55);
-    body.closePath();
-
-    c.save();
-    c.filter = 'blur(15px)';
-    c.fillStyle = 'rgba(0,0,0,.58)';
-    c.beginPath();
-    c.ellipse(-2, 128, 130, 17, -.015, 0, Math.PI * 2);
-    c.fill();
-    c.restore();
-
-    // 溫潤象牙白釉，保留土色陰影，不再使用沉重的水泥灰。
-    const clay = c.createLinearGradient(-150, -75, 125, 120);
-    clay.addColorStop(0, '#d5c9b4');
-    clay.addColorStop(.22, '#b9aa91');
-    clay.addColorStop(.54, '#897a65');
-    clay.addColorStop(.78, '#5b5042');
-    clay.addColorStop(1, '#302a23');
-    c.fillStyle = clay;
-    c.shadowBlur = 30;
-    c.shadowColor = 'rgba(203,171,91,.09)';
-    c.fill(body);
-    c.shadowBlur = 0;
-
-    c.save();
-    c.clip(body);
-
-    // 焼きむら：左側柔亮、右下帶火痕，紋理保持安靜而不髒亂。
-    const glaze = c.createRadialGradient(-92, -59, 5, -40, -5, 220);
-    glaze.addColorStop(0, 'rgba(255,250,232,.48)');
-    glaze.addColorStop(.34, 'rgba(239,226,198,.17)');
-    glaze.addColorStop(.72, 'rgba(92,74,56,.05)');
-    glaze.addColorStop(1, 'rgba(24,19,15,.28)');
-    c.fillStyle = glaze;
-    c.fillRect(-180, -90, 360, 240);
-
-    const fireMark = c.createRadialGradient(92, 56, 2, 88, 56, 82);
-    fireMark.addColorStop(0, 'rgba(126,72,45,.18)');
-    fireMark.addColorStop(.55, 'rgba(91,52,35,.07)');
-    fireMark.addColorStop(1, 'rgba(60,35,24,0)');
-    c.fillStyle = fireMark;
-    c.fillRect(5, -20, 165, 160);
-
-    // 少量固定鐵斑與釉縮孔，避免每次重繪閃動。
-    for(let i=0;i<58;i++){
-        const x=-145+((i*83)%292);
-        const y=-44+((i*53)%147);
-        const r=.28+((i*17)%9)/13;
-        c.beginPath();
-        c.arc(x,y,r,0,Math.PI*2);
-        c.fillStyle=i%5===0?'rgba(82,54,36,.24)':'rgba(255,248,225,.12)';
-        c.fill();
-    }
-
-    // 手指修坯留下的極淡橫紋。
-    c.strokeStyle='rgba(255,245,220,.055)';
-    c.lineWidth=1;
-    for(let y=10;y<90;y+=18){
-        c.beginPath();
-        c.moveTo(-128+y*.12,y);
-        c.bezierCurveTo(-55,y+4,52,y-4,118-y*.08,y+1);
-        c.stroke();
-    }
-    c.restore();
-
-    // 厚而不規則的口沿，以及幽深茶湯般的內釉。
-    const inner = new Path2D();
-    inner.moveTo(-164,-55);
-    inner.bezierCurveTo(-101,-83,79,-82,157,-50);
-    inner.bezierCurveTo(95,-16,-96,-15,-164,-55);
-    inner.closePath();
-    const inside = c.createRadialGradient(-36,-51,8,5,-48,172);
-    inside.addColorStop(0,'#4a4033');
-    inside.addColorStop(.58,'#29231d');
-    inside.addColorStop(1,'#120f0c');
-    c.fillStyle=inside;
-    c.fill(inner);
-
-    c.beginPath();
-    c.moveTo(-164,-55);
-    c.bezierCurveTo(-101,-83,79,-82,157,-50);
-    c.strokeStyle='rgba(255,242,210,.52)';
-    c.lineWidth=2.2;
-    c.stroke();
-
-    c.beginPath();
-    c.moveTo(-158,-51);
-    c.bezierCurveTo(-91,-27,88,-25,151,-48);
-    c.strokeStyle='rgba(18,14,11,.72)';
-    c.lineWidth=2.4;
-    c.stroke();
-
-    // 小而略偏的高台足。
-    const foot = new Path2D();
-    foot.moveTo(-47,108);
-    foot.bezierCurveTo(-33,119,36,120,52,105);
-    foot.lineTo(43,121);
-    foot.bezierCurveTo(18,132,-25,131,-42,120);
-    foot.closePath();
-    c.fillStyle='#272019';
-    c.fill(foot);
-    c.strokeStyle='rgba(222,202,162,.25)';
-    c.lineWidth=1.2;
-    c.stroke(foot);
-
-    // 裂紋以一條主脈帶細小支線構成；分布偏側，保留留白。
-    const veins=[
-      {p:[[-18,112],[-19,79],[-4,51],[-12,24],[8,-4],[3,-35],[19,-66]],w:3.1},
-      {p:[[-5,50],[-35,38],[-53,18],[-78,9]],w:1.7},
-      {p:[[-12,24],[18,30],[38,20],[61,24]],w:1.35},
-      {p:[[7,-4],[34,-16],[49,-38]],w:1.5},
-      {p:[[34,-16],[62,-7],[79,8]],w:1.05},
-      {p:[[-53,18],[-70,35],[-75,55]],w:.95}
-    ];
-    const ratio=total>0?healed/total:0;
-    const goldCount=Math.round(ratio*veins.length);
-
-    const pathFor=(points)=>{
-      c.beginPath();
-      c.moveTo(points[0][0],points[0][1]);
-      for(let i=1;i<points.length;i++){
-        const prev=points[i-1],cur=points[i];
-        const mx=(prev[0]+cur[0])/2,my=(prev[1]+cur[1])/2;
-        c.quadraticCurveTo(prev[0],prev[1],mx,my);
-        if(i===points.length-1)c.lineTo(cur[0],cur[1]);
-      }
-    };
-
-    veins.forEach((v,i)=>{
-      pathFor(v.p);
-      c.lineCap='round';
-      c.lineJoin='round';
-      c.strokeStyle='rgba(25,16,10,.72)';
-      c.lineWidth=v.w+1.8;
-      c.shadowBlur=0;
-      c.stroke();
-
-      pathFor(v.p);
-      if(i<goldCount){
-        const g=c.createLinearGradient(v.p[0][0],v.p[0][1],v.p[v.p.length-1][0],v.p[v.p.length-1][1]);
-        g.addColorStop(0,'#7c5415');
-        g.addColorStop(.28,'#d6ad45');
-        g.addColorStop(.5,'#fff0a5');
-        g.addColorStop(.72,'#c08a25');
-        g.addColorStop(1,'#68420c');
-        c.strokeStyle=g;
-        c.lineWidth=v.w;
-        c.shadowBlur=3;
-        c.shadowColor='rgba(235,190,75,.28)';
-      }else{
-        c.strokeStyle='rgba(34,24,17,.82)';
-        c.lineWidth=Math.max(.8,v.w);
-      }
-      c.stroke();
-      c.shadowBlur=0;
-    });
-
-    c.restore();
-};
-  
+const roomPCanvas = createRoomPCanvas({
+    document,
+    browserWindow:window,
+    getRatio:() => roomPShards.getSummary().ratio
+});
+window.addEventListener('load', () => roomPCanvas.init());
+window.drawKintsugiVessel = () => roomPCanvas.draw();
 window.submitP = async function(){ const input = document.getElementById('p-input'); let text = input.value.trim(); if(!text || !canSubmit()) return; text = prepareSubmittedText(text); const origText = document.getElementById('p-submit-btn').innerHTML; try { await createRoomContent('p', { text }); input.value = ''; logJourney('p', text); playRitual('p-submit-btn', origText); window.empathContrastMoment?.(); window.showToast(t('碎片已放入', 'Added to vessel', '欠片を入れました', 'Añadido a la vasija', 'Ajouté au récipient', 'Zum Gefäß hinzugefügt', '碎片已放入')); queueTonightEcho('p'); } catch(error) { showRoomSubmissionError(error); } }
 
 let sandParticles = []; const SAND_COLORS = ['#7A9E9F', '#6B9091', '#9AC2C3', '#5D7C7D']; 
