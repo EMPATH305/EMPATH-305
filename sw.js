@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v23.6.0'; // Room T visible-feed pagination
+const CACHE_NAME = 'empath-cache-v23.7.0'; // Shared submission service
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -21,6 +21,7 @@ self.addEventListener('install', (event) => {
                 './room-p-canvas.mjs',
                 './soul-crypto.mjs',
                 './storage-resilience.mjs',
+                './submission-service.mjs',
                 './collective-calendar.js',
                 './safety-guard.js',
                 './interactions.js',

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.6.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.7.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -29,6 +29,7 @@ for (const page of pages) {
   assert(html.includes('新版 Room E／M／P／T 投稿'), `${page}: missing owned-content deletion disclosure`);
 }
 
+const submissionSource = readFileSync('submission-service.mjs', 'utf8');
 const appSource = readFileSync('firebase-app.js', 'utf8');
 const firebaseClientSource = readFileSync('firebase-client.mjs', 'utf8');
 const browserRuntimeSource = readFileSync('browser-runtime.mjs', 'utf8');
@@ -87,8 +88,8 @@ assert(/APP_CHECK_ENTERPRISE_SITE_KEY\s*=\s*['"]6L[A-Za-z0-9_-]+['"]/.test(fireb
 assert(firebaseClientSource.includes("httpsCallable(functions, 'submitContentReport')"), 'Anonymous reports must use the rate-limited backend');
 assert(!appSource.includes("addDoc(collection(db, 'content_reports')"), 'Clients must not write reports directly');
 assert(firebaseClientSource.includes("httpsCallable(functions, 'submitRoomContent')"), 'Room submissions must use the rate-limited backend');
-assert(appSource.includes('getOrCreateSubmissionRequest(safeLocalStorage, room, payload)'), 'Room submissions must reuse request IDs after uncertain delivery');
-assert(appSource.includes('requestId:pendingRequest.requestId'), 'Room submissions must send the idempotency request ID');
+assert(submissionSource.includes('getOrCreateSubmissionRequest(storage, room, payload)'), 'Room submissions must reuse request IDs after uncertain delivery');
+assert(submissionSource.includes('requestId:pendingRequest.requestId'), 'Room submissions must send the idempotency request ID');
 assert(appSource.includes('window.EmpathStorage = Object.freeze'), 'Safety controls must share the resilient storage layer');
 assert(!/\blocalStorage\.(getItem|setItem|removeItem)\(/.test(appSource), 'Client storage access must use the resilient wrapper');
 assert(!/\bsessionStorage\.(getItem|setItem|removeItem)\(/.test(appSource), 'Session storage access must use the resilient wrapper');
@@ -209,7 +210,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v23.6.0'), 'Service worker cache must be bumped for v23.6.0');
+assert(serviceWorker.includes('empath-cache-v23.7.0'), 'Service worker cache must be bumped for v23.7.0');
 assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
 assert(serviceWorker.includes("'./browser-runtime.mjs'"), 'Service worker must precache embedded-browser detection');
 assert(serviceWorker.includes("'./room-e-controller.mjs'"), 'Service worker must precache the Room E controller');
@@ -290,3 +291,6 @@ const reportIndex = indexes.indexes?.find(index => index.collectionGroup === 'co
 assert(reportIndex, 'Open moderation reports must have a composite index');
 
 console.log(`Site checks passed for ${pages.length} pages.`);
+
+assert(appSource.includes('createSubmissionService({'), 'Main client must use the shared submission service');
+assert(serviceWorker.includes("'./submission-service.mjs'"), 'Submission service must be available offline');
