@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v23.5.0'; // Room P shard state and responsive kintsugi canvas
+const CACHE_NAME = 'empath-cache-v23.6.0'; // Room T visible-feed pagination
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -16,6 +16,7 @@ self.addEventListener('install', (event) => {
                 './room-e-feed.mjs',
                 './room-m-model.mjs',
                 './room-m-layout.mjs',
+                './room-t-feed.mjs',
                 './room-p-model.mjs',
                 './room-p-canvas.mjs',
                 './soul-crypto.mjs',

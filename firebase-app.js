@@ -6,6 +6,7 @@ import { createRoomEFeedView } from "./room-e-feed.mjs";
 import { createRoomMStarModel, ROOM_M_STAR_COLORS } from "./room-m-model.mjs";
 import { findRoomMStarAt, layoutRoomMStars, nearestRoomMStars, visibleRoomMStars } from "./room-m-layout.mjs";
 import { createRoomPShardModel } from "./room-p-model.mjs";
+import { createRoomTFeedModel } from "./room-t-feed.mjs";
 import { createRoomPCanvas } from "./room-p-canvas.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
@@ -23,6 +24,7 @@ const {
 const safeLocalStorage = createSafeStorage(getBrowserStorage('localStorage'));
 const safeSessionStorage = createSafeStorage(getBrowserStorage('sessionStorage'));
 const roomPShards = createRoomPShardModel();
+const roomTFeed = createRoomTFeedModel({ isHidden:id => window.EmpathSafety?.isHidden('warmth', id) });
 window.EmpathStorage = Object.freeze({ local:safeLocalStorage, session:safeSessionStorage });
 window.EmpathRuntime = runtimeProfile;
 document.documentElement.dataset.empathRuntime = runtimeProfile.kind;
@@ -196,7 +198,8 @@ window.addEventListener('empath:report-content', async event => {
             syncRoomPLegacyState();
             window.renderPShards?.();
         } else if (collectionName === 'warmth') {
-            window.tWarmthRecords = (window.tWarmthRecords || []).filter(item => item.id !== targetId);
+            roomTFeed.remove(targetId);
+            window.tWarmthRecords = roomTFeed.getRecords();
             window.renderTWarmthFeed?.();
         } else if (collectionName === 'sand') {
             document.querySelectorAll('#a-feed .sand-msg').forEach(item => {
@@ -1712,8 +1715,7 @@ window.renderPShards = function(limit = 12) {
     return { rendered: count, total: records.length };
 };
 
-window.tWarmthRecords = window.tWarmthRecords || [];
-let tWarmthRenderLimit = 6;
+window.tWarmthRecords = roomTFeed.getRecords();
 
 function createTWarmthItem(record) {
     const { id, data } = record;
@@ -1727,7 +1729,8 @@ function createTWarmthItem(record) {
     const heart = document.createElement('span'); heart.className = 'heart'; heart.textContent = '🕯️';
     echoButton.append(heart, document.createTextNode(' Echo Pulse '));
     const actions = window.EmpathSafety?.createContentActions('warmth', id, () => {
-        window.tWarmthRecords = window.tWarmthRecords.filter(item => item.id !== id);
+        roomTFeed.remove(id);
+        window.tWarmthRecords = roomTFeed.getRecords();
         window.renderTWarmthFeed();
     });
     div.append(pulse, message, echoButton, actions || document.createDocumentFragment());
@@ -1755,9 +1758,7 @@ function createTWarmthItem(record) {
 window.renderTWarmthFeed = function() {
     const feed = document.getElementById('t-feed');
     if (!feed) return;
-    const records = (Array.isArray(window.tWarmthRecords) ? window.tWarmthRecords : [])
-        .filter(record => !window.EmpathSafety?.isHidden('warmth', record.id));
-    const visibleCount = Math.min(tWarmthRenderLimit, records.length);
+    const { records, total, count:visibleCount, hasMore } = roomTFeed.getPage();
     const fragment = document.createDocumentFragment();
     records.slice(0, visibleCount).forEach(record => fragment.appendChild(createTWarmthItem(record)));
     feed.replaceChildren(fragment);
@@ -1769,17 +1770,17 @@ window.renderTWarmthFeed = function() {
         const status = document.createElement('p'); status.className = 't-page-status'; status.setAttribute('aria-live','polite');
         pager.append(button, status); feed.insertAdjacentElement('afterend', pager);
         button.addEventListener('click', () => {
-            tWarmthRenderLimit = tWarmthRenderLimit < window.tWarmthRecords.length ? tWarmthRenderLimit + 6 : 6;
+            roomTFeed.togglePage();
             window.renderTWarmthFeed();
         });
     }
     const button = pager.querySelector('.t-load-more');
     const status = pager.querySelector('.t-page-status');
-    pager.hidden = records.length <= 6;
-    if (button) button.textContent = visibleCount < records.length
+    pager.hidden = total <= 6;
+    if (button) button.textContent = hasMore
         ? t('再接住一些溫暖 ↓', 'Receive more warmth ↓', 'さらに温もりを受け取る ↓', 'Recibir más calidez ↓', 'Recevoir plus de chaleur ↓', 'Mehr Wärme empfangen ↓', '再接住一些温暖 ↓')
         : t('收起訊息 ↑', 'Collapse messages ↑', 'メッセージを閉じる ↑', 'Ocultar mensajes ↑', 'Réduire les messages ↑', 'Nachrichten einklappen ↑', '收起信息 ↑');
-    if (status) status.textContent = t(`已看見 ${visibleCount}／${records.length} 則`, `Showing ${visibleCount} of ${records.length}`, `${records.length}件中${visibleCount}件を表示`, `Mostrando ${visibleCount} de ${records.length}`, `${visibleCount} sur ${records.length} affichés`, `${visibleCount} von ${records.length} angezeigt`, `已看见 ${visibleCount}／${records.length} 则`);
+    if (status) status.textContent = t(`已看見 ${visibleCount}／${total} 則`, `Showing ${visibleCount} of ${total}`, `${total}件中${visibleCount}件を表示`, `Mostrando ${visibleCount} de ${total}`, `${visibleCount} sur ${total} affichés`, `${visibleCount} von ${total} angezeigt`, `已看见 ${visibleCount}／${total} 则`);
 };
 
 // 📦 接近互動房間後才載入其即時資料
@@ -1884,11 +1885,13 @@ function subscribeOtherRooms() {
     // 6. 監聽溫暖共振
     if (ACTIVE_ROOM === 't') firestoreUnsubs.push(onSnapshot(query(collection(db, "warmth"), where("createdAt", ">", publicContentCutoff()), orderBy("createdAt", "desc"), firestoreLimit(30)), (snapshot) => {
         const feed = document.getElementById('t-feed'); if(!feed) return;
-        window.tWarmthRecords = [];
+        const records = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data(); const id = docSnap.id;
-            window.tWarmthRecords.push({ id, data });
+            records.push({ id, data });
         });
+        roomTFeed.setRecords(records);
+        window.tWarmthRecords = roomTFeed.getRecords();
         window.renderTWarmthFeed();
         setDataState('t',snapshot.empty ? 'empty' : null);
         refreshRoomCount('t');
