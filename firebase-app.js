@@ -3,6 +3,8 @@ import { app, callables, db, runtimeProfile } from "./firebase-client.mjs";
 import { createRoomECanvas } from "./room-e-canvas.mjs";
 import { createRoomEController } from "./room-e-controller.mjs";
 import { createRoomEFeedView } from "./room-e-feed.mjs";
+import { createRoomMStarModel, ROOM_M_STAR_COLORS } from "./room-m-model.mjs";
+import { findRoomMStarAt, layoutRoomMStars, nearestRoomMStars, visibleRoomMStars } from "./room-m-layout.mjs";
 import { decryptSoulPayload, encryptSoulPayload, isEncryptedSoulRecord, soulStorageId } from "./soul-crypto.mjs";
 import { completeSubmissionRequest, createSafeStorage, getBrowserStorage, getOrCreateSubmissionRequest } from "./storage-resilience.mjs";
 
@@ -91,6 +93,8 @@ const roomEFeed = createRoomEFeedView({
 });
 window.renderEFeed = () => roomEFeed.render();
 window.toggleEFeed = () => roomEFeed.toggle();
+const roomMStars = createRoomMStarModel({ storage:safeLocalStorage });
+window.starMessages = roomMStars.getStars();
 
 async function reactToRoomContent(kind, targetId, extra = {}) {
     const response = await reactToRoomContentRequest({ kind, targetId, ...extra });
@@ -181,8 +185,8 @@ window.addEventListener('empath:report-content', async event => {
         if (collectionName === 'emotions') {
             roomEFeed.removeRecord(targetId);
         } else if (collectionName === 'stars') {
-            starMessages = starMessages.filter(item => item.id !== targetId);
-            window.starMessages = starMessages;
+            roomMStars.remove(targetId);
+            window.starMessages = roomMStars.getStars();
             document.getElementById('star-tooltip')?.classList.remove('active');
         } else if (collectionName === 'shards') {
             window.pShardRecords = (window.pShardRecords || []).filter(item => item.id !== targetId);
@@ -1779,11 +1783,8 @@ function subscribeOtherRooms() {
         let tempStars = [];
         snapshot.forEach((docSnap) => { tempStars.push({ id: docSnap.id, ...docSnap.data() }); });
         
-        window.starMessages = tempStars
-            .filter(star => !window.EmpathSafety?.isHidden('stars', star.id))
-            .map(normalizeStar).sort((a,b) => b.brightness - a.brightness).slice(0, 80);
-        try { safeLocalStorage.setItem('empath_stars_cache', JSON.stringify(window.starMessages.slice(0,80).map(s => ({id:s.id,text:s.text,brightness:s.brightness,clicks:s.clicks,colorIdx:s.colorIdx,relX:s.relX,relY:s.relY})))); } catch(e) {}
-        starMessages = window.starMessages;
+        roomMStars.setStars(tempStars, id => window.EmpathSafety?.isHidden('stars', id));
+        window.starMessages = roomMStars.getStars();
         
         if(typeof window.updateMStats === 'function') window.updateMStats();
         refreshRoomCount('m');
@@ -2622,43 +2623,7 @@ window.receiveDriftLetter = async function() {
     }
 };
 
-const canvas = document.getElementById('star-canvas'); const ctx = canvas?.getContext('2d') || null; const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let bgStars=[]; let activeStarId = null; const STAR_COLORS = [ {r: 212, g: 228, b: 255}, {r: 255, g: 239, b: 213}, {r: 198, g: 216, b: 231}, {r: 247, g: 220, b: 200}, {r: 230, g: 230, b: 250}, {r: 255, g: 248, b: 231} ];
-
-function normalizeStar(star, index = 0) {
-    const safeStar = star && typeof star === 'object' ? star : {};
-    const seed = String(safeStar.id || safeStar.text || index);
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
-    const seeded = (offset) => {
-        const value = Math.sin(hash + offset) * 10000;
-        return value - Math.floor(value);
-    };
-
-    return {
-        ...safeStar,
-        text: typeof safeStar.text === 'string' ? safeStar.text : '',
-        brightness: Number.isFinite(Number(safeStar.brightness)) ? Math.max(1, Number(safeStar.brightness)) : 1,
-        clicks: Number.isFinite(Number(safeStar.clicks)) ? Number(safeStar.clicks) : 0,
-        colorIdx: Number.isInteger(Number(safeStar.colorIdx))
-            ? Math.abs(Number(safeStar.colorIdx)) % STAR_COLORS.length
-            : Math.floor(seeded(17) * STAR_COLORS.length),
-        relX: Number.isFinite(Number(safeStar.relX))
-            ? Math.min(0.95, Math.max(0.05, Number(safeStar.relX)))
-            : 0.05 + seeded(31) * 0.9,
-        relY: Number.isFinite(Number(safeStar.relY))
-            ? Math.min(0.95, Math.max(0.05, Number(safeStar.relY)))
-            : 0.05 + seeded(47) * 0.9
-    };
-}
-
-try {
-    const _c = safeLocalStorage.getItem('empath_stars_cache');
-    const cachedStars = _c ? JSON.parse(_c) : [];
-    window.starMessages = Array.isArray(cachedStars) ? cachedStars.map(normalizeStar) : [];
-} catch(e) {
-    window.starMessages = [];
-    safeLocalStorage.removeItem('empath_stars_cache');
-}
+const canvas = document.getElementById('star-canvas'); const ctx = canvas?.getContext('2d') || null; const tooltip = document.getElementById('star-tooltip'); const roomM = document.getElementById('room-m'); let bgStars=[]; let activeStarId = null; const STAR_COLORS = ROOM_M_STAR_COLORS;
 window.resizeCanvas = function(target = 'all'){ 
     const dpr = window.devicePixelRatio || 1; 
     
@@ -2672,9 +2637,7 @@ window.resizeCanvas = function(target = 'all'){
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0); 
         initBgStars(w, h); 
         // 旋轉裝置或行動瀏覽器改變可視高度時，依新星空區重新定位。
-        if(Array.isArray(window.starMessages)) {
-            window.starMessages.forEach(star => { star.x = undefined; star.y = undefined; });
-        }
+        roomMStars.resetLayout();
     } 
     
     const sCanvas = document.getElementById('sand-canvas'); 
@@ -2733,15 +2696,9 @@ function initBgStars(w, h){
 
 window.updateMStats = function() { 
     if(!document.getElementById('m-count')) return; 
-    // 顯示兩千多顆的真實數據
-    document.getElementById('m-count').textContent = globalCounts.m || starMessages.length; 
-    
-    // 計算最亮的那顆星
-    if(starMessages.length === 0) { 
-        document.getElementById('m-brightest').textContent = '—'; return; 
-    } 
-    const brightest = starMessages.reduce((a, b) => b.brightness > a.brightness ? b : a); 
-    document.getElementById('m-brightest').textContent = brightest.text.length > 14 ? brightest.text.slice(0, 14) + '…' : brightest.text; 
+    const summary = roomMStars.getSummary(globalCounts.m);
+    document.getElementById('m-count').textContent = summary.total;
+    document.getElementById('m-brightest').textContent = summary.brightest;
 }
 
 function drawSparkle(ctx, x, y, radius, r, g, b, alpha) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, -radius); ctx.quadraticCurveTo(0, 0, radius, 0); ctx.quadraticCurveTo(0, 0, 0, radius); ctx.quadraticCurveTo(0, 0, -radius, 0); ctx.quadraticCurveTo(0, 0, 0, -radius); ctx.closePath(); ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`; ctx.shadowBlur = radius; ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`; ctx.fill(); ctx.restore(); }
@@ -2752,9 +2709,7 @@ window.drawStars = function(){
         if(typeof window.resizeCanvas === 'function') window.resizeCanvas('m');
         if(!canvas.width || !canvas.height) return;
     }
-    const allStarMessages = Array.isArray(window.starMessages)
-        ? window.starMessages.map(normalizeStar)
-        : [];
+    const allStarMessages = roomMStars.getStars();
     window.starMessages = allStarMessages;
     // 必須和 resizeCanvas 使用同一組 CSS 像素尺寸；手機上 scrollHeight
     // 往往大於 offsetHeight，混用會讓星星被畫到房間邊界之外。
@@ -2778,8 +2733,7 @@ window.drawStars = function(){
     const insideUiSafeRect = (x, y) => uiSafeRects.some(r => x > r.left && x < r.right && y > r.top && y < r.bottom);
     // 窄視窗採代表性抽樣，避免大量星星在有限空間持續互相排斥。
     // 手機保留較少的代表星，完整資料仍存在；避免小螢幕把星系壓成一團。
-    const visibleLimit = w < 600 ? 18 : (w < 900 ? 32 : allStarMessages.length);
-    const starMessages = allStarMessages.slice(0, visibleLimit);
+    const starMessages = visibleRoomMStars(allStarMessages, w);
     ctx.clearRect(0,0,w,h); 
 
     // 1. 畫背景星星
@@ -2826,54 +2780,7 @@ window.drawStars = function(){
 
     const needsStarLayout = starMessages.some(s => !Number.isFinite(s.x) || !Number.isFinite(s.y));
     if (needsStarLayout) {
-    // 3.1 首次定位；完成後所有次要星星保持靜止
-    starMessages.forEach(s => { 
-        let targetX = safeX + (s.relX * safeW); 
-        let targetY = safeY + (s.relY * safeH); 
-        if (s.x === undefined || isNaN(s.x) || s.y === undefined || isNaN(s.y)) {
-            s.x = targetX; s.y = targetY;
-        }
-    });
-
-    // 3.2 排斥力 & 橡皮筋軟邊界
-    for(let i=0; i<starMessages.length; i++) {
-        for(let j=i+1; j<starMessages.length; j++) {
-            let s1 = starMessages[i];
-            let s2 = starMessages[j];
-            let dx = s2.x - s1.x; let dy = s2.y - s1.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist === 0) { dx = 1; dy = 1; dist = 1.414; }
-            // 依目前可用面積動態調整間距；畫面越窄，安全距離越小。
-            const availableArea = Math.max(safeW * safeH, 1);
-            const dynamicMinDist = Math.max(28, Math.min(85, Math.sqrt(availableArea / Math.max(starMessages.length, 1)) * 0.72));
-            if (dist < dynamicMinDist) {
-                const push = Math.min(2.2, (dynamicMinDist - dist) * 0.12);
-                const nx = dx / dist; const ny = dy / dist;
-                s1.x -= nx * push; s1.y -= ny * push;
-                s2.x += nx * push; s2.y += ny * push;
-            }
-        }
-        let s1 = starMessages[i];
-        if(s1.x < safeX) s1.x += (safeX - s1.x) * 0.2;
-        if(s1.x > safeX + safeW) s1.x -= (s1.x - (safeX + safeW)) * 0.2;
-        if(s1.y < safeY) s1.y += (safeY - s1.y) * 0.2;
-        if(s1.y > safeY + safeH) s1.y -= (s1.y - (safeY + safeH)) * 0.2;
-
-        // 若排斥後進入介面禁區，推向距離最近的邊緣，而不是把星星藏在霧幕下。
-        uiSafeRects.forEach(r => {
-            if (s1.x <= r.left || s1.x >= r.right || s1.y <= r.top || s1.y >= r.bottom) return;
-            const distances = [
-                { edge: 'left', value: s1.x - r.left },
-                { edge: 'right', value: r.right - s1.x },
-                { edge: 'top', value: s1.y - r.top },
-                { edge: 'bottom', value: r.bottom - s1.y }
-            ].sort((a,b) => a.value - b.value);
-            if (distances[0].edge === 'left') s1.x = r.left;
-            else if (distances[0].edge === 'right') s1.x = r.right;
-            else if (distances[0].edge === 'top') s1.y = r.top;
-            else s1.y = r.bottom;
-        });
-    }
+        layoutRoomMStars(starMessages, { x:safeX, y:safeY, width:safeW, height:safeH }, uiSafeRects);
     }
 
     // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後)
@@ -2912,14 +2819,13 @@ window.drawStars = function(){
     starsRafId = ambientMotion ? requestAnimationFrame(window.drawStars) : null; 
 }
 
-function getStarAt(x, y){ return starMessages.find(s => { if(!s.x) return false; const dx = s.x-x, dy = s.y-y; return Math.sqrt(dx*dx+dy*dy) < (20 + s.brightness*2); }); }
 window.activeConstellations = window.activeConstellations || [];
 
 roomM?.addEventListener('click', async e => { 
     if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; 
     const rect = canvas.getBoundingClientRect(); 
     const x = e.clientX-rect.left, y = e.clientY-rect.top; 
-    const star = getStarAt(x, y); 
+    const star = findRoomMStarAt(roomMStars.getStars(), x, y);
     
     if(star){ 
         if(activeStarId !== star.id) { 
@@ -2935,8 +2841,8 @@ roomM?.addEventListener('click', async e => {
             prompt.style.cssText = 'font-size:10px;color:var(--gold);margin-top:10px;display:block;';
             prompt.textContent = `✦ ${t('再次點擊以共鳴點亮', 'Click again to resonate', 'もう一度クリックして共鳴', 'Haz clic de nuevo para resonar', 'Cliquez à nouveau pour résonner', 'Klicken Sie erneut, um mitzuschwingen', '再次点击以共鸣点亮')}`;
             const actions = window.EmpathSafety?.createContentActions('stars', star.id, () => {
-                starMessages = starMessages.filter(item => item.id !== star.id);
-                window.starMessages = starMessages;
+                roomMStars.remove(star.id);
+                window.starMessages = roomMStars.getStars();
                 tooltip.classList.remove('active');
                 activeStarId = null;
                 if (starsRafId) cancelAnimationFrame(starsRafId);
@@ -2954,12 +2860,7 @@ roomM?.addEventListener('click', async e => {
         } else {
             // The backend creates these constellation lines in the same transaction
             // as the accepted star reaction, so a failed or duplicate reaction leaves no lines behind.
-            const nearest = starMessages
-                .map(s => ({ star: s, d: Math.hypot(s.x - x, s.y - y) }))
-                .filter(s => s.star.id !== star.id)
-                .sort((a,b) => a.d - b.d)
-                .slice(0, 2)
-                .map(item => item.star);
+            const nearest = nearestRoomMStars(roomMStars.getStars(), star.id, x, y);
             let reaction;
             try {
                 reaction = await reactToRoomContent('star', star.id, {
@@ -2975,8 +2876,7 @@ roomM?.addEventListener('click', async e => {
                 return;
             }
 
-            star.brightness = Number(reaction.brightness) || star.brightness;
-            star.clicks = Number(reaction.clicks) || star.clicks;
+            roomMStars.applyReaction(star.id, reaction);
             window.showToast(t('這顆思念更亮了 ✦', 'Resonated ✦', '星が輝きました ✦', 'Resonó ✦', 'A résonné ✦', 'Hat mitgeschwungen ✦', '这颗思念更亮了 ✦'));
             window.triggerHeartbeat();
 

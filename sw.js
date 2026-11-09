@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v23.3.0'; // Room E view modules
+const CACHE_NAME = 'empath-cache-v23.4.0'; // Room M star model and layout
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -14,6 +14,8 @@ self.addEventListener('install', (event) => {
                 './room-e-canvas.mjs',
                 './room-e-controller.mjs',
                 './room-e-feed.mjs',
+                './room-m-model.mjs',
+                './room-m-layout.mjs',
                 './soul-crypto.mjs',
                 './storage-resilience.mjs',
                 './collective-calendar.js',
