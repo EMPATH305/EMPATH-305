@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const pages = ['index.html', 'room-e.html', 'room-m.html', 'room-p.html', 'room-a.html', 'room-t.html', 'room-h.html'];
-const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.10.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
+const requiredAssets = ['styles.css?v=21.2.0', 'safety-guard.js?v=22.0.0', 'firebase-app.js?v=23.11.0', 'collective-calendar.js?v=21.1.0', 'interactions.js?v=20.5', 'room-router.js?v=20.5'];
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -150,7 +150,7 @@ assert(appSource.includes("allowAction('soul-key-load'"), 'Soul Key lookups must
 assert(appSource.includes("from \"./soul-backup-service.mjs\""), 'Soul backups must use the dedicated backup service');
 assert(firebaseClientSource.includes("httpsCallable(functions, 'retireLegacySoulJourney')"), 'Legacy Soul records need verified server cleanup');
 assert(firebaseClientSource.includes("httpsCallable(functions, 'deleteSoulJourney')"), 'Users must be able to delete cloud Soul backups');
-assert(appSource.includes('await writeSoulBackup(key, mergedJourney, letters)'), 'Future letters must be encrypted with the journey payload');
+assert(appSource.includes('await soulActions.sealFutureLetter(key, text, unlockDate)') && readFileSync(new URL('../soul-actions.mjs', import.meta.url), 'utf8').includes('await writeSoulBackup(key, mergedJourney, letters)'), 'Future letters must be encrypted with the journey payload');
 assert(!appSource.includes('doc(db, "user_journeys", key)'), 'Soul backups must not use the raw key as the primary storage path');
 assert(soulCrypto.includes("name:'AES-GCM'"), 'Soul backups must use authenticated AES-GCM encryption');
 assert(soulCrypto.includes("name:'PBKDF2'"), 'Soul backup encryption keys must use a deliberate derivation step');
@@ -210,7 +210,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v23.10.0'), 'Service worker cache must be bumped for v23.10.0');
+assert(serviceWorker.includes('empath-cache-v23.11.0'), 'Service worker cache must be bumped for v23.11.0');
 assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
 assert(serviceWorker.includes("'./browser-runtime.mjs'"), 'Service worker must precache embedded-browser detection');
 assert(serviceWorker.includes("'./room-e-controller.mjs'"), 'Service worker must precache the Room E controller');

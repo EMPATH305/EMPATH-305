@@ -1,3 +1,4 @@
+import { createSoulActions } from "./soul-actions.mjs";
 import { createSoulAutoBackup, createSoulSyncUI } from "./soul-sync-controller.mjs";
 import { createRealtimeLifecycle } from "./realtime-lifecycle.mjs";
 import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -10,7 +11,7 @@ import { findRoomMStarAt, layoutRoomMStars, nearestRoomMStars, visibleRoomMStars
 import { createRoomPShardModel } from "./room-p-model.mjs";
 import { createRoomTFeedModel } from "./room-t-feed.mjs";
 import { createRoomPCanvas } from "./room-p-canvas.mjs";
-import { normalizeJourney, mergeJourneys, mergeSoulLetters } from "./soul-model.mjs";
+import { normalizeJourney, mergeJourneys } from "./soul-model.mjs";
 import { createSoulBackupService } from "./soul-backup-service.mjs";
 import { createSubmissionService } from "./submission-service.mjs";
 import { createSafeStorage, getBrowserStorage } from "./storage-resilience.mjs";
@@ -2191,6 +2192,17 @@ const { readSoulBackup, writeSoulBackup, retireLegacySoulBackup } = createSoulBa
     onCleanupError:error => console.warn('Encrypted Soul backup saved, but legacy cleanup will be retried later:', error)
 });
 
+const soulActions = createSoulActions({
+    getJourney:() => journeyData,
+    applyJourney,
+    setKey:key => safeLocalStorage.setItem('empath_soul_key', key),
+    removeKey:() => safeLocalStorage.removeItem('empath_soul_key'),
+    readSoulBackup,
+    writeSoulBackup,
+    retireLegacySoulBackup,
+    deleteSoulJourney:deleteSoulJourneyRequest
+});
+
 function applyJourney(nextJourney) {
     journeyData = normalizeJourney(nextJourney);
     safeLocalStorage.setItem('empath_user_journey', JSON.stringify(journeyData));
@@ -2237,15 +2249,11 @@ window.loadExistingSoulKey = async function() {
         return;
     }
     try {
-        const cloud = await readSoulBackup(key);
-        if(!cloud) {
+        const loaded = await soulActions.loadExistingKey(key);
+        if(!loaded) {
             window.showToast(t('未找到此鑰匙', 'Key not found', '鍵が見つかりません', 'Llave no encontrada', 'Clé introuvable', 'Schlüssel nicht gefunden', '未找到此钥匙'));
             return;
         }
-        applyJourney(mergeJourneys(journeyData, cloud.journey));
-        safeLocalStorage.setItem('empath_soul_key', key);
-        await writeSoulBackup(key, journeyData, cloud.letters);
-        if (cloud.legacy) await retireLegacySoulBackup(key);
         updateSyncUI();
         window.showToast(t('足跡已安全合併，沒有覆蓋本機紀錄 ✦', 'Footprints merged without replacing this device ✦', '足跡が安全に統合されました ✦', 'Huellas combinadas con seguridad ✦', 'Empreintes fusionnées en sécurité ✦', 'Spuren wurden sicher zusammengeführt ✦', '足迹已安全合并，没有覆盖本机记录 ✦'));
         input.value='';
@@ -3405,11 +3413,7 @@ window.submitFutureLetter = async function() {
     if(!key) return;
     const unlockDate = Date.now() + (90 * 24 * 60 * 60 * 1000); // 預設 90 天後解鎖
     try {
-        const cloud = await readSoulBackup(key);
-        const mergedJourney = mergeJourneys(journeyData, cloud?.journey || {});
-        const letters = mergeSoulLetters(cloud?.letters || [], [{ content:text, unlockDate, createdAt:Date.now() }]);
-        await writeSoulBackup(key, mergedJourney, letters);
-        if (cloud?.legacy) await retireLegacySoulBackup(key);
+        await soulActions.sealFutureLetter(key, text, unlockDate);
         document.getElementById('future-letter-input').value = '';
         window.showToast('✉️ 信件已封存。三個月後，帶著鑰匙回來這裡。', 4000);
     } catch(e) {
@@ -3467,9 +3471,7 @@ window.deleteSoulBackup = async function() {
     ));
     if (!confirmed) return;
     try {
-        const response = await deleteSoulJourneyRequest({ soulKey:key });
-        if (!response?.data?.completed) throw new Error('Soul backup deletion was not completed.');
-        safeLocalStorage.removeItem('empath_soul_key');
+        await soulActions.deleteConfirmedBackup(key);
         updateSyncUI();
         const unlocked = document.getElementById('unlocked-letters');
         if (unlocked) unlocked.replaceChildren();

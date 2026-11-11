@@ -285,6 +285,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 本次僅拆分既有自動備份與同步 UI；手動載入、寄信、刪除仍保留原流程，不宣告跨分頁或所有寫入已序列化。
 - 整體 v23 仍有其餘 Soul 操作、CSS、Functions 與 interactions 整理。
 
+## ✦ v23.11 Soul manual operations
+
+- `soul-actions.mjs` 抽出手動載入鑰匙、封存未來信與確認後刪除備份的資料流程。
+- 主程式保留鑰匙驗證、節流、刪除確認、多語提示與成功後清空輸入框；模組透過注入函式操作本機與雲端。
+- 保留先合併本機足跡再寫回雲端、寫入成功才清理舊備份、伺服器確認刪除完成才解除鑰匙的順序。
+- 本批沒有改變並行寫入策略。整體 v23 尚有其餘 Soul 畫面、CSS、Functions 與 interactions 整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
