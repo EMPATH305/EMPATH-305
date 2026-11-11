@@ -1,3 +1,4 @@
+import { createSoulAutoBackup, createSoulSyncUI } from "./soul-sync-controller.mjs";
 import { createRealtimeLifecycle } from "./realtime-lifecycle.mjs";
 import { collection, onSnapshot, doc, serverTimestamp, query, orderBy, where, setDoc, getDoc, limit as firestoreLimit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { app, callables, db, runtimeProfile } from "./firebase-client.mjs";
@@ -2254,27 +2255,19 @@ window.loadExistingSoulKey = async function() {
     }
 }
 window.unlinkSoulKey = function() { if(confirm(t('確定要解除綁定嗎？', 'Unlink your device?', '連携を解除しますか？', '¿Desvincular tu dispositivo?', 'Dissocier votre appareil ?', 'Gerät entkoppeln?', '确定要解除绑定吗？'))) { safeLocalStorage.removeItem('empath_soul_key'); updateSyncUI(); } }
-let soulBackupQueue = Promise.resolve();
-async function autoBackupToCloud() {
-    const key = safeLocalStorage.getItem('empath_soul_key');
-    if(!key) return false;
-    soulBackupQueue = soulBackupQueue.catch(() => false).then(async () => {
-        try {
-            const cloud = await readSoulBackup(key);
-            const mergedJourney = mergeJourneys(journeyData, cloud?.journey || {});
-            const letters = cloud?.letters || [];
-            await writeSoulBackup(key, mergedJourney, letters);
-            if (cloud?.legacy) await retireLegacySoulBackup(key);
-            return true;
-        } catch(err) {
-            console.error('Encrypted Soul backup failed:', err);
-            return false;
-        }
-    });
-    return soulBackupQueue;
-}
-function updateSyncUI() { const initial = document.getElementById('sync-initial-actions'); const active = document.getElementById('sync-active-actions'); if(!initial || !active) return; const key = safeLocalStorage.getItem('empath_soul_key'); if(key) { initial.style.display='none'; active.style.display='flex';
-const fb = document.getElementById('future-letter-box'); if(fb) fb.style.display='block'; window.checkFutureLetters(); const display = document.getElementById('active-key-display'); if(display) display.textContent=key; } else { initial.style.display='flex'; active.style.display='none'; } }
+const autoBackupToCloud = createSoulAutoBackup({
+    getKey:() => safeLocalStorage.getItem('empath_soul_key'),
+    getJourney:() => journeyData,
+    readSoulBackup,
+    writeSoulBackup,
+    retireLegacySoulBackup,
+    onError:error => console.error('Encrypted Soul backup failed:', error)
+});
+const updateSyncUI = createSoulSyncUI({
+    getElement:id => document.getElementById(id),
+    getKey:() => safeLocalStorage.getItem('empath_soul_key'),
+    checkFutureLetters:() => window.checkFutureLetters()
+});
 
 // ==========================================
 // 改寫：E房間 送出與渲染邏輯 (支援文字與圖片)
