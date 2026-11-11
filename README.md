@@ -278,6 +278,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 測試涵蓋加密往返、舊資料相容、損壞紀錄不降級讀取、寫入失敗、清理失敗與合併上限。
 - Soul UI 與同步佇列仍在主程式；整體 v23 尚有 CSS、Functions 與其餘架構整理。
 
+## ✦ v23.10 Soul automatic backup and sync UI
+
+- `soul-sync-controller.mjs` 管理單頁自動備份佇列與同步區塊的畫面更新，透過函式注入取得最新旅程、鑰匙與 DOM 元素。
+- 保留原有排隊順序、失敗回傳與重試、合併規則，以及寫入成功後才清理舊備份的順序。
+- 本次僅拆分既有自動備份與同步 UI；手動載入、寄信、刪除仍保留原流程，不宣告跨分頁或所有寫入已序列化。
+- 整體 v23 仍有其餘 Soul 操作、CSS、Functions 與 interactions 整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
