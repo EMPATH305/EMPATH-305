@@ -292,6 +292,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 保留先合併本機足跡再寫回雲端、寫入成功才清理舊備份、伺服器確認刪除完成才解除鑰匙的順序。
 - 本批沒有改變並行寫入策略。整體 v23 尚有其餘 Soul 畫面、CSS、Functions 與 interactions 整理。
 
+## ✦ v23.12 Soul rendering
+
+- `soul-view.mjs` 集中旅程時間軸、空白狀態與已解鎖未來信的 DOM 渲染，透過注入函式讀取目前語言與旅程。
+- 保留既有文案、樣式、40 字摘要、解鎖時間及測試模式；使用者文字仍以 `textContent` 顯示。
+- 瀏覽器測試使用獨立本機頁面，驗證重新渲染、語言切換、解鎖邊界與 HTML 原樣顯示，不讀寫正式備份。
+- 整體 v23 仍有 CSS、Functions、interactions 與主程式整合邏輯的整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
