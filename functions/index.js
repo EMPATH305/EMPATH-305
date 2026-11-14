@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const { createSoulMaintenance } = require('./lib/soul-maintenance');
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { FieldPath, FieldValue, Timestamp, getFirestore } = require('firebase-admin/firestore');
@@ -17,7 +18,6 @@ const {
   validateRoomReactionInput,
   validateContentDeletionInput,
   validateAnonymousClientInput,
-  validateSoulKeyInput,
   containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
@@ -96,10 +96,6 @@ function requestIp(request) {
 
 function rateLimitKey(request, salt) {
   return crypto.createHmac('sha256', salt).update(requestIp(request)).digest('hex').slice(0, 40);
-}
-
-function soulStorageId(soulKey) {
-  return `sj_${crypto.createHash('sha256').update(`EMPATH-SOUL-ID:${soulKey}`).digest('hex')}`;
 }
 
 async function enforceSoulMaintenanceLimit(request) {
@@ -919,67 +915,19 @@ exports.initializeModerationRetention = observedOnCall('initializeModerationRete
   return { completed:true, alreadyCompleted:false, backfilled };
 });
 
+const soulMaintenance = createSoulMaintenance({
+  db, HttpsError, logger, enforceSoulMaintenanceLimit
+});
+
 exports.retireLegacySoulJourney = observedOnCall('retireLegacySoulJourney', {
   secrets:[RATE_LIMIT_SALT],
   enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.retireLegacySoulJourney
-}, async request => {
-  const input = validateSoulKeyInput(request.data);
-  if (!input) throw new HttpsError('invalid-argument', 'Invalid Soul Key.');
-  await enforceSoulMaintenanceLimit(request);
-  const encryptedRef = db.collection('user_journeys').doc(soulStorageId(input.soulKey));
-  const legacyRef = db.collection('user_journeys').doc(input.soulKey);
-  let retired = false;
-  await db.runTransaction(async transaction => {
-    const [encryptedSnapshot, legacySnapshot] = await Promise.all([
-      transaction.get(encryptedRef),
-      transaction.get(legacyRef)
-    ]);
-    const encrypted = encryptedSnapshot.data() || {};
-    if (!encryptedSnapshot.exists || encrypted.schemaVersion !== 3 || typeof encrypted.ciphertext !== 'string') {
-      throw new HttpsError('failed-precondition', 'Encrypted Soul backup must exist before legacy data is retired.');
-    }
-    if (legacySnapshot.exists) {
-      transaction.delete(legacyRef);
-      retired = true;
-    }
-  });
-  logger.info('Legacy Soul journey retired', {
-    storageId:soulStorageId(input.soulKey),
-    retired,
-    appVerified:Boolean(request.app)
-  });
-  return { completed:true, retired };
-});
+}, soulMaintenance.retireLegacySoulJourney);
 
 exports.deleteSoulJourney = observedOnCall('deleteSoulJourney', {
   secrets:[RATE_LIMIT_SALT],
   enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.deleteSoulJourney
-}, async request => {
-  const input = validateSoulKeyInput(request.data);
-  if (!input) throw new HttpsError('invalid-argument', 'Invalid Soul Key.');
-  await enforceSoulMaintenanceLimit(request);
-  const encryptedRef = db.collection('user_journeys').doc(soulStorageId(input.soulKey));
-  const legacyRef = db.collection('user_journeys').doc(input.soulKey);
-  let encryptedDeleted = false;
-  let legacyDeleted = false;
-  await db.runTransaction(async transaction => {
-    const [encryptedSnapshot, legacySnapshot] = await Promise.all([
-      transaction.get(encryptedRef),
-      transaction.get(legacyRef)
-    ]);
-    encryptedDeleted = encryptedSnapshot.exists;
-    legacyDeleted = legacySnapshot.exists;
-    if (encryptedDeleted) transaction.delete(encryptedRef);
-    if (legacyDeleted) transaction.delete(legacyRef);
-  });
-  logger.info('Soul journey deleted by key holder', {
-    storageId:soulStorageId(input.soulKey),
-    encryptedDeleted,
-    legacyDeleted,
-    appVerified:Boolean(request.app)
-  });
-  return { completed:true, deleted:encryptedDeleted || legacyDeleted };
-});
+}, soulMaintenance.deleteSoulJourney);
 
 exports.sendDriftLetter = observedOnCall('sendDriftLetter', {
   secrets:[RATE_LIMIT_SALT],
