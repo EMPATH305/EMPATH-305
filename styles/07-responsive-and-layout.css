@@ -1,0 +1,905 @@
+/* ===== INSTAGRAM / iOS IN-APP BROWSER · MOBILE VIEWPORT SAFETY ===== */
+@media(max-width:900px){
+  :root{--empath-vh:100svh;--empath-safe-top:env(safe-area-inset-top,0px);--empath-safe-right:env(safe-area-inset-right,0px);--empath-safe-bottom:env(safe-area-inset-bottom,0px);--empath-safe-left:env(safe-area-inset-left,0px)}
+  html,body{width:100%!important;max-width:100%!important;overflow-x:clip!important;-webkit-text-size-adjust:100%!important}
+  body{min-height:var(--empath-vh)!important}
+  *,*::before,*::after{box-sizing:border-box}
+
+  nav{padding-left:max(18px,var(--empath-safe-left))!important;padding-right:max(18px,var(--empath-safe-right))!important;padding-top:max(10px,var(--empath-safe-top))!important}
+  .nav-menu{max-height:calc(var(--empath-vh) - 64px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding-bottom:calc(24px + var(--empath-safe-bottom))!important}
+  .nav-menu,.nav-letters,.nav-controls{max-width:100%!important;min-width:0!important}
+
+  #hero,.room{width:100%!important;max-width:100%!important;overflow-x:clip!important}
+  #hero{min-height:var(--empath-vh)!important}
+  .hero-opening{height:auto!important;min-height:var(--empath-vh)!important;padding-top:calc(96px + var(--empath-safe-top))!important;padding-bottom:calc(64px + var(--empath-safe-bottom))!important}
+  .cinematic-sky{height:var(--empath-vh)!important;min-height:0!important}
+  .hero-opening>*{max-width:calc(100vw - 36px)!important}
+  .hero-title{max-width:100%!important;overflow:visible!important;line-height:.92!important;word-break:normal!important}
+  .hero-actions,.doors-nav,.journey-acts{width:100%!important;max-width:100%!important}
+  .opening-scroll{bottom:calc(18px + var(--empath-safe-bottom))!important}
+
+  #room-e,#room-p,#room-t,#room-h{height:auto!important;min-height:var(--empath-vh)!important;overflow-y:visible!important}
+  #room-m{height:auto!important;min-height:var(--empath-vh)!important;overflow-x:clip!important}
+  #room-a{height:auto!important;min-height:var(--empath-vh)!important}
+  .room-content,.room>.room-content,.step-wrapper,.desc-wrap,.t-layout,.t-panel,.t-send-panel,.h-journey,.sync-box,.lighthouse,.share-action-box{width:100%!important;max-width:100%!important;min-width:0!important}
+  .room-title-wrap{width:100%!important;max-width:100%!important;overflow:visible!important}
+  .room-title{max-width:100%!important;overflow:visible!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.15!important}
+  .room-desc{max-width:100%!important;overflow-wrap:anywhere!important}
+  textarea,input,select,button{max-width:100%!important}
+  textarea,input,select{font-size:16px!important}
+
+  #room-e{padding-left:max(20px,var(--empath-safe-left))!important;padding-right:max(20px,var(--empath-safe-right))!important}
+  #room-e>.e-compose-panel,#room-e>.e-feed-container{max-width:100%!important;min-width:0!important}
+  #room-e>.e-feed-container{overflow:visible!important}
+  #room-e .e-msg,#room-e .e-msg>div{max-width:100%!important;overflow-wrap:anywhere!important}
+  #e-draw-wrap,#e-draw-canvas{max-width:100%!important}
+
+  #room-m .room-content{height:auto!important;min-height:var(--empath-vh)!important;padding-top:calc(104px + var(--empath-safe-top))!important;padding-bottom:calc(64px + var(--empath-safe-bottom))!important}
+  #room-m .m-input-wrap{width:100%!important;max-width:100%!important;margin-top:clamp(180px,28svh,260px)!important}
+  #room-m .m-stats{max-width:100%!important;flex-wrap:wrap!important}
+  #star-canvas{max-width:100vw!important}
+
+  #room-p>.step-wrapper:has(#p-input){width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important}
+  #room-p .p-vessel,#room-p #p-canvas,#room-p .kintsugi-board{width:100%!important;max-width:100%!important}
+  #room-p .shard{max-width:100%!important;overflow:hidden!important}
+  #room-p .shard-text{overflow-wrap:anywhere!important}
+
+  #room-a .room-content{height:auto!important;min-height:var(--empath-vh)!important;padding-top:calc(104px + var(--empath-safe-top))!important;padding-left:max(20px,var(--empath-safe-left))!important;padding-right:max(20px,var(--empath-safe-right))!important;padding-bottom:calc(80px + var(--empath-safe-bottom))!important}
+  #room-a #a-feed-wrapper,#room-a .a-warning-mask,#room-a .a-feed{width:100%!important;max-width:100%!important}
+  #room-a .a-warning-mask{height:auto!important;min-height:0!important}
+  #room-a .a-ritual-actions>*{width:100%!important}
+
+  #room-t{padding-left:max(20px,var(--empath-safe-left))!important;padding-right:max(20px,var(--empath-safe-right))!important}
+  #room-t .t-layout{height:auto!important;overflow:visible!important}
+  #room-t .t-feed{width:100%!important;max-width:100%!important;max-height:none!important;overflow:visible!important;padding-right:0!important}
+  #room-t .warmth-item{max-width:100%!important;overflow-wrap:anywhere!important}
+  #room-t .t-load-more{width:100%;min-width:0;min-height:48px}
+
+  #room-h{padding-left:max(20px,var(--empath-safe-left))!important;padding-right:max(20px,var(--empath-safe-right))!important;padding-bottom:calc(80px + var(--empath-safe-bottom))!important}
+  #room-h #g-summary,#room-h .visitor-card,#room-h .h-timeline,#room-h .home-quote{width:100%!important;max-width:100%!important}
+  #room-h .sync-box{padding:24px 18px!important}
+  #room-h .sync-actions,#room-h .share-action-box{flex-wrap:wrap!important}
+  #room-h .action-btn{width:100%!important;min-width:0!important}
+
+  .share-modal,#share-modal,#global-pulse-overlay,#silence-overlay,#breathe-overlay,.empath-entry-overlay,.empath-room-ritual,.lux-room-curtain{height:var(--empath-vh)!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding-top:var(--empath-safe-top)!important;padding-bottom:var(--empath-safe-bottom)!important}
+  .wrapped-card{width:calc(100vw - 32px)!important;max-width:520px!important;max-height:calc(var(--empath-vh) - 32px - var(--empath-safe-top) - var(--empath-safe-bottom))!important;overflow-y:auto!important;padding:32px 20px!important}
+  .star-tooltip{padding-bottom:calc(32px + var(--empath-safe-bottom))!important}
+  .toast{bottom:calc(18px + var(--empath-safe-bottom))!important;width:calc(100vw - 32px)!important;max-width:520px!important;padding:14px 18px!important;text-align:center!important}
+  #btt-btn{bottom:calc(18px + var(--empath-safe-bottom))!important;right:max(18px,var(--empath-safe-right))!important}
+  #creator-btn{left:max(16px,var(--empath-safe-left))!important;bottom:calc(76px + var(--empath-safe-bottom))!important}
+  #breathe-btn{right:max(18px,var(--empath-safe-right))!important;bottom:calc(76px + var(--empath-safe-bottom))!important}
+}
+
+@media(max-width:480px){
+  .hero-opening{padding-left:18px!important;padding-right:18px!important}
+  .hero-title{font-size:clamp(52px,16.5vw,72px)!important;letter-spacing:clamp(3px,1.4vw,6px)!important}
+  .cinema-cta,.send-btn{width:100%!important;min-width:0!important;white-space:normal!important;text-align:center!important}
+  #hero .door-btn{width:100%!important;max-width:100%!important;grid-template-columns:28px 42px minmax(0,1fr) 14px!important}
+  #room-e>.e-feed-container{padding-left:16px!important;border-left:0!important}
+  #room-p>.step-wrapper:has(#p-input){padding-left:0!important}
+  #room-a .a-warning-mask{padding:32px 18px!important}
+  #room-t .t-panel,#room-t .t-send-panel{padding-left:0!important;padding-right:0!important}
+  #room-h #g-summary .visitor-card{padding-left:12px!important;padding-right:12px!important}
+  .empath-entry-question,.empath-room-ritual-line{max-width:calc(100vw - 28px)!important;padding-left:8px!important;padding-right:8px!important;overflow-wrap:anywhere!important}
+}
+
+/* ===== MOBILE ART DIRECTION RESET · compact, deliberate, never clipped ===== */
+@media(max-width:768px){
+  nav{
+    top:0!important;right:0!important;bottom:auto!important;left:0!important;
+    width:100%!important;height:calc(64px + var(--empath-safe-top))!important;
+    min-height:calc(64px + var(--empath-safe-top))!important;
+    padding:var(--empath-safe-top) max(18px,var(--empath-safe-right)) 0 max(18px,var(--empath-safe-left))!important;
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    background:rgba(2,7,11,.94)!important;border-bottom:1px solid rgba(255,255,255,.07)!important;
+    backdrop-filter:blur(18px) saturate(110%)!important;-webkit-backdrop-filter:blur(18px) saturate(110%)!important;
+  }
+  .nav-logo{font-size:18px!important;line-height:1!important;letter-spacing:5px!important;white-space:nowrap!important}
+  .hamburger{width:44px!important;height:44px!important;padding:10px 8px!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;flex-shrink:0!important}
+  .hamburger span{width:28px!important;height:1px!important;flex:none!important}
+
+  .nav-menu{
+    position:fixed!important;top:calc(64px + var(--empath-safe-top))!important;right:0!important;bottom:auto!important;left:0!important;
+    width:100vw!important;height:calc(var(--empath-vh) - 64px - var(--empath-safe-top))!important;
+    max-width:none!important;max-height:none!important;margin:0!important;
+    padding:34px max(22px,var(--empath-safe-right)) calc(34px + var(--empath-safe-bottom)) max(22px,var(--empath-safe-left))!important;
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:30px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+    background:rgba(2,7,11,.985)!important;border:0!important;border-top:1px solid rgba(255,255,255,.06)!important;
+    opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+    transform:translate3d(0,-18px,0)!important;
+    transition:opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s linear .45s!important;
+  }
+  .nav-menu.show{
+    opacity:1!important;visibility:visible!important;pointer-events:auto!important;transform:none!important;
+    transition:opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s!important;
+  }
+  .nav-letters{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;width:100%!important}
+  .nav-letter{width:100%!important;height:58px!important;border:1px solid rgba(255,255,255,.09)!important;font-size:17px!important;background:rgba(255,255,255,.018)!important}
+  .nav-letter::after{left:30%!important;right:30%!important;bottom:8px!important}
+  .nav-controls{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
+  .nav-controls>*{width:100%!important;min-width:0!important}
+  .nav-controls .func-btn{width:100%!important;height:48px!important;padding:0 10px!important;border-radius:2px!important;font-size:11px!important;white-space:normal!important}
+  .lang-dropdown-wrapper{grid-column:1/-1!important;width:100%!important}
+  .lang-dropdown-wrapper>.func-btn{width:100%!important}
+  .lang-dropdown-list{position:static!important;width:100%!important;max-height:240px!important;margin-top:8px!important;overflow-y:auto!important;box-shadow:none!important}
+  .hsp-first-visit-tooltip{display:none!important}
+
+  #hero{padding-top:calc(64px + var(--empath-safe-top))!important}
+  .hero-opening{padding-top:64px!important;padding-bottom:calc(128px + var(--empath-safe-bottom))!important;justify-content:center!important}
+  .hero-actions{margin-bottom:28px!important}
+  .opening-scroll{display:none!important}
+
+  #room-m{padding:0!important;padding-bottom:0!important;min-height:auto!important;overflow:clip!important}
+  #room-m .room-content{min-height:var(--empath-vh)!important;padding:calc(92px + var(--empath-safe-top)) 20px calc(72px + var(--empath-safe-bottom))!important}
+  #room-m .m-input-wrap{margin-top:clamp(380px,46svh,500px)!important}
+  #room-m .m-stats{margin-top:18px!important}
+
+  a[title="CSS Light"]{
+    top:calc(72px + var(--empath-safe-top))!important;right:6px!important;bottom:auto!important;left:auto!important;
+    width:72px!important;height:25px!important;opacity:.22!important;
+    transform:scale(.74)!important;transform-origin:top right!important;z-index:480!important;
+  }
+}
+
+@media(max-width:390px){
+  .nav-menu{padding-left:18px!important;padding-right:18px!important}
+  .nav-controls{grid-template-columns:1fr!important}
+  .lang-dropdown-wrapper{grid-column:auto!important}
+  .hero-opening{padding-left:16px!important;padding-right:16px!important}
+  #room-m .room-content{padding-left:18px!important;padding-right:18px!important}
+}
+
+/* ===== INTERACTION RELIABILITY · journey, skip, native pointer ===== */
+/* Room H expands after it has entered the viewport. Keeping that large, dynamic
+   region on a transformed/filter compositing layer makes iOS WebKit retain the
+   old paint bounds, so the newly revealed content can exist without rendering. */
+#room-h {
+  overflow: visible !important;
+}
+#room-h .h-journey.aw-stage,
+#room-h .h-journey.aw-stage.aw-in {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+.h-detail-panel[hidden] {
+  display: none !important;
+}
+.h-detail-panel.is-open:not([hidden]) {
+  display: block !important;
+  animation: hDetailReveal .45s cubic-bezier(.23,1,.32,1) both;
+}
+@keyframes hDetailReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.h-details-toggle,
+#timeline-toggle-btn {
+  min-height: 48px !important;
+  touch-action: manipulation;
+}
+.h-detail-panel {
+  scroll-margin-top: 88px;
+}
+
+/* The intro exit is a primary control, not decorative microcopy. */
+.empath-entry-skip {
+  right: max(20px, env(safe-area-inset-right, 0px)) !important;
+  bottom: max(24px, calc(18px + env(safe-area-inset-bottom, 0px))) !important;
+  min-width: 132px !important;
+  min-height: 48px !important;
+  padding: 0 20px !important;
+  border: 1px solid rgba(232,230,225,.48) !important;
+  border-radius: 999px !important;
+  background: rgba(8,12,18,.72) !important;
+  color: rgba(255,255,255,.92) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  line-height: 1 !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.28) !important;
+}
+.empath-entry-skip:hover,
+.empath-entry-skip:focus-visible {
+  color: #fff !important;
+  border-color: rgba(232,230,225,.9) !important;
+  background: rgba(232,230,225,.12) !important;
+  outline: 2px solid rgba(201,168,76,.9) !important;
+  outline-offset: 3px !important;
+}
+@media(max-width:680px) {
+  .empath-entry-skip {
+    left: 50% !important;
+    right: auto !important;
+    bottom: max(22px, calc(16px + env(safe-area-inset-bottom, 0px))) !important;
+    width: min(220px, calc(100vw - 40px)) !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* Keep the system pointer: it is faster, clearer and preserves OS accessibility
+   settings. EMPATH's hover feedback remains, but no longer replaces the cursor. */
+@media (hover:hover) and (pointer:fine) {
+  html.aw-custom-cursor,
+  html.aw-custom-cursor body { cursor: auto !important; }
+  html.aw-custom-cursor a,
+  html.aw-custom-cursor button,
+  html.aw-custom-cursor [role="button"],
+  html.aw-custom-cursor .shard,
+  html.aw-custom-cursor .echo-btn { cursor: pointer !important; }
+  html.aw-custom-cursor input,
+  html.aw-custom-cursor textarea,
+  html.aw-custom-cursor [contenteditable="true"] { cursor: text !important; }
+  #cursor-glow { display: none !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .h-detail-panel.is-open:not([hidden]) { animation: none !important; }
+}
+
+/* ===== ACCESSIBILITY LANDMARKS ===== */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10000050;
+  padding: 12px 18px;
+  border: 1px solid rgba(201,168,76,.72);
+  border-radius: 3px;
+  background: #07111b;
+  color: #fff;
+  font: 600 12px/1 'Noto Sans TC',sans-serif;
+  letter-spacing: .12em;
+  transform: translateY(-180%);
+  transition: transform .2s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* ===== LAYOUT POLISH · v14 =====
+   Preserve the cinematic identity while making long-form rooms easier to scan. */
+:root {
+  --empath-reading-measure: 48ch;
+  --empath-mobile-gutter: 20px;
+}
+
+.room-title,
+#journey .journey-heading h2,
+.h-journey-arc-head h3 {
+  text-wrap: balance;
+}
+
+.room-desc {
+  max-width: var(--empath-reading-measure) !important;
+  color: rgba(232,230,225,.68) !important;
+  line-height: 2.05 !important;
+  text-wrap: pretty;
+}
+
+.desc-wrap {
+  max-width: var(--empath-reading-measure) !important;
+}
+
+textarea,
+.e-msg,
+.sand-msg,
+.warmth-item,
+.shard-text,
+.sync-box p {
+  line-height: 1.9 !important;
+}
+
+#journey .journey-heading > p:last-child {
+  max-width: 54ch;
+  color: rgba(232,230,225,.64) !important;
+}
+
+#journey .door-btn {
+  border-color: rgba(232,230,225,.13) !important;
+  background: linear-gradient(145deg,rgba(255,255,255,.028),rgba(255,255,255,.008)) !important;
+}
+
+#journey .door-btn:hover,
+#journey .door-btn:focus-visible {
+  border-color: rgba(201,168,76,.48) !important;
+  background: rgba(201,168,76,.045) !important;
+}
+
+#room-e .e-msg {
+  max-width: 64ch !important;
+}
+
+#room-p .shard-text,
+#room-t .warmth-item,
+#room-a .sand-msg {
+  text-wrap: pretty;
+}
+
+#room-h .h-detail-panel {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+#room-h .h-secondary-summary .g-card,
+#room-h #h-summary .j-card {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .room-desc {
+    font-size: 14px !important;
+    line-height: 1.95 !important;
+  }
+
+  #journey .door-btn {
+    min-height: 116px !important;
+  }
+
+  #room-e > .e-feed-container {
+    margin-top: 64px !important;
+  }
+
+  #room-m .m-input-wrap {
+    margin-top: clamp(220px,32svh,300px) !important;
+  }
+
+  #room-p,
+  #room-t,
+  #room-h {
+    padding: 104px var(--empath-mobile-gutter) 76px !important;
+  }
+
+  #room-p > .step-wrapper:has(#p-input) {
+    margin: 52px 0 68px !important;
+    padding-left: 18px !important;
+  }
+
+  #room-p .p-vessel {
+    padding: 28px 18px !important;
+    gap: 30px !important;
+  }
+
+  #room-p .kintsugi-board {
+    margin-top: 48px !important;
+  }
+
+  #room-a .room-content {
+    padding: 104px var(--empath-mobile-gutter) 76px !important;
+  }
+
+  #room-a #a-input {
+    margin-top: 34px !important;
+  }
+
+  #room-a #a-feed-wrapper {
+    margin-top: 64px !important;
+  }
+
+  #room-a .a-warning-mask {
+    padding: 30px 20px !important;
+  }
+
+  #room-t .t-layout {
+    gap: 56px !important;
+    margin-top: 56px !important;
+  }
+
+  #room-h > .desc-wrap {
+    margin-bottom: 64px !important;
+  }
+
+  #room-h .h-journey-arc {
+    margin-bottom: 60px !important;
+  }
+
+  #room-h .h-detail-panel {
+    padding-top: 40px !important;
+  }
+
+  #room-h .h-timeline-title {
+    margin-top: 64px !important;
+    margin-bottom: 24px !important;
+    line-height: 1.7 !important;
+    letter-spacing: .22em !important;
+  }
+
+  #room-h .h-secondary-summary,
+  #room-h #h-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 56px !important;
+  }
+
+  #room-h #h-summary .j-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  #room-h .h-secondary-summary .g-card,
+  #room-h #h-summary .j-card {
+    min-height: 142px !important;
+    padding: 22px 12px !important;
+  }
+
+  #room-h .sync-box {
+    margin: 52px 0 !important;
+  }
+
+  #room-h .home-quote {
+    margin: 64px auto 48px !important;
+    padding: 40px 16px !important;
+  }
+
+  #room-h .h-timeline {
+    margin-top: 64px !important;
+  }
+
+  #room-h .lighthouse {
+    margin: 56px auto !important;
+  }
+
+  #room-h .share-action-box {
+    gap: 12px !important;
+    margin-top: 40px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #journey.journey-map {
+    padding-inline: var(--empath-mobile-gutter) !important;
+  }
+
+  #journey .journey-heading h2 {
+    font-size: clamp(29px,9vw,36px) !important;
+    line-height: 1.35 !important;
+  }
+
+  #journey .door-btn {
+    min-height: 108px !important;
+    padding: 16px !important;
+  }
+
+  .room-title {
+    font-size: clamp(32px,10vw,40px) !important;
+  }
+
+  #room-h #g-summary .visitor-card {
+    min-height: 190px !important;
+  }
+
+  #room-h #g-summary .visitor-card .g-num,
+  #room-h #g-summary .visitor-card .g-num.lux-counter {
+    min-height: 84px !important;
+    font-size: clamp(58px,20vw,82px) !important;
+  }
+}
+
+/* EMPATH v15 · semantic controls, focus and support notice */
+#creator-btn,
+#fortune-spark,
+#breathe-btn,
+.lighthouse-flame,
+.footer-privacy-btn,
+.hsp-tooltip-close,
+.lang-option {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+}
+
+#creator-btn,
+#fortune-spark,
+#breathe-btn,
+.lighthouse-flame,
+.footer-privacy-btn,
+.hsp-tooltip-close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+#creator-btn,
+#fortune-spark,
+#breathe-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.lighthouse-flame {
+  width: auto;
+  margin-inline: auto;
+  padding: 4px 10px;
+}
+
+.footer-privacy-btn {
+  padding: 3px 5px;
+  color: rgba(255,255,255,.5);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color .3s ease;
+}
+
+.footer-privacy-btn:hover { color: var(--gold); }
+
+.hsp-tooltip-close {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.lang-option {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* EMPATH v20 · calmer entry and clearer Room H hierarchy */
+html.empath-home-page #creator-btn,
+html.empath-home-page .csslight-ribbon {
+  display: none !important;
+}
+
+.h-path-nav {
+  width: min(100%, 920px);
+  margin: 64px auto 72px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block: 1px solid rgba(201,168,76,.2);
+}
+
+.h-path-nav a {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  padding: 22px 20px;
+  color: rgba(232,230,225,.68);
+  text-decoration: none;
+  transition: background .3s ease, color .3s ease;
+}
+
+.h-path-nav a + a { border-left: 1px solid rgba(255,255,255,.08); }
+.h-path-nav a:hover,
+.h-path-nav a:focus-visible { background: rgba(201,168,76,.07); color: var(--white); }
+.h-path-nav span { grid-row: 1 / 3; color: rgba(201,168,76,.48); font: 12px 'Cormorant Garamond',serif; letter-spacing: .16em; }
+.h-path-nav b { font: 400 17px 'Noto Serif TC',serif; letter-spacing: .12em; }
+.h-path-nav small { margin-top: 7px; color: rgba(232,230,225,.38); font-size: 11px; letter-spacing: .06em; line-height: 1.5; }
+
+.h-long-term-head {
+  margin: 16px 0 54px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.h-long-term-head p { margin: 0 0 14px; color: rgba(201,168,76,.55); font: 11px 'Cormorant Garamond',serif; letter-spacing: .32em; }
+.h-long-term-head h3 { margin: 0 0 15px; color: rgba(242,232,217,.92); font: 400 clamp(28px,4vw,44px)/1.2 'Noto Serif TC',serif; letter-spacing: .08em; }
+.h-long-term-head span { color: rgba(232,230,225,.44); font: 13px/1.9 'Noto Serif TC',serif; letter-spacing: .06em; }
+
+#h-journey-arc,
+#emotion-week,
+#emotion-year,
+#h-long-term { scroll-margin-top: 110px; }
+
+@media (max-width: 700px) {
+  .h-path-nav { grid-template-columns: 1fr; margin: 44px auto 58px; }
+  .h-path-nav a + a { border-left: 0; border-top: 1px solid rgba(255,255,255,.08); }
+  .h-path-nav a { padding: 18px 12px; }
+  .h-long-term-head { margin-bottom: 38px; }
+}
+
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+body.empath-dialog-open { overflow: hidden; }
+
+.crisis-support-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background: rgba(4,9,15,.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.crisis-support-notice[hidden] { display: none; }
+
+.crisis-support-card {
+  width: min(520px, 100%);
+  padding: clamp(28px,6vw,46px);
+  border: 1px solid rgba(201,168,76,.48);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(18,32,47,.98), rgba(8,15,24,.98));
+  box-shadow: 0 30px 90px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.04);
+  color: var(--fog);
+  text-align: left;
+}
+
+.crisis-support-kicker {
+  margin: 0 0 10px;
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: .24em;
+}
+
+.crisis-support-card h2 {
+  margin: 0 0 18px;
+  color: #fff;
+  font-size: clamp(24px,5vw,34px);
+  letter-spacing: .08em;
+}
+
+.crisis-support-card > p:not(.crisis-support-kicker) {
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.crisis-support-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.crisis-support-actions .close-modal-btn {
+  flex: 1 1 180px;
+  min-height: 48px;
+  margin: 0;
+  text-align: center;
+  text-decoration: none;
+}
+
+.crisis-support-actions .crisis-link {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #07101a;
+  font-weight: 700;
+}
+
+/* ===== EMPATH v16 · SOCIAL IN-APP BROWSER UI/UX ===== */
+:root {
+  --empath-vv-top: 0px;
+  --empath-vv-bottom: 0px;
+  --empath-inapp-bottom: 0px;
+  --empath-inapp-tip-reserve: 0px;
+  --empath-inapp-accent: var(--gold);
+}
+
+.empath-inapp-tip { display: none; }
+
+@media (max-width: 900px) {
+  html.empath-inapp,
+  html.empath-inapp body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  html.empath-inapp body {
+    touch-action: pan-y pinch-zoom;
+    -webkit-tap-highlight-color: rgba(201,168,76,.16);
+  }
+
+  html.empath-inapp a[title="CSS Light"] { display: none !important; }
+
+  html.empath-inapp nav {
+    background: rgba(2,7,11,.975) !important;
+    border-bottom-color: color-mix(in srgb, var(--empath-inapp-accent) 22%, transparent) !important;
+  }
+
+  html.empath-inapp .hero-opening,
+  html.empath-inapp .room,
+  html.empath-inapp .room-content {
+    max-width: 100% !important;
+  }
+
+  html.empath-inapp .hero-title {
+    max-width: 100% !important;
+    font-size: clamp(48px,15.5vw,68px) !important;
+    letter-spacing: clamp(2px,1.2vw,5px) !important;
+    text-indent: 0 !important;
+  }
+
+  html.empath-inapp .empath-entry-overlay,
+  html.empath-inapp .empath-room-ritual,
+  html.empath-inapp .share-modal,
+  html.empath-inapp #breathe-overlay,
+  html.empath-inapp #nebula-overlay,
+  html.empath-inapp #fortune-display {
+    top: var(--empath-vv-top) !important;
+    bottom: auto !important;
+    height: var(--empath-vh) !important;
+    max-height: var(--empath-vh) !important;
+  }
+
+  html.empath-inapp :where(button,a,.door-btn,.echo-btn,.shard) {
+    touch-action: manipulation;
+  }
+
+  html.empath-inapp .empath-entry-skip {
+    bottom: calc(22px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom)) !important;
+  }
+
+  html.empath-inapp #creator-btn {
+    bottom: calc(76px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom) + var(--empath-inapp-tip-reserve)) !important;
+  }
+
+  html.empath-inapp #breathe-btn {
+    bottom: calc(76px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom) + var(--empath-inapp-tip-reserve)) !important;
+  }
+
+  html.empath-inapp #btt-btn {
+    bottom: calc(18px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom) + var(--empath-inapp-tip-reserve)) !important;
+  }
+
+  html.empath-inapp body.empath-inapp-tip-open {
+    --empath-inapp-tip-reserve: 166px;
+  }
+
+  .empath-inapp-tip {
+    position: fixed;
+    right: max(12px,var(--empath-safe-right));
+    bottom: calc(12px + var(--empath-safe-bottom) + var(--empath-vv-bottom) + var(--empath-inapp-bottom));
+    left: max(12px,var(--empath-safe-left));
+    z-index: 1200;
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 16px;
+    width: auto;
+    max-width: 720px;
+    margin-inline: auto;
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,.13);
+    border-top-color: color-mix(in srgb, var(--empath-inapp-accent) 70%, white 10%);
+    border-radius: 14px;
+    background: rgba(7,13,21,.97);
+    color: var(--fog);
+    box-shadow: 0 20px 60px rgba(0,0,0,.58);
+    backdrop-filter: blur(18px) saturate(115%);
+    -webkit-backdrop-filter: blur(18px) saturate(115%);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate3d(0,22px,0);
+    transition: opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s linear .45s;
+  }
+
+  .empath-inapp-tip.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity .3s ease,transform .45s cubic-bezier(.23,1,.32,1),visibility 0s;
+  }
+
+  .empath-inapp-tip-copy { min-width: 0; }
+  .empath-inapp-tip-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--empath-inapp-accent);
+    font: 600 9px/1 'Noto Sans TC',sans-serif;
+    letter-spacing: .24em;
+  }
+  .empath-inapp-tip strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #fff;
+    font: 600 15px/1.45 'Noto Serif TC',serif;
+    letter-spacing: .08em;
+  }
+  .empath-inapp-tip p {
+    margin: 0;
+    color: rgba(232,230,225,.68);
+    font-size: 12px;
+    line-height: 1.75;
+    letter-spacing: .035em;
+  }
+  .empath-inapp-tip-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    width: 112px;
+  }
+  .empath-inapp-tip-actions button {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(255,255,255,.8);
+    font: 500 11px/1.25 'Noto Sans TC',sans-serif;
+    letter-spacing: .06em;
+  }
+  .empath-inapp-tip-actions .empath-inapp-dismiss {
+    border-color: color-mix(in srgb, var(--empath-inapp-accent) 68%, transparent);
+    background: color-mix(in srgb, var(--empath-inapp-accent) 13%, transparent);
+    color: #fff;
+  }
+
+  /* LINE: reserve extra room for its persistent bottom toolbar. */
+  html.empath-inapp-line {
+    --empath-inapp-accent: #06c755;
+    --empath-inapp-bottom: 18px;
+  }
+  html.empath-inapp-line .hero-opening { padding-bottom: calc(138px + var(--empath-safe-bottom)) !important; }
+  html.empath-inapp-line .cinema-cta { min-height: 50px !important; }
+
+  /* Instagram: its WebView is animation-heavy, so prefer crisp layers over blur. */
+  html.empath-inapp-instagram {
+    --empath-inapp-accent: #e65083;
+    --empath-inapp-bottom: 12px;
+  }
+  html.empath-inapp-instagram nav,
+  html.empath-inapp-instagram .nav-menu,
+  html.empath-inapp-instagram .empath-inapp-tip {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  html.empath-inapp-instagram .empath-entry-char,
+  html.empath-inapp-instagram .empath-ritual-char { filter: none !important; }
+
+  /* Facebook: older embedded WebViews behave better with hidden overflow than clip. */
+  html.empath-inapp-facebook {
+    --empath-inapp-accent: #4f8df7;
+    --empath-inapp-bottom: 15px;
+  }
+  html.empath-inapp-facebook,
+  html.empath-inapp-facebook body,
+  html.empath-inapp-facebook #hero,
+  html.empath-inapp-facebook .room { overflow-x: hidden !important; }
+  html.empath-inapp-facebook body { -webkit-text-size-adjust: 100% !important; }
+  html.empath-inapp-facebook .room-title { overflow-wrap: break-word !important; }
+
+  /* X: protect vertical exploration from the app's horizontal back gesture. */
+  html.empath-inapp-x {
+    --empath-inapp-accent: #f2f2f2;
+    --empath-inapp-bottom: 12px;
+  }
+  html.empath-inapp-x :where(.door-btn,.nav-letter,.action-btn,.send-btn) {
+    touch-action: pan-y !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html.empath-inapp body.empath-inapp-tip-open { --empath-inapp-tip-reserve: 204px; }
+  .empath-inapp-tip {
+    grid-template-columns: 1fr;
+    gap: 13px;
+    padding: 16px;
+  }
+  .empath-inapp-tip-actions {
+    width: 100%;
+    flex-direction: row;
+  }
+  .empath-inapp-tip-actions button { min-height: 44px; }
+}
+
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  html.empath-inapp .hero-opening { min-height: var(--empath-vh) !important; padding-top: 78px !important; padding-bottom: 48px !important; }
+  html.empath-inapp .hero-title { font-size: clamp(42px,11vw,62px) !important; }
+  .empath-inapp-tip { grid-template-columns: minmax(0,1fr) auto; padding: 12px 14px; }
+  .empath-inapp-tip p { display: none; }
+  .empath-inapp-tip-actions { width: 210px; flex-direction: row; }
+  html.empath-inapp body.empath-inapp-tip-open { --empath-inapp-tip-reserve: 104px; }
+}
