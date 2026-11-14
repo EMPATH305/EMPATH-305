@@ -299,6 +299,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 瀏覽器測試使用獨立本機頁面，驗證重新渲染、語言切換、解鎖邊界與 HTML 原樣顯示，不讀寫正式備份。
 - 整體 v23 仍有 CSS、Functions、interactions 與主程式整合邏輯的整理。
 
+## ✦ v23.13 CSS source boundaries
+
+- CSS 依既有連續區段拆成 `styles/` 下八個來源檔，`manifest.json` 固定串接順序。
+- 使用 `npm run build:css` 產生根目錄 `styles.css`；本次產物與拆分前逐位元相同，保留所有覆寫順序與相對資源路徑。
+- 網站仍只載入同一個 CSS bundle；`npm test` 加入來源與產物一致性檢查，防止修改來源卻漏更新部署檔。
+- 編輯流程與各檔責任見 [styles/README.md](styles/README.md)。本批是安全的來源拆分，尚未按語義重排規則。
+- v23 後續仍包含 Functions、interactions 與其餘架構整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
