@@ -307,6 +307,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 編輯流程與各檔責任見 [styles/README.md](styles/README.md)。本批是安全的來源拆分，尚未按語義重排規則。
 - v23 後續仍包含 Functions、interactions 與其餘架構整理。
 
+## ✦ v23.14 Functions: Soul maintenance
+
+- `functions/lib/soul-maintenance.js` 抽出舊 Soul 備份清理與鑰匙持有人刪除流程；`index.js` 保留 callable 名稱、telemetry、secrets、App Check 與共享限流設定。
+- 使用隔離交易測試驗證無效鑰匙、限流阻擋、加密備份前置條件、刪除結果與交易失敗；不讀寫正式資料。
+- 此批為後端來源整理，前端仍是 v23.13。GitHub Pages 部署不會部署 Firebase Functions。
+- 合併並通過測試後，在已登入 Firebase 的 repository 根目錄執行：`firebase deploy --project empath-62582 --only functions:retireLegacySoulJourney,functions:deleteSoulJourney`。
+- v23 後續仍有其他 Functions、interactions 與整合邏輯拆分。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
