@@ -330,6 +330,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:joinSilentCompanionship,functions:empath-backend:recordSiteVisit"`。
 - 整體 v23 尚有其他 Functions、interactions 與整合邏輯待整理。
 
+## ✦ v23.17 Functions: Content withdrawal
+
+- `functions/lib/content-withdrawal.js` 抽出投稿撤回流程；入口保留 callable、telemetry、secrets、App Check 與共用憑證雜湊。
+- 保留有效期限、目標綁定與 token 驗證，並在同一交易刪除內容與憑證。憑證已消耗後再次請求仍回傳 `not-found`。
+- 隔離測試驗證無效輸入、限流、過期／不符憑證、內容已不存在與交易失敗，不刪除正式資料。
+- 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:deleteRoomContent"`。
+- 整體 v23 架構拆分仍持續進行。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
