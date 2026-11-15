@@ -4,7 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 
-const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8');
+const submissionSource = readFileSync(new URL('../lib/room-submission.js', `file://${__dirname}/`), 'utf8');
+const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8') + '\n' + submissionSource;
 const rules = readFileSync(new URL('../../firestore.rules', `file://${__dirname}/`), 'utf8');
 const indexes = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', `file://${__dirname}/`), 'utf8'));
 
@@ -17,9 +18,7 @@ test('submission request IDs use private HMAC document keys and canonical payloa
 });
 
 test('the content write and idempotency receipt share one transaction', () => {
-  const submissionFunction = functionSource
-    .split("exports.submitRoomContent = observedOnCall('submitRoomContent'")[1]
-    .split("exports.deleteRoomContent = observedOnCall('deleteRoomContent'")[0];
+  const submissionFunction = submissionSource;
   assert(submissionFunction.includes('transaction.get(submissionReceiptRef)'));
   assert(submissionFunction.includes('transaction.set(submissionReceiptRef'));
   assert(submissionFunction.includes('transaction.set(contentRef, data)'));

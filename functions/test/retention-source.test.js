@@ -5,7 +5,8 @@ const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 
 const reactionsSource = readFileSync(new URL('../lib/room-reactions.js', `file://${__dirname}/`), 'utf8');
-const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8');
+const submissionSource = readFileSync(new URL('../lib/room-submission.js', `file://${__dirname}/`), 'utf8');
+const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8') + '\n' + submissionSource;
 const indexes = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', `file://${__dirname}/`), 'utf8'));
 
 test('public room submissions receive a server-owned 180-day expiry', () => {
