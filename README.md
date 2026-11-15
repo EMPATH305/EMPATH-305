@@ -312,8 +312,15 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - `functions/lib/soul-maintenance.js` 抽出舊 Soul 備份清理與鑰匙持有人刪除流程；`index.js` 保留 callable 名稱、telemetry、secrets、App Check 與共享限流設定。
 - 使用隔離交易測試驗證無效鑰匙、限流阻擋、加密備份前置條件、刪除結果與交易失敗；不讀寫正式資料。
 - 此批為後端來源整理，前端仍是 v23.13。GitHub Pages 部署不會部署 Firebase Functions。
-- 合併並通過測試後，在已登入 Firebase 的 repository 根目錄執行：`firebase deploy --project empath-62582 --only functions:retireLegacySoulJourney,functions:deleteSoulJourney`。
+- 合併並通過測試後，在已登入 Firebase 的 repository 根目錄執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:retireLegacySoulJourney,functions:empath-backend:deleteSoulJourney"`。
 - v23 後續仍有其他 Functions、interactions 與整合邏輯拆分。
+
+## ✦ v23.15 Functions: Drift letters
+
+- `functions/lib/drift-letters.js` 抽出漂流信寄送與交易領取流程；入口保留 callable 名稱、telemetry、secrets、App Check 與限流依賴。
+- 隔離測試涵蓋驗證、危機內容阻擋、限流、寄送保存期限、排除本人信件、交易重讀與領取競爭；不讀寫正式資料。
+- 此批不改前端版本。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:sendDriftLetter,functions:empath-backend:receiveDriftLetter"`。
+- 修正 v23.14 部署指令的 codebase；整體 v23 架構整理仍持續進行。
 
 ### 首次部署 v20.5
 
