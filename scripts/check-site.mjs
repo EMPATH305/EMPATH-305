@@ -255,6 +255,7 @@ assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded 
 
 const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
 assert.equal(firebaseSettings.functions?.runtime, 'nodejs22', 'Functions must use the supported Node.js 22 runtime');
+const reactionsSource = readFileSync('functions/lib/room-reactions.js', 'utf8');
 const functionsSource = readFileSync('functions/index.js', 'utf8');
 const metricsSource = readFileSync('functions/lib/anonymous-metrics.js', 'utf8');
 const driftSource = readFileSync('functions/lib/drift-letters.js', 'utf8');
@@ -264,15 +265,15 @@ assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side repor
 assert(functionsSource.includes('CONTENT_LIMIT_PER_HOUR = 12'), 'Server-side room posting limit must remain bounded');
 assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 6'), 'Room posting must have burst protection without blocking a five-room journey');
 assert(functionsSource.includes('REACTION_LIMIT_PER_HOUR = 40'), 'Room reactions must have a bounded hourly server limit');
-assert(functionsSource.includes('REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000'), 'Duplicate reaction receipts must expire after 48 hours');
-assert(functionsSource.includes('CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000'), 'Constellations must expire after 24 hours');
+assert(reactionsSource.includes('REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000'), 'Duplicate reaction receipts must expire after 48 hours');
+assert(reactionsSource.includes('CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000'), 'Constellations must expire after 24 hours');
 assert(metricsSource.includes('SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5'), 'Silent companionship must bound joins per source bucket');
 assert(functionsSource.includes("exports.submitRoomContent = observedOnCall('submitRoomContent'"), 'Public room submissions must have an observed callable backend');
 assert(functionsSource.includes("exports.reactToRoomContent = observedOnCall('reactToRoomContent'"), 'Public room reactions must have an observed callable backend');
 assert(functionsSource.includes("exports.joinSilentCompanionship = observedOnCall('joinSilentCompanionship'"), 'Silent companionship joins must have an observed callable backend');
 assert(functionsSource.includes("exports.recordSiteVisit = observedOnCall('recordSiteVisit'"), 'Anonymous site visits must have an observed callable backend');
-assert(functionsSource.includes("throw new HttpsError('already-exists', 'This reaction was already counted.')"), 'Duplicate reactions must be rejected atomically');
-assert(functionsSource.includes("doc(`reaction_${input.kind}_${targetHash}_${participantHash}`)"), 'Reaction receipts must avoid storing a raw participant address or target ID');
+assert(reactionsSource.includes("throw new HttpsError('already-exists', 'This reaction was already counted.')"), 'Duplicate reactions must be rejected atomically');
+assert(reactionsSource.includes("doc(`reaction_${input.kind}_${targetHash}_${participantHash}`)"), 'Reaction receipts must avoid storing a raw participant address or target ID');
 assert(functionsSource.includes("exports.sendDriftLetter = observedOnCall('sendDriftLetter'"), 'Room E must have an observed private drift-letter sender');
 assert(functionsSource.includes("exports.receiveDriftLetter = observedOnCall('receiveDriftLetter'"), 'Room E must have an observed one-recipient drift-letter receiver');
 assert(driftSource.includes("where('status', '==', 'waiting')"), 'Only waiting drift letters may be delivered');

@@ -338,6 +338,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:deleteRoomContent"`。
 - 整體 v23 架構拆分仍持續進行。
 
+## ✦ v23.18 Functions: Room reactions
+
+- `functions/lib/room-reactions.js` 抽出星星、碎片與溫暖回聲的反應交易；保留去重、數值上限、星座連線與保存期限。
+- 入口保留 callable、telemetry、secrets、App Check 與來源限流；沒有新增互動功能。
+- 隔離測試涵蓋無效輸入、限流、重複反應、缺少內容、計數邊界、碎片只累計一次與交易失敗，不修改正式資料。
+- 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:reactToRoomContent"`。
+- 整體 v23 架構整理尚未完成。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
