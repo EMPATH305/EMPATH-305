@@ -256,6 +256,7 @@ assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded 
 const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
 assert.equal(firebaseSettings.functions?.runtime, 'nodejs22', 'Functions must use the supported Node.js 22 runtime');
 const functionsSource = readFileSync('functions/index.js', 'utf8');
+const driftSource = readFileSync('functions/lib/drift-letters.js', 'utf8');
 assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity must be stored in Secret Manager');
 assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit salt must be stored in Secret Manager');
 assert(functionsSource.includes('REPORT_LIMIT_PER_HOUR = 8'), 'Server-side report limit must remain bounded');
@@ -273,8 +274,8 @@ assert(functionsSource.includes("throw new HttpsError('already-exists', 'This re
 assert(functionsSource.includes("doc(`reaction_${input.kind}_${targetHash}_${participantHash}`)"), 'Reaction receipts must avoid storing a raw participant address or target ID');
 assert(functionsSource.includes("exports.sendDriftLetter = observedOnCall('sendDriftLetter'"), 'Room E must have an observed private drift-letter sender');
 assert(functionsSource.includes("exports.receiveDriftLetter = observedOnCall('receiveDriftLetter'"), 'Room E must have an observed one-recipient drift-letter receiver');
-assert(functionsSource.includes("where('status', '==', 'waiting')"), 'Only waiting drift letters may be delivered');
-assert(functionsSource.includes("status:'delivered'"), 'A received drift letter must be atomically consumed');
+assert(driftSource.includes("where('status', '==', 'waiting')"), 'Only waiting drift letters may be delivered');
+assert(driftSource.includes("status:'delivered'"), 'A received drift letter must be atomically consumed');
 assert(functionsSource.includes('expireAt:Timestamp.fromMillis'), 'Room A server writes must include a Firestore TTL timestamp');
 assert(functionsSource.includes('kindCounts[input.weightKind] += 1'), 'Room A must update the selected anonymous category atomically');
 assert(functionsSource.includes('sameKind:kindCounts[input.weightKind]'), 'Room A must return the anonymous same-category count');

@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const { createDriftLetters } = require('./lib/drift-letters');
 const { createSoulMaintenance } = require('./lib/soul-maintenance');
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
@@ -13,12 +14,9 @@ const { createCallableTelemetry } = require('./lib/callable-telemetry');
 const {
   ALLOWED_COLLECTIONS,
   validateRoomSubmissionInput,
-  validateDriftLetterInput,
-  validateDriftReceiveInput,
   validateRoomReactionInput,
   validateContentDeletionInput,
   validateAnonymousClientInput,
-  containsCrisisSignal,
   validateReportInput,
   validateModerationInput,
   validateListReportsInput,
@@ -37,8 +35,6 @@ const CONTENT_LIMIT_PER_HOUR = 12;
 // burst guard, while the hourly ceiling still blocks sustained flooding.
 const CONTENT_LIMIT_PER_TEN_MINUTES = 6;
 const CONTENT_DELETION_LIMIT_PER_HOUR = 10;
-const DRIFT_SEND_LIMIT_PER_HOUR = 4;
-const DRIFT_RECEIVE_LIMIT_PER_HOUR = 8;
 const REACTION_LIMIT_PER_HOUR = 40;
 const REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000;
 const SUBMISSION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000;
@@ -50,8 +46,6 @@ const RETENTION_MIGRATION_LIMIT_PER_HOUR = 4;
 const PUBLIC_CONTENT_RETENTION_MS = 180 * 24 * 60 * 60 * 1000;
 const CONTENT_REPORT_RETENTION_MS = 180 * 24 * 60 * 60 * 1000;
 const MODERATION_AUDIT_RETENTION_MS = 365 * 24 * 60 * 60 * 1000;
-const DRIFT_WAITING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const DRIFT_DELIVERED_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 // Roll App Check out in stages: protect private moderation immediately while
 // public reporting remains observable until embedded-browser compatibility is proven.
 const ADMIN_APP_CHECK_ENFORCED = true;
@@ -929,72 +923,19 @@ exports.deleteSoulJourney = observedOnCall('deleteSoulJourney', {
   enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.deleteSoulJourney
 }, soulMaintenance.deleteSoulJourney);
 
+const driftLetters = createDriftLetters({
+  db, HttpsError, FieldValue, Timestamp, logger, enforceDriftLimit, driftParticipantKey
+});
+
 exports.sendDriftLetter = observedOnCall('sendDriftLetter', {
   secrets:[RATE_LIMIT_SALT],
   enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.sendDriftLetter
-}, async request => {
-  const input = validateDriftLetterInput(request.data);
-  if (!input) throw new HttpsError('invalid-argument', 'Invalid drift letter.');
-  if (containsCrisisSignal(input.text)) {
-    throw new HttpsError('failed-precondition', 'Crisis content should stay in the private release path.');
-  }
-  await enforceDriftLimit(request, input.clientId, 'send', DRIFT_SEND_LIMIT_PER_HOUR);
-  const now = Date.now();
-  const result = await db.collection('drift_letters').add({
-    text:input.text,
-    status:'waiting',
-    senderHash:driftParticipantKey(input.clientId),
-    appVerified:Boolean(request.app),
-    createdAt:FieldValue.serverTimestamp(),
-    expiresAt:Timestamp.fromMillis(now + DRIFT_WAITING_TTL_MS)
-  });
-  logger.info('Anonymous drift letter released', { letterId:result.id, appVerified:Boolean(request.app) });
-  return { accepted:true };
-});
+}, driftLetters.sendDriftLetter);
 
 exports.receiveDriftLetter = observedOnCall('receiveDriftLetter', {
   secrets:[RATE_LIMIT_SALT],
   enforceAppCheck:PUBLIC_APP_CHECK_ENFORCEMENT.receiveDriftLetter
-}, async request => {
-  const input = validateDriftReceiveInput(request.data);
-  if (!input) throw new HttpsError('invalid-argument', 'Invalid drift receiver.');
-  await enforceDriftLimit(request, input.clientId, 'receive', DRIFT_RECEIVE_LIMIT_PER_HOUR);
-  const participantHash = driftParticipantKey(input.clientId);
-  const waiting = await db.collection('drift_letters')
-    .where('status', '==', 'waiting')
-    .orderBy('createdAt', 'desc')
-    .limit(30)
-    .get();
-  const candidates = waiting.docs.filter(item => item.data()?.senderHash !== participantHash);
-  for (let index = candidates.length - 1; index > 0; index -= 1) {
-    const swapWith = crypto.randomInt(0, index + 1);
-    [candidates[index], candidates[swapWith]] = [candidates[swapWith], candidates[index]];
-  }
-
-  for (const candidate of candidates.slice(0, 8)) {
-    try {
-      const delivered = await db.runTransaction(async transaction => {
-        const snapshot = await transaction.get(candidate.ref);
-        const data = snapshot.data();
-        if (!snapshot.exists || data?.status !== 'waiting' || data?.senderHash === participantHash) return null;
-        transaction.update(candidate.ref, {
-          status:'delivered',
-          recipientHash:participantHash,
-          deliveredAt:FieldValue.serverTimestamp(),
-          expiresAt:Timestamp.fromMillis(Date.now() + DRIFT_DELIVERED_TTL_MS)
-        });
-        return { id:snapshot.id, text:String(data.text || '').slice(0, 500) };
-      });
-      if (delivered) {
-        logger.info('Anonymous drift letter delivered', { letterId:delivered.id, appVerified:Boolean(request.app) });
-        return { available:true, ...delivered };
-      }
-    } catch (error) {
-      logger.warn('Drift letter delivery contention', { letterId:candidate.id, error:String(error?.message || error) });
-    }
-  }
-  return { available:false };
-});
+}, driftLetters.receiveDriftLetter);
 
 exports.listReports = onCall({ enforceAppCheck:ADMIN_APP_CHECK_ENFORCED }, async request => {
   requireAdmin(request);
