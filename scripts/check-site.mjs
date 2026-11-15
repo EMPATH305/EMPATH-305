@@ -256,7 +256,7 @@ assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded 
 const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
 assert.equal(firebaseSettings.functions?.runtime, 'nodejs22', 'Functions must use the supported Node.js 22 runtime');
 const reactionsSource = readFileSync('functions/lib/room-reactions.js', 'utf8');
-const functionsSource = readFileSync('functions/index.js', 'utf8');
+const functionsSource = readFileSync('functions/index.js', 'utf8') + '\n' + readFileSync('functions/lib/room-submission.js', 'utf8');
 const metricsSource = readFileSync('functions/lib/anonymous-metrics.js', 'utf8');
 const driftSource = readFileSync('functions/lib/drift-letters.js', 'utf8');
 assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity must be stored in Secret Manager');

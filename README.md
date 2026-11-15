@@ -346,6 +346,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:reactToRoomContent"`。
 - 整體 v23 架構整理尚未完成。
 
+## ✦ v23.19 Functions: Room submission
+
+- `functions/lib/room-submission.js` 抽出五個房間投稿與防重複投稿憑證流程；共用限流與刪除憑證雜湊仍由入口注入。
+- 保留各房間資料格式、保存期限、原子計數、相同請求回用與不同內容衝突判定，不新增產品功能。
+- 隔離交易測試驗證五個房間、圖片投稿、請求重試、憑證期限、刪除 token 重建與提交失敗；不投稿到正式資料庫。
+- 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:submitRoomContent"`。
+- 整體 v23 尚有管理、保留期限、限流與前端整合待整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
