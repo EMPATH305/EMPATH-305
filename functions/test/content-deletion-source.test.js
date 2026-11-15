@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 
 const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8');
+const withdrawalSource = readFileSync(new URL('../lib/content-withdrawal.js', `file://${__dirname}/`), 'utf8');
 const rules = readFileSync(new URL('../../firestore.rules', `file://${__dirname}/`), 'utf8');
 const indexes = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', `file://${__dirname}/`), 'utf8'));
 
@@ -21,17 +22,15 @@ test('withdrawal binds the receipt to one target and compares its digest safely'
   assert(functionSource.includes("exports.deleteRoomContent = observedOnCall('deleteRoomContent'"));
   assert(functionSource.includes("crypto.createHmac('sha256', RATE_LIMIT_SALT.value())"));
   assert(functionSource.includes('crypto.timingSafeEqual'));
-  assert(functionSource.includes('transaction.get(receiptRef)'));
-  assert(functionSource.includes('transaction.get(contentRef)'));
-  assert(functionSource.includes('transaction.delete(contentRef)'));
-  assert(functionSource.includes('transaction.delete(receiptRef)'));
+  assert(withdrawalSource.includes('transaction.get(receiptRef)'));
+  assert(withdrawalSource.includes('transaction.get(contentRef)'));
+  assert(withdrawalSource.includes('transaction.delete(contentRef)'));
+  assert(withdrawalSource.includes('transaction.delete(receiptRef)'));
   assert(functionSource.includes("kind:'content-deletion'"));
 });
 
 test('withdrawal does not rewrite durable lifetime submission totals', () => {
-  const deletionFunction = functionSource
-    .split("exports.deleteRoomContent = observedOnCall('deleteRoomContent'")[1]
-    .split("exports.reactToRoomContent = observedOnCall('reactToRoomContent'")[0];
+  const deletionFunction = withdrawalSource;
   assert(!deletionFunction.includes('FieldValue.increment('));
   assert(!deletionFunction.includes("doc('public_room_stats')"));
 });
