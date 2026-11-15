@@ -322,6 +322,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 此批不改前端版本。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:sendDriftLetter,functions:empath-backend:receiveDriftLetter"`。
 - 修正 v23.14 部署指令的 codebase；整體 v23 架構整理仍持續進行。
 
+## ✦ v23.16 Functions: Anonymous metrics
+
+- `functions/lib/anonymous-metrics.js` 抽出安靜陪伴與匿名訪次計數；保留交易去重、來源上限、時間區段與 TTL。
+- 入口繼續管理 callable、telemetry、secrets、App Check 與雜湊依賴；不新增追蹤欄位。
+- 隔離測試涵蓋重複請求、來源上限、時間區段切換、數值邊界與交易失敗，不讀寫正式資料。
+- 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:joinSilentCompanionship,functions:empath-backend:recordSiteVisit"`。
+- 整體 v23 尚有其他 Functions、interactions 與整合邏輯待整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。

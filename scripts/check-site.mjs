@@ -256,6 +256,7 @@ assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded 
 const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
 assert.equal(firebaseSettings.functions?.runtime, 'nodejs22', 'Functions must use the supported Node.js 22 runtime');
 const functionsSource = readFileSync('functions/index.js', 'utf8');
+const metricsSource = readFileSync('functions/lib/anonymous-metrics.js', 'utf8');
 const driftSource = readFileSync('functions/lib/drift-letters.js', 'utf8');
 assert(functionsSource.includes("defineSecret('ADMIN_EMAIL')"), 'Admin identity must be stored in Secret Manager');
 assert(functionsSource.includes("defineSecret('RATE_LIMIT_SALT')"), 'Rate-limit salt must be stored in Secret Manager');
@@ -265,7 +266,7 @@ assert(functionsSource.includes('CONTENT_LIMIT_PER_TEN_MINUTES = 6'), 'Room post
 assert(functionsSource.includes('REACTION_LIMIT_PER_HOUR = 40'), 'Room reactions must have a bounded hourly server limit');
 assert(functionsSource.includes('REACTION_RECEIPT_TTL_MS = 48 * 60 * 60 * 1000'), 'Duplicate reaction receipts must expire after 48 hours');
 assert(functionsSource.includes('CONSTELLATION_TTL_MS = 24 * 60 * 60 * 1000'), 'Constellations must expire after 24 hours');
-assert(functionsSource.includes('SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5'), 'Silent companionship must bound joins per source bucket');
+assert(metricsSource.includes('SILENT_PARTICIPANTS_PER_SOURCE_BUCKET = 5'), 'Silent companionship must bound joins per source bucket');
 assert(functionsSource.includes("exports.submitRoomContent = observedOnCall('submitRoomContent'"), 'Public room submissions must have an observed callable backend');
 assert(functionsSource.includes("exports.reactToRoomContent = observedOnCall('reactToRoomContent'"), 'Public room reactions must have an observed callable backend');
 assert(functionsSource.includes("exports.joinSilentCompanionship = observedOnCall('joinSilentCompanionship'"), 'Silent companionship joins must have an observed callable backend');
