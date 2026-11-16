@@ -69,7 +69,7 @@ function observedOnCall(functionName, options, handler) {
 
 setGlobalOptions({ region:REGION, memory:'256MiB', timeoutSeconds:30, maxInstances:10 });
 
-const { enforceSoulMaintenanceLimit, enforceRetentionMigrationLimit, enforceReportLimit, enforceContentSubmissionLimit, enforceContentDeletionLimit, enforceDriftLimit, enforceReactionLimit } = createRateLimits({
+const { requestIp, rateLimitKey, enforceSoulMaintenanceLimit, enforceRetentionMigrationLimit, enforceReportLimit, enforceContentSubmissionLimit, enforceContentDeletionLimit, enforceDriftLimit, enforceReactionLimit } = createRateLimits({
   db, HttpsError, FieldValue, Timestamp, RATE_LIMIT_SALT, REPORT_LIMIT_PER_HOUR, CONTENT_LIMIT_PER_HOUR, CONTENT_LIMIT_PER_TEN_MINUTES, CONTENT_DELETION_LIMIT_PER_HOUR, REACTION_LIMIT_PER_HOUR, SOUL_MAINTENANCE_LIMIT_PER_HOUR, RETENTION_MIGRATION_LIMIT_PER_HOUR
 });
 

@@ -164,7 +164,7 @@ function createRateLimits({
     });
   }
 
-  return { enforceSoulMaintenanceLimit, enforceRetentionMigrationLimit, enforceReportLimit, enforceContentSubmissionLimit, enforceContentDeletionLimit, enforceDriftLimit, enforceReactionLimit };
+  return { requestIp, rateLimitKey, enforceSoulMaintenanceLimit, enforceRetentionMigrationLimit, enforceReportLimit, enforceContentSubmissionLimit, enforceContentDeletionLimit, enforceDriftLimit, enforceReactionLimit };
 }
 
 module.exports = { createRateLimits };
