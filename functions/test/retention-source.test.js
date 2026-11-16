@@ -41,7 +41,7 @@ test('moderation records receive deliberate server-owned retention windows', () 
   assert(functionSource.includes('CONTENT_REPORT_RETENTION_MS = 180 * 24 * 60 * 60 * 1000'));
   assert(functionSource.includes('MODERATION_AUDIT_RETENTION_MS = 365 * 24 * 60 * 60 * 1000'));
   assert(functionSource.includes('now + CONTENT_REPORT_RETENTION_MS'));
-  assert(functionSource.includes('Date.now() + MODERATION_AUDIT_RETENTION_MS'));
+  assert(readFileSync(new URL('../lib/moderation.js', `file://${__dirname}/`), 'utf8').includes('Date.now() + MODERATION_AUDIT_RETENTION_MS'));
 });
 
 test('existing moderation records have an idempotent retention migration', () => {

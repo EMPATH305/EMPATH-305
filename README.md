@@ -354,6 +354,14 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:submitRoomContent"`。
 - 整體 v23 尚有管理、保留期限、限流與前端整合待整理。
 
+## ✦ v23.20 Functions: Moderation
+
+- `functions/lib/moderation.js` 抽出檢舉清單與審核交易，保留管理員驗證、穩定分頁、內容摘要、審核紀錄與保存期限。
+- 入口保留 callable 名稱與管理端強制 App Check。沒有變更前端或正式資料。
+- 隔離測試驗證權限、分頁、摘要、駁回／移除、重複審核與交易失敗。
+- 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:listReports,functions:empath-backend:moderateReport"`。
+- 整體 v23 仍有保存期限、限流及前端整合待整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
