@@ -256,6 +256,7 @@ assert(!adminSource.includes('@gmail.com'), 'Admin email must never be embedded 
 const firebaseSettings = JSON.parse(readFileSync('firebase.json', 'utf8'));
 assert.equal(firebaseSettings.functions?.runtime, 'nodejs22', 'Functions must use the supported Node.js 22 runtime');
 const reactionsSource = readFileSync('functions/lib/room-reactions.js', 'utf8');
+const moderationSource = readFileSync('functions/lib/moderation.js', 'utf8');
 const functionsSource = readFileSync('functions/index.js', 'utf8') + '\n' + readFileSync('functions/lib/room-submission.js', 'utf8');
 const metricsSource = readFileSync('functions/lib/anonymous-metrics.js', 'utf8');
 const driftSource = readFileSync('functions/lib/drift-letters.js', 'utf8');
@@ -287,8 +288,8 @@ assert(functionsSource.includes('const PUBLIC_APP_CHECK_ENFORCEMENT = Object.fre
 assert(functionsSource.includes('submitContentReport:false'), 'Public reports must remain in monitored rollout mode');
 assert(functionsSource.includes('createCallableTelemetry(logger)'), 'Public callable outcomes must emit privacy-safe telemetry');
 assert(functionsSource.includes('enforceAppCheck:ADMIN_APP_CHECK_ENFORCED'), 'Admin callables must use the enforcement flag');
-assert(functionsSource.includes("where('status', '==', 'open')"), 'Admin report listing must query only open reports');
-assert(functionsSource.includes('FieldPath.documentId()'), 'Admin report pagination must have a stable document cursor');
+assert(moderationSource.includes("where('status', '==', 'open')"), 'Admin report listing must query only open reports');
+assert(moderationSource.includes('FieldPath.documentId()'), 'Admin report pagination must have a stable document cursor');
 
 const reportIndex = indexes.indexes?.find(index => index.collectionGroup === 'content_reports');
 assert(reportIndex, 'Open moderation reports must have a composite index');
