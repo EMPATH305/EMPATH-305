@@ -383,6 +383,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 此批不變更前端、App Check 策略或資料庫規則。共用限流影響多個函式，部署整個後端 codebase：`firebase deploy --project empath-62582 --only "functions:empath-backend"`。
 - v23 架構整理仍持續進行，尚未加入私人情緒氣象台。
 
+## ✦ v23.23.1 Functions startup fix
+
+- 修正 v23.23 拆分時遺漏匯出與接回 `requestIp`、`rateLimitKey`，導致 Firebase 分析入口時出現 ReferenceError。
+- 新增使用實際 Firebase SDK 載入入口、驗證全部 15 個 callable 的測試；CI 先安裝 Functions 依賴再執行測試。此測試不呼叫正式函式或寫入資料。
+- 本機執行完整測試前先跑 `npm ci --prefix functions --ignore-scripts`。
+- 更新後重新部署：`firebase deploy --project empath-62582 --only "functions:empath-backend"`。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
