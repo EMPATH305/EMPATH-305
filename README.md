@@ -369,6 +369,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:initializePublicRetention,functions:empath-backend:initializeModerationRetention"`。
 - 部署只更新函式程式碼；不需手動呼叫初始化函式。整體 v23 尚有其餘後端與前端整合待整理。
 
+## ✦ v23.22 Functions: Content reports
+
+- 將匿名檢舉投稿流程拆至 `functions/lib/content-reports.js`，保留輸入驗證、限流、目標存在檢查、180 天保存期限與不含原文的日誌。
+- callable 名稱、App Check 監測模式、secret 與前端版本維持原樣。
+- 新增行為測試：無效輸入、限流、目標不存在、伺服器欄位、App Check 狀態與資料庫失敗。
+- 只需部署 `firebase deploy --project empath-62582 --only "functions:empath-backend:submitContentReport"`；整體 v23 架構整理仍在進行。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
