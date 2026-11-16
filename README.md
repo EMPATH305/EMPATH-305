@@ -376,6 +376,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 新增行為測試：無效輸入、限流、目標不存在、伺服器欄位、App Check 狀態與資料庫失敗。
 - 只需部署 `firebase deploy --project empath-62582 --only "functions:empath-backend:submitContentReport"`；整體 v23 架構整理仍在進行。
 
+## ✦ v23.23 Functions: Admin access and rate limits
+
+- 將管理員授權與七種共用限流流程分別移至 `functions/lib/admin-access.js`、`functions/lib/rate-limits.js`；保留原有函式內容、限額、時間桶、雜湊方式與錯誤訊息。
+- 新增授權與限流行為測試，涵蓋未驗證帳號、保留既有權限、限額邊界、投稿雙重上限、不同漂流信身分／動作及資料庫失敗。
+- 此批不變更前端、App Check 策略或資料庫規則。共用限流影響多個函式，部署整個後端 codebase：`firebase deploy --project empath-62582 --only "functions:empath-backend"`。
+- v23 架構整理仍持續進行，尚未加入私人情緒氣象台。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
