@@ -362,6 +362,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:listReports,functions:empath-backend:moderateReport"`。
 - 整體 v23 仍有保存期限、限流及前端整合待整理。
 
+## ✦ v23.21 Functions: Retention migrations
+
+- `functions/lib/retention-migrations.js` 抽出公開內容與管理紀錄的保存期限初始化；保留執行鎖、完成標記、既有期限跳過與統計初始化。
+- 此批僅拆分，不改保存期限或觸發正式資料遷移。隔離測試涵蓋輸入、限流、完成／鎖定狀態、期限補齊與失敗後重試。
+- 前端維持 v23.13。合併後執行：`firebase deploy --project empath-62582 --only "functions:empath-backend:initializePublicRetention,functions:empath-backend:initializeModerationRetention"`。
+- 部署只更新函式程式碼；不需手動呼叫初始化函式。整體 v23 尚有其餘後端與前端整合待整理。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
