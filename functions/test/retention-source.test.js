@@ -7,7 +7,7 @@ const { readFileSync } = require('node:fs');
 const reactionsSource = readFileSync(new URL('../lib/room-reactions.js', `file://${__dirname}/`), 'utf8');
 const submissionSource = readFileSync(new URL('../lib/room-submission.js', `file://${__dirname}/`), 'utf8');
 const reportsSource = readFileSync(new URL('../lib/content-reports.js', `file://${__dirname}/`), 'utf8');
-const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8') + '\n' + reportsSource + '\n' + submissionSource + '\n' + readFileSync(new URL('../lib/retention-migrations.js', `file://${__dirname}/`), 'utf8');
+const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8') + '\n' + readFileSync(new URL('../lib/rate-limits.js', `file://${__dirname}/`), 'utf8') + '\n' + reportsSource + '\n' + submissionSource + '\n' + readFileSync(new URL('../lib/retention-migrations.js', `file://${__dirname}/`), 'utf8');
 const indexes = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', `file://${__dirname}/`), 'utf8'));
 
 test('public room submissions receive a server-owned 180-day expiry', () => {

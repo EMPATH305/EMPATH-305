@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 
 const submissionSource = readFileSync(new URL('../lib/room-submission.js', `file://${__dirname}/`), 'utf8');
-const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8') + '\n' + submissionSource;
+const functionSource = readFileSync(new URL('../index.js', `file://${__dirname}/`), 'utf8') + '\n' + submissionSource + '\n' + readFileSync(new URL('../lib/rate-limits.js', `file://${__dirname}/`), 'utf8');
 const withdrawalSource = readFileSync(new URL('../lib/content-withdrawal.js', `file://${__dirname}/`), 'utf8');
 const rules = readFileSync(new URL('../../firestore.rules', `file://${__dirname}/`), 'utf8');
 const indexes = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', `file://${__dirname}/`), 'utf8'));
