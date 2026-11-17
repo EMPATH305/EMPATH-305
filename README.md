@@ -390,6 +390,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 本機執行完整測試前先跑 `npm ci --prefix functions --ignore-scripts`。
 - 更新後重新部署：`firebase deploy --project empath-62582 --only "functions:empath-backend"`。
 
+## ✦ v23.24 Interactions source organization
+
+- 將 `interactions.js` 拆成 `interactions/manifest.json` 所列的九個依序組合來源：電影式動態、既有每日心情記錄、微互動、概念體驗、內容節奏、閒置動態、工具列、視窗尺寸與內建瀏覽器適配。
+- 編輯 `interactions/` 的對應檔案，再執行 `npm run build:interactions`，並一起提交來源與產物；不要直接編輯根目錄 `interactions.js`。
+- `npm test` 會檢查來源清單完整性與產物一致性。此批產物與上一版逐位元相同，維持原有載入順序、快取版本與網站行為，無須部署 Firebase。
+- 此批是既有程式整理，未新增私人情緒氣象台；v23 尚有前端整合工作待完成。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
