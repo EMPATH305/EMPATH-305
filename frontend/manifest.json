@@ -1,0 +1,16 @@
+[
+  "01-bootstrap.js",
+  "02-consent-and-state.js",
+  "03-motion-and-breathing.js",
+  "04-language-and-dialogs.js",
+  "05-return-memory.js",
+  "06-audio-and-extras.js",
+  "07-realtime-and-feeds.js",
+  "08-sharing-and-dialog-events.js",
+  "09-soul-integration.js",
+  "10-room-e-integration.js",
+  "11-star-canvas.js",
+  "12-sand-and-sensors.js",
+  "13-presence-and-companionship.js",
+  "14-time-and-final-initialization.js"
+]

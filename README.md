@@ -397,6 +397,13 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - `npm test` 會檢查來源清單完整性與產物一致性。此批產物與上一版逐位元相同，維持原有載入順序、快取版本與網站行為，無須部署 Firebase。
 - 此批是既有程式整理，未新增私人情緒氣象台；v23 尚有前端整合工作待完成。
 
+## ✦ v23.25 Frontend integration source organization
+
+- 將 `firebase-app.js` 的 3,706 行整合程式按原順序拆成 `frontend/` 下十四個來源片段，涵蓋初始化、同意與狀態、動態、語言與對話框、回訪、音訊、即時資料、分享、Soul、E 房、星空、流沙、陪伴及時間初始化。
+- 這些片段仍共享原有作用域，不是可直接載入的獨立模組。只在 `frontend/` 編輯，執行 `npm run build:frontend` 後一併提交來源與根目錄產物；既有 `*.mjs` 模組維持原樣。
+- 網頁仍載入原本的 `firebase-app.js`。此批產物與前版逐位元相同，無須改 HTML、Service Worker、快取版本或部署 Firebase。
+- `npm test` 加入來源清單與產物一致性檢查，避免只修改來源卻漏更新網站腳本。v23 仍需檢查共用狀態邊界與整體驗收，尚未宣告完成。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
