@@ -3,12 +3,14 @@
   "version": "23.13.0",
   "private": true,
   "scripts": {
-    "test": "npm run check:css && npm run check:interactions && node --check soul-sync-controller.mjs && node --check soul-actions.mjs && node --check soul-view.mjs && node --check soul-model.mjs && node --check soul-backup-service.mjs && node --check realtime-lifecycle.mjs && node --check submission-service.mjs && node --check firebase-app.js && node --check firebase-client.mjs && node --check browser-runtime.mjs && node --check room-e-canvas.mjs && node --check room-e-controller.mjs && node --check room-e-feed.mjs && node --check room-m-model.mjs && node --check room-m-layout.mjs && node --check room-t-feed.mjs && node --check room-p-model.mjs && node --check room-p-canvas.mjs && node --check collective-calendar.js && node --check admin-app.js && node --check safety-guard.js && node --check interactions.js && node --check room-router.js && node --check soul-crypto.mjs && node --check storage-resilience.mjs && node --check sw.js && node --check functions/index.js && node --test tests/*.test.js tests/*.test.mjs && npm --prefix functions test && node scripts/check-site.mjs && node scripts/check-safety.mjs",
+    "test": "npm run check:css && npm run check:interactions && npm run check:frontend && node --check soul-sync-controller.mjs && node --check soul-actions.mjs && node --check soul-view.mjs && node --check soul-model.mjs && node --check soul-backup-service.mjs && node --check realtime-lifecycle.mjs && node --check submission-service.mjs && node --check firebase-app.js && node --check firebase-client.mjs && node --check browser-runtime.mjs && node --check room-e-canvas.mjs && node --check room-e-controller.mjs && node --check room-e-feed.mjs && node --check room-m-model.mjs && node --check room-m-layout.mjs && node --check room-t-feed.mjs && node --check room-p-model.mjs && node --check room-p-canvas.mjs && node --check collective-calendar.js && node --check admin-app.js && node --check safety-guard.js && node --check interactions.js && node --check room-router.js && node --check soul-crypto.mjs && node --check storage-resilience.mjs && node --check sw.js && node --check functions/index.js && node --test tests/*.test.js tests/*.test.mjs && npm --prefix functions test && node scripts/check-site.mjs && node scripts/check-safety.mjs",
     "test:browser": "playwright test",
     "build:css": "node scripts/build-styles.mjs",
     "check:css": "node scripts/build-styles.mjs --check",
     "build:interactions": "node scripts/build-interactions.mjs",
-    "check:interactions": "node scripts/build-interactions.mjs --check"
+    "check:interactions": "node scripts/build-interactions.mjs --check",
+    "build:frontend": "node scripts/build-frontend.mjs",
+    "check:frontend": "node scripts/build-frontend.mjs --check"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1"
