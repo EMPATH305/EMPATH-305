@@ -60,6 +60,7 @@ export function createRealtimeLifecycle({ isHidden = () => false, onError = () =
     running = true;
     try {
       subscribe();
+      if (!running) return false;
       resumeAuxiliary();
       return true;
     } catch (error) {
@@ -69,7 +70,9 @@ export function createRealtimeLifecycle({ isHidden = () => false, onError = () =
   }
 
   function track(unsubscribe) {
-    if (typeof unsubscribe === 'function') primary.push(unsubscribe);
+    if (typeof unsubscribe !== 'function') return;
+    if (!running) cleanup(unsubscribe, 'primary');
+    else primary.push(unsubscribe);
   }
 
   return Object.freeze({ start, stop, track, register, remove, getPrimaryCount:() => primary.length });

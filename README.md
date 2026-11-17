@@ -404,6 +404,12 @@ App Check 的觀察條件、查詢方式、啟用順序與回復程序記錄於 
 - 網頁仍載入原本的 `firebase-app.js`。此批產物與前版逐位元相同，無須改 HTML、Service Worker、快取版本或部署 Firebase。
 - `npm test` 加入來源清單與產物一致性檢查，避免只修改來源卻漏更新網站腳本。v23 仍需檢查共用狀態邊界與整體驗收，尚未宣告完成。
 
+## ✦ v23.26 Realtime cleanup boundary
+
+- 修正啟動訂閱期間同步停止、或停止後才取得取消函式時的清理：立即釋放遲到的 primary listener，停止後不再接續恢復輔助訂閱。
+- 新增兩項回歸測試；前端與 Service Worker 快取版本更新至 v23.26.0。此批不修改 Firebase Functions，無須部署後端。
+- v23 收尾狀態與尚待驗收項目見 [驗收清單](docs/v23-acceptance.md)，尚未宣告整體完成。
+
 ### 首次部署 v20.5
 
 1. Firebase Authentication 啟用 Google 登入，並將正式網站網域加入 Authorized domains。
