@@ -76,3 +76,32 @@ test('a synchronous self-removing snapshot cannot leak its returned unsubscribe'
   lifecycle.stop(); lifecycle.start(() => {});
   assert.equal(stopped, 1);
 });
+
+test('stopping during startup releases the late primary handle and does not resume auxiliaries', () => {
+  let hidden = true, stopped = 0, auxiliaryStarts = 0;
+  const lifecycle = createRealtimeLifecycle({ isHidden:() => hidden });
+  lifecycle.register('presence', () => { auxiliaryStarts++; return () => {}; });
+  hidden = false;
+  const started = lifecycle.start(() => {
+    lifecycle.stop();
+    lifecycle.track(() => stopped++);
+  });
+  assert.equal(started, false);
+  assert.equal(stopped, 1);
+  assert.equal(lifecycle.getPrimaryCount(), 0);
+  assert.equal(auxiliaryStarts, 0);
+  assert.equal(lifecycle.start(() => {}), true);
+  assert.equal(auxiliaryStarts, 1);
+  lifecycle.stop();
+});
+
+test('a delayed primary handle after page cleanup is immediately released', () => {
+  let stopped = 0;
+  const lifecycle = createRealtimeLifecycle();
+  lifecycle.start(() => {});
+  lifecycle.stop();
+  lifecycle.track(() => stopped++);
+  lifecycle.stop();
+  assert.equal(stopped, 1);
+  assert.equal(lifecycle.getPrimaryCount(), 0);
+});
