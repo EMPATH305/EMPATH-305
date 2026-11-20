@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // 2. 集體靜默時刻系統 (每天 UTC 00:00 觸發 60 秒)
-  let silenceInterval = setInterval(() => {
+  const updateSilenceMoment = () => {
       const now = new Date();
       // 判斷是否為 UTC 00:00 (台灣時間早上 8:00) 的前 60 秒內
       const isSilenceMoment = (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && now.getUTCSeconds() < 60);
@@ -411,7 +411,12 @@ document.addEventListener('DOMContentLoaded', async () => {
               if (typeof audioCtx !== 'undefined' && isAudioEnabled) audioCtx.resume(); // 恢復音樂
           }
       }
-  }, 1000);
+  };
+  registerAuxiliarySubscription('collective-silence-clock', () => {
+      updateSilenceMoment();
+      const timer = setInterval(updateSilenceMoment, 1000);
+      return () => clearInterval(timer);
+  });
     
   // 🌟 瞬間視覺魔法：在 Firebase 還沒連上之前，先用快取數據填滿畫面！
   const cached = safeLocalStorage.getItem('empath_global_counts');
