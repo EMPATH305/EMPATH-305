@@ -3082,6 +3082,7 @@ function setupRoomPresence(roomKey, inputId) {
     let isTyping = false;
 
     inputBox.addEventListener('input', () => {
+        if (document.hidden || !presencePageActive) return;
         if (!isTyping) { 
             isTyping = true; 
             setDoc(presenceRef, { by: mySessionId }, { merge: true }).catch(e=>{}); 
@@ -3109,8 +3110,11 @@ function setupRoomPresence(roomKey, inputId) {
             }
         }, error => console.error(`Room presence failed (${roomKey}):`, error));
         return () => {
-            unsubscribe();
+            clearTimeout(typingTimer);
+            typingTimer = null;
+            isTyping = false;
             clearTimeout(presenceHideTimer);
+            unsubscribe();
             sparkEl.classList.remove('show');
         };
     });
@@ -3123,7 +3127,18 @@ function setupRoomPresence(roomKey, inputId) {
 const SILENT_COMPANY_SECONDS = 5 * 60;
 const SILENT_BUCKET_MS = SILENT_COMPANY_SECONDS * 1000;
 let silentCompanyTimer = null;
-let silentCompanyUnsubscribe = null;
+let silentCompanyGeneration = 0;
+let pendingSilentCompanyStart = null;
+let presencePageActive = true;
+function resumePendingSilentCompany() {
+    if (presencePageActive && !document.hidden) pendingSilentCompanyStart?.();
+}
+window.addEventListener('pagehide', () => { presencePageActive = false; });
+window.addEventListener('pageshow', () => {
+    presencePageActive = true;
+    resumePendingSilentCompany();
+});
+document.addEventListener('visibilitychange', resumePendingSilentCompany);
 
 function ensureSilentCompanyOverlay() {
     if (document.getElementById('silent-company-overlay')) return;
@@ -3159,6 +3174,8 @@ window.startSilentCompanionship = async function() {
     ensureSilentCompanyOverlay();
     const overlay = document.getElementById('silent-company-overlay');
     if (!overlay || overlay.classList.contains('show')) return;
+    const generation = ++silentCompanyGeneration;
+    const startedAt = Date.now();
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('empath-dialog-open', 'silent-company-active');
@@ -3175,22 +3192,15 @@ window.startSilentCompanionship = async function() {
             if (!result?.accepted) throw new Error('Silent companionship join was not accepted.');
             bucket = Number(result.bucket) || bucket;
             bucketKey = String(bucket);
-            renderSilentCompanyCount(result.count);
+            if (generation === silentCompanyGeneration) renderSilentCompanyCount(result.count);
             safeSessionStorage.setItem(joinedKey, bucketKey);
         } catch(error) {
             console.error('Silent company count failed:', error);
-            renderSilentCompanyCount(1);
+            if (generation === silentCompanyGeneration) renderSilentCompanyCount(1);
         }
     }
 
-    silentCompanyUnsubscribe?.();
-    silentCompanyUnsubscribe = onSnapshot(presenceRef, snapshot => {
-        const data = snapshot.data() || {};
-        renderSilentCompanyCount(Number(data.bucket) === bucket ? data.count : 1);
-    }, error => console.error('Silent company presence failed:', error));
-
-    const startedAt = Date.now();
-    clearInterval(silentCompanyTimer);
+    if (generation !== silentCompanyGeneration || !overlay.classList.contains('show')) return;
     const tick = () => {
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         const remaining = Math.max(0, SILENT_COMPANY_SECONDS - elapsed);
@@ -3205,11 +3215,33 @@ window.startSilentCompanionship = async function() {
             window.showToast(t('五分鐘到了。謝謝你陪自己停在這裡。', 'Five minutes have passed. Thank you for staying with yourself.'));
         }
     };
-    tick();
-    silentCompanyTimer = setInterval(tick, 1000);
+    pendingSilentCompanyStart = () => {
+        pendingSilentCompanyStart = null;
+        if (generation !== silentCompanyGeneration) return;
+        registerAuxiliarySubscription('silent-company', () => {
+            tick();
+            if (generation !== silentCompanyGeneration) return;
+            const unsubscribe = onSnapshot(presenceRef, snapshot => {
+                const data = snapshot.data() || {};
+                renderSilentCompanyCount(Number(data.bucket) === bucket ? data.count : 1);
+            }, error => console.error('Silent company presence failed:', error));
+            silentCompanyTimer = setInterval(tick, 1000);
+            return () => {
+                clearInterval(silentCompanyTimer);
+                silentCompanyTimer = null;
+                unsubscribe();
+            };
+        });
+    };
+    resumePendingSilentCompany();
 };
 
 window.stopSilentCompanionship = function() {
+    silentCompanyGeneration++;
+    pendingSilentCompanyStart = null;
+    removeAuxiliarySubscription('silent-company');
+    clearInterval(silentCompanyTimer);
+    silentCompanyTimer = null;
     const overlay = document.getElementById('silent-company-overlay');
     if (!overlay) return;
     overlay.classList.remove('show');
@@ -3220,8 +3252,6 @@ window.stopSilentCompanionship = function() {
     }
     clearInterval(silentCompanyTimer);
     silentCompanyTimer = null;
-    silentCompanyUnsubscribe?.();
-    silentCompanyUnsubscribe = null;
     document.querySelector('.silent-enter-btn')?.focus({ preventScroll:true });
 };
 
@@ -3620,7 +3650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // 2. 集體靜默時刻系統 (每天 UTC 00:00 觸發 60 秒)
-  let silenceInterval = setInterval(() => {
+  const updateSilenceMoment = () => {
       const now = new Date();
       // 判斷是否為 UTC 00:00 (台灣時間早上 8:00) 的前 60 秒內
       const isSilenceMoment = (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && now.getUTCSeconds() < 60);
@@ -3640,7 +3670,12 @@ document.addEventListener('DOMContentLoaded', async () => {
               if (typeof audioCtx !== 'undefined' && isAudioEnabled) audioCtx.resume(); // 恢復音樂
           }
       }
-  }, 1000);
+  };
+  registerAuxiliarySubscription('collective-silence-clock', () => {
+      updateSilenceMoment();
+      const timer = setInterval(updateSilenceMoment, 1000);
+      return () => clearInterval(timer);
+  });
     
   // 🌟 瞬間視覺魔法：在 Firebase 還沒連上之前，先用快取數據填滿畫面！
   const cached = safeLocalStorage.getItem('empath_global_counts');
