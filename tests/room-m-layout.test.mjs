@@ -5,8 +5,8 @@ import { findRoomMStarAt, layoutRoomMStars, nearestRoomMStars, visibleRoomMStars
 const stars = Array.from({ length:40 }, (_, index) => ({ id:`s-${index}`, brightness:1, relX:0.5, relY:0.5, x:index * 10, y:0 }));
 
 test('Room M uses representative star limits on narrow screens', () => {
-  assert.equal(visibleRoomMStars(stars, 390).length, 18);
-  assert.equal(visibleRoomMStars(stars, 768).length, 32);
+  assert.equal(visibleRoomMStars(stars, 390).length, 12);
+  assert.equal(visibleRoomMStars(stars, 768).length, 12);
   assert.equal(visibleRoomMStars(stars, 1200).length, 40);
 });
 
@@ -22,4 +22,17 @@ test('Room M layout keeps stars inside the safe stage', () => {
     assert(star.x >= 10 && star.x <= 210);
     assert(star.y >= 20 && star.y <= 120);
   });
+});
+
+// Regression: all stars can arrive at the same saved coordinates.
+test('mobile stars remain separated and tappable even with clustered input', () => {
+  const sample = Array.from({ length:12 }, (_, i) => ({ id:String(i), brightness:100, relX:.5, relY:.5 }));
+  layoutRoomMStars(sample, { x:30, y:260, width:260, height:360 }, [], { mobile:true });
+  for (const star of sample) {
+    assert.equal(findRoomMStarAt(sample, star.x, star.y), star);
+    assert(star.x >= 30 && star.x <= 290 && star.y >= 260 && star.y <= 620);
+    for (const other of sample) {
+      if (other !== star) assert(Math.hypot(star.x - other.x, star.y - other.y) >= 60);
+    }
+  }
 });

@@ -1000,10 +1000,13 @@ window.renderSessionJourney = function() {
         host.innerHTML = `<div class="h-arc-empty">${t('當你走進第一個房間，旅程會從這裡開始。','Your path will begin when you enter your first room.','最初の部屋に入ると、ここから旅が始まります。')}</div>`;
         return;
     }
-    const width = 1000, height = 220;
+    const mobile = window.matchMedia('(max-width: 768px)').matches;
+    const width = mobile ? 320 : 1000, height = mobile ? route.length * 76 + 24 : 220;
     const points = route.map((room,index) => {
         const progress = route.length === 1 ? .5 : index / (route.length - 1);
-        return { room, x:100 + progress * 800, y:142 - Math.sin(progress * Math.PI) * 66 };
+        return mobile
+            ? { room, x:44, y:50 + index * 76 }
+            : { room, x:100 + progress * 800, y:142 - Math.sin(progress * Math.PI) * 66 };
     });
     let path = `M ${points[0].x} ${points[0].y}`;
     for (let index=1; index<points.length; index++) {
@@ -1014,8 +1017,8 @@ window.renderSessionJourney = function() {
       <g class="h-arc-node" transform="translate(${point.x} ${point.y})">
         <circle class="h-arc-node-ring" r="25"></circle>
         <circle class="h-arc-node-core" r="2.5"></circle>
-        <text class="h-arc-node-label" y="-38">${point.room}</text>
-        <text class="h-arc-node-order" y="47">${String(index+1).padStart(2,'0')}</text>
+        <text class="h-arc-node-label" y="${mobile ? 9 : -38}">${point.room}</text>
+        <text class="h-arc-node-order" x="${mobile ? 60 : 0}" y="${mobile ? 5 : 47}">${String(index+1).padStart(2,'0')}${mobile ? ` · ${t(sessionRoomNames[point.room], `Room ${point.room}`)}` : ''}</text>
         <title>${sessionRoomNames[point.room]}</title>
       </g>`).join('');
     host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${t('你今晚走過的房間路徑','The rooms you visited tonight','今夜訪れた部屋の道のり')}"><path class="h-arc-path" d="${path}"></path>${nodes}</svg>`;
@@ -1040,6 +1043,8 @@ window.storeSessionEcho = function(text) {
     const echo = document.getElementById('h-session-echo');
     if (echo) echo.textContent = fragment;
 };
+
+window.matchMedia('(max-width: 768px)').addEventListener('change', () => window.renderSessionJourney());
 
 function initSessionNarrative() {
     window.renderSessionJourney();
@@ -2504,6 +2509,8 @@ window.resizeCanvas = function(target = 'all'){
 // 終極防護：加入防抖 (Debounce) 機制，並忽略手機上下滑動時的網址列縮放
 let resizeTimer = null;
 let lastWidth = window.innerWidth;
+let lastMStage = '';
+let renderedMStars = [];
 
 window.addEventListener('resize', () => {
     // 核心關鍵：如果只是上下滑動導致網址列縮放（寬度沒變），就絕對不要重繪畫布！
@@ -2512,7 +2519,12 @@ window.addEventListener('resize', () => {
     
     clearTimeout(resizeTimer); // 踩煞車，取消前一次的倒數
     resizeTimer = setTimeout(() => {
-        if (roomMVisible) window.resizeCanvas('m');
+        if (roomMVisible) {
+            if (starsRafId) cancelAnimationFrame(starsRafId);
+            starsRafId = null;
+            window.resizeCanvas('m');
+            window.drawStars();
+        }
         if (roomAVisible) window.resizeCanvas('a');
     }, 300);
 });
@@ -2520,11 +2532,25 @@ window.addEventListener('resize', () => {
 window.addEventListener('orientationchange', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        if (roomMVisible) window.resizeCanvas('m');
+        if (roomMVisible) {
+            if (starsRafId) cancelAnimationFrame(starsRafId);
+            starsRafId = null;
+            window.resizeCanvas('m');
+            window.drawStars();
+        }
         if (roomAVisible) window.resizeCanvas('a');
     }, 300);
 });
   
+window.addEventListener('empath:language-changed', () => {
+    if (roomMVisible) {
+        if (starsRafId) cancelAnimationFrame(starsRafId);
+        starsRafId = null;
+        window.resizeCanvas('m');
+        window.drawStars();
+    }
+});
+
 function initBgStars(w, h){ 
     bgStars=[]; 
     // 動態計算：電腦給 100 顆，手機寬度小於 768px 時只給 35 顆
@@ -2625,10 +2651,14 @@ window.drawStars = function(){
     }
     safeW = Math.max(safeW, 100);
 
-    const needsStarLayout = starMessages.some(s => !Number.isFinite(s.x) || !Number.isFinite(s.y));
+    const stageKey = [safeX, safeY, safeW, safeH].map(Math.round).join(':');
+    const needsStarLayout = stageKey !== lastMStage || starMessages.some(s => !Number.isFinite(s.x) || !Number.isFinite(s.y));
     if (needsStarLayout) {
-        layoutRoomMStars(starMessages, { x:safeX, y:safeY, width:safeW, height:safeH }, uiSafeRects);
+        layoutRoomMStars(starMessages, { x:safeX, y:safeY, width:safeW, height:safeH }, uiSafeRects, { mobile:w <= 768 });
+        lastMStage = stageKey;
     }
+
+    renderedMStars = starMessages;
 
     // 🌟 4. 先畫出全網 24 小時共振星系連線 (放在星星背後)
     if (window.activeConstellations && window.activeConstellations.length > 0) {
@@ -2656,7 +2686,7 @@ window.drawStars = function(){
     const brightestStar = starMessages.reduce((best,s) => !best || s.brightness > best.brightness ? s : best,null);
     const pulse = ambientMotion ? (1 + Math.sin(performance.now() / 760) * .085) : 1;
     starMessages.forEach(s => { 
-        const b = s.brightness; const c = STAR_COLORS[s.colorIdx]; const focusScale = s === brightestStar ? pulse : 1; const coreR = (1.5 + (b * 0.4)) * focusScale; const glowR = coreR * 5; 
+        const b = Math.min(5, Math.max(1, s.brightness)); const c = STAR_COLORS[s.colorIdx]; const focusScale = s === brightestStar ? pulse : 1; const coreR = (1.5 + (b * 0.4)) * focusScale; const glowR = coreR * 5;
         const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR); 
         grd.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.9)`); grd.addColorStop(0.3, `rgba(${c.r}, ${c.g}, ${c.b}, 0.3)`); grd.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`); 
         ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(s.x, s.y, glowR, 0, Math.PI*2); ctx.fill(); 
@@ -2672,7 +2702,7 @@ roomM?.addEventListener('click', async e => {
     if (e.target.closest('.m-input-wrap') || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return; 
     const rect = canvas.getBoundingClientRect(); 
     const x = e.clientX-rect.left, y = e.clientY-rect.top; 
-    const star = findRoomMStarAt(roomMStars.getStars(), x, y);
+    const star = findRoomMStarAt(renderedMStars, x, y);
     
     if(star){ 
         if(activeStarId !== star.id) { 
@@ -2707,7 +2737,7 @@ roomM?.addEventListener('click', async e => {
         } else {
             // The backend creates these constellation lines in the same transaction
             // as the accepted star reaction, so a failed or duplicate reaction leaves no lines behind.
-            const nearest = nearestRoomMStars(roomMStars.getStars(), star.id, x, y);
+            const nearest = nearestRoomMStars(renderedMStars, star.id, x, y);
             let reaction;
             try {
                 reaction = await reactToRoomContent('star', star.id, {
