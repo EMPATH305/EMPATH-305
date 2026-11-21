@@ -38,3 +38,13 @@ If these pass, close the v23 release gate and start v24 private-weather developm
 | companionship generation / deadline | 13-presence-and-companionship.js | Late responses cannot recreate closed sessions. Background time counts toward five minutes. |
 
 Further extraction should be justified by a concrete change or defect, not by a target number of files.
+
+### Mobile layout follow-up (v23.28)
+
+The user completed device testing and reported crowded H/M layouts; do not treat
+that report as final visual acceptance. This patch gives M a dedicated 420px gap,
+12 separated phone stars with bounded glow, and hit testing limited to rendered
+stars. H uses a vertical phone journey and readable single-column daily records.
+Desktop layouts retain their existing structure. Browser regressions cover
+320/390/768px, clustered high-brightness stars, text boundaries and hit selection.
+Real iOS Safari/Instagram visual acceptance remains a device check.

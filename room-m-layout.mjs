@@ -1,12 +1,12 @@
 export function visibleRoomMStars(stars, width) {
-  const limit = width < 600 ? 18 : (width < 900 ? 32 : stars.length);
+  const limit = width <= 768 ? 12 : (width < 900 ? 32 : stars.length);
   return stars.slice(0, limit);
 }
 
 export function findRoomMStarAt(stars, x, y) {
   return stars.find(star => {
     if (!Number.isFinite(star.x) || !Number.isFinite(star.y)) return false;
-    return Math.hypot(star.x - x, star.y - y) < 20 + star.brightness * 2;
+    return Math.hypot(star.x - x, star.y - y) < 20 + Math.min(5, star.brightness) * 2;
   }) || null;
 }
 
@@ -19,8 +19,24 @@ export function nearestRoomMStars(stars, selectedId, x, y, limit = 2) {
     .map(item => item.star);
 }
 
-export function layoutRoomMStars(stars, safeArea, uiSafeRects = []) {
+export function layoutRoomMStars(stars, safeArea, uiSafeRects = [], { mobile = false } = {}) {
   const { x:safeX, y:safeY, width:safeWidth, height:safeHeight } = safeArea;
+  // A small, stable set of separated touch targets on the dedicated mobile stage.
+  // Seeded offsets preserve an organic sky without allowing clustered input data
+  // (or a single relaxation pass) to stack stars on top of each other.
+  if (mobile) {
+    const columns = Math.max(1, Math.min(3, stars.length));
+    const rows = Math.max(1, Math.ceil(stars.length / columns));
+    const cellWidth = safeWidth / columns;
+    const cellHeight = safeHeight / rows;
+    stars.forEach((star, index) => {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      star.x = safeX + (column + .5) * cellWidth + (star.relX - .5) * cellWidth * .2;
+      star.y = safeY + (row + .5) * cellHeight + (star.relY - .5) * cellHeight * .2;
+    });
+    return stars;
+  }
   stars.forEach(star => {
     if (!Number.isFinite(star.x) || !Number.isFinite(star.y)) {
       star.x = safeX + star.relX * safeWidth;

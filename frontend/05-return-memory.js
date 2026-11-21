@@ -143,10 +143,13 @@ window.renderSessionJourney = function() {
         host.innerHTML = `<div class="h-arc-empty">${t('當你走進第一個房間，旅程會從這裡開始。','Your path will begin when you enter your first room.','最初の部屋に入ると、ここから旅が始まります。')}</div>`;
         return;
     }
-    const width = 1000, height = 220;
+    const mobile = window.matchMedia('(max-width: 768px)').matches;
+    const width = mobile ? 320 : 1000, height = mobile ? route.length * 76 + 24 : 220;
     const points = route.map((room,index) => {
         const progress = route.length === 1 ? .5 : index / (route.length - 1);
-        return { room, x:100 + progress * 800, y:142 - Math.sin(progress * Math.PI) * 66 };
+        return mobile
+            ? { room, x:44, y:50 + index * 76 }
+            : { room, x:100 + progress * 800, y:142 - Math.sin(progress * Math.PI) * 66 };
     });
     let path = `M ${points[0].x} ${points[0].y}`;
     for (let index=1; index<points.length; index++) {
@@ -157,8 +160,8 @@ window.renderSessionJourney = function() {
       <g class="h-arc-node" transform="translate(${point.x} ${point.y})">
         <circle class="h-arc-node-ring" r="25"></circle>
         <circle class="h-arc-node-core" r="2.5"></circle>
-        <text class="h-arc-node-label" y="-38">${point.room}</text>
-        <text class="h-arc-node-order" y="47">${String(index+1).padStart(2,'0')}</text>
+        <text class="h-arc-node-label" y="${mobile ? 9 : -38}">${point.room}</text>
+        <text class="h-arc-node-order" x="${mobile ? 60 : 0}" y="${mobile ? 5 : 47}">${String(index+1).padStart(2,'0')}${mobile ? ` · ${t(sessionRoomNames[point.room], `Room ${point.room}`)}` : ''}</text>
         <title>${sessionRoomNames[point.room]}</title>
       </g>`).join('');
     host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${t('你今晚走過的房間路徑','The rooms you visited tonight','今夜訪れた部屋の道のり')}"><path class="h-arc-path" d="${path}"></path>${nodes}</svg>`;
@@ -183,6 +186,8 @@ window.storeSessionEcho = function(text) {
     const echo = document.getElementById('h-session-echo');
     if (echo) echo.textContent = fragment;
 };
+
+window.matchMedia('(max-width: 768px)').addEventListener('change', () => window.renderSessionJourney());
 
 function initSessionNarrative() {
     window.renderSessionJourney();
