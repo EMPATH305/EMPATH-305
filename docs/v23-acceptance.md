@@ -1,7 +1,7 @@
 # v23 release gate
 
-Updated 2026-11-20. Candidate: v23.27, main commit afd9b44d0487f5f0be223b2d7cd8847038f5ba70.
-Status: automated checks and Pages deployment passed; final device acceptance pending. No further refactor-only release is required for this gate.
+Updated 2026-11-23. Final layout candidate: v23.28, main commit 81e5e78f3bf834124c58bf64de004e7d3adee41e.
+Status: v23 gate closed for v24 development. The user reported testing complete, requested H/M layout repairs, then accepted the published v23.28 layout with “可以了 請繼續” on 2026-11-23. Exact device/browser results were not supplied; do not represent this as an independently verified iOS matrix. No further refactor-only release is required.
 
 ## Evidence and limits
 
@@ -11,7 +11,7 @@ Status: automated checks and Pages deployment passed; final device acceptance pe
 - Browser projects use Chromium for desktop, mobile dimensions and an Instagram user agent. They block Firestore and mock Functions; they do not establish real iOS/Instagram or production submission success. Service workers are blocked in these tests.
 - Presence typing timeouts cancel on stop. Companionship cancels late setup after close and suspends resources on hide/pagehide; returning uses the original deadline. Collective-silence timers share that lifecycle. These are automated results, not device observations.
 
-## Final device gate (pending, not yet claimed passed)
+## Device checklist retained for future regressions
 
 Use the published site on iPhone Safari, then open the same link inside Instagram. Do not clear site data or remove existing saved content.
 
@@ -47,4 +47,4 @@ that report as final visual acceptance. This patch gives M a dedicated 420px gap
 stars. H uses a vertical phone journey and readable single-column daily records.
 Desktop layouts retain their existing structure. Browser regressions cover
 320/390/768px, clustered high-brightness stars, text boundaries and hit selection.
-Real iOS Safari/Instagram visual acceptance remains a device check.
+User accepted this layout on 2026-11-23. PR #75 passed 83 frontend, 108 backend and 45 browser cases; Pages delivery was verified. Exact iOS/browser matrix remains unrecorded.

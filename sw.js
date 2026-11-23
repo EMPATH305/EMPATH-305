@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v23.28.0'; // Shared realtime subscription lifecycle
+const CACHE_NAME = 'empath-cache-v24.0.0'; // Shared realtime subscription lifecycle
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者
@@ -26,6 +26,8 @@ self.addEventListener('install', (event) => {
                 './soul-sync-controller.mjs',
                 './soul-backup-service.mjs',
                 './storage-resilience.mjs',
+                './private-weather.mjs',
+                './private-weather-model.mjs',
                 './submission-service.mjs',
                 './realtime-lifecycle.mjs',
                 './collective-calendar.js',
