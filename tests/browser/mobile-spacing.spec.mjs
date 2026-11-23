@@ -16,6 +16,11 @@ test('phone H journey and week read vertically without clipping', async ({page},
     await page.goto('/room-h.html');
     await expect(page.locator('.h-arc-node')).toHaveCount(6);
     await expect(page.locator('.emotion-day')).toHaveCount(7);
+    await expect(page.locator('.h-path-nav')).toHaveCSS('position','relative');
+    await expect(page.locator('.h-path-nav')).toHaveCSS('display','grid');
+    const navBox = await page.locator('.h-path-nav').boundingBox();
+    const journeyBox = await page.locator('#h-journey-arc').boundingBox();
+    expect(navBox.y + navBox.height).toBeLessThanOrEqual(journeyBox.y);
     const boxes = await page.locator('.h-arc-node').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().toJSON()));
     for (let i=1;i<boxes.length;i++) expect(boxes[i].top).toBeGreaterThanOrEqual(boxes[i-1].bottom + 8);
     const days = await page.locator('.emotion-day').evaluateAll(nodes => nodes.map(node=>({rect:node.getBoundingClientRect().toJSON(),width:node.scrollWidth,client:node.clientWidth})));

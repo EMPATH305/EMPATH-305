@@ -51,7 +51,7 @@ test('weather phone summary is readable and language changes do not reset consen
   const sizes=await page.locator('#private-weather button').evaluateAll(nodes=>nodes.filter(n=>n.offsetHeight).map(n=>n.getBoundingClientRect().height));
   expect(sizes.every(height=>height>=48)).toBe(true);
   await page.evaluate(()=>window.dispatchEvent(new CustomEvent('empath:language-changed',{detail:{lang:'zh'}})));
-  await testInfo.attach('private-weather-phone',{body:await page.locator('#private-weather').screenshot(),contentType:'image/png'});
+  await testInfo.attach('private-weather-phone',{body:await page.locator('#private-weather').screenshot({style:'body > nav, .skip-link { visibility:hidden !important; }'}),contentType:'image/png'});
 });
 
 test('unavailable local storage is disclosed and the room remains usable',async({page})=>{

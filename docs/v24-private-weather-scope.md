@@ -13,6 +13,7 @@ v24.0 implements the first milestone after user acceptance of v23.28. The comple
 
 - Independent local modules load on every room without waiting for Firebase.
 - Off by default; one day/room pair per local calendar day after opt-in. Same-day reloads do not increase counts. No older history is imported.
+- Fixed H’s in-page navigation inheriting the fixed header styles; it now stays in document flow.
 - H reuses the existing private-sky section for 7/30-day room-day summaries, pause/resume, and confirmed clear-and-disable controls. Self-selected mood entries remain separate.
 - Retains the current 30-day calendar window, pruning on next access. Date/room pairs only, plus schema version and enabled flag; no text, IDs, exact timestamps or cloud synchronization.
 - Failed writes are disclosed as page-only changes. Failed deletion is explicitly reported with browser-data cleanup instructions; it is never reported as successful.

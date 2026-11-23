@@ -732,3 +732,20 @@ body.content-report-open { overflow: hidden; }
   .weather-rooms li { font-size: 13px; gap: 10px; }
   .weather-clear-confirm button { width: 100%; margin-right: 0; }
 }
+
+/* This is in-page navigation, not the fixed site header. */
+#room-h .h-path-nav {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  align-items: stretch !important;
+  justify-content: normal !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+  z-index: 1;
+}
