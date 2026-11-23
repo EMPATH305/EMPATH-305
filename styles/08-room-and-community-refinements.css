@@ -704,3 +704,31 @@ body.content-report-open { overflow: hidden; }
   #room-h .sync-actions { gap: 16px !important; }
   #room-h .sync-btn-small { min-height: 48px; white-space: normal; line-height: 1.7; }
 }
+
+/* v24: local room summaries share H's existing private-sky section. */
+.private-weather { text-align: left; padding-bottom: 36px; margin-bottom: 36px; border-bottom: 1px solid rgba(201,168,76,.22); }
+.private-weather .weather-explanation,
+.private-weather .weather-summary { color: rgba(242,232,217,.78); font-size: 14px; line-height: 1.9; letter-spacing: .03em; margin: 20px 0; }
+.private-weather button { min-height: 48px; padding: 12px 18px; border: 1px solid rgba(201,168,76,.4); border-radius: 4px; background: transparent; color: var(--fog); font: inherit; font-size: 13px; line-height: 1.6; cursor: pointer; white-space: normal; }
+.private-weather button:hover,
+.private-weather button[aria-pressed="true"] { color: var(--gold); background: rgba(201,168,76,.1); border-color: var(--gold); }
+.private-weather .weather-status,
+.private-weather .weather-note { color: rgba(242,232,217,.6); font-size: 12px; line-height: 1.9; letter-spacing: .02em; margin: 18px 0; }
+.weather-period { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.weather-rooms { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 18px; }
+.weather-rooms[hidden], .weather-clear-confirm[hidden] { display: none; }
+.weather-rooms li { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px 16px; font-size: 14px; line-height: 1.7; color: rgba(242,232,217,.85); }
+.weather-room-days { color: var(--gold); white-space: nowrap; }
+.weather-track { grid-column: 1 / -1; height: 3px; background: rgba(255,255,255,.09); }
+.weather-track > span { display: block; height: 100%; background: var(--gold); }
+.private-weather .weather-clear { border-color: rgba(242,232,217,.25); }
+.weather-clear-confirm { margin-top: 20px; padding: 18px; background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.3); }
+.weather-clear-confirm p { font-size: 13px; line-height: 1.9; margin-bottom: 16px; }
+.weather-clear-confirm button { margin: 0 8px 8px 0; }
+@media (max-width: 768px) {
+  .private-weather button { max-width: 100%; }
+  .private-weather > button { width: 100%; }
+  .weather-period button { flex: 1; }
+  .weather-rooms li { font-size: 13px; gap: 10px; }
+  .weather-clear-confirm button { width: 100%; margin-right: 0; }
+}

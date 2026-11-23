@@ -70,7 +70,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=23.28.0">
+<link rel="stylesheet" href="styles.css?v=24.0.0">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -172,6 +172,7 @@ try {
         <li style="margin-bottom:12px;" data-zh="【檢舉與審核】匿名檢舉只保存目標編號、固定原因與必要技術狀態，最多保留 180 天；管理員處置稽核最多保留 365 天。檢舉紀錄不複製被檢舉原文。" data-en="[Reports and moderation] Anonymous reports retain only the target ID, a fixed reason and necessary technical status for at most 180 days. Moderator action audits are retained for at most 365 days. Reports do not copy the reported text.">【檢舉與審核】匿名檢舉只保存目標編號、固定原因與必要技術狀態，最多保留 180 天；管理員處置稽核最多保留 365 天。檢舉紀錄不複製被檢舉原文。</li>
         <li style="margin-bottom:12px;" data-zh="【匿名使用】這裡不要求建立公開帳號；網站基礎設施與分析服務仍可能產生一般技術紀錄。請不要輸入可識別個資。" data-en="[No public identity] No public account is required and other visitors cannot see who you are. Site infrastructure may still generate necessary technical records; usage analytics is off by default. Do not enter identifying information.">【匿名使用】這裡不要求建立公開帳號；網站基礎設施與分析服務仍可能產生一般技術紀錄。請不要輸入可識別個資。</li>
         <li style="margin-bottom:12px;" data-zh="【使用承諾】我們不販售留言內容，也不使用留言進行廣告定向。" data-en="[Our commitment] We do not sell message content or use it for advertising targeting.">【使用承諾】我們不販售留言內容，也不使用留言進行廣告定向。</li>
+        <li style="margin-bottom:12px;" data-zh="【私人氣象台】房間造訪記錄預設關閉，開啟後只在這個瀏覽器保存日期與房間代號；可在 H 房暫停或清除，不會加入靈魂鑰匙雲端備份。" data-en="[Private weather] Room-visit recording is off by default. Opting in saves only days and room codes in this browser. Pause or clear it in Room H; it is excluded from Soul Key cloud backups.">【私人氣象台】房間造訪記錄預設關閉，開啟後只在這個瀏覽器保存日期與房間代號；可在 H 房暫停或清除，不會加入靈魂鑰匙雲端備份。</li>
       </ul>
       <p data-zh="這是一個安全的樹洞，請安心放下。" data-en="This is a safe treehole. Feel free to let go.">這是一個安全的樹洞，請安心放下。</p>
     </div>
@@ -347,9 +348,29 @@ try {
   </section>
 
   <section class="emotion-week" id="emotion-week" aria-labelledby="emotion-week-title">
+    <div id="private-weather" class="private-weather" aria-labelledby="weather-title">
+      <p class="emotion-week-kicker">PRIVATE WEATHER · LOCAL ONLY</p>
+      <h3 id="weather-title" data-zh="私人情緒氣象台" data-en="Your private weather">私人情緒氣象台</h3>
+      <p class="weather-explanation" data-zh="從你開啟後開始，只留下日期與房間代號，整理近 30 天，並在開啟網站時清理較早資料。同一天到同一房只記一次；不保存投稿原文、不分析情緒，也不連到雲端同步。" data-en="After you opt in, keep only the day and room for the last 30 days, pruning older entries when the site opens. Each room counts once per day. No post text, emotional analysis or cloud sync.">從你開啟後開始，只留下日期與房間代號，整理近 30 天，並在開啟網站時清理較早資料。同一天到同一房只記一次；不保存投稿原文、不分析情緒，也不連到雲端同步。</p>
+      <button type="button" id="weather-toggle" aria-pressed="false" data-zh="開啟本機記錄" data-en="Enable local recording">開啟本機記錄</button>
+      <p id="weather-status" class="weather-status" role="status" aria-live="polite" data-zh="尚未開啟 · 不會記錄房間造訪" data-en="Off · Room visits are not recorded">尚未開啟 · 不會記錄房間造訪</p>
+      <div class="weather-period" role="group" aria-label="摘要期間" data-zh-aria="摘要期間" data-en-aria="Summary period">
+        <button type="button" data-weather-days="7" aria-pressed="true" data-zh="近七日" data-en="7 days">近七日</button>
+        <button type="button" data-weather-days="30" aria-pressed="false" data-zh="近三十日" data-en="30 days">近三十日</button>
+      </div>
+      <p id="weather-summary" class="weather-summary" data-zh="這裡還是一片留白。想留下足跡時，再開啟就好。" data-en="A quiet blank space. Enable recording only when you want to.">這裡還是一片留白。想留下足跡時，再開啟就好。</p>
+      <ul id="weather-rooms" class="weather-rooms" hidden></ul>
+      <p class="weather-note" data-zh="這些是造訪天數，不是情緒分數。資料只留在這個瀏覽器；換裝置不會帶過去，清除網站資料也會移除它。下方的自選心情記錄獨立保存，不會自動匯入。" data-en="These are days visited, not emotional scores. Records stay in this browser, do not move to another device, and disappear if you clear site data. Your self-selected mood entries below are separate and are never imported automatically.">這些是造訪天數，不是情緒分數。資料只留在這個瀏覽器；換裝置不會帶過去，清除網站資料也會移除它。下方的自選心情記錄獨立保存，不會自動匯入。</p>
+      <button type="button" id="weather-clear" class="weather-clear" data-zh="清除氣象台記錄並關閉" data-en="Clear weather records and turn off">清除氣象台記錄並關閉</button>
+      <div id="weather-clear-confirm" class="weather-clear-confirm" hidden>
+        <p data-zh="清除後無法復原。這只刪除氣象台的房間紀錄，不影響自選心情、靈魂鑰匙或未來信。" data-en="This cannot be undone. Only weather room records are removed; mood entries, your Soul Key and future letters are unaffected.">清除後無法復原。這只刪除氣象台的房間紀錄，不影響自選心情、靈魂鑰匙或未來信。</p>
+        <button type="button" id="weather-clear-cancel" data-zh="先保留" data-en="Keep records">先保留</button>
+        <button type="button" id="weather-clear-yes" data-zh="確認清除並關閉" data-en="Clear and turn off">確認清除並關閉</button>
+      </div>
+    </div>
     <header class="emotion-week-head">
       <div>
-        <p class="emotion-week-kicker">YOUR PRIVATE SKY · 只屬於你</p>
+        <p class="emotion-week-kicker">YOUR CHECK-INS · 你選擇留下的心情</p>
         <h3 id="emotion-week-title">近七日情緒星圖</h3>
       </div>
       <p>不是評分，也不會上傳。只是讓你回頭看見，自己曾經如何經過這七天。</p>
@@ -485,7 +506,7 @@ try {
 </footer>
 
 <script src="safety-guard.js?v=22.0.0"></script>
-    <script type="module" src="firebase-app.js?v=23.28.0"></script>
+    <script type="module" src="firebase-app.js?v=24.0.0"></script>
 <!-- 註冊 PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -537,6 +558,7 @@ try {
 <script defer src="collective-calendar.js?v=21.1.0"></script>
 <script src="interactions.js?v=20.5"></script>
 <script src="room-router.js?v=20.5"></script>
+<script type="module" src="private-weather.mjs?v=24.0.0"></script>
 
 
 
