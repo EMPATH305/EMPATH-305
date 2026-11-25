@@ -69,7 +69,10 @@ for (const width of [375, 1440]) {
     expect(new Set(audit.cards.map(c=>Math.round(c.height))).size).toBe(1);
     expect(audit.acts[1]-audit.acts[0]).toBeCloseTo(28);
     expect(audit.acts[2]-audit.acts[0]).toBeCloseTo(56);
-    if (await page.locator('.collective-grief-close').isVisible()) await page.locator('.collective-grief-close').click();
+    if (await page.locator('.collective-grief-close').isVisible()) {
+      await page.locator('.collective-grief-close').click();
+      await expect(page.locator('.collective-grief-close')).toHaveCount(0);
+    }
     await testInfo.attach(`homepage-${width}.png`, { body:await page.screenshot({ fullPage:true }),contentType:'image/png' });
     await page.locator('[data-mood="missing"]').click();
     await expect(page.locator('#daily-result-link')).toHaveAttribute('href','room-m.html');
@@ -93,6 +96,10 @@ for (const width of [375, 1440]) {
     await expect(page.locator('.hero-lead')).toHaveText('Some feelings do not need to be solved. They only need a place to be seen.');
     await page.evaluate(()=>window.closeMobileNav());
     expect((await page.evaluate(measureHome)).issues).toEqual([]);
+    await page.keyboard.press('Escape');
+    await page.evaluate(()=>{ document.activeElement?.blur(); window.scrollTo({top:0,behavior:'instant'}); });
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
+    await expect(page.locator('#toast')).not.toHaveClass(/show/);
     await testInfo.attach(`homepage-${width}-english.png`, { body:await page.screenshot({fullPage:true}),contentType:'image/png' });
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.evaluate(()=>window.toggleHSP());

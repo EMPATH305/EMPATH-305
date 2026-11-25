@@ -44,7 +44,12 @@ test('phone M separates crowded stars from copy and keeps every shown star selec
       document.querySelectorAll('#room-m .data-state, #star-loading').forEach(el=>el.style.setProperty('display','none','important'));
       window.resizeCanvas('m'); window.drawStars();
     });
-    await expect.poll(()=>page.evaluate(()=>window.starMessages.filter(s=>Number.isFinite(s.x)).length)).toBe(12);
+    // Reduced motion renders on demand. A late viewport/font layout reset can
+    // clear coordinates after the first draw; redraw as layout becomes ready.
+    await expect.poll(()=>page.evaluate(()=>{
+      window.drawStars();
+      return window.starMessages.filter(s=>Number.isFinite(s.x)).length;
+    })).toBe(12);
     const geometry=await page.evaluate(()=>{
       const rect=document.querySelector('#star-canvas').getBoundingClientRect();
       return {stars:window.starMessages.filter(s=>Number.isFinite(s.x)).map(s=>({id:s.id,x:s.x,y:s.y})),top:document.querySelector('#room-m .desc-wrap').getBoundingClientRect().bottom-rect.top,bottom:document.querySelector('.m-input-wrap').getBoundingClientRect().top-rect.top};
