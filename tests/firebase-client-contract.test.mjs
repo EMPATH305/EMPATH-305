@@ -49,7 +49,7 @@ test('the modular client is available offline and cache-busted on every page', (
   assert(serviceWorkerSource.includes("'./room-t-feed.mjs'"));
   assert(serviceWorkerSource.includes("'./private-weather.mjs'"));
   assert(serviceWorkerSource.includes("'./private-weather-model.mjs'"));
-  assert(serviceWorkerSource.includes('empath-cache-v24.1.0'));
+  assert(serviceWorkerSource.includes('empath-cache-v24.2.0'));
   for (const pageName of [
     'index.html',
     'room-e.html',

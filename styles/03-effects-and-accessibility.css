@@ -2,17 +2,17 @@
 #fortune-spark {
     position: fixed; bottom: 40px; left: 40px; z-index: 900;
     color: var(--gold); font-size: 28px; cursor: pointer;
-    animation: pulse-spark 4s ease-in-out infinite; 
+    animation: pulse-spark 4s ease-in-out infinite;
     text-shadow: 0 0 15px rgba(201,168,76,0.8);
     transition: all 0.4s ease; display: flex; align-items: center; justify-content: center;
 }
-#fortune-spark:hover { 
-    transform: scale(1.3) rotate(90deg); 
-    text-shadow: 0 0 25px rgba(201,168,76,1); 
+#fortune-spark:hover {
+    transform: scale(1.3) rotate(90deg);
+    text-shadow: 0 0 25px rgba(201,168,76,1);
 }
-@keyframes pulse-spark { 
-    0%, 100% { opacity: 0.4; transform: translateY(0); } 
-    50% { opacity: 1; transform: translateY(-5px); } 
+@keyframes pulse-spark {
+    0%, 100% { opacity: 0.4; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-5px); }
 }
 
 .fortune-modal {
@@ -103,42 +103,43 @@
 }
 
 @media(max-width:768px){
-  nav:not(:where(.home-surface, .home-surface *)) { padding: 16px 20px; } .nav-logo:not(:where(.home-surface, .home-surface *)) { font-size: 22px; } .hamburger:not(:where(.home-surface, .home-surface *)) { display: flex; }
+  nav:not(:where(.home-surface, .home-surface *)):not(:where(.reading-room, .reading-surface, .reading-surface *)) { padding: 16px 20px; } .nav-logo:not(:where(.home-surface, .home-surface *)) { font-size: 22px; } .hamburger:not(:where(.home-surface, .home-surface *)) { display: flex; }
   .nav-menu:not(:where(.home-surface, .home-surface *)) { position: absolute; top: 100%; left: 0; right: 0; background: #03070a; flex-direction: column; padding: 24px; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.8); transform: translateY(-150%); opacity: 0; pointer-events: none; }
   .nav-menu.show:not(:where(.home-surface, .home-surface *)) { transform: translateY(0); opacity: 1; pointer-events: auto; }
   .nav-letters:not(:where(.home-surface, .home-surface *)) { flex-wrap: wrap; justify-content: center; width: 100%; gap: 12px; } .nav-controls:not(:where(.home-surface, .home-surface *)) { justify-content: center; width: 100%; }
   .hsp-first-visit-tooltip:not(:where(.home-surface, .home-surface *)) { right: 50%; transform: translateX(50%); top: 56px; font-size:12px; padding: 12px 30px 12px 16px;}
   .hsp-first-visit-tooltip:not(:where(.home-surface, .home-surface *))::before { right: 50%; transform: translateX(50%) rotate(45deg); }
 
-  .room { padding: 120px 20px 60px; } .room-letter { font-size: 80px; top: 80px; right: 16px; }
-  .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
+  .room:not(:where(.reading-room, .reading-surface, .reading-surface *)) { padding: 120px 20px 60px; } .room-letter:not(:where(.reading-room, .reading-surface, .reading-surface *)) { font-size: 80px; top: 80px; right: 16px; }
+  .t-layout, .kintsugi-board { grid-template-columns: 1fr; }
 
   #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 36px; align-items: center; }
   .onboarding-box { padding: 24px 20px; margin-bottom: 40px; }
   .star-tooltip { top: auto !important; bottom: 0 !important; left: 0 !important; width: 100% !important; max-width: none !important; border-radius: 20px 20px 0 0 !important; padding: 40px 24px 48px !important; transform: translateY(100%) !important; transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.4s ease !important; border-bottom: none !important; }
   .star-tooltip.active { transform: translateY(0) !important; }
   .star-tooltip::before { content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; }
-  .input-area { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); }
-  .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .input-area:not(:where(.reading-room, .reading-surface, .reading-surface *)) { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); }
+  .send-btn:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 
   .shard { background: rgba(0,0,0,0.45); border: 1px solid rgba(201,168,76,0.45); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
-  .send-btn:active,
+  .send-btn:active:not(:where(.reading-room, .reading-surface, .reading-surface *)),
 .action-btn:active,
 .shard:active,
 .nav-letter:active:not(:where(.home-surface, .home-surface *)) { transform: scale(0.95) !important; background: rgba(255,255,255,0.15) !important; box-shadow: none !important; transition: all 0.1s !important; }
   #btt-btn { bottom: 20px; right: 20px; width: 44px; height: 44px; font-size: 18px; }
 }
 @media(max-width:480px){
-  .room { padding: 110px 16px 40px; } .t-panel, .t-send-panel { padding: 20px; } .input-area { padding: 16px; font-size: 15px; }
+  .room:not(:where(.reading-room, .reading-surface, .reading-surface *)) { padding: 110px 16px 40px; } .t-panel, .t-send-panel { padding: 20px; } .input-area:not(:where(.reading-room, .reading-surface, .reading-surface *)) { padding: 16px; font-size: 15px; }
 
     .step-wrapper { margin-bottom: 56px; }
 }
 /* 手機版 Room M 專屬星空與排版優化 */
 @media(max-width: 768px) {
-    #room-m { padding-bottom: 600px !important; } /* 強制在底下開拓 420px 的深邃星空 */
-    .m-stats { gap: 12px !important; justify-content: space-between; width: 100%; margin-top: 20px; } /* 縮小間距，確保文字在同一行 */
-    .m-stat { font-size: 11px; letter-spacing: 1px; }
-    .m-stat span { font-size: 16px; }
+     /* 強制在底下開拓 420px 的深邃星空 */
+     /* 縮小間距，確保文字在同一行 */
+
+
 }
 /* 🌍 徹底封殺 Google 翻譯的所有醜陋介面與白邊 */
 
@@ -178,25 +179,25 @@ html { top: 0px !important; position: static !important; }
 }
 /* 🌙 1. 時刻感知：深夜模式 (00:00 - 04:00) */
 body.night-mode {
-    --bg: #020305 !important; 
+    --bg: #020305 !important;
     --bg2: #05070a !important;
 }
  /* 深夜的字更暗 */
 
 /* 🌅 1. 時刻感知：破曉晨光 (05:00 - 08:00) */
 body.dawn-mode {
-    --bg: #14161a !important; 
+    --bg: #14161a !important;
     --bg2: #1e1b18 !important;
 }
 
 /* 🎂 3. 週年紀念日專屬特效 */
-body.anniversary-mode #room-h .g-num { 
-    color: #fff !important; 
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important; 
+body.anniversary-mode #room-h .g-num {
+    color: #fff !important;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important;
 }
-body.anniversary-mode .sand-timer-fill { 
+body.anniversary-mode .sand-timer-fill {
     /* 沙畫的消散條在生日這天變成閃耀的金色 */
-    background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 2px, transparent 2px, transparent 4px) !important; 
+    background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 2px, transparent 2px, transparent 4px) !important;
 }
 
 /* 🌍 魔法六：全站情緒脈衝與集體靜默 */
@@ -236,14 +237,16 @@ body.anniversary-mode .sand-timer-fill {
 
 /* 強制覆寫手機版舊有的方塊輸入框，保持底線極簡美學 */
 @media(max-width: 768px) {
-    .input-area, .sync-input { 
-        background: transparent !important; 
-        border: none !important; 
-        border-bottom: 1px solid rgba(255,255,255,0.35) !important; 
+    .input-area:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.sync-input {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.35) !important;
         box-shadow: none !important;
         border-radius: 0 !important;
     }
-    .input-area:focus, .sync-input:focus {
+    .input-area:focus:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.sync-input:focus {
         border-bottom-color: var(--gold) !important;
         background: rgba(255,255,255,0.02) !important;
     }
@@ -251,8 +254,9 @@ body.anniversary-mode .sand-timer-fill {
 
 /* 統一按鈕與區塊的 Padding 為 8 的倍數 (8, 16, 24, 32, 48) */
 
-.room-desc { padding: 16px 24px; }
-.send-btn, .action-btn { padding: 16px 32px; }
+.room-desc:not(:where(.reading-room, .reading-surface, .reading-surface *)) { padding: 16px 24px; }
+.send-btn:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.action-btn { padding: 16px 32px; }
 .ob-btn { padding: 16px 24px; }
 .e-msg, .sand-msg { padding: 24px 32px; }
 .warmth-item { padding: 24px; }
@@ -260,20 +264,20 @@ body.anniversary-mode .sand-timer-fill {
 .home-quote { padding: 48px; }
 
 /* 讓靈魂鑰匙的輸入框也跟著一起極簡化 */
-.sync-input { 
-    background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.35); 
-    color: var(--white); padding: 8px 16px; font-size: 14px; outline: none; letter-spacing: 2px; 
-    border-radius: 0; transition: border-color 0.3s; 
+.sync-input {
+    background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.35);
+    color: var(--white); padding: 8px 16px; font-size: 14px; outline: none; letter-spacing: 2px;
+    border-radius: 0; transition: border-color 0.3s;
 }
-.sync-input:focus { 
-    border-color: var(--gold); box-shadow: 0 8px 15px -8px rgba(201,168,76,0.15); 
+.sync-input:focus {
+    border-color: var(--gold); box-shadow: 0 8px 15px -8px rgba(201,168,76,0.15);
 }
 
 /* ===== ♿ 無障礙與行動端防護網 ===== */
 /* Room A 手機版按鈕垂直排列，加高觸控面積防誤觸 */
 @media(max-width: 480px) {
     #a-warning-mask > div { flex-direction: column; width: 100%; gap: 16px; }
-    #a-warning-mask .send-btn { width: 100%; min-height: 48px; }
+    #a-warning-mask .send-btn:not(:where(.reading-room, .reading-surface, .reading-surface *)) { width: 100%; min-height: 48px; }
 }
 
 /* ♿ 系統層級減少動態效果與鍵盤對焦 */
@@ -349,4 +353,3 @@ body.anniversary-mode .sand-timer-fill {
 body.hsp-mode :where(.room-desc, .e-mode-hint, .daily-local-note, .cosmic-presence, .h-event, footer):not(:where(.home-surface, .home-surface *)) {
   color: rgba(232,230,225,.78) !important;
 }
-

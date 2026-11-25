@@ -130,7 +130,8 @@
       const icon = document.createElement('span');
       icon.className = 'emotion-day-icon';
       icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = meta ? meta.icon : '·';
+      const readingGlyphs = { heavy:'雨', confused:'霧', missing:'月', stuck:'傷', company:'燭', okay:'晴' };
+      icon.textContent = meta && grid.closest('.reading-surface') ? readingGlyphs[entry.mood] : (meta ? meta.icon : '·');
       const label = document.createElement('span');
       label.className = 'emotion-day-label';
       label.textContent = meta ? meta.label : '留白';
