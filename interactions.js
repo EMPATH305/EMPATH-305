@@ -24,7 +24,7 @@
       '.input-area', '#e-draw-wrap', '.m-input-wrap', '.step-wrapper',
       '.a-warning-mask', '.t-layout', '.h-journey'
     ].join(',');
-    const items = qsa(selector);
+    const items = qsa(selector).filter(element => !element.closest('.reading-surface'));
     items.forEach((element, index) => {
       element.classList.add('aw-stage');
       element.style.setProperty('--aw-delay', Math.min(index * 110, 660) + 'ms');
@@ -69,7 +69,7 @@
 
   function setupMagneticButtons() {
     if (!finePointer.matches || reduceMotion.matches) return;
-    qsa('.send-btn, .door-btn').forEach(button => {
+    qsa('.send-btn, .door-btn').filter(button => !button.closest('.reading-surface')).forEach(button => {
       button.classList.add('is-magnetic');
       button.addEventListener('pointermove', event => {
         const rect = button.getBoundingClientRect();
@@ -101,7 +101,7 @@
         return span;
       }));
     };
-    const titles = qsa('.room-title');
+    const titles = qsa('.room-title').filter(title => !title.closest('.reading-surface'));
     titles.forEach(split);
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => entry.target.classList.toggle('aw-title-in', entry.isIntersecting));
@@ -310,7 +310,8 @@
       const icon = document.createElement('span');
       icon.className = 'emotion-day-icon';
       icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = meta ? meta.icon : '·';
+      const readingGlyphs = { heavy:'雨', confused:'霧', missing:'月', stuck:'傷', company:'燭', okay:'晴' };
+      icon.textContent = meta && grid.closest('.reading-surface') ? readingGlyphs[entry.mood] : (meta ? meta.icon : '·');
       const label = document.createElement('span');
       label.className = 'emotion-day-label';
       label.textContent = meta ? meta.label : '留白';

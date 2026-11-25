@@ -70,7 +70,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=24.0.0">
+<link rel="stylesheet" href="styles.css?v=24.2.0">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -298,14 +298,14 @@ try {
 </nav>
 
 <main id="main-content">
-<section id="room-h" class="room">
-  <div class="room-letter">H</div>
-  <p class="room-tag">H — Home / Heal</p>
-  <div class="room-title-wrap">
+<section id="room-h" class="room reading-room">
+  <div class="room-letter reading-surface">H</div>
+  <p class="room-tag reading-surface">H — Home / Heal</p>
+  <div class="room-title-wrap reading-surface">
       <h1 class="room-title" data-zh="靈魂歸宿" data-en="Soul's Home" data-ja="魂の帰郷" data-es="Hogar del Alma" data-fr="Foyer de l'Âme" data-de="Zuhause der Seele" data-zh-cn="灵魂归宿">靈魂歸宿</h1>
       <svg class="room-title-icon" viewBox="0 0 24 24" fill="none" stroke="var(--h)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
   </div>
-  <div class="desc-wrap">
+  <div class="desc-wrap reading-surface">
       <p class="room-desc" onclick="window.speakText(this.textContent)" data-zh-title="點擊聆聽" data-en-title="Click to listen" data-ja-title="クリックして聴く" data-es-title="Haz clic para escuchar" data-fr-title="Cliquez pour écouter" data-de-title="Klicken zum Anhören" data-zh-cn-title="点击聆听" data-uk-title="Натисніть, щоб послухати" data-pl-title="Kliknij, aby posłuchać" title="點擊聆聽文字" 
          data-zh="回家，回到不需偽裝的地方。你走過的每個房間，都是你的。" 
          data-en="Come home, to a place where no disguise is needed. Every room you've walked through is yours." 
@@ -321,7 +321,7 @@ try {
       <button type="button" class="tts-btn" aria-label="朗讀說明" onclick="window.speakText(this.previousElementSibling.textContent)" data-zh-title="點擊朗讀" title="點擊朗讀"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
   </div>
 
-  <section class="silent-invitation" aria-labelledby="silent-invitation-title">
+  <section class="silent-invitation reading-surface" aria-labelledby="silent-invitation-title">
     <div>
       <p class="silent-invitation-kicker">SILENT COMPANY · 5 MIN</p>
       <h2 id="silent-invitation-title" data-zh="不說話，也可以有人陪" data-en="Company without words">不說話，也可以有人陪</h2>
@@ -330,7 +330,7 @@ try {
     <button type="button" class="silent-enter-btn" onclick="window.startSilentCompanionship()" data-zh="進入無聲陪伴" data-en="Enter Silent Company">進入無聲陪伴</button>
   </section>
 
-  <nav class="h-path-nav" aria-label="靈魂歸宿內容導覽">
+  <nav class="h-path-nav reading-surface" aria-label="靈魂歸宿內容導覽">
     <a href="#h-journey-arc"><span>01</span><b data-zh="今晚" data-en="Tonight">今晚</b><small data-zh="剛剛走過的路" data-en="The path you just walked">剛剛走過的路</small></a>
     <a href="#emotion-week"><span>02</span><b data-zh="這七天" data-en="Seven days">這七天</b><small data-zh="看見情緒的形狀" data-en="See the shape of your feelings">看見情緒的形狀</small></a>
     <a href="#emotion-year"><span>03</span><b data-zh="這一年" data-en="This year">這一年</b><small data-zh="只有你看得懂的地圖" data-en="A map only you can read">只有你看得懂的地圖</small></a>
@@ -338,7 +338,7 @@ try {
   </nav>
 
   <div class="h-session-echo" id="h-session-echo" aria-hidden="true"></div>
-  <section class="h-journey-arc" id="h-journey-arc" aria-labelledby="h-journey-arc-title">
+  <section class="h-journey-arc reading-surface" id="h-journey-arc" aria-labelledby="h-journey-arc-title">
     <header class="h-journey-arc-head">
       <p class="h-journey-arc-index">SESSION / TONIGHT</p>
       <h3 id="h-journey-arc-title" data-zh="你今晚的旅程" data-en="Your Journey Tonight" data-ja="今夜のあなたの旅" data-es="Tu viaje de esta noche" data-fr="Votre voyage de ce soir" data-de="Deine heutige Reise" data-zh-cn="你今晚的旅程">你今晚的旅程</h3>
@@ -347,7 +347,7 @@ try {
     <div class="h-journey-arc-canvas" id="h-journey-arc-canvas"></div>
   </section>
 
-  <section class="emotion-week" id="emotion-week" aria-labelledby="emotion-week-title">
+  <section class="emotion-week reading-surface" id="emotion-week" aria-labelledby="emotion-week-title">
     <div id="private-weather" class="private-weather" aria-labelledby="weather-title">
       <p class="emotion-week-kicker">PRIVATE WEATHER · LOCAL ONLY</p>
       <h3 id="weather-title" data-zh="私人情緒氣象台" data-en="Your private weather">私人情緒氣象台</h3>
@@ -556,7 +556,7 @@ try {
 
 
 <script defer src="collective-calendar.js?v=21.1.0"></script>
-<script src="interactions.js?v=20.5"></script>
+<script src="interactions.js?v=24.2.0"></script>
 <script src="room-router.js?v=20.5"></script>
 <script type="module" src="private-weather.mjs?v=24.0.0"></script>
 

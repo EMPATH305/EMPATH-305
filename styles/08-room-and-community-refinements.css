@@ -1,32 +1,12 @@
 /* =========================================================
    v17 — Daily emotional check-in, private week sky, echo
    ========================================================= */
-.emotion-week {
-  position: relative;
-  width: min(980px, calc(100% - 40px));
-  margin-inline: auto;
-  border: 1px solid rgba(201,168,76,.22);
-  background:
-    radial-gradient(circle at 12% 0%, rgba(201,168,76,.09), transparent 36%),
-    linear-gradient(145deg, rgba(18,20,26,.92), rgba(8,10,14,.84));
-  box-shadow: 0 28px 80px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.025);
-  overflow: hidden;
-}
 
-.emotion-week::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .18;
-  background-image: radial-gradient(rgba(255,255,255,.55) .5px, transparent .6px);
-  background-size: 19px 19px;
-  mask-image: linear-gradient(to bottom, #000, transparent 74%);
-}
 
-.emotion-week > * { position: relative; z-index: 1; }
 
-.emotion-week-kicker,
+
+
+
 .tonight-echo-kicker {
   margin: 0 0 10px;
   color: var(--gold);
@@ -34,7 +14,6 @@
   letter-spacing: .24em;
   text-transform: uppercase;
 }
-.emotion-week h3,
 .tonight-echo h2 {
   margin: 0;
   color: var(--white);
@@ -42,32 +21,19 @@
   font-weight: 500;
 }
 
-.emotion-week {
-  margin-top: 34px;
-  margin-bottom: 36px;
-  padding: clamp(24px, 4vw, 42px);
-  border-radius: 24px 3px 24px 3px;
-}
-.emotion-week-head { display: flex; align-items: end; justify-content: space-between; gap: 32px; }
-.emotion-week h3 { font-size: clamp(22px, 3vw, 31px); letter-spacing: .08em; }
-.emotion-week-head > p { max-width: 410px; margin: 0; color: rgba(255,255,255,.43); font-size: 12px; line-height: 1.8; }
-.emotion-week-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; margin-top: 28px; }
-.emotion-day {
-  min-width: 0;
-  min-height: 128px;
-  padding: 14px 8px 12px;
-  border: 1px solid rgba(255,255,255,.075);
-  border-radius: 16px 3px 16px 3px;
-  background: rgba(255,255,255,.025);
-  text-align: center;
-}
-.emotion-day.is-today { border-color: rgba(201,168,76,.46); background: rgba(201,168,76,.06); }
-.emotion-day.is-empty { opacity: .55; }
-.emotion-day-name { display: block; color: rgba(255,255,255,.38); font-size: 9px; letter-spacing: .12em; }
-.emotion-day-icon { display: block; min-height: 35px; margin: 11px 0 4px; color: var(--gold); font-size: 23px; line-height: 1.4; }
-.emotion-day-label { display: block; overflow: hidden; color: rgba(255,255,255,.67); font: 11px/1.45 'Noto Serif TC', serif; text-overflow: ellipsis; white-space: nowrap; }
-.emotion-day-room { display: block; margin-top: 7px; color: rgba(201,168,76,.62); font: 9px/1 'Noto Sans TC', sans-serif; letter-spacing: .16em; }
-.emotion-week-insight { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.07); color: rgba(255,255,255,.52); font: 13px/1.9 'Noto Serif TC', serif; }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .tonight-echo {
   position: fixed;
@@ -103,15 +69,15 @@
 
 @media (max-width: 760px) {
 
-  .emotion-week { width: calc(100% - 24px); padding: 26px 16px; }
-  .emotion-week-head { align-items: start; flex-direction: column; gap: 12px; }
-  .emotion-week-grid { grid-template-columns: repeat(4, minmax(72px,1fr)); overflow-x: auto; padding-bottom: 5px; }
-  .emotion-day { min-height: 116px; }
+
+
+
+
 }
 
 @media (max-width: 390px) {
 
-  .emotion-week-grid { grid-template-columns: repeat(7, 78px); }
+
   .tonight-echo-actions { flex-direction: column; }
 }
 
@@ -262,7 +228,7 @@
   .a-release-witness { transition: none; }
 }
 
-.silent-invitation {
+.silent-invitation:not(:where(.reading-room, .reading-surface, .reading-surface *)) {
   width: min(920px, calc(100% - 36px));
   margin: 46px auto 0;
   padding: clamp(24px,4vw,38px);
@@ -274,12 +240,12 @@
   border-radius: 24px 3px 24px 3px;
   background: radial-gradient(circle at 82% 30%,rgba(242,232,217,.07),transparent 36%),rgba(3,7,13,.36);
 }
-.silent-invitation-kicker,
+.silent-invitation-kicker:not(:where(.reading-room, .reading-surface, .reading-surface *)),
 .silent-company-kicker,
 .emotion-year-kicker { margin: 0 0 12px; color: rgba(201,168,76,.58); font: 10px/1.4 'Noto Sans TC',sans-serif; letter-spacing: .27em; }
-.silent-invitation h2 { margin: 0 0 10px; color: rgba(242,232,217,.9); font: 400 clamp(22px,3vw,31px)/1.4 'Noto Serif TC',serif; letter-spacing: .08em; }
-.silent-invitation div > p:last-child { max-width: 600px; margin: 0; color: rgba(232,230,225,.45); font: 12px/1.9 'Noto Serif TC',serif; }
-.silent-enter-btn,
+.silent-invitation h2:not(:where(.reading-room, .reading-surface, .reading-surface *)) { margin: 0 0 10px; color: rgba(242,232,217,.9); font: 400 clamp(22px,3vw,31px)/1.4 'Noto Serif TC',serif; letter-spacing: .08em; }
+.silent-invitation div > p:last-child:not(:where(.reading-room, .reading-surface, .reading-surface *)) { max-width: 600px; margin: 0; color: rgba(232,230,225,.45); font: 12px/1.9 'Noto Serif TC',serif; }
+.silent-enter-btn:not(:where(.reading-room, .reading-surface, .reading-surface *)),
 .silent-exit-btn {
   min-height: 48px;
   padding: 0 22px;
@@ -292,8 +258,10 @@
   cursor: pointer;
   transition: background .25s ease,color .25s ease,border-color .25s ease;
 }
-.silent-enter-btn:hover,.silent-enter-btn:focus-visible,
-.silent-exit-btn:hover,.silent-exit-btn:focus-visible { border-color: var(--gold); background: rgba(201,168,76,.1); color: #fff0bd; }
+.silent-enter-btn:hover:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.silent-enter-btn:focus-visible:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.silent-exit-btn:hover,
+.silent-exit-btn:focus-visible { border-color: var(--gold); background: rgba(201,168,76,.1); color: #fff0bd; }
 
 .silent-company-overlay {
   position: fixed;
@@ -431,16 +399,17 @@ body.content-report-open { overflow: hidden; }
 
 @media (max-width:900px) {
   .emotion-year-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .h-path-nav { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .h-path-nav a:nth-child(3) { border-left: 0; border-top: 1px solid rgba(255,255,255,.08); }
-  .h-path-nav a:nth-child(4) { border-top: 1px solid rgba(255,255,255,.08); }
+
+
+
 }
 @media (max-width:700px) {
-  .silent-invitation,.emotion-year-head { align-items: stretch; flex-direction: column; }
-  .silent-enter-btn { width: 100%; }
+  .silent-invitation:not(:where(.reading-room, .reading-surface, .reading-surface *)),
+.emotion-year-head { align-items: stretch; flex-direction: column; }
+  .silent-enter-btn:not(:where(.reading-room, .reading-surface, .reading-surface *)) { width: 100%; }
   .emotion-year-grid { grid-template-columns: 1fr; }
-  .h-path-nav { grid-template-columns: 1fr; }
-  .h-path-nav a:nth-child(3),.h-path-nav a:nth-child(4) { border-left: 0; border-top: 1px solid rgba(255,255,255,.08); }
+
+
   .content-report-reasons { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion:reduce) {
@@ -534,42 +503,22 @@ body.content-report-open { overflow: hidden; }
 
 /* v23.28: phone layouts give text and constellations separate space. */
 @media (max-width: 768px) {
-  #room-m .m-input-wrap {
-    margin-top: 420px !important;
-  }
-  #room-m .room-desc,
-  #room-h .room-desc {
+
+  #room-h .room-desc:not(:where(.reading-room, .reading-surface, .reading-surface *)) {
     font-size: 15px !important;
     line-height: 2 !important;
     letter-spacing: .04em !important;
   }
-  #room-m .m-stats {
-    position: static !important;
-    display: flex !important;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px !important;
-    margin-top: 28px !important;
-  }
-  #room-m .m-stat { max-width: 100%; overflow-wrap: anywhere; line-height: 1.8 !important; }
-  #room-m #m-brightest { font-size: 15px; line-height: 1.8; }
+
+
+
   #room-h .h-session-echo { display: none !important; }
-  #room-h .h-journey-arc-canvas {
-    min-height: 0 !important;
-    overflow: visible !important;
-    padding: 0 !important;
-  }
-  #room-h .h-journey-arc-canvas svg { min-width: 0 !important; }
-  #room-h .h-arc-node-core { display: none; }
-  #room-h .h-arc-node-order {
-    text-anchor: start !important;
-    font-size: 14px !important;
-    letter-spacing: .04em !important;
-  }
-  #room-h .h-journey-arc-head h3,
+
+
+
+
   #room-h .h-long-term-head h3 { line-height: 1.5 !important; }
-  #room-h .h-journey-arc-head > p:last-child { line-height: 1.9 !important; }
-  #room-h .emotion-week,
+
   #room-h .emotion-year {
     width: 100%;
     max-width: 100%;
@@ -577,70 +526,41 @@ body.content-report-open { overflow: hidden; }
     padding: 28px 16px;
     box-sizing: border-box;
   }
-  #room-h .emotion-week-head,
   #room-h .emotion-year-head { flex-direction: column; align-items: stretch; gap: 18px; }
-  #room-h .emotion-week-grid { grid-template-columns: 1fr; gap: 12px; overflow: visible; }
-  #room-h .emotion-day {
-    display: grid;
-    grid-template-columns: 42px 32px minmax(0,1fr);
-    grid-template-rows: auto auto;
-    column-gap: 12px;
-    row-gap: 6px;
-    align-items: center;
-    min-height: 80px;
-    padding: 16px 12px;
-    text-align: left;
-  }
-  #room-h .emotion-day-name { grid-row: 1 / 3; font-size: 12px; letter-spacing: 0; }
-  #room-h .emotion-day-icon { grid-row: 1 / 3; margin: 0; min-height: 0; text-align: center; }
-  #room-h .emotion-day-label { font-size: 14px; line-height: 1.6; white-space: normal; overflow-wrap: anywhere; }
-  #room-h .emotion-day-room { grid-column: 3; margin: 0; font-size: 10px; line-height: 1.5; }
+
+
+
+
+
+
   #room-h .h-timeline-title { letter-spacing: .08em !important; overflow-wrap: anywhere; }
   #room-h .sync-actions { gap: 16px !important; }
   #room-h .sync-btn-small { min-height: 48px; white-space: normal; line-height: 1.7; }
 }
 
 /* v24: local room summaries share H's existing private-sky section. */
-.private-weather { text-align: left; padding-bottom: 36px; margin-bottom: 36px; border-bottom: 1px solid rgba(201,168,76,.22); }
-.private-weather .weather-explanation,
-.private-weather .weather-summary { color: rgba(242,232,217,.78); font-size: 14px; line-height: 1.9; letter-spacing: .03em; margin: 20px 0; }
-.private-weather button { min-height: 48px; padding: 12px 18px; border: 1px solid rgba(201,168,76,.4); border-radius: 4px; background: transparent; color: var(--fog); font: inherit; font-size: 13px; line-height: 1.6; cursor: pointer; white-space: normal; }
-.private-weather button:hover,
-.private-weather button[aria-pressed="true"] { color: var(--gold); background: rgba(201,168,76,.1); border-color: var(--gold); }
-.private-weather .weather-status,
-.private-weather .weather-note { color: rgba(242,232,217,.6); font-size: 12px; line-height: 1.9; letter-spacing: .02em; margin: 18px 0; }
-.weather-period { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
-.weather-rooms { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 18px; }
-.weather-rooms[hidden], .weather-clear-confirm[hidden] { display: none; }
-.weather-rooms li { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px 16px; font-size: 14px; line-height: 1.7; color: rgba(242,232,217,.85); }
-.weather-room-days { color: var(--gold); white-space: nowrap; }
-.weather-track { grid-column: 1 / -1; height: 3px; background: rgba(255,255,255,.09); }
-.weather-track > span { display: block; height: 100%; background: var(--gold); }
-.private-weather .weather-clear { border-color: rgba(242,232,217,.25); }
-.weather-clear-confirm { margin-top: 20px; padding: 18px; background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.3); }
-.weather-clear-confirm p { font-size: 13px; line-height: 1.9; margin-bottom: 16px; }
-.weather-clear-confirm button { margin: 0 8px 8px 0; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media (max-width: 768px) {
-  .private-weather button { max-width: 100%; }
-  .private-weather > button { width: 100%; }
-  .weather-period button { flex: 1; }
-  .weather-rooms li { font-size: 13px; gap: 10px; }
-  .weather-clear-confirm button { width: 100%; margin-right: 0; }
+
+
+
+
+
 }
 
 /* This is in-page navigation, not the fixed site header. */
-#room-h .h-path-nav {
-  position: relative !important;
-  inset: auto !important;
-  display: grid !important;
-  height: auto !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  align-items: stretch !important;
-  justify-content: normal !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  transform: none !important;
-  z-index: 1;
-}
