@@ -106,7 +106,7 @@
 
   function setupHomeEditorialCut() {
     const manifesto = document.querySelector('#hero .hero-manifesto');
-    if (manifesto) manifesto.setAttribute('aria-hidden','true');
+    if (manifesto && !manifesto.classList.contains('home-surface')) manifesto.setAttribute('aria-hidden','true');
   }
 
   function setupHomeLayering() {

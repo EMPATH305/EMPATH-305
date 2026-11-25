@@ -10,6 +10,7 @@
   const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
   function setupNoise() {
+    if (document.documentElement.classList.contains('empath-home-page')) return;
     if (document.querySelector('.aw-site-noise')) return;
     const noise = document.createElement('div');
     noise.className = 'aw-site-noise';
@@ -126,9 +127,46 @@
     if (cursor) cursor.hidden = true;
   }
 
+  // Keep backend-owned audio behavior intact; normalize only its decorative icon.
+  function setupHomePresentation() {
+    if (!document.documentElement.classList.contains('empath-home-page')) return;
+    const warmthDoor = document.querySelector('.home-surface .door-btn[data-d="T"]');
+    if (warmthDoor) {
+      // Retain the return-echo cue as a colored rule, without backend glow styles.
+      const normalizeEcho = () => {
+        if (!warmthDoor.style.boxShadow) return;
+        warmthDoor.classList.add('has-return-echo');
+        warmthDoor.style.removeProperty('box-shadow');
+        warmthDoor.style.removeProperty('border-color');
+      };
+      normalizeEcho();
+      new MutationObserver(normalizeEcho).observe(warmthDoor, { attributes: true, attributeFilter: ['style'] });
+    }
+    const audio = document.getElementById('audio-btn');
+    if (audio) {
+      const normalizeIcon = () => {
+        for (const node of Array.from(audio.childNodes)) {
+          if (node.nodeType === Node.TEXT_NODE && /[🔊🔇]/u.test(node.textContent)) {
+            node.textContent = node.textContent.replace(/[🔊🔇]\uFE0F?/gu, '');
+          }
+        }
+        if (!audio.querySelector('.home-control-glyph')) {
+          const icon = document.createElement('span');
+          icon.className = 'home-control-glyph';
+          icon.setAttribute('aria-hidden', 'true');
+          icon.textContent = '音';
+          audio.prepend(icon);
+        }
+      };
+      normalizeIcon();
+      new MutationObserver(normalizeIcon).observe(audio, { childList: true, characterData: true, subtree: true });
+    }
+  }
+
   function init() {
     document.body.classList.add('aw-ready');
     setupNoise();
+    setupHomePresentation();
     setupRoomStages();
     setupHeroParallax();
     setupMagneticButtons();

@@ -69,8 +69,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+TC:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css?v=24.0.0">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css?v=24.1.0">
 <script>
 /* EMPATH CONCEPTUAL ENTRY · paint guard */
 try {
@@ -86,7 +86,7 @@ try {
 <a class="skip-link" href="#main-content">跳至主要內容</a>
 
 <!-- 創作者公告按鈕與 Modal -->
-<button type="button" id="creator-btn" aria-label="開啟創作者公告" title="創作者公告" onclick="window.openCreator()" style="position:fixed; bottom:90px; left:40px; z-index:900; font-size:24px; cursor:pointer; opacity:0.6; transition:all 0.3s; filter:grayscale(100%);">✉️</button>
+
 
 <div id="creator-modal" class="share-modal" role="dialog" aria-modal="true" aria-labelledby="creator-modal-title" aria-hidden="true" tabindex="-1" onclick="if(event.target===this) window.closeCreator()">
   <div class="wrapped-card" style="max-width: 500px; text-align: left; padding: 40px 32px;">
@@ -249,8 +249,9 @@ try {
   <div class="fortune-hint" data-zh="點擊畫面任何一處關閉" data-en="Click anywhere to close">點擊畫面任何一處關閉</div>
 </div>
 
-<nav aria-label="主要導覽">
+<nav class="home-surface" aria-label="主要導覽">
   <a href="#hero" class="nav-logo">EMPATH</a>
+  <button type="button" id="creator-btn" class="home-surface" aria-label="開啟創作者公告" title="創作者公告" onclick="window.openCreator()"><span aria-hidden="true">信</span></button>
   <button class="hamburger" id="hamburger-btn" type="button" aria-label="開啟導覽選單" aria-expanded="false" aria-controls="nav-menu" onclick="window.toggleMobileNav()">
       <span></span><span></span><span></span>
   </button>
@@ -269,17 +270,17 @@ try {
       <div class="nav-controls" id="nav-controls">
         <!-- 新增這顆聲音按鈕 -->
 <button type="button" class="func-btn audio-btn" id="audio-btn" onclick="window.toggleAudio()">
-  🔇<span class="audio-text" data-zh=" 聲音" data-en=" Audio" data-ja=" 音声" data-es=" Audio" data-fr=" Audio" data-de=" Audio" data-zh-cn=" 声音"> 聲音</span>
+  <span aria-hidden="true" class="home-control-glyph">音</span><span class="audio-text" data-zh=" 聲音" data-en=" Audio" data-ja=" 音声" data-es=" Audio" data-fr=" Audio" data-de=" Audio" data-zh-cn=" 声音"> 聲音</span>
 </button>
         <div class="hsp-tooltip-wrap">
-          <button type="button" class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()">👁️<span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
+          <button type="button" class="func-btn hsp-toggle-btn" id="hsp-btn" onclick="window.toggleHSP()"><span aria-hidden="true" class="home-control-glyph">靜</span><span class="hsp-text" data-zh=" 降噪" data-en=" Calm" data-ja=" 静寂" data-es=" Calma" data-fr=" Calme" data-de=" Ruhe" data-zh-cn=" 降噪"> 降噪</span></button>
           <div class="hsp-first-visit-tooltip" id="hsp-tooltip">
               <span data-zh="給高感官敏感者的靜心模式" data-en="Calm Mode for Highly Sensitive Persons" data-ja="HSPのための静寂モード" data-es="Modo Calma para Personas Altamente Sensibles" data-fr="Mode Calme pour personnes hypersensibles" data-de="Ruhemodus für hochsensible Personen" data-zh-cn="给高感官敏感者的静心模式">給高感官敏感者的靜心模式</span>
               <button type="button" class="hsp-tooltip-close" aria-label="關閉說明" onclick="this.parentElement.classList.remove('show')">×</button>
           </div>
         </div>
         <div class="lang-dropdown-wrapper">
-            <button type="button" class="func-btn lang-select-btn" id="lang-select-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="lang-dropdown-list" onclick="window.toggleLangDropdown()">🌐 <span id="current-lang-display">繁體中文</span></button>
+            <button type="button" class="func-btn lang-select-btn" id="lang-select-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="lang-dropdown-list" onclick="window.toggleLangDropdown()"><span aria-hidden="true" class="home-control-glyph">語</span> <span id="current-lang-display">繁體中文</span></button>
             <div class="lang-dropdown-list" id="lang-dropdown-list" role="listbox" aria-label="選擇語言">
                 <button type="button" class="lang-option active-lang" role="option" aria-selected="true" data-lang="zh" onclick="window.switchLang('zh')">繁體中文</button>
                 <button type="button" class="lang-option" role="option" aria-selected="false" data-lang="zh-cn" onclick="window.switchLang('zh-cn')">简体中文</button>
@@ -299,21 +300,14 @@ try {
 
 <main id="main-content">
 <section id="hero">
-  <div class="cinematic-sky" aria-hidden="true">
-    <div class="cinematic-nebula"></div>
+  <div class="cinematic-sky home-surface" aria-hidden="true">
     <div class="cinematic-lens"></div>
-    <div class="cinematic-meteor cinematic-meteor-one"></div>
-    <div class="cinematic-meteor cinematic-meteor-two"></div>
     <div class="cinematic-stars cinematic-stars-a"></div>
-    <div class="cinematic-stars cinematic-stars-b"></div>
-    <div class="cinematic-vignette"></div>
-    <div class="cinematic-grain"></div>
   </div>
 
-  <div class="hero-opening">
-    <p class="hero-kicker">DIGITAL SANCTUARY · EST. 2026</p>
+  <div class="hero-opening home-surface">
+    <p class="hero-kicker">DIGITAL SANCTUARY</p>
     <p class="cosmic-presence" id="cosmic-presence" aria-live="polite"></p>
-    <div class="hero-bg-text">EMPATH</div>
     <h1 class="hero-title">EMPATH</h1>
     <p class="hero-sub">Every Moment As Truth Heals</p>
     <p class="hero-lead" data-zh="有些情緒不需要被解決，只需要一個地方，被好好看見。" data-en="Some feelings do not need to be solved. They only need a place to be seen.">有些情緒不需要被解決，只需要一個地方，被好好看見。</p>
@@ -325,19 +319,18 @@ try {
     <span class="opening-scroll">SCROLL TO BEGIN <i></i></span>
   </div>
 
-  <section class="daily-checkin" id="daily-checkin" aria-labelledby="daily-checkin-title">
+  <section class="daily-checkin home-surface" id="daily-checkin" aria-labelledby="daily-checkin-title">
     <div class="daily-checkin-head">
-      <p class="daily-checkin-kicker">A QUIET CHECK-IN · 只需十秒</p>
       <h2 id="daily-checkin-title">今天的你，現在是什麼天氣？</h2>
       <p>不用解釋，也沒有好壞。選一個最靠近此刻的感受，讓 EMPATH 為你留一條路。</p>
     </div>
     <div class="daily-mood-grid" role="group" aria-label="選擇今天的情緒天氣">
-      <button type="button" class="daily-mood" data-mood="heavy" aria-pressed="false"><span aria-hidden="true">🌧️</span><strong>很沉重</strong><small>有些話想放下</small></button>
-      <button type="button" class="daily-mood" data-mood="confused" aria-pressed="false"><span aria-hidden="true">🌫️</span><strong>有點混亂</strong><small>想把裂痕看清楚</small></button>
-      <button type="button" class="daily-mood" data-mood="missing" aria-pressed="false"><span aria-hidden="true">🌙</span><strong>想念某個人</strong><small>讓思念有地方停留</small></button>
-      <button type="button" class="daily-mood" data-mood="stuck" aria-pressed="false"><span aria-hidden="true">🩹</span><strong>有件事過不去</strong><small>想讓重量慢慢流走</small></button>
-      <button type="button" class="daily-mood" data-mood="company" aria-pressed="false"><span aria-hidden="true">🕯️</span><strong>想被陪一下</strong><small>先回到安靜的地方</small></button>
-      <button type="button" class="daily-mood" data-mood="okay" aria-pressed="false"><span aria-hidden="true">✦</span><strong>今天還不錯</strong><small>想把光交給某個人</small></button>
+      <button type="button" class="daily-mood" data-mood="heavy" aria-pressed="false"><span aria-hidden="true">雨</span><strong>很沉重</strong><small>有些話想放下</small></button>
+      <button type="button" class="daily-mood" data-mood="confused" aria-pressed="false"><span aria-hidden="true">霧</span><strong>有點混亂</strong><small>想把裂痕看清楚</small></button>
+      <button type="button" class="daily-mood" data-mood="missing" aria-pressed="false"><span aria-hidden="true">月</span><strong>想念某個人</strong><small>讓思念有地方停留</small></button>
+      <button type="button" class="daily-mood" data-mood="stuck" aria-pressed="false"><span aria-hidden="true">傷</span><strong>有件事過不去</strong><small>想讓重量慢慢流走</small></button>
+      <button type="button" class="daily-mood" data-mood="company" aria-pressed="false"><span aria-hidden="true">燭</span><strong>想被陪一下</strong><small>先回到安靜的地方</small></button>
+      <button type="button" class="daily-mood" data-mood="okay" aria-pressed="false"><span aria-hidden="true">晴</span><strong>今天還不錯</strong><small>想把光交給某個人</small></button>
     </div>
     <div class="daily-checkin-result" id="daily-checkin-result" aria-live="polite" hidden>
       <div>
@@ -347,6 +340,7 @@ try {
       </div>
       <a class="daily-result-link" id="daily-result-link" href="room-h.html">走進這個房間 <span aria-hidden="true">→</span></a>
     </div>
+      <p class="daily-checkin-kicker">A QUIET CHECK-IN · 只需十秒</p>
     <p class="daily-local-note"><span aria-hidden="true">◌</span> 不需登入；你的選擇只保存在這台裝置。</p>
   </section>
 
@@ -382,9 +376,8 @@ try {
     </div>
   </div>
 
-  <div id="journey" class="journey-map">
+  <div id="journey" class="journey-map home-surface">
     <header class="journey-heading">
-      <p class="journey-index">CHAPTERS · 01—03</p>
       <h2 data-zh="沿著情緒，走回自己" data-en="Follow the feeling back to yourself">沿著情緒，走回自己</h2>
       <p data-zh="六個房間，三段旅程。你不必依序前進，只要選擇此刻最接近你的入口。" data-en="Six rooms, three movements. Begin wherever feels closest tonight.">六個房間，三段旅程。你不必依序前進，只要選擇此刻最接近你的入口。</p>
     </header>
@@ -394,10 +387,10 @@ try {
         <div class="act-meta"><span>ACT I</span><strong data-zh="說出與懷念" data-en="Speak & Remember">說出與懷念</strong></div>
         <div class="act-rooms">
           <a class="door-btn" data-d="E" href="room-e.html" aria-label="前往 Room E — 情緒出口">
-            <span class="room-no">01</span><span class="dl">E</span><span class="door-copy"><b data-zh="情緒出口" data-en="Emotional Exit">情緒出口</b><small data-zh="讓沒有名字的重量，被聽見" data-en="Let the unnamed weight be heard">讓沒有名字的重量，被聽見</small></span><span class="door-arrow">↗</span>
+            <span class="room-no">01</span><span class="dl" aria-hidden="true">墨</span><span class="door-copy"><b data-zh="情緒出口" data-en="Emotional Exit">情緒出口</b><small data-zh="讓沒有名字的重量，被聽見" data-en="Let the unnamed weight be heard">讓沒有名字的重量，被聽見</small></span><span class="door-arrow">↗</span>
           </a>
           <a class="door-btn" data-d="M" href="room-m.html" aria-label="前往 Room M — 思念映射">
-            <span class="room-no">02</span><span class="dl">M</span><span class="door-copy"><b data-zh="思念映射" data-en="Memory Mapping">思念映射</b><small data-zh="把想念放上夜空" data-en="Place your memory among the stars">把想念放上夜空</small></span><span class="door-arrow">↗</span>
+            <span class="room-no">02</span><span class="dl" aria-hidden="true">星</span><span class="door-copy"><b data-zh="思念映射" data-en="Memory Mapping">思念映射</b><small data-zh="把想念放上夜空" data-en="Place your memory among the stars">把想念放上夜空</small></span><span class="door-arrow">↗</span>
           </a>
         </div>
       </section>
@@ -406,10 +399,10 @@ try {
         <div class="act-meta"><span>ACT II</span><strong data-zh="修補與釋放" data-en="Repair & Release">修補與釋放</strong></div>
         <div class="act-rooms">
           <a class="door-btn" data-d="P" href="room-p.html" aria-label="前往 Room P — 碎片修補">
-            <span class="room-no">03</span><span class="dl">P</span><span class="door-copy"><b data-zh="碎片修補" data-en="Kintsugi Repair">碎片修補</b><small data-zh="讓裂痕成為光的入口" data-en="Let the fracture become an opening for light">讓裂痕成為光的入口</small></span><span class="door-arrow">↗</span>
+            <span class="room-no">03</span><span class="dl" aria-hidden="true">金</span><span class="door-copy"><b data-zh="碎片修補" data-en="Kintsugi Repair">碎片修補</b><small data-zh="讓裂痕成為光的入口" data-en="Let the fracture become an opening for light">讓裂痕成為光的入口</small></span><span class="door-arrow">↗</span>
           </a>
           <a class="door-btn" data-d="A" href="room-a.html" aria-label="前往 Room A — 神聖避難所">
-            <span class="room-no">04</span><span class="dl">A</span><span class="door-copy"><b data-zh="神聖避難所" data-en="Sacred Asylum">神聖避難所</b><small data-zh="讓痛苦隨時間消散" data-en="Let pain dissolve with time">讓痛苦隨時間消散</small></span><span class="door-arrow">↗</span>
+            <span class="room-no">04</span><span class="dl" aria-hidden="true">沙</span><span class="door-copy"><b data-zh="神聖避難所" data-en="Sacred Asylum">神聖避難所</b><small data-zh="讓痛苦隨時間消散" data-en="Let pain dissolve with time">讓痛苦隨時間消散</small></span><span class="door-arrow">↗</span>
           </a>
         </div>
       </section>
@@ -418,20 +411,20 @@ try {
         <div class="act-meta"><span>ACT III</span><strong data-zh="交換與回家" data-en="Exchange & Return">交換與回家</strong></div>
         <div class="act-rooms">
           <a class="door-btn" data-d="T" href="room-t.html" aria-label="前往 Room T — 能量共振">
-            <span class="room-no">05</span><span class="dl">T</span><span class="door-copy"><b data-zh="能量共振" data-en="Energy Resonance">能量共振</b><small data-zh="把溫暖交給另一個靈魂" data-en="Pass warmth to another soul">把溫暖交給另一個靈魂</small></span><span class="door-arrow">↗</span>
+            <span class="room-no">05</span><span class="dl" aria-hidden="true">脈</span><span class="door-copy"><b data-zh="能量共振" data-en="Energy Resonance">能量共振</b><small data-zh="把溫暖交給另一個靈魂" data-en="Pass warmth to another soul">把溫暖交給另一個靈魂</small></span><span class="door-arrow">↗</span>
           </a>
           <a class="door-btn" data-d="H" href="room-h.html" aria-label="前往 Room H — 靈魂歸宿">
-            <span class="room-no">06</span><span class="dl">H</span><span class="door-copy"><b data-zh="靈魂歸宿" data-en="Soul's Home">靈魂歸宿</b><small data-zh="保存走過的情緒足跡" data-en="Keep the traces of your journey">保存走過的情緒足跡</small></span><span class="door-arrow">↗</span>
+            <span class="room-no">06</span><span class="dl" aria-hidden="true">家</span><span class="door-copy"><b data-zh="靈魂歸宿" data-en="Soul's Home">靈魂歸宿</b><small data-zh="保存走過的情緒足跡" data-en="Keep the traces of your journey">保存走過的情緒足跡</small></span><span class="door-arrow">↗</span>
           </a>
         </div>
       </section>
     </div>
 
+      <p class="journey-index">CHAPTERS · 01—03</p>
     <p class="flow-line" data-zh="承認 · 安放 · 修補 · 釋放 · 交換 · 回家" data-en="Acknowledge · Place · Repair · Release · Exchange · Home">承認 · 安放 · 修補 · 釋放 · 交換 · 回家</p>
   </div>
 
-  <aside class="hero-manifesto">
-    <p class="manifesto-label">CREATIVE STATEMENT</p>
+  <aside class="hero-manifesto home-surface">
     <p class="hero-desc">
       <span data-zh="數位時代的情緒安放平台" data-en="An emotional sanctuary for the digital age.">數位時代的情緒安放平台</span>
       <span data-zh="以文學敘事，留下不被影像取代的真實。" data-en="Literary narrative for truths that images cannot replace.">以文學敘事，留下不被影像取代的真實。</span>
@@ -445,7 +438,7 @@ try {
 
 </main>
 
-<footer>
+<footer class="home-surface">
   <p class="footer-farewell" data-zh="你帶走的，比你放下的更多。" data-en="You carry away more than you left behind." data-ja="手放したものより、多くのものを持ち帰る。" data-es="Te llevas más de lo que dejaste atrás." data-fr="Vous repartez avec plus que ce que vous avez déposé." data-de="Du nimmst mehr mit, als du zurückgelassen hast." data-zh-cn="你带走的，比你放下的更多。">你帶走的，比你放下的更多。</p>
   <div class="footer-main">
     <div class="footer-left" data-zh="Every Moment As Truth Heals" data-en="Every Moment As Truth Heals" data-ja="Every Moment As Truth Heals" data-es="Every Moment As Truth Heals" data-fr="Every Moment As Truth Heals" data-de="Every Moment As Truth Heals" data-zh-cn="Every Moment As Truth Heals">Every Moment As Truth Heals</div>
@@ -454,9 +447,9 @@ try {
   </div>
   
   <!-- 新增：About 與 Privacy 連結 -->
-  <div style="display:flex; gap:24px; font-size:12px; color:rgba(255,255,255,0.5); margin-bottom: 24px; font-family:'Noto Sans TC',sans-serif; letter-spacing:1px; flex-wrap:wrap; justify-content:center;">
-      <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" rel="noopener noreferrer" style="text-decoration:underline; transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">About EMPATH (Behance)</a>
-      <a href="https://www.csslight.com/website/74264/EMPATH" target="_blank" rel="noopener" style="text-decoration:underline; transition:color 0.3s;">CSS Light Recognition</a>
+  <div class="footer-links">
+      <a href="https://www.behance.net/gallery/251309763/EMPATH-Every-Moment-As-Truth-Heals?platform=direct" target="_blank" rel="noopener noreferrer">About EMPATH (Behance)</a>
+      <a href="https://www.csslight.com/website/74264/EMPATH" target="_blank" rel="noopener">CSS Light Recognition</a>
       <button type="button" class="footer-privacy-btn" onclick="window.openCreator()" data-zh="創作者公告" data-en="Creator Notes">創作者公告</button>
       <button type="button" class="footer-privacy-btn" onclick="window.openPrivacy()" data-zh="隱私與承諾" data-en="Privacy Philosophy">隱私與承諾</button>
   </div>
@@ -515,7 +508,7 @@ try {
 
 
 <script defer src="collective-calendar.js?v=21.1.0"></script>
-<script src="interactions.js?v=20.5"></script>
+<script src="interactions.js?v=24.1.0"></script>
 <script src="room-router.js?v=20.5"></script>
 <script type="module" src="private-weather.mjs?v=24.0.0"></script>
 
