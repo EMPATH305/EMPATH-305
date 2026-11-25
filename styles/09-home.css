@@ -130,7 +130,7 @@ html.empath-home-page #hero:has(.hero-opening:hover) .cinematic-lens { visibilit
 .home-surface .hero-kicker { font-size: var(--home-xs); color: var(--home-muted); margin-bottom: var(--home-s4); }
 .home-surface .hero-title { font-size: clamp(48px, 9vw, 116px); font-weight: 400; letter-spacing: -.025em; line-height: 1.2; margin-left: -.04em; }
 .home-surface .hero-sub { color: var(--home-paper); font-size: clamp(14px, 2vw, 20px); margin: var(--home-s2) 0 var(--home-s6); }
-.home-surface .hero-lead { font-size: clamp(18px, 2.2vw, 24px); max-width: 22em; line-height: 1.9; text-wrap: pretty; }
+.home-surface .hero-lead { font-size: clamp(18px, 2.2vw, 24px); max-width: 22em; line-height: 1.9; text-wrap: balance; }
 .home-surface .hero-actions { margin-top: var(--home-s6); display: flex; flex-wrap: wrap; align-items: center; gap: var(--home-s2) var(--home-s4); }
 .home-surface .cinema-cta { min-height: 48px; padding: var(--home-s1) 0; display: inline-flex; align-items: center; font-size: var(--home-sm); border-bottom: 1px solid var(--home-muted); }
 .home-surface .cinema-cta-primary { border-bottom-color: var(--home-paper); font-size: var(--home-body); }

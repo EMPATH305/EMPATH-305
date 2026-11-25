@@ -26,7 +26,7 @@ for (const width of [375, 1440]) {
     await expect(page.locator('.hero-manifesto')).not.toHaveAttribute('aria-hidden', 'true');
     await page.locator('.door-btn[data-d="T"]').evaluate(el => {el.style.boxShadow='0 0 25px orange';el.style.borderColor='orange';});
     await expect(page.locator('.door-btn[data-d="T"]')).toHaveClass(/has-return-echo/);
-    const audit = await page.evaluate(() => {
+    const measureHome = () => {
       const issues=[];
       const roots=[...document.querySelectorAll('.home-surface')];
       const elements=[...new Set(roots.flatMap(el=>[el,...el.querySelectorAll('*')]))];
@@ -39,6 +39,7 @@ for (const width of [375, 1440]) {
         for (const pseudo of [null,'::before','::after']) {
           const s=getComputedStyle(el,pseudo);
           if (pseudo && (s.content==='none'||s.content==='normal')) continue;
+          if (/\p{Emoji_Presentation}|\p{Extended_Pictographic}\uFE0F|✦/u.test(s.content)) issues.push([label(el),pseudo,'emoji content']);
           if(s.boxShadow!=='none') issues.push([label(el),pseudo,'shadow',s.boxShadow]);
           if(s.backdropFilter && s.backdropFilter!=='none') issues.push([label(el),pseudo,'backdrop',s.backdropFilter]);
           if(s.animationName!=='none' && s.animationIterationCount.split(',').some(n=>n.trim()==='infinite')) issues.push([label(el),pseudo,'infinite animation']);
@@ -60,13 +61,15 @@ for (const width of [375, 1440]) {
         if(contrast<4.5)issues.push([label(el),'contrast',contrast]);
       }
       return {issues,width:document.documentElement.scrollWidth, cards:[...document.querySelectorAll('.door-btn')].map(el=>{const r=el.getBoundingClientRect();return {width:r.width,height:r.height};}),acts:[...document.querySelectorAll('.journey-act')].map(el=>el.getBoundingClientRect().left)};
-    });
+    };
+    const audit = await page.evaluate(measureHome);
     expect(audit.issues).toEqual([]);
     expect(audit.width).toBeLessThanOrEqual(width);
     expect(new Set(audit.cards.map(c=>Math.round(c.width))).size).toBe(1);
     expect(new Set(audit.cards.map(c=>Math.round(c.height))).size).toBe(1);
     expect(audit.acts[1]-audit.acts[0]).toBeCloseTo(28);
     expect(audit.acts[2]-audit.acts[0]).toBeCloseTo(56);
+    if (await page.locator('.collective-grief-close').isVisible()) await page.locator('.collective-grief-close').click();
     await testInfo.attach(`homepage-${width}.png`, { body:await page.screenshot({ fullPage:true }),contentType:'image/png' });
     await page.locator('[data-mood="missing"]').click();
     await expect(page.locator('#daily-result-link')).toHaveAttribute('href','room-m.html');
@@ -78,25 +81,31 @@ for (const width of [375, 1440]) {
     if(width<901) await page.locator('#hamburger-btn').click();
     else await page.locator('#nav-utility-toggle').click();
     await expect(page.locator('#nav-controls')).toBeVisible();
-    await page.locator('#audio-btn').click();
+    expect((await page.evaluate(measureHome)).issues).toEqual([]);
+    await page.locator('#audio-btn .home-control-glyph').click();
     await expect(page.locator('#audio-btn')).not.toContainText('🔊');
+    await expect(page.locator('#nav-controls')).toBeVisible();
+    expect((await page.evaluate(measureHome)).issues).toEqual([]);
     await expect(page.locator('#audio-btn .home-control-glyph')).toHaveAttribute('aria-hidden','true');
     await page.locator('#audio-btn').click();
     await page.locator('#lang-select-btn').click();
     await page.locator('[data-lang="en"]').click();
     await expect(page.locator('.hero-lead')).toHaveText('Some feelings do not need to be solved. They only need a place to be seen.');
     await page.evaluate(()=>window.closeMobileNav());
+    expect((await page.evaluate(measureHome)).issues).toEqual([]);
     await testInfo.attach(`homepage-${width}-english.png`, { body:await page.screenshot({fullPage:true}),contentType:'image/png' });
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.evaluate(()=>window.toggleHSP());
     await expect(page.locator('body')).toHaveClass(/hsp-mode/);
     await expect(page.locator('.cinematic-sky')).toBeHidden();
+    expect((await page.evaluate(measureHome)).issues).toEqual([]);
     await page.evaluate(()=>window.toggleHSP());
     await page.emulateMedia({reducedMotion:'reduce'});
     await expect(page.locator('.cinematic-lens')).toBeHidden();
     for(const mode of ['dawn-mode','night-mode']){
       await page.evaluate(mode=>document.body.classList.add(mode),mode);
       await expect(page.locator('#hero')).toBeVisible();
+      expect((await page.evaluate(measureHome)).issues).toEqual([]);
       await page.evaluate(mode=>document.body.classList.remove(mode),mode);
     }
     await expect(page.locator('#empath-safe-mode')).toBeHidden();
