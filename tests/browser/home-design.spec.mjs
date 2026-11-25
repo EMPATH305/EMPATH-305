@@ -12,6 +12,7 @@ for (const width of [375, 1440]) {
     await page.setViewportSize({ width, height:900 });
     await page.emulateMedia({ reducedMotion:'no-preference' });
     await prepare(page);
+    await page.clock.setFixedTime(new Date('2026-12-31T12:00:00Z'));
     await page.goto('/index.html', { waitUntil:'domcontentloaded' });
     await expect(page.locator('#hero')).toBeVisible();
     await page.waitForFunction(() => typeof window.switchLang === 'function');
@@ -21,6 +22,10 @@ for (const width of [375, 1440]) {
     await expect(page.locator('.aw-site-noise, .empath-living-field')).toHaveCount(0);
     await expect(page.locator('.daily-mood > span')).toHaveText(['雨','霧','月','傷','燭','晴']);
     await expect(page.locator('.door-btn .dl')).toHaveText(['墨','星','金','沙','脈','家']);
+    await expect(page.locator('#collective-date-whisper')).toBeVisible();
+    await expect(page.locator('.hero-manifesto')).not.toHaveAttribute('aria-hidden', 'true');
+    await page.locator('.door-btn[data-d="T"]').evaluate(el => {el.style.boxShadow='0 0 25px orange';el.style.borderColor='orange';});
+    await expect(page.locator('.door-btn[data-d="T"]')).toHaveClass(/has-return-echo/);
     const audit = await page.evaluate(() => {
       const issues=[];
       const roots=[...document.querySelectorAll('.home-surface')];
@@ -40,7 +45,7 @@ for (const width of [375, 1440]) {
         }
         const text=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim();
         if (!text) continue;
-        if (/\p{Extended_Pictographic}|✦/u.test(text)) issues.push([label(el),'emoji',text]);
+        if (/\p{Emoji_Presentation}|\p{Extended_Pictographic}\uFE0F|✦/u.test(text)) issues.push([label(el),'emoji',text]);
         if (parseFloat(cs.fontSize)<12) issues.push([label(el),'small font',cs.fontSize]);
         if (!cs.fontFamily.includes('Noto Serif TC')) issues.push([label(el),'font',cs.fontFamily]);
         if (parseFloat(cs.letterSpacing)>parseFloat(cs.fontSize)*.04+.01) issues.push([label(el),'spacing',cs.letterSpacing]);

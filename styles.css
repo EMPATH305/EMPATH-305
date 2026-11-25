@@ -3809,7 +3809,7 @@ html.empath-inapp-facebook .room { overflow-x: hidden !important; }
 }
 
 /* ===== EMPATH v20.2 · STILL HERE ===== */
-.collective-date-whisper {
+.collective-date-whisper:not(:where(.home-surface, .home-surface *)) {
   width: min(720px, calc(100% - 36px));
   margin: 22px auto 0;
   padding: 15px 20px;
@@ -3819,7 +3819,7 @@ html.empath-inapp-facebook .room { overflow-x: hidden !important; }
   letter-spacing: .08em;
   text-align: center;
 }
-.collective-date-whisper::before { content: '✦'; margin-right: 10px; color: rgba(201,168,76,.62); }
+.collective-date-whisper:not(:where(.home-surface, .home-surface *))::before { content: '✦'; margin-right: 10px; color: rgba(201,168,76,.62); }
 
 .a-collective-count {
   max-width: 620px;
@@ -4403,7 +4403,7 @@ nav.home-surface {
   background: var(--bg);
   border-bottom: 1px solid var(--home-line);
 }
-.home-surface .nav-logo { font-size: 20px; font-weight: 700; }
+.home-surface .nav-logo { margin-right: auto; font-size: 20px; font-weight: 700; }
 .home-surface .nav-menu { display: flex; align-items: center; gap: var(--home-s4); position: relative; }
 .home-surface .nav-letters { display: flex; gap: var(--home-s1); }
 .home-surface .nav-letter {
@@ -4464,11 +4464,12 @@ html.empath-home-page #hero:has(.hero-opening:hover) .cinematic-lens { visibilit
 .home-surface .hero-kicker { font-size: var(--home-xs); color: var(--home-muted); margin-bottom: var(--home-s4); }
 .home-surface .hero-title { font-size: clamp(48px, 9vw, 116px); font-weight: 400; letter-spacing: -.025em; line-height: 1.2; margin-left: -.04em; }
 .home-surface .hero-sub { color: var(--home-paper); font-size: clamp(14px, 2vw, 20px); margin: var(--home-s2) 0 var(--home-s6); }
-.home-surface .hero-lead { font-size: clamp(18px, 2.2vw, 24px); max-width: 25em; line-height: 1.9; }
+.home-surface .hero-lead { font-size: clamp(18px, 2.2vw, 24px); max-width: 22em; line-height: 1.9; text-wrap: pretty; }
 .home-surface .hero-actions { margin-top: var(--home-s6); display: flex; flex-wrap: wrap; align-items: center; gap: var(--home-s2) var(--home-s4); }
 .home-surface .cinema-cta { min-height: 48px; padding: var(--home-s1) 0; display: inline-flex; align-items: center; font-size: var(--home-sm); border-bottom: 1px solid var(--home-muted); }
 .home-surface .cinema-cta-primary { border-bottom-color: var(--home-paper); font-size: var(--home-body); }
 .home-surface .cinema-cta:hover { border-bottom-width: 2px; }
+.home-surface .collective-date-whisper { max-width: 38em; margin-bottom: var(--home-s3); color: var(--home-muted); font-size: var(--home-sm); }
 .home-surface .cosmic-presence, .home-surface .return-memory { font-size: var(--home-xs); color: var(--home-muted); max-width: 38em; }
 .home-surface .cosmic-presence:empty, .home-surface .return-memory:empty { display: none; }
 .home-surface .cosmic-presence { margin-bottom: var(--home-s2); }
@@ -4477,7 +4478,7 @@ html.empath-home-page #hero:has(.hero-opening:hover) .cinematic-lens { visibilit
 /* A small weather vocabulary, laid out as text rather than glass tiles. */
 .daily-checkin.home-surface { width: min(880px, calc(100% - 2 * var(--home-gutter))); margin: var(--home-s4) auto var(--home-s16); scroll-margin-top: 100px; }
 .home-surface .daily-checkin-head { max-width: 40em; }
-.home-surface .daily-checkin-kicker { color: var(--home-muted); font-size: var(--home-xs); text-transform: lowercase; margin-bottom: var(--home-s2); }
+.home-surface .daily-checkin-kicker { margin-top: var(--home-s3); color: var(--home-muted); font-size: var(--home-xs); text-transform: lowercase; margin-bottom: var(--home-s2); }
 .home-surface #daily-checkin-title { font-size: var(--home-title); font-weight: 400; line-height: 1.5; margin-bottom: var(--home-s3); }
 .home-surface .daily-checkin-head > p:last-child { font-size: var(--home-sm); color: var(--home-muted); }
 .home-surface .daily-mood-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--home-s2) var(--home-s4); margin-top: var(--home-s4); }
@@ -4497,7 +4498,7 @@ html.empath-home-page #hero:has(.hero-opening:hover) .cinematic-lens { visibilit
 /* Three movements; all six entrances have identical dimensions and type scale. */
 .journey-map.home-surface { width: min(1000px, calc(100% - 2 * var(--home-gutter))); margin: 0 auto; padding: var(--home-s4) 0 var(--home-s12); scroll-margin-top: 100px; }
 .home-surface .journey-heading { max-width: 42em; margin-bottom: var(--home-s8); }
-.home-surface .journey-index { font-size: var(--home-xs); color: var(--home-muted); text-transform: lowercase; margin-bottom: var(--home-s2); }
+.home-surface .journey-index { margin-top: var(--home-s4); font-size: var(--home-xs); color: var(--home-muted); text-transform: lowercase; margin-bottom: var(--home-s2); }
 .home-surface .journey-heading h2 { font-size: var(--home-title); font-weight: 400; line-height: 1.5; }
 .home-surface .journey-heading > p:last-child { max-width: 36em; margin-top: var(--home-s3); font-size: var(--home-sm); color: var(--home-muted); }
 .home-surface .journey-act { width: calc(100% - 56px); margin-bottom: var(--home-s8); }
@@ -4508,7 +4509,7 @@ html.empath-home-page #hero:has(.hero-opening:hover) .cinematic-lens { visibilit
 .home-surface .act-meta strong { font-size: var(--home-body); font-weight: 400; }
 .home-surface .act-rooms { display: grid; }
 .home-surface .door-btn { position: relative; display: grid; grid-template-columns: 28px 56px minmax(0, 1fr) 24px; gap: var(--home-s3); align-items: center; min-height: 128px; padding: var(--home-s3) 0; border-bottom: 1px solid var(--home-line); border-radius: 0; }
-.home-surface .door-btn:hover, .home-surface .door-btn:focus-visible { border-bottom-color: var(--room-color); }
+.home-surface .door-btn.has-return-echo, .home-surface .door-btn:hover, .home-surface .door-btn:focus-visible { border-bottom-color: var(--room-color); }
 .home-surface .room-no { font-size: var(--home-xs); color: var(--home-muted); }
 .home-surface .door-btn .dl { font-size: 36px; color: var(--room-color); line-height: 1.3; }
 .home-surface .door-copy { min-width: 0; }
@@ -4532,7 +4533,7 @@ footer.home-surface { padding: var(--home-s8) var(--home-gutter) var(--home-s12)
 .home-surface .footer-links { display: flex; flex-wrap: wrap; gap: var(--home-s1) var(--home-s3); font-size: var(--home-xs); }
 .home-surface .footer-links a, .home-surface .footer-privacy-btn { min-height: 44px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; font-size: var(--home-xs); }
 .home-surface .footer-copy { margin-top: var(--home-s4); font-size: var(--home-xs); color: var(--home-muted); }
-#creator-btn.home-surface { position: fixed; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); z-index: 480; width: 48px; height: 48px; display: grid; place-items: center; padding: 0; appearance: none; background: var(--bg); border: 1px solid var(--home-line); border-radius: var(--home-radius); font-size: 20px; cursor: pointer; }
+#creator-btn.home-surface { position: relative; flex-shrink: 0; width: 48px; height: 48px; display: grid; place-items: center; padding: 0; appearance: none; background: transparent; border: 1px solid var(--home-line); border-radius: var(--home-radius); font-size: 20px; cursor: pointer; }
 #creator-btn.home-surface:hover { border-color: var(--home-paper); }
 /* Retain the calm mode and time-of-day background variables. */
 body.hsp-mode .home-surface { --home-paper: #D9D9D6; --home-muted: #AFBDC9; }

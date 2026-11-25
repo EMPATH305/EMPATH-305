@@ -121,7 +121,7 @@
 }
 
 /* ===== EMPATH v20.2 · STILL HERE ===== */
-.collective-date-whisper {
+.collective-date-whisper:not(:where(.home-surface, .home-surface *)) {
   width: min(720px, calc(100% - 36px));
   margin: 22px auto 0;
   padding: 15px 20px;
@@ -131,7 +131,7 @@
   letter-spacing: .08em;
   text-align: center;
 }
-.collective-date-whisper::before { content: '✦'; margin-right: 10px; color: rgba(201,168,76,.62); }
+.collective-date-whisper:not(:where(.home-surface, .home-surface *))::before { content: '✦'; margin-right: 10px; color: rgba(201,168,76,.62); }
 
 .a-collective-count {
   max-width: 620px;

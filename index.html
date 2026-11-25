@@ -86,7 +86,7 @@ try {
 <a class="skip-link" href="#main-content">跳至主要內容</a>
 
 <!-- 創作者公告按鈕與 Modal -->
-<button type="button" id="creator-btn" class="home-surface" aria-label="開啟創作者公告" title="創作者公告" onclick="window.openCreator()"><span aria-hidden="true">信</span></button>
+
 
 <div id="creator-modal" class="share-modal" role="dialog" aria-modal="true" aria-labelledby="creator-modal-title" aria-hidden="true" tabindex="-1" onclick="if(event.target===this) window.closeCreator()">
   <div class="wrapped-card" style="max-width: 500px; text-align: left; padding: 40px 32px;">
@@ -251,6 +251,7 @@ try {
 
 <nav class="home-surface" aria-label="主要導覽">
   <a href="#hero" class="nav-logo">EMPATH</a>
+  <button type="button" id="creator-btn" class="home-surface" aria-label="開啟創作者公告" title="創作者公告" onclick="window.openCreator()"><span aria-hidden="true">信</span></button>
   <button class="hamburger" id="hamburger-btn" type="button" aria-label="開啟導覽選單" aria-expanded="false" aria-controls="nav-menu" onclick="window.toggleMobileNav()">
       <span></span><span></span><span></span>
   </button>
@@ -320,7 +321,6 @@ try {
 
   <section class="daily-checkin home-surface" id="daily-checkin" aria-labelledby="daily-checkin-title">
     <div class="daily-checkin-head">
-      <p class="daily-checkin-kicker">A QUIET CHECK-IN · 只需十秒</p>
       <h2 id="daily-checkin-title">今天的你，現在是什麼天氣？</h2>
       <p>不用解釋，也沒有好壞。選一個最靠近此刻的感受，讓 EMPATH 為你留一條路。</p>
     </div>
@@ -340,6 +340,7 @@ try {
       </div>
       <a class="daily-result-link" id="daily-result-link" href="room-h.html">走進這個房間 <span aria-hidden="true">→</span></a>
     </div>
+      <p class="daily-checkin-kicker">A QUIET CHECK-IN · 只需十秒</p>
     <p class="daily-local-note"><span aria-hidden="true">◌</span> 不需登入；你的選擇只保存在這台裝置。</p>
   </section>
 
@@ -377,7 +378,6 @@ try {
 
   <div id="journey" class="journey-map home-surface">
     <header class="journey-heading">
-      <p class="journey-index">CHAPTERS · 01—03</p>
       <h2 data-zh="沿著情緒，走回自己" data-en="Follow the feeling back to yourself">沿著情緒，走回自己</h2>
       <p data-zh="六個房間，三段旅程。你不必依序前進，只要選擇此刻最接近你的入口。" data-en="Six rooms, three movements. Begin wherever feels closest tonight.">六個房間，三段旅程。你不必依序前進，只要選擇此刻最接近你的入口。</p>
     </header>
@@ -420,6 +420,7 @@ try {
       </section>
     </div>
 
+      <p class="journey-index">CHAPTERS · 01—03</p>
     <p class="flow-line" data-zh="承認 · 安放 · 修補 · 釋放 · 交換 · 回家" data-en="Acknowledge · Place · Repair · Release · Exchange · Home">承認 · 安放 · 修補 · 釋放 · 交換 · 回家</p>
   </div>
 

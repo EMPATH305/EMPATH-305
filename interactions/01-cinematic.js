@@ -130,6 +130,18 @@
   // Keep backend-owned audio behavior intact; normalize only its decorative icon.
   function setupHomePresentation() {
     if (!document.documentElement.classList.contains('empath-home-page')) return;
+    const warmthDoor = document.querySelector('.home-surface .door-btn[data-d="T"]');
+    if (warmthDoor) {
+      // Retain the return-echo cue as a colored rule, without backend glow styles.
+      const normalizeEcho = () => {
+        if (!warmthDoor.style.boxShadow) return;
+        warmthDoor.classList.add('has-return-echo');
+        warmthDoor.style.removeProperty('box-shadow');
+        warmthDoor.style.removeProperty('border-color');
+      };
+      normalizeEcho();
+      new MutationObserver(normalizeEcho).observe(warmthDoor, { attributes: true, attributeFilter: ['style'] });
+    }
     const audio = document.getElementById('audio-btn');
     if (audio) {
       const normalizeIcon = () => {
