@@ -8,7 +8,8 @@ for (const page of pages) {
   const html = readFileSync(page, 'utf8');
 
   for (const asset of requiredAssets) {
-    assert(html.includes(asset), `${page}: missing versioned asset ${asset}`);
+    const expected = page === 'index.html' ? asset.replace('styles.css?v=24.0.0', 'styles.css?v=24.1.0').replace('interactions.js?v=20.5', 'interactions.js?v=24.1.0') : asset;
+    assert(html.includes(expected), `${page}: missing versioned asset ${asset}`);
   }
 
   const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
@@ -210,7 +211,7 @@ for (const icon of manifest.icons) {
 }
 
 const serviceWorker = readFileSync('sw.js', 'utf8');
-assert(serviceWorker.includes('empath-cache-v24.0.0'), 'Service worker cache must be bumped for v24.0.0');
+assert(serviceWorker.includes('empath-cache-v24.1.0'), 'Service worker cache must be bumped for v24.0.0');
 assert(serviceWorker.includes("'./firebase-client.mjs'"), 'Service worker must precache the Firebase client boundary');
 assert(serviceWorker.includes("'./browser-runtime.mjs'"), 'Service worker must precache embedded-browser detection');
 assert(serviceWorker.includes("'./room-e-controller.mjs'"), 'Service worker must precache the Room E controller');

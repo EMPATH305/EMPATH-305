@@ -14,7 +14,10 @@ Edit these source files, then run `npm run build:css`. Commit both the sources a
 | 06-concept-and-art-overrides.css | Concept experience, content rhythm and art overrides |
 | 07-responsive-and-layout.css | Mobile/in-app viewport, accessibility and layout overrides |
 | 08-room-and-community-refinements.css | Later room refinements, community safety and calendar |
+| 09-home.css | Consolidated homepage: navigation, hero, check-in, entrances and footer |
 
 The browser continues to request only `styles.css`; source files are not linked or precached individually. Concatenation adds no separators and performs no minification, URL rewriting or reordering. Relative asset URLs remain relative to root `styles.css`.
 
 Future semantic regrouping must be reviewed separately because it can change precedence. The v23.13 extraction reproduces the previous deployed stylesheet byte for byte.
+
+Homepage components carry `.home-surface`. Legacy shared controls exclude that subtree with a zero-specificity `:where()` guard, preserving their behavior in rooms and dialogs. Homepage-only rules were removed from earlier sources; edit `09-home.css` for this surface instead of adding overrides.

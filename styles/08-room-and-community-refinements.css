@@ -1,7 +1,6 @@
 /* =========================================================
    v17 — Daily emotional check-in, private week sky, echo
    ========================================================= */
-.daily-checkin,
 .emotion-week {
   position: relative;
   width: min(980px, calc(100% - 40px));
@@ -14,7 +13,6 @@
   overflow: hidden;
 }
 
-.daily-checkin::before,
 .emotion-week::before {
   content: "";
   position: absolute;
@@ -26,33 +24,16 @@
   mask-image: linear-gradient(to bottom, #000, transparent 74%);
 }
 
-.daily-checkin {
-  z-index: 3;
-  /* Keep the opening as a true full-screen scene; reveal this card only after scrolling. */
-  margin-top: 0;
-  margin-bottom: clamp(82px, 11vw, 150px);
-  padding: clamp(28px, 5vw, 58px);
-  border-radius: 3px 30px 3px 30px;
-}
-
-.daily-checkin-head,
-.daily-mood-grid,
-.daily-checkin-result,
-.daily-local-note,
 .emotion-week > * { position: relative; z-index: 1; }
 
-.daily-checkin-head { max-width: 680px; margin-bottom: 30px; }
-.daily-checkin-kicker,
 .emotion-week-kicker,
-.tonight-echo-kicker,
-.daily-result-label {
+.tonight-echo-kicker {
   margin: 0 0 10px;
   color: var(--gold);
   font: 600 10px/1.4 'Noto Sans TC', sans-serif;
   letter-spacing: .24em;
   text-transform: uppercase;
 }
-.daily-checkin h2,
 .emotion-week h3,
 .tonight-echo h2 {
   margin: 0;
@@ -60,84 +41,6 @@
   font-family: 'Noto Serif TC', 'Cormorant Garamond', serif;
   font-weight: 500;
 }
-.daily-checkin h2 { font-size: clamp(26px, 4vw, 40px); letter-spacing: .06em; }
-.daily-checkin-head > p:last-child {
-  max-width: 620px;
-  margin: 14px 0 0;
-  color: rgba(255,255,255,.57);
-  font-size: 14px;
-  line-height: 1.9;
-}
-
-.daily-mood-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 10px;
-}
-.daily-mood {
-  display: grid;
-  grid-template-columns: 38px 1fr;
-  grid-template-rows: auto auto;
-  column-gap: 12px;
-  align-items: center;
-  min-height: 88px;
-  padding: 17px 18px;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 2px 14px 2px 14px;
-  color: rgba(255,255,255,.72);
-  background: rgba(255,255,255,.025);
-  text-align: left;
-  cursor: pointer;
-  transition: transform .25s ease, border-color .25s ease, background .25s ease, box-shadow .25s ease;
-}
-.daily-mood > span { grid-row: 1 / 3; font-size: 23px; filter: grayscale(.25); }
-.daily-mood strong { align-self: end; font: 500 14px/1.4 'Noto Serif TC', serif; letter-spacing: .08em; }
-.daily-mood small { align-self: start; margin-top: 3px; color: rgba(255,255,255,.36); font-size: 10px; letter-spacing: .05em; }
-.daily-mood:hover,
-.daily-mood:focus-visible {
-  transform: translateY(-2px);
-  border-color: rgba(201,168,76,.5);
-  background: rgba(201,168,76,.075);
-  outline: none;
-}
-.daily-mood[aria-pressed="true"] {
-  border-color: var(--gold);
-  color: #fff8df;
-  background: linear-gradient(135deg, rgba(201,168,76,.17), rgba(201,168,76,.045));
-  box-shadow: inset 3px 0 var(--gold), 0 12px 30px rgba(0,0,0,.18);
-}
-
-.daily-checkin-result {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 26px;
-  margin-top: 20px;
-  padding: 22px 24px;
-  border: 1px solid rgba(201,168,76,.25);
-  border-radius: 2px 16px 2px 16px;
-  background: rgba(201,168,76,.065);
-}
-.daily-checkin-result[hidden] { display: none; }
-.daily-checkin-result strong { display: block; color: #f4ead0; font: 500 20px/1.4 'Noto Serif TC', serif; letter-spacing: .08em; }
-.daily-checkin-result p { margin: 5px 0 0; color: rgba(255,255,255,.48); font-size: 12px; line-height: 1.7; }
-.daily-result-link {
-  flex: 0 0 auto;
-  min-height: 48px;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 20px;
-  border: 1px solid var(--gold);
-  border-radius: 999px;
-  color: #f4df9a;
-  font-size: 12px;
-  letter-spacing: .12em;
-  transition: color .2s ease, background .2s ease, transform .2s ease;
-}
-.daily-result-link:hover,
-.daily-result-link:focus-visible { color: #111; background: var(--gold); transform: translateX(2px); outline: none; }
-.daily-local-note { margin: 18px 0 0; color: rgba(255,255,255,.3); font-size: 10px; letter-spacing: .08em; }
 
 .emotion-week {
   margin-top: 34px;
@@ -199,12 +102,7 @@
 .tonight-echo-home { border-color: var(--gold) !important; color: var(--gold) !important; }
 
 @media (max-width: 760px) {
-  .daily-checkin { width: calc(100% - 24px); margin-top: 0; padding: 28px 18px; }
-  .daily-mood-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .daily-mood { grid-template-columns: 30px 1fr; min-height: 84px; padding: 14px 12px; column-gap: 9px; }
-  .daily-mood > span { font-size: 20px; }
-  .daily-checkin-result { align-items: stretch; flex-direction: column; padding: 20px; }
-  .daily-result-link { align-self: flex-start; }
+
   .emotion-week { width: calc(100% - 24px); padding: 26px 16px; }
   .emotion-week-head { align-items: start; flex-direction: column; gap: 12px; }
   .emotion-week-grid { grid-template-columns: repeat(4, minmax(72px,1fr)); overflow-x: auto; padding-bottom: 5px; }
@@ -212,17 +110,14 @@
 }
 
 @media (max-width: 390px) {
-  .daily-mood-grid { grid-template-columns: 1fr; }
-  .daily-mood { min-height: 76px; }
+
   .emotion-week-grid { grid-template-columns: repeat(7, 78px); }
   .tonight-echo-actions { flex-direction: column; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .daily-mood,
-  .daily-result-link,
   .tonight-echo,
-  .tonight-echo-card { transition: none !important; }
+.tonight-echo-card { transition: none !important; }
 }
 
 /* ===== EMPATH v20.2 · STILL HERE ===== */

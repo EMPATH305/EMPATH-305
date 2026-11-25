@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empath-cache-v24.0.0'; // Shared realtime subscription lifecycle
+const CACHE_NAME = 'empath-cache-v24.1.0'; // Shared realtime subscription lifecycle
 
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // 強制立即更新守護者

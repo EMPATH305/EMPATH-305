@@ -95,7 +95,7 @@
 }
 .presence-spark.show { opacity: 0.8; animation: pulse-spark 3s infinite; }
 .presence-spark .spark-icon { font-size: 14px; font-weight: bold; }
-  
+
 /* 手機版隱藏游標跟隨與微調按鈕位置 */
 @media(max-width:768px){
     #cursor-glow { display: none !important; }
@@ -103,19 +103,16 @@
 }
 
 @media(max-width:768px){
-  nav { padding: 16px 20px; } .nav-logo { font-size: 22px; } .hamburger { display: flex; }
-  .nav-menu { position: absolute; top: 100%; left: 0; right: 0; background: #03070a; flex-direction: column; padding: 24px; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.8); transform: translateY(-150%); opacity: 0; pointer-events: none; }
-  .nav-menu.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-  .nav-letters { flex-wrap: wrap; justify-content: center; width: 100%; gap: 12px; } .nav-controls { justify-content: center; width: 100%; }
-  .hsp-first-visit-tooltip { right: 50%; transform: translateX(50%); top: 56px; font-size:12px; padding: 12px 30px 12px 16px;}
-  .hsp-first-visit-tooltip::before { right: 50%; transform: translateX(50%) rotate(45deg); }
-  #hero { justify-content: flex-start; padding-top: 150px; }
-  .hero-title { font-size: 15vw; letter-spacing: 10px; margin-top: 4vh; margin-bottom: 20px; }
-  .hero-bg-text { font-size: 34vw; top: 45%; } .hero-sub { font-size: 14px; margin-bottom: 36px; } .hero-desc { margin-bottom: 40px; }
+  nav:not(:where(.home-surface, .home-surface *)) { padding: 16px 20px; } .nav-logo:not(:where(.home-surface, .home-surface *)) { font-size: 22px; } .hamburger:not(:where(.home-surface, .home-surface *)) { display: flex; }
+  .nav-menu:not(:where(.home-surface, .home-surface *)) { position: absolute; top: 100%; left: 0; right: 0; background: #03070a; flex-direction: column; padding: 24px; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.8); transform: translateY(-150%); opacity: 0; pointer-events: none; }
+  .nav-menu.show:not(:where(.home-surface, .home-surface *)) { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .nav-letters:not(:where(.home-surface, .home-surface *)) { flex-wrap: wrap; justify-content: center; width: 100%; gap: 12px; } .nav-controls:not(:where(.home-surface, .home-surface *)) { justify-content: center; width: 100%; }
+  .hsp-first-visit-tooltip:not(:where(.home-surface, .home-surface *)) { right: 50%; transform: translateX(50%); top: 56px; font-size:12px; padding: 12px 30px 12px 16px;}
+  .hsp-first-visit-tooltip:not(:where(.home-surface, .home-surface *))::before { right: 50%; transform: translateX(50%) rotate(45deg); }
+
   .room { padding: 120px 20px 60px; } .room-letter { font-size: 80px; top: 80px; right: 16px; }
   .t-layout, .kintsugi-board { grid-template-columns: 1fr; } 
-  .hero-quotes { display: none; flex-direction: column; gap: 20px; margin-bottom: 40px;}
-  .hero-quotes.show-quotes { display: flex; animation: fadeSlideIn 0.5s ease; }
+
   #hero-quotes-toggle { display: inline-flex !important; margin: 0 auto 36px; align-items: center; }
   .onboarding-box { padding: 24px 20px; margin-bottom: 40px; }
   .star-tooltip { top: auto !important; bottom: 0 !important; left: 0 !important; width: 100% !important; max-width: none !important; border-radius: 20px 20px 0 0 !important; padding: 40px 24px 48px !important; transform: translateY(100%) !important; transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.4s ease !important; border-bottom: none !important; }
@@ -123,15 +120,18 @@
   .star-tooltip::before { content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; }
   .input-area { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); }
   .send-btn, .action-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-  .door-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+
   .shard { background: rgba(0,0,0,0.45); border: 1px solid rgba(201,168,76,0.45); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
-  .door-btn:active, .send-btn:active, .action-btn:active, .shard:active, .nav-letter:active { transform: scale(0.95) !important; background: rgba(255,255,255,0.15) !important; box-shadow: none !important; transition: all 0.1s !important; }
+  .send-btn:active,
+.action-btn:active,
+.shard:active,
+.nav-letter:active:not(:where(.home-surface, .home-surface *)) { transform: scale(0.95) !important; background: rgba(255,255,255,0.15) !important; box-shadow: none !important; transition: all 0.1s !important; }
   #btt-btn { bottom: 20px; right: 20px; width: 44px; height: 44px; font-size: 18px; }
 }
 @media(max-width:480px){
   .room { padding: 110px 16px 40px; } .t-panel, .t-send-panel { padding: 20px; } .input-area { padding: 16px; font-size: 15px; }
-  .hero-title { font-size: 17vw; letter-spacing: 6px; } .doors-nav { gap: 10px; } .door-btn { padding: 16px 10px; min-width: 80px; }
-  .door-btn .dl{ font-size: 28px; } .door-btn .dz{ font-size: 12px; } .step-wrapper { margin-bottom: 56px; }
+
+    .step-wrapper { margin-bottom: 56px; }
 }
 /* 手機版 Room M 專屬星空與排版優化 */
 @media(max-width: 768px) {
@@ -181,7 +181,7 @@ body.night-mode {
     --bg: #020305 !important; 
     --bg2: #05070a !important;
 }
-body.night-mode .hero-bg-text { opacity: 0.01; } /* 深夜的字更暗 */
+ /* 深夜的字更暗 */
 
 /* 🌅 1. 時刻感知：破曉晨光 (05:00 - 08:00) */
 body.dawn-mode {
@@ -231,9 +231,9 @@ body.anniversary-mode .sand-timer-fill {
     margin-top: 32px; font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--muted);
     letter-spacing: 4px;
 }
-  
+
 /* 📏 魔法八：全站 8px 網格系統對齊與極簡化覆寫 */
-  
+
 /* 強制覆寫手機版舊有的方塊輸入框，保持底線極簡美學 */
 @media(max-width: 768px) {
     .input-area, .sync-input { 
@@ -250,7 +250,7 @@ body.anniversary-mode .sand-timer-fill {
 }
 
 /* 統一按鈕與區塊的 Padding 為 8 的倍數 (8, 16, 24, 32, 48) */
-.door-btn { padding: 24px; }
+
 .room-desc { padding: 16px 24px; }
 .send-btn, .action-btn { padding: 16px 32px; }
 .ob-btn { padding: 16px 24px; }
@@ -299,12 +299,12 @@ body.anniversary-mode .sand-timer-fill {
   border: 0 !important;
 }
 
-:where(#creator-btn, #fortune-spark, #breathe-btn) {
+:where(#creator-btn, #fortune-spark, #breathe-btn):not(:where(.home-surface, .home-surface *)) {
   min-width: 44px !important;
   min-height: 44px !important;
 }
 
-:where(.room-back-lobby, .nav-utility-toggle, .footer-privacy-btn, footer a) {
+:where(.room-back-lobby, .nav-utility-toggle, .footer-privacy-btn, footer a):not(:where(.home-surface, .home-surface *)) {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -346,7 +346,7 @@ body.anniversary-mode .sand-timer-fill {
   font: 12px/1.7 'Noto Sans TC', sans-serif;
 }
 
-body.hsp-mode :where(.room-desc, .e-mode-hint, .daily-local-note, .cosmic-presence, .h-event, footer) {
+body.hsp-mode :where(.room-desc, .e-mode-hint, .daily-local-note, .cosmic-presence, .h-event, footer):not(:where(.home-surface, .home-surface *)) {
   color: rgba(232,230,225,.78) !important;
 }
 

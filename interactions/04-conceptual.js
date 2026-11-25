@@ -83,6 +83,7 @@
   }
 
   function setupLivingParticleField() {
+    if (document.documentElement.classList.contains('empath-home-page')) return;
     const hero = document.getElementById('hero');
     if (!hero || reduceMotion.matches) return;
     const canvas = document.createElement('canvas');

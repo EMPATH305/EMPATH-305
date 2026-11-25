@@ -55,7 +55,6 @@ body {
     font-family: 'Noto Sans TC', sans-serif !important;
     font-weight: 300 !important;
 }
-.hero-title,
 .room-title,
 .wrapped-title {
     font-family: 'Cormorant Garamond', 'Noto Serif TC', serif !important;
@@ -113,7 +112,6 @@ body {
     letter-spacing: 0.22em !important;
 }
 .send-btn,
-.door-btn,
 .action-btn,
 .sync-btn-small {
     font-family: 'Noto Sans TC', sans-serif !important;
@@ -124,18 +122,17 @@ body {
 }
 .e-tool-btn,
 .echo-btn,
-.func-btn {
+.func-btn:not(:where(.home-surface, .home-surface *)) {
     font-size: 11px !important;
     font-weight: 400 !important;
     letter-spacing: 0.14em !important;
 }
 
 /* 03 — 克制的線條與器物邊角 */
-.lang-dropdown-list,
-.hsp-first-visit-tooltip,
+.lang-dropdown-list:not(:where(.home-surface, .home-surface *)),
+.hsp-first-visit-tooltip:not(:where(.home-surface, .home-surface *)),
 .onboarding-box,
 .ob-btn,
-.door-btn,
 #e-draw-canvas,
 .star-tooltip,
 .a-warning-mask,
@@ -187,14 +184,13 @@ textarea {
 
 /* 04 — 沈靜一致的 UI 動態 */
 .send-btn,
-.door-btn,
 .action-btn,
 .ob-btn,
 .sync-btn-small,
 .e-mode-btn,
 .e-tool-btn,
 .echo-btn,
-.func-btn {
+.func-btn:not(:where(.home-surface, .home-surface *)) {
     transition:
         color 320ms ease,
         background-color 320ms ease,
@@ -226,7 +222,6 @@ textarea {
     box-shadow: none !important;
 }
 .send-btn:hover,
-.door-btn:hover,
 .action-btn:hover {
     transform: translateY(-1px) !important;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
@@ -336,8 +331,6 @@ textarea {
     }
 }
 
-
-
 /* H 房間五組數據：避免桌面形成四加一的孤立卡片 */
 @media (min-width: 1025px) {
     #room-h .global-summary,
@@ -359,8 +352,6 @@ textarea {
     }
 }
 
-
-
 /* ===== EMPATH CINEMATIC INTERACTION SYSTEM ===== */
 /* 1 — 房間內容依序展開 */
 body.aw-ready .room .aw-stage {
@@ -380,14 +371,9 @@ body.aw-ready .room .aw-stage.aw-in {
 }
 
 /* 2 — Hero 背景字視差 */
-.hero-bg-text {
-    will-change:transform !important;
-    backface-visibility:hidden !important;
-    transform:translate3d(-50%,calc(-50% + var(--hero-parallax-y,0px)),0) !important;
-}
 
 /* 3 — 磁性按鈕 */
-.send-btn,.door-btn {
+.send-btn {
     --magnetic-x:0px;
     --magnetic-y:0px;
     transform:translate3d(var(--magnetic-x),var(--magnetic-y),0) !important;
@@ -396,7 +382,7 @@ body.aw-ready .room .aw-stage.aw-in {
                border-color 320ms ease,box-shadow 400ms ease !important;
     will-change:transform !important;
 }
-.send-btn.is-magnetic,.door-btn.is-magnetic {
+.send-btn.is-magnetic {
     transition:transform 90ms linear,color 320ms ease,
                background-color 320ms ease,border-color 320ms ease,
                box-shadow 400ms ease !important;
@@ -476,24 +462,22 @@ body.aw-ready .room .aw-stage.aw-in {
     100%{transform:translate3d(-1%,-1%,0)}
 }
 @media (max-width:768px) {
-    .hero-bg-text{--hero-parallax-y:0px !important}
+
     #cursor-glow{display:none !important}
-    .send-btn,.door-btn{--magnetic-x:0px !important;--magnetic-y:0px !important}
+    .send-btn {--magnetic-x:0px !important;--magnetic-y:0px !important}
 }
 @media (prefers-reduced-motion:reduce) {
     body.aw-ready .room .aw-stage,.aw-title-char {
         opacity:1 !important;transform:none !important;filter:none !important;
         transition:none !important;
     }
-    .hero-bg-text{--hero-parallax-y:0px !important}
-    .send-btn,.door-btn {
+
+    .send-btn {
         --magnetic-x:0px !important;--magnetic-y:0px !important;
         transition:none !important;
     }
     .aw-site-noise{animation:none !important}
 }
-
-
 
 /* ===== EMPATH LUXURY MICRODETAILS · LEVEL 2 ===== */
 
@@ -644,11 +628,10 @@ body.aw-ready .room .aw-stage.aw-in {
 /* 8 — HSP 像把世界音量慢慢調小 */
 body,
 body .room,
-body nav,
+body nav:not(:where(.home-surface, .home-surface *)),
 body .room-desc,
 body .room-title,
-body .send-btn,
-body .door-btn {
+body .send-btn {
     transition-duration:1.5s !important;
     transition-timing-function:cubic-bezier(.23,1,.32,1) !important;
 }
@@ -682,6 +665,4 @@ body.hsp-mode:not(.hsp-transitioning) * {
     .lux-room-curtain { display:none !important; }
     .lux-hsp-veil { transition:none !important; }
 }
-
-
 

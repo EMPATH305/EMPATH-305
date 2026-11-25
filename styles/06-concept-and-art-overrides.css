@@ -78,29 +78,13 @@ html.empath-entry-pending body > *:not(.empath-entry-overlay) {
     color:#E8E6E1 !important;
     border-color:rgba(232,230,225,.8) !important;
 }
-body.empath-world-open #hero .hero-opening {
-    animation:empathWorldUnfold 1500ms cubic-bezier(.23,1,.32,1) both !important;
-}
+
 @keyframes empathWorldUnfold {
     from { opacity:0; filter:blur(12px); transform:translate3d(0,34px,0) scale(.985); }
     to { opacity:1; filter:blur(0); transform:translate3d(0,0,0) scale(1); }
 }
 
 /* 2 — Hero 活粒子場 */
-#hero .empath-living-field {
-    position:absolute !important;
-    inset:0 !important;
-    width:100% !important;
-    height:100% !important;
-    z-index:1 !important;
-    pointer-events:none !important;
-    opacity:.72 !important;
-    mix-blend-mode:screen !important;
-}
-#hero .hero-opening {
-    position:relative !important;
-    z-index:2 !important;
-}
 
 /* 3 — 六個房間的專屬進入儀式 */
 .empath-room-ritual {
@@ -175,7 +159,7 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
 
 @media (max-width:768px) {
     .empath-entry-question { font-size:clamp(34px,10vw,58px) !important; letter-spacing:4px !important; }
-    #hero .empath-living-field { opacity:.48 !important; }
+
     .empath-room-ritual-line { font-size:clamp(28px,8vw,46px) !important; }
 }
 @media (prefers-reduced-motion:reduce) {
@@ -185,12 +169,9 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
         transition:opacity 250ms ease !important;
         transition-delay:0ms !important;
     }
-    #hero .empath-living-field { display:none !important; }
-    body.empath-world-open #hero .hero-opening,
+
     body.empath-room-arrived .room:target > * { animation:none !important; }
 }
-
-
 
 /* ===== CURSOR TEMPO + GLOBAL SOUL COUNTER ALIGNMENT ===== */
 .global-summary {
@@ -255,7 +236,6 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
     }
 }
 
-
 /* ===== KINTSUGI SHARD BALANCED GRID · 2026-08-15 ===== */
 #room-p .kintsugi-board {
   width: 100% !important;
@@ -314,51 +294,6 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
 
 /* ===== EDITORIAL CONTENT RHYTHM · 2026-08-15 ===== */
 /* 首頁：保留電影式第一幕，將六房間整理成緊湊章節 */
-#hero .hero-manifesto {
-  display: none !important;
-}
-#journey.journey-map {
-  padding: 72px max(32px, 7vw) 80px !important;
-}
-#journey .journey-heading {
-  margin-bottom: 40px !important;
-}
-#journey .journey-heading h2 {
-  font-size: clamp(30px, 3.8vw, 50px) !important;
-  margin: 12px 0 16px !important;
-}
-#journey .journey-acts {
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 24px !important;
-  max-width: 1180px !important;
-}
-#journey .journey-act {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 20px !important;
-  padding: 24px 0 !important;
-  align-content: start !important;
-}
-#journey .act-meta {
-  min-height: 52px !important;
-}
-#journey .act-rooms {
-  grid-template-columns: 1fr !important;
-  gap: 12px !important;
-}
-#journey .door-btn {
-  min-height: 132px !important;
-  grid-template-columns: 28px 50px 1fr 18px !important;
-  padding: 18px !important;
-}
-#journey .door-btn .dl {
-  font-size: 42px !important;
-}
-#journey .flow-line {
-  grid-column: 1 / -1 !important;
-  margin: 38px 0 0 !important;
-}
 
 /* P：分批顯示，避免一次把整面牆展開 */
 #room-p .shard.is-pagination-hidden {
@@ -491,32 +426,13 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
 }
 
 @media (max-width: 980px) {
-  #journey .journey-acts {
-    grid-template-columns: 1fr !important;
-    gap: 0 !important;
-  }
-  #journey .journey-act {
-    grid-template-columns: 150px 1fr !important;
-    gap: 28px !important;
-  }
-  #journey .act-rooms {
-    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
-  }
+
   .h-secondary-summary {
     grid-template-columns: repeat(2,minmax(0,1fr)) !important;
   }
 }
 @media (max-width: 680px) {
-  #journey.journey-map {
-    padding: 64px 20px 72px !important;
-  }
-  #journey .journey-act {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-  #journey .act-rooms {
-    grid-template-columns: 1fr !important;
-  }
+
   #room-p .shard-text {
     -webkit-line-clamp: 5;
   }
@@ -584,25 +500,26 @@ body.empath-room-arrived .room:target > *:not(.lux-room-boundary) {
 /* ===== ART DIRECTION OVERRIDES ===== */
 
 /* ===== ART DIRECTION V1 · E / M / P + quiet navigation ===== */
-.nav-utility-toggle{
+.nav-utility-toggle:not(:where(.home-surface, .home-surface *)) {
   width:92px;height:38px;padding:0;border:0;border-left:1px solid rgba(232,230,225,.12);
   background:transparent;color:rgba(232,230,225,.54);display:flex;align-items:center;justify-content:flex-end;gap:11px;
   font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:.24em;cursor:pointer;position:relative;z-index:3;
   transition:color .35s ease!important;
 }
-.nav-utility-toggle i{width:5px;height:5px;border:1px solid currentColor;border-radius:50%;transition:transform .45s cubic-bezier(.23,1,.32,1),background .35s ease!important}
-.nav-utility-toggle:hover,.nav-utility-toggle[aria-expanded="true"]{color:var(--gold)}
-.nav-utility-toggle[aria-expanded="true"] i{background:var(--gold);transform:scale(1.5)}
-nav .nav-menu{position:relative}
-nav .nav-controls{
+.nav-utility-toggle i:not(:where(.home-surface, .home-surface *)) {width:5px;height:5px;border:1px solid currentColor;border-radius:50%;transition:transform .45s cubic-bezier(.23,1,.32,1),background .35s ease!important}
+.nav-utility-toggle:hover:not(:where(.home-surface, .home-surface *)),
+.nav-utility-toggle[aria-expanded="true"]:not(:where(.home-surface, .home-surface *)) {color:var(--gold)}
+.nav-utility-toggle[aria-expanded="true"] i:not(:where(.home-surface, .home-surface *)) {background:var(--gold);transform:scale(1.5)}
+nav .nav-menu:not(:where(.home-surface, .home-surface *)) {position:relative}
+nav .nav-controls:not(:where(.home-surface, .home-surface *)) {
   position:absolute!important;top:54px;right:0;min-width:310px;padding:14px!important;
   display:flex!important;justify-content:flex-end;gap:8px!important;
   background:rgba(3,7,10,.94);border:1px solid rgba(232,230,225,.09);box-shadow:0 24px 70px rgba(0,0,0,.42);
   backdrop-filter:blur(22px);opacity:0;visibility:hidden;transform:translateY(-8px);pointer-events:none;
   transition:opacity .28s ease,transform .42s cubic-bezier(.23,1,.32,1),visibility .28s!important;
 }
-nav .nav-controls.is-open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
-nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(232,230,225,.1)!important}
+nav .nav-controls.is-open:not(:where(.home-surface, .home-surface *)) {opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+nav .nav-controls .func-btn:not(:where(.home-surface, .home-surface *)) {background:transparent!important;border-color:rgba(232,230,225,.1)!important}
 
 /* E — an anonymous correspondence archive */
 #room-e{
@@ -738,7 +655,7 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 #room-h .share-action-box{justify-content:center!important}
 
 @media(max-width:900px){
-  .nav-utility-toggle{display:none!important}nav .nav-controls{position:static!important;min-width:0!important;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important}
+  .nav-utility-toggle:not(:where(.home-surface, .home-surface *)) {display:none!important}nav .nav-controls:not(:where(.home-surface, .home-surface *)) {position:static!important;min-width:0!important;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important}
   #room-e{display:block!important;padding:112px 24px 80px!important;background:#09131d!important}
   #room-e>.e-compose-panel{display:block!important}
   #room-e>.e-feed-container{height:auto!important;margin-top:88px!important;padding:64px 0 48px 24px!important}
@@ -766,8 +683,15 @@ nav .nav-controls .func-btn{background:transparent!important;border-color:rgba(2
 @media(max-width:560px){#room-p .kintsugi-board{grid-template-columns:1fr!important}#room-m .m-stats{position:static!important;margin:24px 0!important;padding-left:16px!important}#room-m .m-input-wrap{margin-top:28vh!important}}
 
 /* ===== EMPATH MOTION DIRECTION · 靜止是預設，動態是例外 ===== */
-.aw-site-noise,.cinematic-stars-a,.cinematic-stars-b,.cinematic-meteor-one,.cinematic-meteor-two{animation:none!important}
-.room .room-letter,.scroll-hint,.behance-float,.opening-scroll i,.warmth-pulse,.echo-heart,.lighthouse-flame,.presence-spark.show,.lux-input-spark::after{animation-play-state:paused!important}
+.aw-site-noise {animation:none!important}
+.room .room-letter,
+.scroll-hint,
+.behance-float,
+.warmth-pulse,
+.echo-heart,
+.lighthouse-flame,
+.presence-spark.show,
+.lux-input-spark::after {animation-play-state:paused!important}
 body.empath-motion-idle #room-e .room-letter,
 body.empath-motion-idle #room-p .room-letter,
 body.empath-motion-idle #room-t .warmth-item:first-child .warmth-pulse,
@@ -780,20 +704,7 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
 @media(prefers-reduced-motion:reduce){.empath-contrast-flash{display:none!important}}
 
 /* ===== EMPATH SESSION NARRATIVE · 一段真正可見的旅程 ===== */
-.cosmic-presence{
-  min-height:18px!important;margin:10px 0 0!important;
-  color:rgba(232,230,225,.42)!important;font:400 10px/1.8 'Noto Sans TC',sans-serif!important;
-  letter-spacing:.18em!important;text-align:center!important;
-}
-.return-memory{
-  position:absolute!important;left:50%!important;bottom:92px!important;z-index:3!important;
-  width:min(88vw,680px)!important;margin:0!important;transform:translate(-50%,6px)!important;
-  color:rgba(232,230,225,.3)!important;font:400 11px/1.8 'Noto Sans TC',sans-serif!important;
-  letter-spacing:3px!important;text-align:center!important;opacity:0!important;pointer-events:none!important;
-  transition:opacity 900ms ease,transform 900ms cubic-bezier(.23,1,.32,1)!important;
-}
-.return-memory.is-visible{opacity:1!important;transform:translate(-50%,0)!important}
-.return-memory.is-fading{opacity:0!important;transform:translate(-50%,-4px)!important}
+
 .h-return-memory{
   min-height:18px!important;margin:0 0 16px!important;color:rgba(232,230,225,.3)!important;
   font:400 11px/1.8 'Noto Sans TC',sans-serif!important;letter-spacing:3px!important;
@@ -854,11 +765,10 @@ body.empath-motion-idle #room-h .lighthouse-flame{animation-play-state:running!i
   #room-m .data-state{top:46%!important;width:86vw!important}
 }
 @media(prefers-reduced-motion:reduce){.data-state[data-status="loading"]::before{animation:none!important}}
-.footer-farewell{margin:0 auto 48px!important;color:rgba(232,230,225,.62)!important;font:italic 400 clamp(20px,3vw,32px)/1.8 'Noto Serif TC',serif!important;letter-spacing:.12em!important;text-align:center!important;opacity:.25!important;transform:translateY(10px)!important;transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.23,1,.32,1)!important}
-footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!important}
+.footer-farewell:not(:where(.home-surface, .home-surface *)) {margin:0 auto 48px!important;color:rgba(232,230,225,.62)!important;font:italic 400 clamp(20px,3vw,32px)/1.8 'Noto Serif TC',serif!important;letter-spacing:.12em!important;text-align:center!important;opacity:.25!important;transform:translateY(10px)!important;transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.23,1,.32,1)!important}
+footer.is-farewell-visible .footer-farewell:not(:where(.home-surface, .home-surface *)) {opacity:1!important;transform:none!important}
 @media(max-width:680px){
-  .cosmic-presence{max-width:290px!important;letter-spacing:.1em!important}
-  .return-memory{bottom:86px!important;width:82vw!important;letter-spacing:2px!important}
+
   #room-h .h-session-echo{top:19%!important;font-size:26vw!important}
   #room-h .h-journey-arc{margin:8px auto 80px!important;padding:40px 0 28px!important}
   .h-journey-arc-head{display:block!important;margin-bottom:30px!important}
@@ -867,5 +777,5 @@ footer.is-farewell-visible .footer-farewell{opacity:1!important;transform:none!i
   .h-journey-arc-canvas{min-height:170px!important;overflow-x:auto!important;padding-bottom:10px!important}
   .h-journey-arc-canvas svg{min-width:620px!important}
 }
-@media(prefers-reduced-motion:reduce){.footer-farewell{opacity:1!important;transform:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){.footer-farewell:not(:where(.home-surface, .home-surface *)) {opacity:1!important;transform:none!important;transition:none!important}}
 
